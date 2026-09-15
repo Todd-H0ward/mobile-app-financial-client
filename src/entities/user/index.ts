@@ -1,3 +1,9 @@
+export {
+  acknowledgeSummary,
+  canFinishPeriod,
+  finishPeriod,
+  startPeriod,
+} from './lib/period';
 export { resetUser } from './lib/reset';
 export type {
   BudgetDirection,
