@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
-import { makeDemoTimeSource } from '@/shared/lib';
+import { makeDemoTimeSource } from '@/shared/lib/time-source';
 
-import { createInitialUser } from '../../model';
-import { acknowledgeSummary, finishPeriod, startPeriod } from '../period';
+import { createInitialUser } from '../../model/initial-user';
+import { finishPeriod, startPeriod } from '../period';
 
-import { createDemoProfile, toggleDemoMode } from './demo';
+import {
+  createDemoProfile,
+  DEMO_RUN_PERIODS,
+  runDemoPeriods,
+  toggleDemoMode,
+} from './demo';
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -150,51 +155,61 @@ describe('toggleDemoMode — disabling', () => {
 describe('demo mode — five periods back-to-back', () => {
   it('runs five full periods and leaves a valid profile', () => {
     const time = makeDemoTimeSource(0);
-    let user = createDemoProfile();
-
-    for (let i = 0; i < 5; i++) {
-      // Simulate the child filling the plan during the planning phase.
-      user = {
-        ...user,
-        period: { ...user.period, plan: { needs: 10, wants: 5, savings: 5 } },
-      };
-
-      user = startPeriod(user, time);
-      time.tick();
-      user = finishPeriod(user, time);
-      time.tick();
-      user = acknowledgeSummary(user, time);
-      time.tick();
-    }
+    const user = runDemoPeriods(createDemoProfile(), time);
 
     // Five periods completed: index advanced 1→6.
-    expect(user.period.index).toBe(6);
+    expect(user.period.index).toBe(1 + DEMO_RUN_PERIODS);
     expect(user.period.phase).toBe('planning');
-    expect(user.history).toHaveLength(5);
+    expect(user.history).toHaveLength(DEMO_RUN_PERIODS);
     expect(hasValidShape(user)).toBe(true);
+  });
+
+  it('starts from active and still finishes exactly five periods', () => {
+    const time = makeDemoTimeSource(0);
+    let user = createDemoProfile();
+
+    user = {
+      ...user,
+      period: { ...user.period, plan: { needs: 10, wants: 5, savings: 5 } },
+    };
+    user = startPeriod(user, time);
+    time.tick();
+
+    expect(user.period.phase).toBe('active');
+
+    user = runDemoPeriods(user, time);
+
+    expect(user.period.index).toBe(1 + DEMO_RUN_PERIODS);
+    expect(user.period.phase).toBe('planning');
+    expect(user.history).toHaveLength(DEMO_RUN_PERIODS);
+  });
+
+  it('starts from summary and still finishes exactly five periods', () => {
+    const time = makeDemoTimeSource(0);
+    let user = createDemoProfile();
+
+    user = {
+      ...user,
+      period: { ...user.period, plan: { needs: 10, wants: 5, savings: 5 } },
+    };
+    user = startPeriod(user, time);
+    time.tick();
+    user = finishPeriod(user, time);
+    time.tick();
+
+    expect(user.period.phase).toBe('summary');
+
+    user = runDemoPeriods(user, time);
+
+    expect(user.period.index).toBe(1 + DEMO_RUN_PERIODS);
+    expect(user.period.phase).toBe('planning');
+    expect(user.history).toHaveLength(DEMO_RUN_PERIODS);
   });
 
   it('does not depend on real time — same financial outcome with any clock seed', () => {
     const runFivePeriods = (seed: number) => {
       const time = makeDemoTimeSource(seed);
-      let user = createDemoProfile();
-
-      for (let i = 0; i < 5; i++) {
-        user = {
-          ...user,
-          period: {
-            ...user.period,
-            plan: { needs: 20, wants: 10, savings: 10 },
-          },
-        };
-
-        user = startPeriod(user, time);
-        time.tick();
-        user = finishPeriod(user, time);
-        time.tick();
-        user = acknowledgeSummary(user, time);
-        time.tick();
-      }
+      const user = runDemoPeriods(createDemoProfile(), time);
 
       return user.history.map((r) => ({
         plan: r.plan,
@@ -208,5 +223,16 @@ describe('demo mode — five periods back-to-back', () => {
     const historyB = runFivePeriods(30 * 24 * 60 * 60 * 1000);
 
     expect(historyA).toEqual(historyB);
+  });
+
+  it('keeps endedAt strictly ascending across history', () => {
+    const time = makeDemoTimeSource(1000);
+    const user = runDemoPeriods(createDemoProfile(), time);
+
+    for (let i = 1; i < user.history.length; i++) {
+      expect(user.history[i].endedAt).toBeGreaterThan(
+        user.history[i - 1].endedAt,
+      );
+    }
   });
 });

@@ -1,5 +1,7 @@
 import { useRouter } from 'expo-router';
 
+import { DemoModeCard } from '@/features/demo-mode';
+
 import { Button, Card, Screen, Text } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
@@ -30,6 +32,8 @@ export const HomeScreen = () => {
           </Button>
         </Card.Footer>
       </Card>
+
+      <DemoModeCard />
     </Screen>
   );
 };

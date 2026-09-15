@@ -1,4 +1,9 @@
-export { createDemoProfile, toggleDemoMode } from './demo';
+export {
+  createDemoProfile,
+  DEMO_RUN_PERIODS,
+  runDemoPeriods,
+  toggleDemoMode,
+} from './demo';
 export {
   acknowledgeSummary,
   canFinishPeriod,

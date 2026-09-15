@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import { StyleSheet } from 'react-native';
@@ -11,7 +11,7 @@ import { useUser } from '@/entities/user';
 import { queryClient } from '@/shared/api';
 import { useAppLanguage } from '@/shared/hooks';
 import {
-  makeDemoTimeSource,
+  demoTimeSource,
   realTimeSource,
   TimeSourceContext,
 } from '@/shared/lib';
@@ -37,10 +37,8 @@ export const Providers = ({ children }: ProvidersProps) => {
   const user = useUser();
   const isDemoMode = user?.settings.isDemoMode ?? false;
 
-  const demoSourceRef = useRef(makeDemoTimeSource());
-
   const timeSource = useMemo(
-    () => (isDemoMode ? demoSourceRef.current : realTimeSource),
+    () => (isDemoMode ? demoTimeSource : realTimeSource),
     [isDemoMode],
   );
 

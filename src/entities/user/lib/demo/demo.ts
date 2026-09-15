@@ -1,5 +1,8 @@
-import type { UserSave } from '../../model';
-import { createInitialUser } from '../../model';
+import type { DemoTimeSource, TimeSource } from '@/shared/lib/time-source';
+
+import { createInitialUser } from '../../model/initial-user';
+import type { BudgetPlan, UserSave } from '../../model/types';
+import { acknowledgeSummary, finishPeriod, startPeriod } from '../period';
 import { resetUser } from '../reset';
 
 // ═══════════════════════════════════════════
@@ -11,6 +14,21 @@ const DEMO_PLAYER_NAME = 'Демо';
 
 /** Pet name used in the demo profile. */
 const DEMO_PET_NAME = 'Лапик';
+
+/**
+ * Plan the demo run fills in for the child. All three directions are occupied
+ * so `startPeriod` accepts it — fact stays zero until wallet / shop exist.
+ */
+const DEMO_PLAN: BudgetPlan = { needs: 20, wants: 10, savings: 10 };
+
+/** How many periods one button press advances — 2.5.13 requires five. */
+export const DEMO_RUN_PERIODS = 5;
+
+/**
+ * Hard cap on state-machine steps inside one run. Three transitions per period
+ * plus a few to leave a mid-period phase; anything above means a bug.
+ */
+const DEMO_RUN_STEP_LIMIT = DEMO_RUN_PERIODS * 3 + 6;
 
 // ═══════════════════════════════════════════
 // FACTORY
@@ -75,4 +93,63 @@ export const toggleDemoMode = (user: UserSave): UserSave => {
     ...user,
     settings: { ...settings, isDemoMode: false },
   });
+};
+
+// ═══════════════════════════════════════════
+// RUN PERIODS
+// ═══════════════════════════════════════════
+
+/**
+ * One transition of the period machine, filling `DEMO_PLAN` when needed.
+ *
+ * Fact is left at zero on purpose: wallet, tasks and shop are not wired yet,
+ * and inventing spend would misrepresent the engine on a demo.
+ */
+const stepDemoPeriod = (user: UserSave, time: TimeSource): UserSave => {
+  switch (user.period.phase) {
+    case 'planning':
+      return startPeriod(
+        {
+          ...user,
+          period: { ...user.period, plan: DEMO_PLAN },
+        },
+        time,
+      );
+    case 'active':
+      return finishPeriod(user, time);
+    default:
+      // `settlement` never lands in the save: acknowledgeSummary jumps to planning.
+      return acknowledgeSummary(user, time);
+  }
+};
+
+/**
+ * Advance the period machine by `count` finished periods without waiting for
+ * real time. Starts from any phase (the grown-up may press mid-period).
+ *
+ * After each transition `time.tick()` runs so `phaseEnteredAt` / `endedAt`
+ * stay strictly ascending in history.
+ */
+export const runDemoPeriods = (
+  user: UserSave,
+  time: DemoTimeSource,
+  count = DEMO_RUN_PERIODS,
+): UserSave => {
+  const targetIndex = user.period.index + count;
+  let next = user;
+  let steps = 0;
+
+  while (next.period.index < targetIndex) {
+    if (steps >= DEMO_RUN_STEP_LIMIT) {
+      throw new Error(
+        `runDemoPeriods: exceeded ${DEMO_RUN_STEP_LIMIT} steps without reaching period ${targetIndex}`,
+      );
+    }
+
+    next = stepDemoPeriod(next, time);
+    time.tick();
+    steps += 1;
+  }
+
+  return next;
 };

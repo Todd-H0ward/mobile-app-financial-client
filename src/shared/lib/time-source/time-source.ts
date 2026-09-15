@@ -7,9 +7,9 @@
  * directly — see docs/game-period.md §TimeSource.
  *
  * Two implementations ship:
- * - `realTimeSource`    — production, delegates to the system clock.
- * - `makeDemoTimeSource` — demo mode, a manually controlled counter so that
- *   five periods can be run back-to-back without waiting for real time.
+ * - `realTimeSource`  — production, delegates to the system clock.
+ * - `demoTimeSource`  — app-wide demo clock; advances only on `tick()`.
+ * Tests build isolated clocks with `makeDemoTimeSource(seed)`.
  */
 interface TimeSource {
   /** Current moment, epoch ms. */
@@ -69,5 +69,16 @@ export const makeDemoTimeSource = (startMs = 0): DemoTimeSource => {
     },
   };
 };
+
+/**
+ * App-wide demo clock. Starts at the real moment the module loads so dates in
+ * history stay readable, and advances only when `tick()` is called from a demo
+ * run — see docs/game-period.md §Демо-режим.
+ *
+ * Tests keep using `makeDemoTimeSource(seed)` so they stay deterministic.
+ */
+export const demoTimeSource: DemoTimeSource = makeDemoTimeSource(
+  realTimeSource.now(),
+);
 
 export type { DemoTimeSource, TimeSource };

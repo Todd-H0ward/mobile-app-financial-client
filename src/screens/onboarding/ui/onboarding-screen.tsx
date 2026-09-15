@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 
 import { useUserStore } from '@/entities/user';
 
+import { useTimeSource } from '@/shared/lib';
 import { Button, Card, Input, Screen, Text } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
@@ -18,13 +19,14 @@ const NAME_MAX_LENGTH = 12;
 
 export const OnboardingScreen = () => {
   const router = useRouter();
+  const time = useTimeSource();
   const createUser = useUserStore((state) => state.createUser);
   const [playerName, setPlayerName] = useState('');
 
   const start = () => {
     createUser({
       playerName: playerName.trim(),
-      createdAt: Date.now(),
+      createdAt: time.now(),
     });
 
     router.replace('/home');

@@ -2,8 +2,10 @@ export {
   acknowledgeSummary,
   canFinishPeriod,
   createDemoProfile,
+  DEMO_RUN_PERIODS,
   finishPeriod,
   resetUser,
+  runDemoPeriods,
   startPeriod,
   toggleDemoMode,
 } from './lib';

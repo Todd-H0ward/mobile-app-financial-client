@@ -1,5 +1,5 @@
-import type { UserSave } from '../../model';
-import { createInitialUser } from '../../model';
+import { createInitialUser } from '../../model/initial-user';
+import type { UserSave } from '../../model/types';
 
 // ═══════════════════════════════════════════
 // RESET

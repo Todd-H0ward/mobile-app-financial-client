@@ -1,6 +1,6 @@
-import type { TimeSource } from '@/shared/lib';
+import type { TimeSource } from '@/shared/lib/time-source';
 
-import type { UserSave } from '../../model';
+import type { UserSave } from '../../model/types';
 
 // ═══════════════════════════════════════════
 // HELPERS
