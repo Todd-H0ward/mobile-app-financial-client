@@ -1,7 +1,14 @@
 import { isFiniteNumber, isRecord } from '@/shared/utils';
 
 import { createInitialUser, USER_SAVE_VERSION } from '../initial-user';
-import type { UserSave } from '../types';
+import {
+  PERIOD_PHASES,
+  PET_COLORS,
+  PET_PATTERNS,
+  PET_SPECIES,
+  PET_STAGES,
+  type UserSave,
+} from '../types';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -32,6 +39,14 @@ const MIGRATIONS: Record<number, MigrationStep> = {
 // VALIDATION
 // ═══════════════════════════════════════════
 
+/**
+ * Membership in one of the save's enums. A plain `typeof === 'string'` check
+ * would pass `phase: "banana"` on to the screens, which is exactly the crash
+ * this guard exists to prevent.
+ */
+const isOneOf = (value: unknown, allowed: readonly string[]): boolean =>
+  typeof value === 'string' && allowed.includes(value);
+
 const isBudget = (value: unknown): boolean =>
   isRecord(value) &&
   isFiniteNumber(value.needs) &&
@@ -40,12 +55,13 @@ const isBudget = (value: unknown): boolean =>
 
 const isPet = (value: unknown): boolean =>
   isRecord(value) &&
-  typeof value.species === 'string' &&
-  typeof value.color === 'string' &&
-  typeof value.pattern === 'string' &&
+  isOneOf(value.species, PET_SPECIES) &&
+  isOneOf(value.color, PET_COLORS) &&
+  isOneOf(value.pattern, PET_PATTERNS) &&
   typeof value.name === 'string' &&
   Array.isArray(value.traitIds) &&
-  typeof value.stage === 'string' &&
+  value.traitIds.every((id) => typeof id === 'string') &&
+  isOneOf(value.stage, PET_STAGES) &&
   isFiniteNumber(value.comfort) &&
   isFiniteNumber(value.spirit);
 
@@ -63,12 +79,13 @@ const isSavings = (value: unknown): boolean =>
       typeof goal.goalId === 'string' &&
       isFiniteNumber(goal.saved),
   ) &&
+  (value.activeGoalId === null || typeof value.activeGoalId === 'string') &&
   isFiniteNumber(value.depositsThisPeriod);
 
 const isPeriod = (value: unknown): boolean =>
   isRecord(value) &&
   isFiniteNumber(value.index) &&
-  typeof value.phase === 'string' &&
+  isOneOf(value.phase, PERIOD_PHASES) &&
   isBudget(value.plan) &&
   isBudget(value.fact) &&
   isFiniteNumber(value.phaseEnteredAt);

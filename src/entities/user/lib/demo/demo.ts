@@ -3,7 +3,6 @@ import type { DemoTimeSource, TimeSource } from '@/shared/lib/time-source';
 import { createInitialUser } from '../../model/initial-user';
 import type { BudgetPlan, UserSave } from '../../model/types';
 import { acknowledgeSummary, finishPeriod, startPeriod } from '../period';
-import { resetUser } from '../reset';
 
 // ═══════════════════════════════════════════
 // CONSTANTS
@@ -62,37 +61,61 @@ export const createDemoProfile = (
   });
 
 // ═══════════════════════════════════════════
-// TOGGLE
+// ENTER / EXIT
 // ═══════════════════════════════════════════
 
 /**
- * Toggle demo mode for the current user.
- *
- * **Enabling** (`isDemoMode` was `false` → `true`):
- * Replaces the profile with a fresh demo profile. The child's progress is lost
- * because the grown-up chose to run a demo; they will disable it when done.
- * The grown-up's sound and animation settings survive.
- *
- * **Disabling** (`isDemoMode` was `true` → `false`):
- * Returns a clean starting profile with `isDemoMode: false`. The demo profile
- * is discarded — there is no "previous profile" to restore, since enabling demo
- * mode already wiped it. The grown-up's settings survive.
- *
- * Both directions produce a profile in `phase: 'planning'`, `period.index: 1`.
+ * Device settings that belong to the grown-up, not to a profile: they were set
+ * on this phone and must survive both entering and leaving a demo.
  */
-export const toggleDemoMode = (user: UserSave): UserSave => {
-  const { settings } = user;
+const carryDeviceSettings = (
+  from: UserSave['settings'],
+  isDemoMode: boolean,
+): UserSave['settings'] => ({
+  isParentGateEnabled: from.isParentGateEnabled,
+  isSoundEnabled: from.isSoundEnabled,
+  isAnimationEnabled: from.isAnimationEnabled,
+  isDemoMode,
+});
 
-  if (!settings.isDemoMode) {
-    // Turning demo on: hand out a demo profile with the same device settings.
-    return createDemoProfile(settings);
-  }
+/**
+ * Entering demo mode (2.5.13): the child's save is handed back to the caller to
+ * park, and a fresh demo profile takes its place.
+ *
+ * Nothing is wiped. The grown-up demonstrating the app on a child's phone gets
+ * their progress back untouched when they switch demo mode off — which is what
+ * "сброс к исходному" means for a profile that already existed.
+ *
+ * @returns the demo profile to play, and the save to park until demo mode ends.
+ */
+export const enterDemoMode = (
+  user: UserSave,
+): { profile: UserSave; parked: UserSave } => ({
+  profile: createDemoProfile(user.settings),
+  parked: user,
+});
 
-  // Turning demo off: reset to a standard starting profile.
-  return resetUser({
-    ...user,
-    settings: { ...settings, isDemoMode: false },
-  });
+/**
+ * Leaving demo mode (2.5.13).
+ *
+ * The parked save comes back exactly as it was, wearing whatever device
+ * settings the grown-up left on during the demo. Without a parked save — demo
+ * mode was entered before this build, or the save did not survive — a clean
+ * starting profile is returned rather than the demo's: the child must never end
+ * up carrying the demo's name and pet.
+ *
+ * @param parked the save put aside by `enterDemoMode`, if there is one
+ * @param demo the demo profile being left, the source of the device settings
+ */
+export const exitDemoMode = (
+  parked: UserSave | null,
+  demo: UserSave,
+): UserSave => {
+  const settings = carryDeviceSettings(demo.settings, false);
+
+  return parked
+    ? { ...parked, settings }
+    : createInitialUser({ settings, createdAt: demo.createdAt });
 };
 
 // ═══════════════════════════════════════════
@@ -106,6 +129,8 @@ export const toggleDemoMode = (user: UserSave): UserSave => {
  * and inventing spend would misrepresent the engine on a demo.
  */
 const stepDemoPeriod = (user: UserSave, time: TimeSource): UserSave => {
+  // Every phase is named: `PeriodPhase` has exactly these three, so adding a
+  // fourth makes this switch fail to compile instead of falling through.
   switch (user.period.phase) {
     case 'planning':
       return startPeriod(
@@ -117,8 +142,7 @@ const stepDemoPeriod = (user: UserSave, time: TimeSource): UserSave => {
       );
     case 'active':
       return finishPeriod(user, time);
-    default:
-      // `settlement` never lands in the save: acknowledgeSummary jumps to planning.
+    case 'summary':
       return acknowledgeSummary(user, time);
   }
 };

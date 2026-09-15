@@ -1,10 +1,5 @@
 export type { CreateUserInput } from './initial-user';
-export {
-  createInitialUser,
-  STARTING_BALANCE,
-  USER_SAVE_VERSION,
-  WALLET_HISTORY_LIMIT,
-} from './initial-user';
+export { createInitialUser, USER_SAVE_VERSION } from './initial-user';
 export { isUserSave, migrateUser } from './migrations';
 export type { UserPersistedState, UserStore } from './store';
 export { useUser, useUserStore } from './store';
@@ -27,4 +22,12 @@ export type {
   UserSave,
   WalletEntry,
   WalletSave,
+} from './types';
+export {
+  BUDGET_DIRECTIONS,
+  PERIOD_PHASES,
+  PET_COLORS,
+  PET_PATTERNS,
+  PET_SPECIES,
+  PET_STAGES,
 } from './types';

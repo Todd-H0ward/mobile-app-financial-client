@@ -3,11 +3,12 @@ export {
   canFinishPeriod,
   createDemoProfile,
   DEMO_RUN_PERIODS,
+  enterDemoMode,
+  exitDemoMode,
   finishPeriod,
   resetUser,
   runDemoPeriods,
   startPeriod,
-  toggleDemoMode,
 } from './lib';
 export type {
   BudgetDirection,
@@ -33,12 +34,16 @@ export type {
   WalletSave,
 } from './model';
 export {
+  BUDGET_DIRECTIONS,
   createInitialUser,
   isUserSave,
   migrateUser,
-  STARTING_BALANCE,
+  PERIOD_PHASES,
+  PET_COLORS,
+  PET_PATTERNS,
+  PET_SPECIES,
+  PET_STAGES,
   USER_SAVE_VERSION,
   useUser,
   useUserStore,
-  WALLET_HISTORY_LIMIT,
 } from './model';

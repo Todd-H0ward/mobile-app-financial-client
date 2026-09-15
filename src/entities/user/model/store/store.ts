@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 import { STORAGE_KEYS } from '@/shared/constants';
 import { createPersistStorage } from '@/shared/model';
 
+import { enterDemoMode, exitDemoMode } from '../../lib/demo';
 import { resetUser } from '../../lib/reset';
 import {
   type CreateUserInput,
@@ -21,6 +22,12 @@ import type { UserSave } from '../types';
 interface UserPersistedState {
   /** The whole save, or `null` — no profile yet, the app goes to onboarding. */
   user: UserSave | null;
+  /**
+   * The child's save, parked while demo mode runs; `null` whenever demo mode is
+   * off. It is persisted on purpose: a demo can outlive an app restart, and the
+   * child's progress must still come back when the grown-up switches demo off.
+   */
+  demoBackup: UserSave | null;
 }
 
 interface UserStore extends UserPersistedState {
@@ -32,6 +39,12 @@ interface UserStore extends UserPersistedState {
    * holds the result and writes it to disk.
    */
   updateUser: (update: (user: UserSave) => UserSave) => void;
+  /**
+   * Turns demo mode on and off, 2.5.13. Switching on parks the child's save in
+   * `demoBackup` and plays a demo profile; switching off gives the parked save
+   * back untouched. Nothing the child earned is lost to a demonstration.
+   */
+  setDemoMode: (isOn: boolean) => void;
   /** Reset to the starting state, 2.5.12. Name, looks and settings survive. */
   resetUser: () => void;
   /** Deleting the profile, 2.5.12. Erases the whole key, irreversibly. */
@@ -57,14 +70,29 @@ export const useUserStore = create<UserStore>()(
   persist(
     (set, get) => ({
       user: null,
+      demoBackup: null,
 
-      createUser: (input) => set({ user: createInitialUser(input) }),
+      createUser: (input) =>
+        set({ user: createInitialUser(input), demoBackup: null }),
 
       updateUser: (update) => {
         const { user } = get();
         if (!user) return;
 
         set({ user: update(user) });
+      },
+
+      setDemoMode: (isOn) => {
+        const { user, demoBackup } = get();
+        if (!user || user.settings.isDemoMode === isOn) return;
+
+        if (isOn) {
+          const { profile, parked } = enterDemoMode(user);
+          set({ user: profile, demoBackup: parked });
+          return;
+        }
+
+        set({ user: exitDemoMode(demoBackup, user), demoBackup: null });
       },
 
       resetUser: () => {
@@ -78,7 +106,7 @@ export const useUserStore = create<UserStore>()(
         // Order matters: `set` writes `{ user: null }` to storage first, and
         // only then `clearStorage` removes the key. The other way around would
         // leave a key holding an empty profile instead of a clean device.
-        set({ user: null });
+        set({ user: null, demoBackup: null });
         useUserStore.persist.clearStorage();
       },
     }),
@@ -87,24 +115,34 @@ export const useUserStore = create<UserStore>()(
       storage: createPersistStorage<UserPersistedState>(),
       version: USER_SAVE_VERSION,
       // Actions stay in memory: only the save goes to disk.
-      partialize: ({ user }): UserPersistedState => ({ user }),
-      migrate: (persisted, version) => ({
-        user: migrateUser(
-          (persisted as Partial<UserPersistedState> | undefined)?.user,
-          version,
-        ),
+      partialize: ({ user, demoBackup }): UserPersistedState => ({
+        user,
+        demoBackup,
       }),
+      migrate: (persisted, version) => {
+        const saved = persisted as Partial<UserPersistedState> | undefined;
+
+        return {
+          user: migrateUser(saved?.user, version),
+          demoBackup: migrateUser(saved?.demoBackup, version),
+        };
+      },
       // `migrate` only runs when the version changed, `merge` always does, so
       // the shape is checked here: a save of the current version can be broken
       // too.
-      merge: (persisted, current) => ({
-        ...current,
-        user: isUserSave(
-          (persisted as Partial<UserPersistedState> | undefined)?.user,
-        )
-          ? ((persisted as UserPersistedState).user as UserSave)
-          : null,
-      }),
+      merge: (persisted, current) => {
+        const saved = persisted as Partial<UserPersistedState> | undefined;
+        const readSave = (value: unknown): UserSave | null =>
+          isUserSave(value) ? value : null;
+
+        return {
+          ...current,
+          user: readSave(saved?.user),
+          // A broken backup only costs the parked profile, never the launch:
+          // leaving demo mode then hands out a clean starting profile.
+          demoBackup: readSave(saved?.demoBackup),
+        };
+      },
     },
   ),
 );

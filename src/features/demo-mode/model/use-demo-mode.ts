@@ -1,12 +1,11 @@
 import {
   DEMO_RUN_PERIODS,
   runDemoPeriods,
-  toggleDemoMode,
   useUser,
   useUserStore,
 } from '@/entities/user';
 
-import { demoTimeSource } from '@/shared/lib';
+import { isDemoTimeSource, useTimeSource } from '@/shared/lib';
 import { toast } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
@@ -16,12 +15,17 @@ import { toast } from '@/shared/ui';
 /**
  * Demo-mode controls for the grown-up (2.5.13).
  *
- * Pure transitions live in `entities/user/lib/demo`; this hook only wires them
- * to the store and names each change with a toast (2.5.9).
+ * Pure transitions live in `entities/user/lib/demo`, parking the child's save
+ * is the store's job; this hook only wires the two together and names each
+ * change with a toast (2.5.9).
  */
 export const useDemoMode = () => {
   const user = useUser();
+  // The clock comes from the provider, never from the module: in demo mode it
+  // is the demo clock, and `runPeriods` refuses to run against any other.
+  const time = useTimeSource();
   const updateUser = useUserStore((state) => state.updateUser);
+  const setDemoMode = useUserStore((state) => state.setDemoMode);
   const resetUser = useUserStore((state) => state.resetUser);
 
   const isDemoMode = user?.settings.isDemoMode ?? false;
@@ -29,18 +33,29 @@ export const useDemoMode = () => {
   const finishedPeriods = user?.history.length ?? 0;
 
   const enable = () => {
-    updateUser(toggleDemoMode);
+    setDemoMode(true);
     toast('Включён тестовый профиль');
   };
 
   const disable = () => {
-    updateUser(toggleDemoMode);
-    toast('Демо-режим выключен');
+    setDemoMode(false);
+    toast('Демо-режим выключен, профиль вернулся');
   };
 
   const runPeriods = () => {
-    updateUser((current) => runDemoPeriods(current, demoTimeSource));
-    toast(`Прогнано ${DEMO_RUN_PERIODS} периодов`);
+    if (!isDemoTimeSource(time)) {
+      toast('Прогон периодов доступен только в демо-режиме');
+      return;
+    }
+
+    try {
+      updateUser((current) => runDemoPeriods(current, time));
+      toast(`Прогнано ${DEMO_RUN_PERIODS} периодов`);
+    } catch {
+      // The run guards itself against a runaway state machine. A grown-up
+      // pressing a button deserves a message, not a red screen.
+      toast('Не удалось прогнать периоды', { variant: 'warning' });
+    }
   };
 
   const resetProfile = () => {

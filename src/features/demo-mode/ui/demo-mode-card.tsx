@@ -32,7 +32,8 @@ export const DemoModeCard = () => {
 
   const onSwitchChange = (isChecked: boolean) => {
     if (isChecked) {
-      // Enabling wipes the child's progress — ask first.
+      // Nothing is lost any more, but swapping the profile under a child is
+      // still a thing a grown-up should confirm rather than discover.
       setIsConfirmVisible(true);
       return;
     }
@@ -64,6 +65,11 @@ export const DemoModeCard = () => {
             Пять периодов подряд без ожидания реального времени. Факт по
             направлениям пока нулевой — кошелёк и задания появятся позже.
           </Text>
+
+          <Text variant="small" themeColor="textSecondary">
+            Профиль ребёнка не теряется: он ждёт, пока идёт демонстрация, и
+            возвращается целиком.
+          </Text>
         </Card.Content>
         <Card.Footer>
           <View style={styles.actions}>
@@ -94,8 +100,8 @@ export const DemoModeCard = () => {
       >
         <Sheet.Title>Включить демо-режим?</Sheet.Title>
         <Sheet.Description>
-          Текущий прогресс ребёнка будет заменён тестовым профилем. Выключить
-          демо-режим тоже начнёт игру заново.
+          Игра переключится на тестовый профиль. Прогресс ребёнка сохранится и
+          вернётся, когда демо-режим выключат.
         </Sheet.Description>
         <Sheet.Actions>
           <Button

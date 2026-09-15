@@ -278,3 +278,56 @@ describe('canFinishPeriod', () => {
     expect(canFinishPeriod(summary)).toBe(false);
   });
 });
+
+// ═══════════════════════════════════════════
+// isPlanKept — every direction counts
+// ═══════════════════════════════════════════
+
+describe('isPlanKept', () => {
+  /** Runs one period with the given plan and fact, and reports the verdict. */
+  const verdictFor = (
+    plan: UserSave['period']['plan'],
+    fact: UserSave['period']['fact'],
+  ): boolean => {
+    const time = makeDemoTimeSource();
+    let user = makeUser({ period: { ...makeUser().period, plan } });
+
+    user = startPeriod(user, time);
+    time.tick();
+    user = { ...user, period: { ...user.period, fact } };
+    user = finishPeriod(user, time);
+    time.tick();
+    user = acknowledgeSummary(user, time);
+
+    return user.history[0].isPlanKept;
+  };
+
+  it('kept when every direction stayed inside its allocation', () => {
+    expect(
+      verdictFor(
+        { needs: 10, wants: 5, savings: 5 },
+        { needs: 10, wants: 3, savings: 0 },
+      ),
+    ).toBe(true);
+  });
+
+  it('broken when a direction went over its allocation', () => {
+    expect(
+      verdictFor(
+        { needs: 10, wants: 5, savings: 5 },
+        { needs: 11, wants: 0, savings: 0 },
+      ),
+    ).toBe(false);
+  });
+
+  it('broken when money went where nothing was allocated', () => {
+    // Spending in a direction with a zero plan is the plainest way to break a
+    // plan — it must never score as kept.
+    expect(
+      verdictFor(
+        { needs: 10, wants: 0, savings: 0 },
+        { needs: 5, wants: 999, savings: 0 },
+      ),
+    ).toBe(false);
+  });
+});

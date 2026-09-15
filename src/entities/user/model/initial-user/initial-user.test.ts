@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  createInitialUser,
-  STARTING_BALANCE,
-  USER_SAVE_VERSION,
-} from './initial-user';
+import { STARTING_BALANCE } from '@/entities/economy';
+
+import { createInitialUser, USER_SAVE_VERSION } from './initial-user';
 
 import GOALS_CONTENT from '@/content/goals.json';
 

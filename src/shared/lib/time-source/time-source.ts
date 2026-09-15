@@ -71,6 +71,19 @@ export const makeDemoTimeSource = (startMs = 0): DemoTimeSource => {
 };
 
 /**
+ * Whether a time source can be advanced by hand.
+ *
+ * The context carries a plain `TimeSource`; only demo mode puts a clock with a
+ * `tick()` in it. A caller that needs to advance time asks this instead of
+ * importing the demo clock directly, so it follows the provider rather than
+ * ticking a clock nobody is reading.
+ */
+export const isDemoTimeSource = (
+  source: TimeSource,
+): source is DemoTimeSource =>
+  typeof (source as DemoTimeSource).tick === 'function';
+
+/**
  * App-wide demo clock. Starts at the real moment the module loads so dates in
  * history stay readable, and advances only when `tick()` is called from a demo
  * run — see docs/game-period.md §Демо-режим.

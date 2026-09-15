@@ -64,7 +64,7 @@ const readStorage = () => {
 describe('useUserStore', () => {
   beforeEach(() => {
     storage.clear();
-    useUserStore.setState({ user: null });
+    useUserStore.setState({ user: null, demoBackup: null });
   });
 
   it('survives a restart: the whole save comes back from storage', () => {
@@ -127,7 +127,7 @@ describe('useUserStore', () => {
   it('keeps the actions out of the file', () => {
     useUserStore.getState().createUser({ playerName: 'Аня' });
 
-    expect(Object.keys(readStorage().state)).toEqual(['user']);
+    expect(Object.keys(readStorage().state)).toEqual(['user', 'demoBackup']);
   });
 
   it('starts clean, and still starts, when the save is unreadable', () => {
@@ -179,6 +179,69 @@ describe('useUserStore', () => {
     await vi.waitFor(() => expect(storage.has(STORAGE_KEYS.USER)).toBe(false));
 
     expect(useUserStore.getState().user).toBeNull();
+  });
+
+  it('gives the child their profile back when demo mode is switched off', () => {
+    useUserStore.getState().createUser({ playerName: 'Аня' });
+    useUserStore.getState().updateUser((user) => ({
+      ...user,
+      wallet: { ...user.wallet, balance: 137 },
+    }));
+
+    useUserStore.getState().setDemoMode(true);
+
+    // The demo plays under its own name; the child's save waits on disk.
+    expect(useUserStore.getState().user?.playerName).not.toBe('Аня');
+    expect(readStorage().state.demoBackup.playerName).toBe('Аня');
+
+    useUserStore.getState().setDemoMode(false);
+
+    const { user, demoBackup } = useUserStore.getState();
+
+    expect(user?.playerName).toBe('Аня');
+    expect(user?.wallet.balance).toBe(137);
+    expect(user?.settings.isDemoMode).toBe(false);
+    expect(demoBackup).toBeNull();
+  });
+
+  it('a demo survives a restart and still gives the profile back', () => {
+    useUserStore.getState().createUser({ playerName: 'Аня' });
+    useUserStore.getState().setDemoMode(true);
+
+    // A restart in the middle of a demonstration.
+    const written = readStorage();
+    useUserStore.setState({ user: null, demoBackup: null });
+    writeAndRehydrate(written.state);
+
+    expect(useUserStore.getState().user?.settings.isDemoMode).toBe(true);
+
+    useUserStore.getState().setDemoMode(false);
+
+    expect(useUserStore.getState().user?.playerName).toBe('Аня');
+  });
+
+  it('hands out a clean profile, never the demo one, without a backup', () => {
+    useUserStore.getState().createUser({ playerName: 'Аня' });
+    useUserStore.getState().setDemoMode(true);
+
+    const demoName = useUserStore.getState().user?.playerName;
+
+    // The backup did not survive — a corrupted save, an older build.
+    useUserStore.setState({ demoBackup: null });
+    useUserStore.getState().setDemoMode(false);
+
+    const { user } = useUserStore.getState();
+
+    expect(user?.playerName).not.toBe(demoName);
+    expect(user?.settings.isDemoMode).toBe(false);
+  });
+
+  it('ignores a demo toggle that changes nothing', () => {
+    useUserStore.getState().createUser({ playerName: 'Аня' });
+    useUserStore.getState().setDemoMode(false);
+
+    expect(useUserStore.getState().user?.playerName).toBe('Аня');
+    expect(useUserStore.getState().demoBackup).toBeNull();
   });
 
   it('ignores an update when there is no profile yet', () => {

@@ -18,7 +18,7 @@ export const TASK_REWARD = {
   hard: 25,
 } as const;
 
-/** Coins added in `settlement` when the child deposited at least once. */
+/** Coins added by the settlement step when the child deposited at least once. */
 export const REGULARITY_BONUS = 5;
 
 /**

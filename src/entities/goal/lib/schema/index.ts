@@ -1,0 +1,1 @@
+export { assertGoalsContent } from './schema';

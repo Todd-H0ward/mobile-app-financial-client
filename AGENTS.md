@@ -67,6 +67,13 @@ entities/wallet/lib/rules/
    layers** import through the alias public API (`@/shared/ui`, `@/screens/home`).
 6. **Never import upwards or sideways** between slices of the same layer. If two
    screens need the same block, it belongs in `widgets/` or `shared/ui`.
+   The one carve-out is inside `entities/`: a slice may import another entity's
+   public API when that entity is a **leaf** — no state, no store, no imports of
+   its own from the layer. `entities/economy` (the balance table) and
+   `entities/goal` / `entities/task` (validated content catalogues) are those
+   leaves. The rule that does not bend: a slice never **re-exports** another
+   slice's API. `STARTING_BALANCE` is imported from `@/entities/economy` by
+   everyone who needs it, never through `@/entities/user`.
 7. `shared/` knows nothing about the domain. No entity types, no feature logic.
 
 ## Component file conventions
@@ -314,8 +321,10 @@ Symptom to recognise: no red screen, no Metro error, a fresh report in
 
 The app must look right on phones **and** tablets. There is **no scaling layer**:
 `scale()`, `fontSize()`, `vw()`, `select()` and `useResponsive()` were removed on
-purpose, and `@/shared/lib` does not exist — `@/shared/utils` holds `clamp` and
-`formatMoney`.
+purpose: there is no scaling layer and no `vw` / `moderateScale` primitives
+anywhere. `@/shared/utils` holds the pure helpers (`clamp`, `formatMoney`,
+`hitSlopFor`); `@/shared/lib` holds framework-aware infrastructure and today
+contains exactly one thing, `time-source`.
 
 - `SPACING`, `CONTENT_PADDING` and `MAX_CONTENT_WIDTH` from `@/shared/constants`
   are the layout tokens — reach for these first.

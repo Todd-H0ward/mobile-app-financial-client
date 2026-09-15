@@ -5,14 +5,16 @@
 
 ## 48dp — минимальная цель нажатия
 
-`HIT_SLOP_SIZE = 48` в `shared/constants/theme.ts`, хелпер `hitSlopFor(visualSize)`
-в `@/shared/utils`.
+`HIT_SLOP_SIZE = 48` в `shared/constants/a11y.ts` (модуль без `react-native`,
+чтобы его могли импортировать чистые хелперы и тесты), хелпер
+`hitSlopFor(visualSize)` — в `@/shared/utils`.
 
 - Кнопки размера `l` и `m` проходят по высоте сами (56 и 48).
 - Размер `s` — 40, поэтому ему **обязателен** `hitSlop` (в `Button` уже стоит).
 - `Screen.Back` (40×40), pressable `Chip` и другие мелкие цели получают
   `hitSlopFor`, а не увеличение макета.
-- `Slider` и `Collapsible.Trigger` держат область жеста / строки ≥ 48dp.
+- `Slider`, `Collapsible.Trigger` и `ListRow` держат область жеста / строки
+  ≥ 48dp явным `minHeight`, а не суммой кегля и паддингов.
 - Любой самодельный `Pressable` мельче 48dp получает `hitSlop`, а не увеличение
   визуального размера: макет не должен страдать ради зоны нажатия.
 
@@ -69,7 +71,8 @@
 ## Чек-лист перед сдачей
 
 - [x] Цели нажатия в `shared/ui` ≥ 48dp (hitSlop / minHeight) — `Button` s,
-      `Screen.Back`, `Chip`, `Slider`, `Collapsible`, `Toast`, `Switch`.
+      `Screen.Back`, `Chip`, `Slider`, `Collapsible`, `Toast`, `Switch`,
+      `ListRow`.
 - [x] Содержательный текст в ките ≥ 16sp (`body` / `bodyBold` / ссылки).
 - [x] Состояния читаются не только цветом (`Shape`, `MeterCard` tone, `ListRow`).
 - [ ] Звук отключается и остаётся отключённым после перезапуска — экран

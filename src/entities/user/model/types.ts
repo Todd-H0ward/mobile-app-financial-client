@@ -1,9 +1,33 @@
 // ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/**
+ * Every value an enum-shaped save field may hold.
+ *
+ * They are runtime tuples, not bare unions, because `isUserSave` has to check
+ * membership: a save is JSON, so `phase: "banana"` is as likely as a typo in a
+ * hand-edited file, and a string check alone would let it reach the screens.
+ */
+const BUDGET_DIRECTIONS = ['needs', 'wants', 'savings'] as const;
+
+/** Phases the machine can actually be in. See docs/game-period.md. */
+const PERIOD_PHASES = ['planning', 'active', 'summary'] as const;
+
+const PET_SPECIES = ['cat', 'dog', 'capybara'] as const;
+
+const PET_COLORS = ['sand', 'graphite', 'mint'] as const;
+
+const PET_PATTERNS = ['solid', 'spots', 'stripes'] as const;
+
+const PET_STAGES = ['baby', 'teen', 'adult'] as const;
+
+// ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
 
 /** One of the three budget directions. The same three words on every screen. */
-type BudgetDirection = 'needs' | 'wants' | 'savings';
+type BudgetDirection = (typeof BUDGET_DIRECTIONS)[number];
 
 /** What the child set aside per direction. Coins, whole numbers, >= 0. */
 interface BudgetPlan {
@@ -18,20 +42,25 @@ interface BudgetPlan {
 /** What actually went out. Same shape, so comparing is a subtraction. */
 type BudgetFact = BudgetPlan;
 
-/** Phase of the period state machine. See docs/game-period.md. */
-type PeriodPhase = 'planning' | 'active' | 'summary' | 'settlement';
+/**
+ * Phase of the period state machine. See docs/game-period.md.
+ *
+ * Settlement is deliberately absent: it is the work `acknowledgeSummary` does
+ * between `summary` and the next `planning`, never a state a save can hold.
+ */
+type PeriodPhase = (typeof PERIOD_PHASES)[number];
 
 /** Pet species — the appearance axis you read from the silhouette alone. */
-type PetSpecies = 'cat' | 'dog' | 'capybara';
+type PetSpecies = (typeof PET_SPECIES)[number];
 
 /** Coat — three contrasting colors, never shades of one. */
-type PetColor = 'sand' | 'graphite' | 'mint';
+type PetColor = (typeof PET_COLORS)[number];
 
 /** Pattern on top of the coat: the third axis, spare capacity past the nine. */
-type PetPattern = 'solid' | 'spots' | 'stripes';
+type PetPattern = (typeof PET_PATTERNS)[number];
 
 /** Growth stage. Never goes backwards — 2.2 forbids wiping progress. */
-type PetStage = 'baby' | 'teen' | 'adult';
+type PetStage = (typeof PET_STAGES)[number];
 
 /** The pet: how it looks, what it is called, how it feels. */
 interface PetSave {
@@ -45,7 +74,7 @@ interface PetSave {
   name: string;
   /** Character traits (wave 2). They shift prices and rates; ids from content. */
   traitIds: string[];
-  /** Growth stage. Recomputed in `settlement`, and only upwards. */
+  /** Growth stage. Recomputed by the settlement step, and only upwards. */
   stage: PetStage;
   /** Body: fed and warm. 0…1, with inertia — the mood eases, never jumps. */
   comfort: number;
@@ -103,7 +132,7 @@ interface SavingsSave {
   activeGoalId: string | null;
   /**
    * Deposits made during the current period. Above zero earns the regularity
-   * bonus in `settlement`; reset when a new period starts.
+   * bonus on settlement; reset when a new period starts.
    */
   depositsThisPeriod: number;
 }
@@ -151,7 +180,7 @@ interface HomeSave {
   furnitureIds: string[];
   /**
    * Period the bill has already been issued for. Guards against double
-   * charging: the bill is issued once per period, even if `settlement` runs
+   * charging: the bill is issued once per period, even if settlement runs
    * a second time.
    */
   lastBilledPeriod: number;
@@ -216,4 +245,12 @@ export type {
   UserSave,
   WalletEntry,
   WalletSave,
+};
+export {
+  BUDGET_DIRECTIONS,
+  PERIOD_PHASES,
+  PET_COLORS,
+  PET_PATTERNS,
+  PET_SPECIES,
+  PET_STAGES,
 };

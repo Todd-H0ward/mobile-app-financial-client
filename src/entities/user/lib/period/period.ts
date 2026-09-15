@@ -1,6 +1,6 @@
 import type { TimeSource } from '@/shared/lib/time-source';
 
-import type { UserSave } from '../../model/types';
+import { BUDGET_DIRECTIONS, type UserSave } from '../../model/types';
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -83,7 +83,7 @@ export const finishPeriod = (user: UserSave, time: TimeSource): UserSave => {
 };
 
 /**
- * `summary → settlement → planning`
+ * `summary → planning`, settling the finished period on the way
  *
  * The child (or the grown-up in demo mode) dismissed the summary screen.
  * Settlement happens atomically — there is no in-between state the UI ever
@@ -111,13 +111,12 @@ export const acknowledgeSummary = (
   const { period, savings } = user;
   const endedAt = time.now();
 
-  // A direction is "kept" when the fact did not exceed the plan. Zero-plan
-  // directions are excluded: the child did not allocate there, so there is
-  // nothing to violate.
-  const isPlanKept =
-    (period.plan.needs === 0 || period.fact.needs <= period.plan.needs) &&
-    (period.plan.wants === 0 || period.fact.wants <= period.plan.wants) &&
-    (period.plan.savings === 0 || period.fact.savings <= period.plan.savings);
+  // A direction is "kept" when the fact did not exceed the plan — all three,
+  // zero-plan ones included. Spending in a direction nothing was allocated to
+  // is the plainest way to break a plan, so it must not score as kept.
+  const isPlanKept = BUDGET_DIRECTIONS.every(
+    (direction) => period.fact[direction] <= period.plan[direction],
+  );
 
   const reachedGoalIds = savings.goals
     .filter((g) => g.reachedInPeriod === period.index)

@@ -8,8 +8,9 @@ import { finishPeriod, startPeriod } from '../period';
 import {
   createDemoProfile,
   DEMO_RUN_PERIODS,
+  enterDemoMode,
+  exitDemoMode,
   runDemoPeriods,
-  toggleDemoMode,
 } from './demo';
 
 // ═══════════════════════════════════════════
@@ -80,12 +81,13 @@ describe('createDemoProfile', () => {
 });
 
 // ═══════════════════════════════════════════
-// 2. toggleDemoMode — enabling demo mode
+// 2. enterDemoMode — the child's save is parked, not wiped
 // ═══════════════════════════════════════════
 
-describe('toggleDemoMode — enabling', () => {
+describe('enterDemoMode', () => {
   const user = createInitialUser({
     playerName: 'Аня',
+    pet: { name: 'Барсик', species: 'dog' },
     settings: {
       isParentGateEnabled: true,
       isSoundEnabled: false,
@@ -94,57 +96,87 @@ describe('toggleDemoMode — enabling', () => {
     },
   });
 
-  const demo = toggleDemoMode(user);
+  const { profile, parked } = enterDemoMode(user);
 
-  it('sets isDemoMode to true', () => {
-    expect(demo.settings.isDemoMode).toBe(true);
+  it('hands the demo profile out in demo mode', () => {
+    expect(profile.settings.isDemoMode).toBe(true);
+    expect(hasValidShape(profile)).toBe(true);
   });
 
-  it('resets to period 1, planning phase', () => {
-    expect(demo.period.index).toBe(1);
-    expect(demo.period.phase).toBe('planning');
+  it('starts the demo at period 1, planning phase', () => {
+    expect(profile.period.index).toBe(1);
+    expect(profile.period.phase).toBe('planning');
   });
 
   it('preserves sound and animation settings from the grown-up', () => {
-    expect(demo.settings.isSoundEnabled).toBe(false);
-    expect(demo.settings.isAnimationEnabled).toBe(true);
+    expect(profile.settings.isSoundEnabled).toBe(false);
+    expect(profile.settings.isAnimationEnabled).toBe(true);
   });
 
-  it("replaces player name with the demo name (not the child's name)", () => {
-    // The demo profile uses a fixed name, not "Аня".
-    expect(demo.playerName).not.toBe('Аня');
+  it("does not play under the child's name", () => {
+    expect(profile.playerName).not.toBe('Аня');
+    expect(profile.pet.name).not.toBe('Барсик');
   });
 
-  it('produces a valid UserSave', () => {
-    expect(hasValidShape(demo)).toBe(true);
+  it("parks the child's save untouched", () => {
+    expect(parked).toEqual(user);
   });
 });
 
 // ═══════════════════════════════════════════
-// 3. toggleDemoMode — disabling demo mode
+// 3. exitDemoMode — the child gets their own profile back
 // ═══════════════════════════════════════════
 
-describe('toggleDemoMode — disabling', () => {
-  // Start from a demo profile that has been played a bit.
-  const demo = createDemoProfile({ isSoundEnabled: false });
+describe('exitDemoMode', () => {
+  const user = createInitialUser({
+    playerName: 'Аня',
+    pet: { name: 'Барсик', species: 'dog' },
+  });
 
-  const restored = toggleDemoMode(demo);
+  it('gives the parked save back, name, pet and progress included', () => {
+    const played = {
+      ...user,
+      wallet: { ...user.wallet, balance: 137 },
+      period: { ...user.period, index: 4 },
+    };
 
-  it('sets isDemoMode to false', () => {
+    const { profile, parked } = enterDemoMode(played);
+    const restored = exitDemoMode(parked, profile);
+
+    expect(restored.playerName).toBe('Аня');
+    expect(restored.pet.name).toBe('Барсик');
+    expect(restored.wallet.balance).toBe(137);
+    expect(restored.period.index).toBe(4);
     expect(restored.settings.isDemoMode).toBe(false);
   });
 
-  it('resets to period 1, planning phase', () => {
-    expect(restored.period.index).toBe(1);
-    expect(restored.period.phase).toBe('planning');
+  it('carries the device settings the grown-up left on during the demo', () => {
+    const { profile, parked } = enterDemoMode(user);
+    const muted = {
+      ...profile,
+      settings: { ...profile.settings, isSoundEnabled: false },
+    };
+
+    expect(exitDemoMode(parked, muted).settings.isSoundEnabled).toBe(false);
   });
 
-  it('preserves sound and animation settings', () => {
-    expect(restored.settings.isSoundEnabled).toBe(false);
-  });
+  it('never leaves the demo name behind when there is nothing parked', () => {
+    const demo = createDemoProfile();
+    const restored = exitDemoMode(null, demo);
 
-  it('produces a valid UserSave', () => {
+    expect(restored.playerName).not.toBe(demo.playerName);
+    expect(restored.pet.name).not.toBe(demo.pet.name);
+    expect(restored.settings.isDemoMode).toBe(false);
     expect(hasValidShape(restored)).toBe(true);
+  });
+
+  it('leaves the demo profile itself alone — the restore is pure', () => {
+    const { profile, parked } = enterDemoMode(user);
+    const before = JSON.stringify(profile);
+
+    exitDemoMode(parked, profile);
+
+    expect(JSON.stringify(profile)).toBe(before);
   });
 });
 

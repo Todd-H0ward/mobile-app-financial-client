@@ -8,7 +8,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { RADII, type ThemeColor } from '@/shared/constants';
+import { HIT_SLOP_SIZE, RADII, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 
 import { Text } from './text';
@@ -169,6 +169,9 @@ const styles = StyleSheet.create({
     borderRadius: RADII.l,
     flexDirection: 'row',
     gap: 12,
+    // A pressable row is a touch target: the floor is stated, not left to the
+    // sum of a font size and two paddings — see docs/accessibility.md.
+    minHeight: HIT_SLOP_SIZE,
   },
   pressed: {
     opacity: 0.85,

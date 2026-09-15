@@ -1,8 +1,7 @@
-import { STARTING_BALANCE, WALLET_HISTORY_LIMIT } from '@/entities/economy';
+import { STARTING_BALANCE } from '@/entities/economy';
+import { listGoals } from '@/entities/goal';
 
 import type { UserSave } from '../types';
-
-import GOALS_CONTENT from '@/content/goals.json';
 
 // ═══════════════════════════════════════════
 // CONSTANTS
@@ -71,12 +70,14 @@ export const createInitialUser = ({
     history: [],
   },
   savings: {
-    goals: GOALS_CONTENT.goals.map((goal) => ({
+    // Goals come from the validated catalogue, never straight from the JSON:
+    // a broken row must fail in tests, not end up inside a child's save.
+    goals: listGoals().map((goal) => ({
       goalId: goal.id,
       saved: 0,
       reachedInPeriod: null,
     })),
-    activeGoalId: GOALS_CONTENT.goals[0]?.id ?? null,
+    activeGoalId: listGoals()[0]?.id ?? null,
     depositsThisPeriod: 0,
   },
   period: {
@@ -102,4 +103,4 @@ export const createInitialUser = ({
 });
 
 export type { CreateUserInput };
-export { STARTING_BALANCE, USER_SAVE_VERSION, WALLET_HISTORY_LIMIT };
+export { USER_SAVE_VERSION };

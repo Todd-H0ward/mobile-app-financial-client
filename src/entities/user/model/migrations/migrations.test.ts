@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { createInitialUser, USER_SAVE_VERSION } from '../initial-user';
+import { PERIOD_PHASES, PET_SPECIES } from '../types';
 
 import { isUserSave, migrateUser } from './migrations';
 
@@ -86,6 +87,42 @@ describe('isUserSave', () => {
       false,
     );
     expect(isUserSave({ ...save, history: null })).toBe(false);
+  });
+
+  it('rejects a save whose enum field holds an unknown value', () => {
+    // JSON has no enums: a hand-edited or half-migrated file can hold any
+    // string, and the screens switch on these values.
+    const save = createInitialUser();
+
+    expect(
+      isUserSave({ ...save, period: { ...save.period, phase: 'banana' } }),
+    ).toBe(false);
+    // `settlement` is not a phase a save can hold — it is a step between two.
+    expect(
+      isUserSave({ ...save, period: { ...save.period, phase: 'settlement' } }),
+    ).toBe(false);
+    expect(
+      isUserSave({ ...save, pet: { ...save.pet, species: 'dragon' } }),
+    ).toBe(false);
+    expect(isUserSave({ ...save, pet: { ...save.pet, stage: 'elder' } })).toBe(
+      false,
+    );
+    expect(
+      isUserSave({ ...save, pet: { ...save.pet, color: 'invisible' } }),
+    ).toBe(false);
+  });
+
+  it('accepts every value the enums actually allow', () => {
+    const save = createInitialUser();
+
+    for (const phase of PERIOD_PHASES) {
+      expect(isUserSave({ ...save, period: { ...save.period, phase } })).toBe(
+        true,
+      );
+    }
+    for (const species of PET_SPECIES) {
+      expect(isUserSave({ ...save, pet: { ...save.pet, species } })).toBe(true);
+    }
   });
 
   it('rejects anything that is not an object', () => {
