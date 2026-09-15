@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import type { UserSave } from '../../model';
 import { createInitialUser } from '../../model';
+import type { UserSave } from '../../model';
+
 
 import { resetUser } from './reset';
 

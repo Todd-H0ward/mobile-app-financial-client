@@ -1,3 +1,4 @@
+export { createDemoProfile, toggleDemoMode } from './demo';
 export {
   acknowledgeSummary,
   canFinishPeriod,

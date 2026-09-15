@@ -21,5 +21,10 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts'],
+    server: {
+      deps: {
+        external: [/react-native/, /expo-sqlite/, /expo-modules-core/],
+      },
+    },
   },
 });

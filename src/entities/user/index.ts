@@ -1,10 +1,12 @@
 export {
   acknowledgeSummary,
   canFinishPeriod,
+  createDemoProfile,
   finishPeriod,
+  resetUser,
   startPeriod,
-} from './lib/period';
-export { resetUser } from './lib/reset';
+  toggleDemoMode,
+} from './lib';
 export type {
   BudgetDirection,
   BudgetFact,
