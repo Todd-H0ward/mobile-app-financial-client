@@ -1,6 +1,6 @@
 import { BUDGET_DIRECTIONS, type BudgetDirection } from '@/entities/economy';
 
-import { isRecord } from '@/shared/utils';
+import { isNonEmptyString, isRecord } from '@/shared/utils';
 
 import {
   type DecisionContent,
@@ -25,9 +25,6 @@ const MIN_SORT_ITEMS = 5;
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
-
-const isNonEmptyString = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0;
 
 const isDirection = (value: unknown): value is BudgetDirection =>
   BUDGET_DIRECTIONS.includes(value as BudgetDirection);

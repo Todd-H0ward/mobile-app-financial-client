@@ -1,4 +1,4 @@
-import { isRecord } from '@/shared/utils';
+import { isNonEmptyString, isRecord } from '@/shared/utils';
 
 import {
   HINT_SCREENS,
@@ -10,9 +10,6 @@ import {
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
-
-const isNonEmptyString = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0;
 
 const assertHint = (hint: unknown, path: string): HintContent => {
   if (!isRecord(hint)) {
