@@ -1,5 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
+import { HintButton } from '@/widgets/hint-button';
+
 import { SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import {
@@ -103,7 +105,7 @@ export const UiKitScreen = () => {
           title="UI-кит"
           subtitle="Все компоненты @/shared/ui и их состояния"
           leading={<Screen.Back />}
-          trailing={<CoinBadge amount={1240} coinSize={18} />}
+          trailing={<HintButton screen="ui-kit" />}
         />
 
         {/* ─── the two switches every section below reacts to ─── */}

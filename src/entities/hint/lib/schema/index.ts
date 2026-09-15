@@ -1,0 +1,1 @@
+export { assertHintsContent } from './schema';

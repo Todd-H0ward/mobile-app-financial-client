@@ -1,6 +1,8 @@
+import { BUDGET_DIRECTIONS } from '@/entities/economy';
+
 import type { TimeSource } from '@/shared/lib/time-source';
 
-import { BUDGET_DIRECTIONS, type UserSave } from '../../model/types';
+import type { UserSave } from '../../model/types';
 
 // ═══════════════════════════════════════════
 // HELPERS

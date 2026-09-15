@@ -1,67 +1,67 @@
-import { useState } from 'react';
+import { StyleSheet } from 'react-native';
 
-import { useRouter } from 'expo-router';
+import { HintButton } from '@/widgets/hint-button';
 
-import { useUserStore } from '@/entities/user';
+import { Button, Screen } from '@/shared/ui';
 
-import { useTimeSource } from '@/shared/lib';
-import { Button, Card, Input, Screen, Text } from '@/shared/ui';
+import { useOnboarding } from '../model';
+
+import { PawTrail } from './paw-trail';
+import { PetSpeech } from './pet-speech';
+import {
+  CoinsStep,
+  GreetingStep,
+  NameStep,
+  PlanStep,
+  SortingStep,
+} from './steps';
 
 // ═══════════════════════════════════════════
-// CONSTANTS
-// ═══════════════════════════════════════════
-
-const NAME_MAX_LENGTH = 12;
-
-// ═══════════════════════════════════════════
-// COMPONENTS
+// MAIN COMPONENT
 // ═══════════════════════════════════════════
 
 export const OnboardingScreen = () => {
-  const router = useRouter();
-  const time = useTimeSource();
-  const createUser = useUserStore((state) => state.createUser);
-  const [playerName, setPlayerName] = useState('');
-
-  const start = () => {
-    createUser({
-      playerName: playerName.trim(),
-      createdAt: time.now(),
-    });
-
-    router.replace('/home');
-  };
+  const onboarding = useOnboarding();
+  const { stepId, title, line, stepNumber, stepCount } = onboarding;
 
   return (
     <Screen gap="three" isTabBarVisible={false}>
       <Screen.Header
-        title="Привет!"
-        subtitle="Заведём профиль — он останется на этом устройстве"
+        title={title}
+        trailing={
+          <HintButton screen="onboarding" isPulsing={stepId === 'greeting'} />
+        }
       />
 
-      <Card tone="surfaceSoft">
-        <Card.Title>Как тебя зовут?</Card.Title>
-        <Card.Content>
-          <Input
-            value={playerName}
-            onChangeText={setPlayerName}
-            placeholder="Имя"
-            maxLength={NAME_MAX_LENGTH}
-            isCounterVisible
-            hint="Это имя увидишь только ты"
-          />
-        </Card.Content>
-        <Card.Footer>
-          <Button size="m" disabled={!playerName.trim()} onPress={start}>
-            Начать
-          </Button>
-        </Card.Footer>
-      </Card>
+      <PawTrail current={stepNumber} total={stepCount} />
 
-      <Text variant="small" themeColor="textSecondary">
-        Аккаунт не нужен: профиль хранится только на устройстве и никуда не
-        отправляется.
-      </Text>
+      <PetSpeech line={line} stepId={stepId} />
+
+      {stepId === 'greeting' && <GreetingStep />}
+      {stepId === 'sorting' && <SortingStep onboarding={onboarding} />}
+      {stepId === 'coins' && <CoinsStep />}
+      {stepId === 'plan' && <PlanStep onboarding={onboarding} />}
+      {stepId === 'name' && <NameStep onboarding={onboarding} />}
+
+      <Button
+        size="l"
+        isFullWidth
+        disabled={!onboarding.canContinue}
+        onPress={onboarding.goNext}
+        style={styles.button}
+      >
+        {onboarding.actionLabel}
+      </Button>
     </Screen>
   );
 };
+
+// ═══════════════════════════════════════════
+// STYLES
+// ═══════════════════════════════════════════
+
+const styles = StyleSheet.create({
+  button: {
+    marginTop: 'auto',
+  },
+});

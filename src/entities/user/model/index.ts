@@ -4,7 +4,6 @@ export { isUserSave, migrateUser } from './migrations';
 export type { UserPersistedState, UserStore } from './store';
 export { useUser, useUserStore } from './store';
 export type {
-  BudgetDirection,
   BudgetFact,
   BudgetPlan,
   HomeSave,
@@ -24,7 +23,6 @@ export type {
   WalletSave,
 } from './types';
 export {
-  BUDGET_DIRECTIONS,
   PERIOD_PHASES,
   PET_COLORS,
   PET_PATTERNS,
