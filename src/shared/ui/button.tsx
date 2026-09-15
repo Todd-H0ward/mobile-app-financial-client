@@ -1,4 +1,11 @@
-import { createContext, type ReactNode, useContext, useMemo } from 'react';
+import {
+  Children,
+  createContext,
+  isValidElement,
+  type ReactNode,
+  useContext,
+  useMemo,
+} from 'react';
 
 import {
   type GestureResponderEvent,
@@ -18,6 +25,7 @@ import Animated, {
 
 import { RADII, SPACING, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { isTextOnly } from '@/shared/utils';
 
 import { Text, type TextProps, type TextVariant } from './text';
 
@@ -265,10 +273,19 @@ const ButtonRoot = ({
               </View>
             ) : (
               <ButtonContext.Provider value={contextValue}>
-                {typeof children === 'string' ? (
+                {isTextOnly(children) ? (
                   <ButtonLabel>{children}</ButtonLabel>
                 ) : (
-                  <View style={styles.content}>{children}</View>
+                  <View style={styles.content}>
+                    {/* Loose text beside an icon still needs its own <Text>. */}
+                    {Children.toArray(children).map((child, index) =>
+                      isValidElement(child) ? (
+                        child
+                      ) : (
+                        <ButtonLabel key={index}>{child}</ButtonLabel>
+                      ),
+                    )}
+                  </View>
                 )}
               </ButtonContext.Provider>
             )}

@@ -1,7 +1,7 @@
 import {
   createContext,
   type PropsWithChildren,
-  type ReactNode,
+  type ReactElement,
   useContext,
   useMemo,
   useState,
@@ -18,6 +18,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { isTextOnly } from '@/shared/utils';
 
 import { Text } from './text';
 import { ThemedView } from './themed-view';
@@ -34,7 +35,7 @@ interface CollapsibleRootProps extends PropsWithChildren {
 }
 
 interface CollapsibleTriggerProps {
-  children: ReactNode;
+  children: string | ReactElement;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -102,7 +103,7 @@ const CollapsibleTrigger = ({ children, style }: CollapsibleTriggerProps) => {
         />
       </ThemedView>
 
-      {typeof children === 'string' ? (
+      {isTextOnly(children) ? (
         <Text variant="small">{children}</Text>
       ) : (
         children

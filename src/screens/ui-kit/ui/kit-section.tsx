@@ -1,54 +1,47 @@
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
 
 import { SPACING } from '@/shared/constants';
-import { isTextOnly } from '@/shared/utils';
-
-import { Text, type TextProps } from './text';
-import { ThemedView } from './themed-view';
+import { Text, ThemedView } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
 
-interface HintRowRootProps {
+interface KitSectionProps {
+  /** Name of the component, exactly as it is exported from `@/shared/ui`. */
+  title: string;
+  /** What the section is checking — states, edge cases, the interaction. */
+  caption?: string;
   children?: ReactNode;
   style?: StyleProp<ViewStyle>;
 }
 
-interface HintRowHintProps {
-  children?: string | ReactElement;
+interface KitRowProps {
+  /** Names the state being shown, e.g. "disabled" or "длинный текст". */
+  label?: string;
+  children?: ReactNode;
+  /** Lay the examples out in a row instead of a column. */
+  isInline?: boolean;
   style?: StyleProp<ViewStyle>;
 }
-
-type HintRowTitleProps = TextProps;
 
 // ═══════════════════════════════════════════
 // COMPOUND COMPONENTS
 // ═══════════════════════════════════════════
 
-const HintRowHint = ({ children, style }: HintRowHintProps) => {
+const KitRow = ({ label, children, isInline = false, style }: KitRowProps) => {
   return (
-    <ThemedView variant="surfaceDeep" style={[styles.hint, style]}>
-      {isTextOnly(children) ? (
-        <Text themeColor="textSecondary">{children}</Text>
-      ) : (
-        children
+    <View style={[styles.row, style]}>
+      {label != null && (
+        <Text variant="label" themeColor="textMuted">
+          {label.toUpperCase()}
+        </Text>
       )}
-    </ThemedView>
-  );
-};
 
-const HintRowTitle = ({
-  children,
-  variant = 'small',
-  ...props
-}: HintRowTitleProps) => {
-  return (
-    <Text variant={variant} {...props}>
-      {children}
-    </Text>
+      <View style={isInline ? styles.inline : styles.stack}>{children}</View>
+    </View>
   );
 };
 
@@ -56,17 +49,35 @@ const HintRowTitle = ({
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-const HintRowRoot = ({ children, style }: HintRowRootProps) => {
-  return <View style={[styles.root, style]}>{children}</View>;
+const KitSectionRoot = ({
+  title,
+  caption,
+  children,
+  style,
+}: KitSectionProps) => {
+  return (
+    <ThemedView variant="surface" style={[styles.root, style]}>
+      <View style={styles.heading}>
+        <Text variant="subtitle">{title}</Text>
+
+        {caption != null && (
+          <Text variant="small" themeColor="textMuted">
+            {caption}
+          </Text>
+        )}
+      </View>
+
+      {children}
+    </ThemedView>
+  );
 };
 
 // ═══════════════════════════════════════════
 // COMPOUND EXPORT
 // ═══════════════════════════════════════════
 
-export const HintRow = Object.assign(HintRowRoot, {
-  Title: HintRowTitle,
-  Hint: HintRowHint,
+export const KitSection = Object.assign(KitSectionRoot, {
+  Row: KitRow,
 });
 
 // ═══════════════════════════════════════════
@@ -75,14 +86,26 @@ export const HintRow = Object.assign(HintRowRoot, {
 
 const styles = StyleSheet.create({
   root: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    borderRadius: SPACING.three,
+    gap: SPACING.three,
+    padding: SPACING.three,
   },
-  hint: {
-    borderRadius: SPACING.two,
-    paddingHorizontal: SPACING.two,
-    paddingVertical: SPACING.half,
+  heading: {
+    gap: SPACING.half,
+  },
+  inline: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.two,
+  },
+  row: {
+    gap: SPACING.one,
+  },
+  stack: {
+    alignItems: 'flex-start',
+    gap: SPACING.two,
   },
 });
 
-export type { HintRowHintProps, HintRowRootProps, HintRowTitleProps };
+export type { KitRowProps, KitSectionProps };

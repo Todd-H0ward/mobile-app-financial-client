@@ -56,7 +56,6 @@ interface ScreenHeaderProps {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** The root stack renders no header, so a pushed screen carries its own. */
 const ScreenBack = ({ tone = 'surface', color = 'text' }: ScreenBackProps) => {
   const theme = useTheme();
   const router = useRouter();
@@ -65,7 +64,14 @@ const ScreenBack = ({ tone = 'surface', color = 'text' }: ScreenBackProps) => {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Назад"
-      onPress={() => router.back()}
+      onPress={() => {
+        if (router.canGoBack()) {
+          router.back();
+          return;
+        }
+
+        router.replace('/');
+      }}
       style={({ pressed }) => [
         styles.back,
         {
@@ -111,10 +117,10 @@ const ScreenHeader = ({
   );
 };
 
-/**
- * The page frame every screen sits in: background, safe area, scroll container
- * and the column capped at `MAX_CONTENT_WIDTH`.
- */
+// ═══════════════════════════════════════════
+// MAIN COMPONENT
+// ═══════════════════════════════════════════
+
 const ScreenRoot = ({
   children,
   variant = 'background',
