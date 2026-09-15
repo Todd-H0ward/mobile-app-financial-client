@@ -1,0 +1,1 @@
+export { isTextOnly } from './isTextOnly';
