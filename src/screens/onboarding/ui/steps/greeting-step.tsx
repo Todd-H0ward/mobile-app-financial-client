@@ -14,14 +14,16 @@ import { DecisionBasket } from '../decision-basket';
 export const GreetingStep = () => {
   return (
     <View style={styles.root}>
-      {listDecisions().map((decision) => (
-        <DecisionBasket
-          key={decision.id}
-          direction={decision.id}
-          title={decision.title}
-          example={decision.example}
-        />
-      ))}
+      <View style={styles.boxes}>
+        {listDecisions().map((decision) => (
+          <DecisionBasket
+            key={decision.id}
+            direction={decision.id}
+            title={decision.title}
+            example={decision.example}
+          />
+        ))}
+      </View>
 
       <Card tone="surfaceSoft">
         <Card.Content>
@@ -40,6 +42,10 @@ export const GreetingStep = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
+  boxes: {
+    flexDirection: 'row',
+    gap: SPACING.two,
+  },
   root: {
     gap: SPACING.two,
   },

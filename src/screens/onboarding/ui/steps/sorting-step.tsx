@@ -95,6 +95,7 @@ export const SortingStep = ({ onboarding }: SortingStepProps) => {
             direction={decision.id}
             title={decision.title}
             example={decision.example}
+            isRow
             onPress={sortItem ? () => placeItem(decision.id) : undefined}
             accessibilityLabel={
               sortItem

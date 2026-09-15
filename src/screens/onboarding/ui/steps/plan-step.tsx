@@ -122,6 +122,7 @@ export const PlanStep = ({ onboarding }: PlanStepProps) => {
             direction={decision.id}
             title={decision.title}
             example={decision.example}
+            isRow
             trailing={
               <CoinStepper
                 count={plan[decision.id]}
