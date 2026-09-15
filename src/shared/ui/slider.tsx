@@ -8,7 +8,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 
-import { RADII, type ThemeColor } from '@/shared/constants';
+import { HIT_SLOP_SIZE, RADII, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 
 import { clamp } from '../utils';
@@ -163,7 +163,8 @@ export const Slider = ({
 
 const styles = StyleSheet.create({
   root: {
-    height: THUMB_SIZE,
+    // Thumb is 34dp; the gesture area is 48dp so the track is still reachable.
+    height: HIT_SLOP_SIZE,
     justifyContent: 'center',
     width: '100%',
   },

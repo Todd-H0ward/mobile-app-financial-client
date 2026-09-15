@@ -24,6 +24,7 @@ import {
   type ThemeColor,
 } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { hitSlopFor } from '@/shared/utils';
 
 import { Text } from './text';
 import { ThemedView } from './themed-view';
@@ -56,6 +57,13 @@ interface ScreenHeaderProps {
 }
 
 // ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/** Visual size of the back control; hitSlop expands it to HIT_SLOP_SIZE. */
+const BACK_SIZE = 40;
+
+// ═══════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════
 
@@ -67,6 +75,7 @@ const ScreenBack = ({ tone = 'surface', color = 'text' }: ScreenBackProps) => {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Назад"
+      hitSlop={hitSlopFor(BACK_SIZE)}
       onPress={() => {
         if (router.canGoBack()) {
           router.back();
@@ -183,9 +192,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: RADII.m,
     borderWidth: 1,
-    height: 40,
+    height: BACK_SIZE,
     justifyContent: 'center',
-    width: 40,
+    width: BACK_SIZE,
   },
   column: {
     maxWidth: MAX_CONTENT_WIDTH,

@@ -10,6 +10,7 @@ import {
 
 import { RADII, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { hitSlopFor } from '@/shared/utils';
 
 import { Shape } from './shape';
 import { Text } from './text';
@@ -30,6 +31,12 @@ interface ChipProps {
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
+
+/**
+ * Approximate chip height: paddingVertical 8×2 + smallBold line 18.
+ * hitSlop expands the press target to HIT_SLOP_SIZE without changing the pill.
+ */
+const CHIP_VISUAL_HEIGHT = 34;
 
 const VARIANT_COLORS: Record<
   ChipVariant,
@@ -91,7 +98,7 @@ export const Chip = ({
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ selected: variant === 'selected' }}
-      hitSlop={8}
+      hitSlop={hitSlopFor(CHIP_VISUAL_HEIGHT)}
       onPress={onPress}
       style={({ pressed }) => [chipStyle, pressed && styles.pressed]}
     >

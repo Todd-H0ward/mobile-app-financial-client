@@ -64,7 +64,7 @@ export const MeterCard = ({
       {icon}
 
       <Text
-        variant="label"
+        variant="body"
         themeColor={isLow ? 'warningStrong' : 'textSecondary'}
         numberOfLines={1}
       >

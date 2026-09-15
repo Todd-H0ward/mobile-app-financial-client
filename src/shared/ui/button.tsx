@@ -25,7 +25,7 @@ import Animated, {
 
 import { RADII, SPACING, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
-import { isTextOnly } from '@/shared/utils';
+import { hitSlopFor, isTextOnly } from '@/shared/utils';
 
 import { Text, type TextProps, type TextVariant } from './text';
 
@@ -65,8 +65,12 @@ const PRESS_OUT_DURATION = 130;
 const LABEL_VARIANT: Record<ButtonSize, TextVariant> = {
   l: 'subtitle',
   m: 'bodyBold',
-  s: 'smallBold',
+  // Size S is still actionable content — 16sp floor, not a caption (3.6).
+  s: 'bodyBold',
 };
+
+/** Visual height of size S; hitSlop expands the target to HIT_SLOP_SIZE. */
+const SIZE_S_HEIGHT = 40;
 
 const SHADOW_HEIGHT: Record<ButtonSize, number> = {
   l: 4,
@@ -87,7 +91,7 @@ const SIZE_STYLE: Record<ButtonSize, ViewStyle> = {
   },
   s: {
     borderRadius: RADII.s,
-    minHeight: 40,
+    minHeight: SIZE_S_HEIGHT,
     paddingHorizontal: 14,
   },
 };
@@ -227,6 +231,10 @@ const ButtonRoot = ({
         style,
       ]}
       {...props}
+      // Size S is 40dp visually; hitSlop is required so the target stays ≥ 48.
+      hitSlop={
+        size === 's' ? hitSlopFor(SIZE_S_HEIGHT) : (props.hitSlop ?? undefined)
+      }
     >
       {({ pressed }) => (
         <>

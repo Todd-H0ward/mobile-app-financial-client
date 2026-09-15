@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { SPACING } from '@/shared/constants';
+import { HIT_SLOP_SIZE, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { isTextOnly } from '@/shared/utils';
 
@@ -103,11 +103,7 @@ const CollapsibleTrigger = ({ children, style }: CollapsibleTriggerProps) => {
         />
       </ThemedView>
 
-      {isTextOnly(children) ? (
-        <Text variant="small">{children}</Text>
-      ) : (
-        children
-      )}
+      {isTextOnly(children) ? <Text variant="body">{children}</Text> : children}
     </Pressable>
   );
 };
@@ -180,6 +176,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: SPACING.two,
+    // Full-width row stays ≥ 48dp tall so the chevron alone is not the target.
+    minHeight: HIT_SLOP_SIZE,
   },
   pressed: {
     opacity: 0.7,

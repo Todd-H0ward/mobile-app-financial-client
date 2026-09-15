@@ -20,8 +20,12 @@ in `screens/ui-kit/model/use-playground.ts`.
   circle, wants an orange diamond — see `Chip` and `Shape`.
 - **One press mechanic.** Every pressable drops onto its own shadow
   (`Button`, 4 / 3 / 0 px by size); nothing dims to 50%.
-- **16px is the floor for content.** 13px is a caption, 10px only labels
-  navigation and icons.
+- **16px is the floor for content.** `body` / `bodyBold` / links are 16.
+  13px (`small`) is a caption or chip filter; 10px (`label`) only labels
+  navigation and icons. Actionable copy (`Button`, `Toast`, meter names) stays
+  at 16+.
+- **48dp touch targets.** Controls under 48 use `hitSlopFor` from
+  `@/shared/utils` (or a ≥48 gesture row) — see [accessibility.md](./accessibility.md).
 
 ## Tokens
 

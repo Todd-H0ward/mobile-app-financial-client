@@ -8,7 +8,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { RADII, type ThemeColor } from '@/shared/constants';
+import { HIT_SLOP_SIZE, RADII, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 
 import { Text } from './text';
@@ -78,7 +78,7 @@ export const Toast = ({
         {icon}
       </View>
 
-      <Text variant="smallBold" themeColor={colors.label} style={styles.label}>
+      <Text variant="bodyBold" themeColor={colors.label} style={styles.label}>
         {children}
       </Text>
     </Container>
@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
     borderRadius: RADII.m,
     flexDirection: 'row',
     gap: 10,
+    minHeight: HIT_SLOP_SIZE,
     paddingHorizontal: 16,
     paddingVertical: 13,
   },
