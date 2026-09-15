@@ -1,56 +1,61 @@
-# Welcome to your Expo app 👋
+# Лапка
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Мобильная игра про карманные деньги: ребёнок ведёт бюджет игрового периода,
+выполняет задания, копит и заботится о питомце. Expo SDK 57 / React Native,
+Android — целевая платформа, сборка релизного APK описана ниже.
 
-## Get started
+## Быстрый старт
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```sh
+pnpm install
+npx expo start        # затем «a» — Android, «i» — iOS
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Скрипты:
 
-### Other setup steps
+| Команда | Что делает |
+| --- | --- |
+| `npm start` | Metro + Expo Dev Tools |
+| `npm run android` / `npm run ios` | открыть на эмуляторе/симуляторе |
+| `npm run run:android` | нативная отладочная сборка на устройство |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run format` | `biome check --write src` |
+| `npm run keystore` | одноразовая генерация ключа подписи |
+| `npm run build:apk` | подписанный релизный APK в `build/` |
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Релизный APK
 
-## Learn more
+```sh
+npm run keystore      # один раз: ключ в credentials/ (вне git)
+npm run build:apk     # build/mobile-hackathon-1.0.0.apk
+adb install -r build/mobile-hackathon-1.0.0.apk
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+APK собран под arm64-v8a и armeabi-v7a (все физические телефоны), JS-бандл внутри —
+на телефоне не нужны ни Metro, ни Expo Go, ни Android Studio.
+Требования к машине сборщика, работа с ключом, версии и разбор типичных
+ошибок: [docs/android-release.md](docs/android-release.md).
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Структура
 
-## Join the community
+```
+src/
+├── app/        # маршруты expo-router — только реэкспорт экранов
+├── _app/       # провайдеры и глобальная инициализация
+├── screens/    # экраны
+├── widgets/    # составные блоки для нескольких экранов
+├── features/   # пользовательские действия
+├── entities/   # бизнес-сущности: model + api + ui
+└── shared/     # переиспользуемый код без знания о домене
+plugins/        # конфиг-плагины Expo (подпись релиза)
+scripts/        # ключ подписи, сборка APK
+docs/           # спецификация и регламенты
+```
 
-Join our community of developers creating universal apps.
+Импорты идут только вниз по слоям. Правила — в
+[AGENTS.md](AGENTS.md) и [docs/architecture.md](docs/architecture.md).
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Документация
+
+Точка входа — [docs/README.md](docs/README.md): дорожная карта, экономика,
+игровой период, питомец, доступность, матрица соответствия ТЗ.

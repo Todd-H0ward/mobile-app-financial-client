@@ -116,17 +116,18 @@ const styles = StyleSheet.create({
   },
   link: {
     fontFamily: FONTS.sans,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 700,
-    lineHeight: 20,
+    lineHeight: 23,
   },
   /** Colour comes from `VARIANT_COLOR`, so it follows the theme. */
   linkPrimary: {
     fontFamily: FONTS.sans,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 700,
-    lineHeight: 20,
+    lineHeight: 23,
   },
+  /** Monospace for debug / UI-kit only — not content copy. */
   code: {
     fontFamily: FONTS.mono,
     fontSize: 12,

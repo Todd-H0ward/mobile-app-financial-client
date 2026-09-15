@@ -45,3 +45,8 @@ example
 # editors
 .idea
 .vscode
+
+# release credentials and build output
+credentials/
+*.keystore
+/build
