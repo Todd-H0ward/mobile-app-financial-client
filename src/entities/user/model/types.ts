@@ -76,8 +76,9 @@ interface WalletSave {
   /**
    * Balance in coins. Never below zero — 2.5.6.
    *
-   * History is trimmed to `WALLET_HISTORY_LIMIT`: it exists for the report, not
-   * as an archive, and the save must not grow without a bound.
+   * History is trimmed to `WALLET_HISTORY_LIMIT` from `entities/economy`: it
+   * exists for the report, not as an archive, and the save must not grow
+   * without a bound.
    */
   balance: number;
   /** Recent operations, newest first. */

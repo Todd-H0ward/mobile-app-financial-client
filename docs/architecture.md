@@ -123,7 +123,13 @@ confirmation, chat, notifications.
   единственное место, где носитель выбирается, — `shared/model/persist-storage`.
 - Учебный контент лежит в `content/*.json` и отделён от кода — требование
   2.5.14, см. [content.md](./content.md). Импортируется по алиасу
-  `@/content/*` (`tsconfig.json`), сейв хранит только id позиций.
+  `@/content/*` (`tsconfig.json`), сейв хранит только id позиций
+  (прогресс заданий появится позже; тексты остаются в JSON).
+- Числа экономики — в `entities/economy` (`balance.ts`): стартовый кошелёк,
+  награды за задания, бонус регулярности, лимит истории. Экраны числа не
+  правят.
+- Каталог заданий читает `entities/task` из `content/tasks.json` по типу
+  механики; седьмое задание того же типа — строка в JSON без правки `.tsx`.
 - `shared/api/api-client.ts` — axios instance, base URL from
   `EXPO_PUBLIC_API_URL`, 40s timeout.
 - `shared/api/query-client.ts` — TanStack Query defaults (60s `staleTime`,

@@ -1,0 +1,122 @@
+{
+  "tasks": [
+    {
+      "id": "enough-for-all",
+      "theme": "planning",
+      "mechanic": "basket",
+      "title": "Хватит ли на всё?",
+      "difficulty": "medium",
+      "brief": "Собери покупки так, чтобы сумма не вышла за кошелёк.",
+      "explanation": "Сначала смотрим, сколько есть, потом выбираем, на что хватит.",
+      "payload": {
+        "budget": 40,
+        "items": [
+          { "id": "bread", "title": "Хлеб", "price": 8 },
+          { "id": "soap", "title": "Мыло", "price": 12 },
+          { "id": "toy", "title": "Игрушка", "price": 25 },
+          { "id": "juice", "title": "Сок", "price": 15 }
+        ]
+      }
+    },
+    {
+      "id": "buy-first",
+      "theme": "planning",
+      "mechanic": "priority",
+      "title": "Что купить первым",
+      "difficulty": "easy",
+      "brief": "Расставь покупки: сначала нужное, потом желаемое.",
+      "explanation": "Без еды и тепла не обойтись, а игрушка подождёт.",
+      "payload": {
+        "items": [
+          { "id": "food", "title": "Еда", "kind": "need" },
+          { "id": "heating", "title": "Отопление", "kind": "need" },
+          { "id": "poster", "title": "Плакат", "kind": "want" },
+          { "id": "stickers", "title": "Наклейки", "kind": "want" }
+        ]
+      }
+    },
+    {
+      "id": "save-for-scooter",
+      "theme": "savings",
+      "mechanic": "quiz",
+      "title": "Накопить на самокат",
+      "difficulty": "medium",
+      "brief": "Сколько периодов копиться, если откладывать понемногу?",
+      "explanation": "Копим на что-то одно и видим, сколько осталось.",
+      "payload": {
+        "question": "Самокат стоит 140. Если откладывать по 40 за период, сколько периодов нужно?",
+        "options": [
+          { "id": "two", "label": "2", "isCorrect": false },
+          { "id": "three", "label": "3", "isCorrect": false },
+          { "id": "four", "label": "4", "isCorrect": true },
+          { "id": "seven", "label": "7", "isCorrect": false }
+        ]
+      }
+    },
+    {
+      "id": "put-aside-now",
+      "theme": "savings",
+      "mechanic": "dialog",
+      "title": "Отложить сразу",
+      "difficulty": "easy",
+      "brief": "Выбери, что сделать с монетами в начале периода.",
+      "explanation": "Понемногу, но каждый раз — так получается быстрее.",
+      "payload": {
+        "prompt": "У тебя 50 монет. Что сделаешь сначала?",
+        "choices": [
+          {
+            "id": "save-ten",
+            "label": "Отложить 10 в копилку",
+            "consequence": "До цели станет ближе уже в этом периоде."
+          },
+          {
+            "id": "spend-all",
+            "label": "Потратить всё на желаемое",
+            "consequence": "Копилка не вырастет — цель отодвинется."
+          },
+          {
+            "id": "wait",
+            "label": "Подождать до конца периода",
+            "consequence": "Легко забыть отложить, если не решить сразу."
+          }
+        ]
+      }
+    },
+    {
+      "id": "change-counting",
+      "theme": "payments",
+      "mechanic": "change",
+      "title": "Посчитай сдачу",
+      "difficulty": "medium",
+      "brief": "Сколько вернут, если отдать больше цены?",
+      "explanation": "Считаем, сколько отдали и сколько вернут.",
+      "payload": {
+        "price": 27,
+        "paid": 50,
+        "options": [
+          { "id": "13", "label": "13", "isCorrect": false },
+          { "id": "23", "label": "23", "isCorrect": true },
+          { "id": "27", "label": "27", "isCorrect": false },
+          { "id": "50", "label": "50", "isCorrect": false }
+        ]
+      }
+    },
+    {
+      "id": "cheaper-pick",
+      "theme": "payments",
+      "mechanic": "quiz",
+      "title": "Что дешевле",
+      "difficulty": "hard",
+      "brief": "Сравни два набора и выбери более дешёвый.",
+      "explanation": "Сравниваем цены, а не только названия.",
+      "payload": {
+        "question": "Набор А: 18 + 12. Набор Б: 35. Что дешевле?",
+        "options": [
+          { "id": "a", "label": "Набор А (30)", "isCorrect": true },
+          { "id": "b", "label": "Набор Б (35)", "isCorrect": false },
+          { "id": "same", "label": "Одинаково", "isCorrect": false }
+        ]
+      }
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+import { STARTING_BALANCE, WALLET_HISTORY_LIMIT } from '@/entities/economy';
+
 import type { UserSave } from '../types';
 
 import GOALS_CONTENT from '@/content/goals.json';
@@ -8,17 +10,6 @@ import GOALS_CONTENT from '@/content/goals.json';
 
 /** Save schema version. Bumped on every incompatible change. */
 const USER_SAVE_VERSION = 1;
-
-/**
- * Starting wallet, in coins — see docs/economy.md.
- *
- * It lives here until the balance table (`entities/economy/model/balance.ts`)
- * exists; then it moves there wholesale, so every number is edited in one place.
- */
-const STARTING_BALANCE = 50;
-
-/** How many wallet operations the save keeps. History is a report, not an archive. */
-const WALLET_HISTORY_LIMIT = 100;
 
 /** Starting thermostat position: chilly, but not cold. */
 const STARTING_TEMPERATURE = 0.5;
