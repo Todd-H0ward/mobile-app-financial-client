@@ -181,4 +181,8 @@ export const RADII = {
 /** Minimum touch target, per the design notes. */
 export const HIT_SLOP_SIZE = 48;
 
+/** Horizontal gutter every screen keeps between its content and the edge. */
+export const CONTENT_PADDING = SPACING.three;
+export const MAX_CONTENT_WIDTH = 560;
+
 export const BOTTOM_TAB_INSET = Platform.select({ ios: 50, android: 80 }) ?? 0;
