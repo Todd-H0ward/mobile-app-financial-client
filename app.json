@@ -17,7 +17,9 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.mobilehackathon.app",
+      "versionCode": 1
     },
     "web": {
       "output": "static",
@@ -32,7 +34,9 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      "./plugins/with-android-release-signing",
+      "./plugins/with-android-abis"
     ],
     "experiments": {
       "typedRoutes": true,

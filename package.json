@@ -42,11 +42,17 @@
   },
   "scripts": {
     "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "run:android": "expo run:android",
+    "prebuild:android": "expo prebuild --platform android",
+    "keystore": "./scripts/generate-keystore.sh",
+    "build:apk": "./scripts/build-apk.sh",
+    "typecheck": "tsc --noEmit",
+    "format": "biome check --write src",
+    "lint": "expo lint",
+    "reset-project": "node ./scripts/reset-project.js"
   },
   "private": true
 }

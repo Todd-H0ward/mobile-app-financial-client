@@ -37,6 +37,7 @@
 | [design-system.md](./design-system.md) | Токены и компоненты кита |
 | [ui-conventions.md](./ui-conventions.md) | Как пишется компонент |
 | [layout.md](./layout.md) | Как верстается экран под разные размеры |
+| [android-release.md](./android-release.md) | Ключ подписи и сборка релизного APK |
 
 ## Обязательный пакет документации (12 пунктов)
 
@@ -53,7 +54,7 @@
 | 6 | Карта образовательного контента | [content.md](./content.md#карта-образовательного-контента) | черновик |
 | 7 | Тест-кейсы и автотесты | [requirements-matrix.md](./requirements-matrix.md) | не начато |
 | 8 | Перечень лицензий | [licenses.md](./licenses.md) | не начато |
-| 9 | README и инструкция сборки | [../README.md](../README.md) | не начато |
+| 9 | README и инструкция сборки | [../README.md](../README.md), [android-release.md](./android-release.md) | черновик |
 | 10 | Карточка RuStore | не создан | не начато |
 | 11 | Презентация 8–12 слайдов | не создан | не начато |
 | 12 | Резервное видео до 3 минут | не создан | не начато |

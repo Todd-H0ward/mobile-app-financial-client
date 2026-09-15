@@ -59,7 +59,7 @@
 | Пункт | Требование | Где | Статус |
 | --- | --- | --- | --- |
 | 3.2 | Контент отделён от кода | `content/*.json`, см. [content.md](./content.md) | не начато |
-| 3.3 | Подписанный релизный APK | CI, с первого дня волны 0 | не начато |
+| 3.3 | Подписанный релизный APK | `npm run build:apk`, см. [android-release.md](./android-release.md) | готово |
 | 3.4 | Разделение слоёв, автотесты | [architecture.md](./architecture.md) | частично |
 | 3.6 | Доступность: 48dp, 16sp, цвет не единственный носитель | [accessibility.md](./accessibility.md) | частично |
 | 3.7 | Старт ≤5 с, отклик ≤1 с на устройстве от 3 ГБ | [performance.md](./performance.md) | не начато |
