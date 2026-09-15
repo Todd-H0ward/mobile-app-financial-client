@@ -1,3 +1,5 @@
+import type { BudgetDirection } from '@/entities/economy';
+
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
@@ -8,8 +10,11 @@
  * They are runtime tuples, not bare unions, because `isUserSave` has to check
  * membership: a save is JSON, so `phase: "banana"` is as likely as a typo in a
  * hand-edited file, and a string check alone would let it reach the screens.
+ *
+ * The budget directions are the exception: they live in `entities/economy`,
+ * because the onboarding content and the budget screens need the three
+ * directions without needing the save.
  */
-const BUDGET_DIRECTIONS = ['needs', 'wants', 'savings'] as const;
 
 /** Phases the machine can actually be in. See docs/game-period.md. */
 const PERIOD_PHASES = ['planning', 'active', 'summary'] as const;
@@ -25,9 +30,6 @@ const PET_STAGES = ['baby', 'teen', 'adult'] as const;
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
-
-/** One of the three budget directions. The same three words on every screen. */
-type BudgetDirection = (typeof BUDGET_DIRECTIONS)[number];
 
 /** What the child set aside per direction. Coins, whole numbers, >= 0. */
 interface BudgetPlan {
@@ -227,7 +229,6 @@ interface UserSave {
 }
 
 export type {
-  BudgetDirection,
   BudgetFact,
   BudgetPlan,
   HomeSave,
@@ -246,11 +247,4 @@ export type {
   WalletEntry,
   WalletSave,
 };
-export {
-  BUDGET_DIRECTIONS,
-  PERIOD_PHASES,
-  PET_COLORS,
-  PET_PATTERNS,
-  PET_SPECIES,
-  PET_STAGES,
-};
+export { PERIOD_PHASES, PET_COLORS, PET_PATTERNS, PET_SPECIES, PET_STAGES };

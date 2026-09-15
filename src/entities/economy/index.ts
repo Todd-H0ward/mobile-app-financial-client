@@ -1,5 +1,6 @@
-export type { TaskDifficulty } from './model';
+export type { BudgetDirection, TaskDifficulty } from './model';
 export {
+  BUDGET_DIRECTIONS,
   REGULARITY_BONUS,
   STARTING_BALANCE,
   TASK_REWARD,

@@ -199,11 +199,13 @@ const styles = StyleSheet.create({
   column: {
     maxWidth: MAX_CONTENT_WIDTH,
     width: '100%',
+    flexGrow: 1,
   },
   content: {
     alignItems: 'center',
     paddingHorizontal: CONTENT_PADDING,
     paddingTop: SPACING.three,
+    flexGrow: 1,
   },
   header: {
     alignItems: 'center',

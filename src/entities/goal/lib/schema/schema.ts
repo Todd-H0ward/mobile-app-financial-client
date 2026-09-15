@@ -1,4 +1,4 @@
-import { isRecord } from '@/shared/utils';
+import { isNonEmptyString, isRecord } from '@/shared/utils';
 
 import type { GoalContent, GoalsFile } from '../../model';
 
@@ -12,9 +12,6 @@ const MIN_GOALS = 3;
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
-
-const isNonEmptyString = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0;
 
 const assertGoal = (goal: unknown, path: string): GoalContent => {
   if (!isRecord(goal)) {

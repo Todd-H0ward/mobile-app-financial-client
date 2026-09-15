@@ -21,9 +21,9 @@
 
 | Пункт | Требование | Экран | Модуль | Тест | Статус |
 | --- | --- | --- | --- | --- | --- |
-| 2.5.1 | Онбординг: цель игры и три типа решений (обязательное / желаемое / отложить) | `screens/onboarding` | — | — | не начато |
-| 2.5.1 | Гостевой режим, локальный профиль, игровое имя | `screens/onboarding` | `entities/user` | `store.test.ts` | в работе — заглушка заводит профиль по имени, полный онбординг в волне 1 |
-| 2.5.1 | Доступ к подсказке в любой момент | все экраны | `widgets/hint-button` | — | не начато |
+| 2.5.1 | Онбординг: цель игры и три типа решений (обязательное / желаемое / отложить) | `screens/onboarding` | `entities/onboarding` + `content/onboarding.json` | `content.test.ts`, `sorting.test.ts` | в работе — три типа ребёнок раскладывает сам, промах объясняется и ничего не проваливает; осталось пройти на устройстве |
+| 2.5.1 | Гостевой режим, локальный профиль, игровое имя | `screens/onboarding` | `entities/user` + `lib/player-name` | `player-name.test.ts`, `store.test.ts` | в работе — профиль создаётся в конце знакомства, аккаунта нет; осталось пройти на устройстве |
+| 2.5.1 | Доступ к подсказке в любой момент | все экраны | `widgets/hint-button` + `entities/hint` | `content.test.ts` | в работе — «?» в шапке каждого экрана, тексты в `content/hints.json`; осталось пройти на устройстве |
 | 2.5.2 | Создание питомца: внешность + имя, ≥9 различимых комбинаций | `screens/onboarding` | `entities/pet/model/appearance` | `appearance.test.ts` | не начато |
 | 2.5.3 | Главный экран: питомец, баланс, накопления, цель, состояние, активное задание — одновременно | `screens/home` | — | — | не начато |
 | 2.5.4 | Валюта с явным источником и суммой каждого начисления | `screens/home`, `screens/history` | `entities/wallet` | `wallet.test.ts` | не начато |
@@ -40,7 +40,7 @@
 | 2.5.10 | ≥3 стадии развития по совокупности решений за несколько периодов | `screens/home` | `entities/pet/lib/growth` | `growth.test.ts` | не начато |
 | 2.5.11 | История, итоги последнего периода, справочник терминов | `screens/history`, `screens/glossary` | `entities/period/model` | — | не начато |
 | 2.5.12 | Раздел для взрослого за арифметическим барьером | `screens/parents` | `entities/settings/lib/gate` | `gate.test.ts` | не начато |
-| 2.5.12 | Сброс и удаление профиля | `screens/parents` | `entities/user/lib/reset` | `reset.test.ts` | в работе — логика и тесты есть, экрана нет |
+| 2.5.12 | Сброс и удаление профиля | `screens/home` (временно; позже `screens/parents`) | `entities/user/lib/reset` + `features/profile-restart` | `reset.test.ts` | в работе — сброс в демо-карточке, удаление с подтверждением и возвратом в онбординг; экрана взрослого нет |
 | 2.5.13 | Сохранение состояния между запусками | — | `entities/user` | `store.test.ts`, `migrations.test.ts` | готово |
 | 2.5.13 | Демо-режим: тестовый профиль, сброс, 5 периодов подряд | `screens/home` (временно; позже `screens/parents`) | `entities/user/lib/demo` + `features/demo-mode` | `demo.test.ts` | готово |
 | 2.5.14 | Новое задание добавляется без переработки логики | — | `content/tasks.json` + `entities/task` | `content.test.ts` | готово |
@@ -58,7 +58,7 @@
 
 | Пункт | Требование | Где | Статус |
 | --- | --- | --- | --- |
-| 3.2 | Контент отделён от кода | `content/*.json`, см. [content.md](./content.md) | частично — `goals.json` + `tasks.json`, сейв хранит только id |
+| 3.2 | Контент отделён от кода | `content/*.json`, см. [content.md](./content.md) | частично — `goals.json`, `tasks.json`, `onboarding.json`, `hints.json`; сейв хранит только id |
 | 3.3 | Подписанный релизный APK | `npm run build:apk`, см. [android-release.md](./android-release.md) | готово |
 | 3.4 | Разделение слоёв, автотесты | [architecture.md](./architecture.md) | частично — economy / content JSON / user storage разделены; UI заданий и кошелёк — волна 1 |
 | 3.6 | Доступность: 48dp, 16sp, цвет не единственный носитель | `shared/ui` + [accessibility.md](./accessibility.md) | частично — кит соблюдает 48dp/16sp и не-цветные состояния; звук/анимации и прогон на устройстве — с экраном родителей |

@@ -1,4 +1,4 @@
-import { isRecord } from '@/shared/utils';
+import { isNonEmptyString, isPositiveInt, isRecord } from '@/shared/utils';
 
 import {
   MECHANIC_TYPES,
@@ -14,12 +14,6 @@ import {
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
-
-const isNonEmptyString = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0;
-
-const isPositiveInt = (value: unknown): value is number =>
-  typeof value === 'number' && Number.isInteger(value) && value > 0;
 
 const isTheme = (value: unknown): value is TaskTheme =>
   typeof value === 'string' &&

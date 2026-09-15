@@ -1,0 +1,1 @@
+export { isPositiveInt } from './isPositiveInt';

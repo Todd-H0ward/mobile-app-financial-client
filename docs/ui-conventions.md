@@ -132,3 +132,18 @@ live gallery is the second tab of the app
 ([`src/screens/ui-kit`](../src/screens/ui-kit/)).
 
 Import from the barrel: `import { Button, Text } from '@/shared/ui';`
+
+## Подсказка — всегда в одном углу
+
+Требование 2.5.1 «подсказка доступна в любой момент» выполняется только тогда,
+когда её не приходится искать. `HintButton` из `@/widgets/hint-button` живёт в
+слоте `trailing` у `Screen.Header` и больше нигде:
+
+```tsx
+<Screen.Header title="Лапка" trailing={<HintButton screen="home" />} />
+```
+
+Текста компонент не содержит: он берёт заголовок и абзацы из
+`content/hints.json` через `entities/hint`. Новый экран — строка в JSON и id в
+`HINT_SCREENS`; забытый экран роняет `content.test.ts`, а не показывает ребёнку
+пустую шторку.

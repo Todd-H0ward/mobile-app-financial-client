@@ -1,3 +1,4 @@
+export type { PlayerNameStatus } from './lib';
 export {
   acknowledgeSummary,
   canFinishPeriod,
@@ -6,12 +7,16 @@ export {
   enterDemoMode,
   exitDemoMode,
   finishPeriod,
+  isPlayerNameValid,
+  normalizePlayerName,
+  PLAYER_NAME_MAX_LENGTH,
+  PLAYER_NAME_MIN_LENGTH,
   resetUser,
   runDemoPeriods,
   startPeriod,
+  validatePlayerName,
 } from './lib';
 export type {
-  BudgetDirection,
   BudgetFact,
   BudgetPlan,
   CreateUserInput,
@@ -34,7 +39,6 @@ export type {
   WalletSave,
 } from './model';
 export {
-  BUDGET_DIRECTIONS,
   createInitialUser,
   isUserSave,
   migrateUser,
