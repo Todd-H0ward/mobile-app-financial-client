@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import {
   type StyleProp,
   StyleSheet,
@@ -34,16 +36,28 @@ export const Input = ({
   containerStyle,
   style,
   value,
+  defaultValue,
+  onChangeText,
   maxLength,
   ...props
 }: InputProps) => {
   const theme = useTheme();
 
+  // The counter cannot read `value` alone: an uncontrolled field leaves it
+  // undefined and the counter would sit at 0 while the user types.
+  const [typed, setTyped] = useState(defaultValue ?? '');
+  const text = value ?? typed;
+
   return (
     <View style={[styles.root, containerStyle]}>
       <TextInput
         value={value}
+        defaultValue={defaultValue}
         maxLength={maxLength}
+        onChangeText={(next) => {
+          setTyped(next);
+          onChangeText?.(next);
+        }}
         placeholderTextColor={theme.textDisabled}
         selectionColor={theme.primary}
         style={[
@@ -66,7 +80,7 @@ export const Input = ({
 
           {isCounterVisible && maxLength != null && (
             <Text variant="small" themeColor="textDisabled">
-              {value?.length ?? 0}/{maxLength}
+              {text.length}/{maxLength}
             </Text>
           )}
         </View>

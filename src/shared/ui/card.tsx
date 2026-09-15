@@ -40,10 +40,17 @@ interface CardFooterProps {
 }
 
 // ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+const BORDER = 1;
+const SELECTED_BORDER = 2.5;
+const PADDING = SPACING.three;
+
+// ═══════════════════════════════════════════
 // COMPOUND COMPONENTS
 // ═══════════════════════════════════════════
 
-/** Card heading. Defaults to the `subtitle` preset, per the design notes. */
 const CardTitle = ({
   children,
   variant = 'subtitle',
@@ -56,12 +63,10 @@ const CardTitle = ({
   );
 };
 
-/** Body of the card: a column that spaces its own children. */
 const CardContent = ({ children, style }: CardContentProps) => {
   return <View style={[styles.content, style]}>{children}</View>;
 };
 
-/** Trailing action row, aligned to the end so buttons line up across cards. */
 const CardFooter = ({ children, isSpread = false, style }: CardFooterProps) => {
   return (
     <View style={[styles.footer, isSpread && styles.footerSpread, style]}>
@@ -103,7 +108,10 @@ const CardRoot = ({
     {
       backgroundColor: theme[tone],
       borderColor: isSelected ? theme.primary : theme.border,
-      borderWidth: isSelected ? 2.5 : 1,
+      borderWidth: isSelected ? SELECTED_BORDER : BORDER,
+      // The thicker border eats into the content box, so the padding gives
+      // back exactly what it took: selecting a row must not nudge its text.
+      padding: PADDING - (isSelected ? SELECTED_BORDER : BORDER),
     },
     style,
   ];
@@ -142,7 +150,6 @@ const styles = StyleSheet.create({
   root: {
     borderRadius: RADII.l,
     gap: SPACING.two,
-    padding: SPACING.three,
   },
   pressed: {
     opacity: 0.85,

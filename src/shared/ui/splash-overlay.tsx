@@ -63,9 +63,14 @@ export const SplashOverlay = () => {
   ) : (
     <View
       onLayout={() => {
-        SplashScreen.hideAsync().finally(() => {
-          setAnimate(true);
-        });
+        // `.finally` passes the rejection on, so a failed `hideAsync` at cold
+        // start would become an unhandled rejection. The animation has to run
+        // either way — the native splash being already hidden is not an error.
+        SplashScreen.hideAsync()
+          .catch(() => {})
+          .finally(() => {
+            setAnimate(true);
+          });
       }}
       style={styles.root}
     >

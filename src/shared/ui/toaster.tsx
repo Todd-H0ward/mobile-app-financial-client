@@ -22,7 +22,7 @@ const DEFAULT_DURATION = 2500;
 const MAX_VISIBLE = 3;
 
 // ═══════════════════════════════════════════
-// UTILS
+// HELPERS
 // ═══════════════════════════════════════════
 
 export const toast = (message: string, options: ToastOptions = {}) => {

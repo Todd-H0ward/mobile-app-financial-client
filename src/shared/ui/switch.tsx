@@ -36,8 +36,13 @@ const TRACK_WIDTH = 52;
 const TRACK_HEIGHT = 30;
 const KNOB = 24;
 const PADDING = 3;
+const TRACK_BORDER = 1;
 
-const TRAVEL = TRACK_WIDTH - KNOB - PADDING * 2;
+/**
+ * How far the knob travels. The border eats into the content box on both
+ * sides, so leaving it out overshoots the track by 2px at the "on" end.
+ */
+const TRAVEL = TRACK_WIDTH - TRACK_BORDER * 2 - KNOB - PADDING * 2;
 const DURATION = 160;
 
 const EASING = Easing.out(Easing.quad);
@@ -100,7 +105,7 @@ export const Switch = ({
 const styles = StyleSheet.create({
   track: {
     borderRadius: RADII.pill,
-    borderWidth: 1,
+    borderWidth: TRACK_BORDER,
     height: TRACK_HEIGHT,
     justifyContent: 'center',
     paddingHorizontal: PADDING,

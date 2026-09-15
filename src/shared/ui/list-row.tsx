@@ -40,6 +40,15 @@ interface ListRowRootProps {
 }
 
 // ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+const BORDER = 1;
+const SELECTED_BORDER = 2.5;
+const PADDING_HORIZONTAL = 14;
+const PADDING_VERTICAL = 13;
+
+// ═══════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════
 
@@ -87,7 +96,13 @@ const ListRowRoot = ({
     {
       backgroundColor: isDone ? theme.backgroundAlt : theme.surface,
       borderColor: isSelected ? theme.primary : theme.border,
-      borderWidth: isSelected ? 2.5 : 1,
+      borderWidth: isSelected ? SELECTED_BORDER : BORDER,
+      // The thicker border eats into the content box, so the padding gives
+      // back exactly what it took: selecting a row must not nudge its text.
+      paddingHorizontal:
+        PADDING_HORIZONTAL - (isSelected ? SELECTED_BORDER : BORDER),
+      paddingVertical:
+        PADDING_VERTICAL - (isSelected ? SELECTED_BORDER : BORDER),
     },
     style,
   ];
@@ -154,8 +169,6 @@ const styles = StyleSheet.create({
     borderRadius: RADII.l,
     flexDirection: 'row',
     gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 13,
   },
   pressed: {
     opacity: 0.85,

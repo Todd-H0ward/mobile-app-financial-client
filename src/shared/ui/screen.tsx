@@ -9,7 +9,10 @@ import {
   View,
   type ViewStyle,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 
 import {
   BOTTOM_TAB_INSET,
@@ -128,6 +131,11 @@ const ScreenRoot = ({
   isTabBarVisible = true,
   style,
 }: ScreenRootProps) => {
+  // The bottom edge stays off `SafeAreaView` on purpose: padding it there would
+  // clip the scroll view instead of letting content scroll past the indicator.
+  // It goes on the scroll content, together with the tab-bar inset.
+  const insets = useSafeAreaInsets();
+
   const column = (
     <View style={[styles.column, { gap: SPACING[gap] }, style]}>
       {children}
@@ -142,7 +150,8 @@ const ScreenRoot = ({
             styles.content,
             {
               paddingBottom:
-                (isTabBarVisible ? BOTTOM_TAB_INSET : 0) + SPACING.four,
+                (isTabBarVisible ? BOTTOM_TAB_INSET : insets.bottom) +
+                SPACING.four,
             },
           ]}
         >

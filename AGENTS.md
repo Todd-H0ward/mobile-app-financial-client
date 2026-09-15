@@ -137,8 +137,10 @@ export type { BadgeRootProps, BadgeTextProps };
 Checklist:
 
 - Section banners in this order, omitting the ones that do not apply:
-  `TYPES` → `CONSTANTS` → `ANIMATIONS` → `LIB` → `COMPONENTS` →
-  `COMPOUND EXPORT` → `STYLES`.
+  `TYPES` → `CONSTANTS` → `ANIMATIONS` → `HELPERS` → `COMPONENTS` →
+  `MAIN COMPONENT` → `COMPOUND EXPORT` → `STYLES`.
+  `MAIN COMPONENT` separates the root of a compound component from the parts
+  assembled onto it, so the entry point of the file is findable at a glance.
 - Arrow-function components, props destructured in the signature, `...props`
   spread last.
 - **Values are exported inline** (`export const Badge = …`). Only the parts of a

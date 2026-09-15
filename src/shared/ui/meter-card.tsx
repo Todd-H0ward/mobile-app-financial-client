@@ -4,6 +4,7 @@ import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
 
 import { RADII, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { clamp } from '@/shared/utils';
 
 import { ProgressBar } from './progress-bar';
 import { Text } from './text';
@@ -39,11 +40,16 @@ export const MeterCard = ({
   const isLow = tone === 'low';
   const isIdle = tone === 'idle';
 
+  const ratio = Number.isFinite(value) ? clamp(value, 0, 1) : 0;
+
   return (
     <View
       accessibilityRole="progressbar"
       accessibilityLabel={label}
-      accessibilityValue={{ min: 0, max: 100, now: Math.round(value * 100) }}
+      // Clamped like the bar it describes: an out-of-range stat must not be
+      // announced as "120 percent". `clamp` alone would not do — it propagates
+      // NaN, and NaN must never reach the screen reader.
+      accessibilityValue={{ min: 0, max: 100, now: Math.round(ratio * 100) }}
       style={[
         styles.root,
         {
@@ -67,7 +73,7 @@ export const MeterCard = ({
 
       <ProgressBar
         aria-hidden
-        value={isIdle ? 0 : value}
+        value={isIdle ? 0 : ratio}
         color={color}
         height={6}
         style={styles.bar}

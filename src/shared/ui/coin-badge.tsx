@@ -22,7 +22,7 @@ interface CoinBadgeProps {
 }
 
 // ═══════════════════════════════════════════
-// LIB
+// HELPERS
 // ═══════════════════════════════════════════
 
 /** A delta may arrive pre-signed as a string ("-15"), so check both shapes. */

@@ -14,38 +14,33 @@ interface ExternalLinkProps extends Omit<ComponentProps<typeof Link>, 'href'> {
   href: Href & string;
 }
 
+type LinkPressEvent = Parameters<NonNullable<ExternalLinkProps['onPress']>>[0];
+
 // ═══════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** Opens the link in an in-app browser on native, in a new tab on web. */
 export const ExternalLink = ({
   href,
   onPress,
   ...props
 }: ExternalLinkProps) => {
+  const handleLinkClick = (event: LinkPressEvent) => {
+    onPress?.(event);
+
+    if (event.defaultPrevented) return;
+    if (process.env.EXPO_OS === 'web') return;
+
+    event.preventDefault();
+
+    void openBrowserAsync(href, {
+      presentationStyle: WebBrowserPresentationStyle.AUTOMATIC,
+    });
+  };
+
   return (
-    <Link
-      target="_blank"
-      {...props}
-      href={href}
-      onPress={async (event) => {
-        // The caller's handler runs first and may cancel the navigation, the
-        // same contract a plain `<Link>` gives it.
-        onPress?.(event);
-
-        if (event.defaultPrevented) return;
-
-        if (process.env.EXPO_OS !== 'web') {
-          event.preventDefault();
-
-          await openBrowserAsync(href, {
-            presentationStyle: WebBrowserPresentationStyle.AUTOMATIC,
-          });
-        }
-      }}
-    />
+    <Link target="_blank" {...props} href={href} onPress={handleLinkClick} />
   );
 };
 
-export type { ExternalLinkProps };
+export type { ExternalLinkProps, LinkPressEvent };

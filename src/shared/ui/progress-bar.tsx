@@ -33,7 +33,9 @@ export const ProgressBar = ({
   ...props
 }: ProgressBarProps) => {
   const theme = useTheme();
-  const ratio = clamp(value, 0, 1);
+  // `clamp` propagates NaN, which would reach the style as `width: "NaN%"`
+  // and the screen reader as an unreadable value.
+  const ratio = Number.isFinite(value) ? clamp(value, 0, 1) : 0;
 
   return (
     <View
