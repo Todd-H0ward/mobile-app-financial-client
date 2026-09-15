@@ -8,7 +8,8 @@
     "scheme": "mobilehackathon",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.mobilehackathon.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -36,7 +37,8 @@
         }
       ],
       "./plugins/with-android-release-signing",
-      "./plugins/with-android-abis"
+      "./plugins/with-android-abis",
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -17,10 +17,10 @@ const DURATION = 600;
 // ═══════════════════════════════════════════
 
 export const SplashOverlay = () => {
-  const [animate, setAnimate] = useState(false);
-  const [visible, setVisible] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
-  if (!visible) return null;
+  if (!isVisible) return null;
 
   const splashKeyframe = new Keyframe({
     0: {
@@ -48,12 +48,12 @@ export const SplashOverlay = () => {
     />
   );
 
-  return animate ? (
+  return isAnimating ? (
     <Animated.View
       entering={splashKeyframe.duration(DURATION).withCallback((finished) => {
         'worklet';
         if (finished) {
-          scheduleOnRN(setVisible, false);
+          scheduleOnRN(setIsVisible, false);
         }
       })}
       style={styles.root}
@@ -63,13 +63,10 @@ export const SplashOverlay = () => {
   ) : (
     <View
       onLayout={() => {
-        // `.finally` passes the rejection on, so a failed `hideAsync` at cold
-        // start would become an unhandled rejection. The animation has to run
-        // either way — the native splash being already hidden is not an error.
         SplashScreen.hideAsync()
           .catch(() => {})
           .finally(() => {
-            setAnimate(true);
+            setIsAnimating(true);
           });
       }}
       style={styles.root}

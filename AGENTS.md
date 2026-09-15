@@ -17,7 +17,7 @@ runs Expo SDK 57, React 19, React Native 0.86 and expo-router 57 (native tabs,
 | Runtime | Expo SDK 57, React Native 0.86, React 19 |
 | Routing | expo-router (file-based, `src/app`) |
 | Server state | TanStack Query + axios (`@/shared/api`) |
-| Client state | zustand + AsyncStorage persist (`@/entities/*/model`) |
+| Client state | zustand + `persist` поверх `expo-sqlite/kv-store`, синхронно (`@/entities/*/model`) |
 | Game loop | game periods, not real time — [docs/game-period.md](docs/game-period.md) |
 | i18n | i18next + react-i18next (`@/shared/i18n`) |
 | Lint / format | Biome (`npx biome check --write src`) |
@@ -342,7 +342,8 @@ Full rationale: [docs/layout.md](docs/layout.md).
 2. Put the code in the lowest layer that can own it (`shared` → `entities` →
    `features` → `widgets` → `screens`).
 3. Export it through the slice `index.ts`.
-4. Run `npx tsc --noEmit` and `npx biome check --write src` before finishing.
+4. Run `npx tsc --noEmit`, `pnpm test` and `npx biome check --write src` before
+   finishing.
 5. Never edit `src/app/*` to add UI — add a screen and re-export it.
 
 ## Do not

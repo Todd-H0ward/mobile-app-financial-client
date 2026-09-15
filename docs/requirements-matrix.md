@@ -22,7 +22,7 @@
 | Пункт | Требование | Экран | Модуль | Тест | Статус |
 | --- | --- | --- | --- | --- | --- |
 | 2.5.1 | Онбординг: цель игры и три типа решений (обязательное / желаемое / отложить) | `screens/onboarding` | — | — | не начато |
-| 2.5.1 | Гостевой режим, локальный профиль, игровое имя | `screens/onboarding` | `entities/profile` | — | не начато |
+| 2.5.1 | Гостевой режим, локальный профиль, игровое имя | `screens/onboarding` | `entities/user` | `store.test.ts` | в работе — заглушка заводит профиль по имени, полный онбординг в волне 1 |
 | 2.5.1 | Доступ к подсказке в любой момент | все экраны | `widgets/hint-button` | — | не начато |
 | 2.5.2 | Создание питомца: внешность + имя, ≥9 различимых комбинаций | `screens/onboarding` | `entities/pet/model/appearance` | `appearance.test.ts` | не начато |
 | 2.5.3 | Главный экран: питомец, баланс, накопления, цель, состояние, активное задание — одновременно | `screens/home` | — | — | не начато |
@@ -31,7 +31,7 @@
 | 2.5.5 | Сравнение плана с фактом после периода | `screens/period-summary` | `entities/budget/lib/compare` | `compare.test.ts` | не начато |
 | 2.5.6 | Каталог покупок: ≥8 позиций, обязательные и необязательные, цена, категория, влияние | `screens/shop` | `entities/catalogue` | `catalogue.test.ts` | не начато |
 | 2.5.6 | Запрет отрицательного баланса + объяснение вариантов | `screens/shop` | `entities/wallet/lib/rules` | `rules.test.ts` | не начато |
-| 2.5.7 | Накопления, ≥3 цели, прогресс | `screens/savings` | `entities/savings` | `savings.test.ts` | не начато |
+| 2.5.7 | Накопления, ≥3 цели, прогресс | `screens/savings` | `entities/savings` + `content/goals.json` | `savings.test.ts` | в работе — три цели в контенте, прогресс хранится в сейве |
 | 2.5.7 | Снятие только по отдельному подтверждению с показом последствий | `screens/savings` | `entities/savings/lib/withdraw` | `withdraw.test.ts` | не начато |
 | 2.5.8 | ≥6 заданий по 3 темам, с последствиями, не только тесты | `screens/tasks` | `entities/task` + `content/tasks.json` | `task.test.ts` | не начато |
 | 2.5.9 | Обратная связь после каждого действия: что изменилось и почему | все экраны | `features/feedback` | — | не начато |
@@ -40,8 +40,8 @@
 | 2.5.10 | ≥3 стадии развития по совокупности решений за несколько периодов | `screens/home` | `entities/pet/lib/growth` | `growth.test.ts` | не начато |
 | 2.5.11 | История, итоги последнего периода, справочник терминов | `screens/history`, `screens/glossary` | `entities/period/model` | — | не начато |
 | 2.5.12 | Раздел для взрослого за арифметическим барьером | `screens/parents` | `entities/settings/lib/gate` | `gate.test.ts` | не начато |
-| 2.5.12 | Сброс и удаление профиля | `screens/parents` | `entities/profile/lib/reset` | `reset.test.ts` | не начато |
-| 2.5.13 | Сохранение состояния между запусками | — | `entities/profile/model/store` | `migrations.test.ts` | не начато |
+| 2.5.12 | Сброс и удаление профиля | `screens/parents` | `entities/user/lib/reset` | `reset.test.ts` | в работе — логика и тесты есть, экрана нет |
+| 2.5.13 | Сохранение состояния между запусками | — | `entities/user` | `store.test.ts`, `migrations.test.ts` | готово |
 | 2.5.13 | Демо-режим: тестовый профиль, сброс, 5 периодов подряд | `screens/parents` | `features/demo-mode` | `demo.test.ts` | не начато |
 | 2.5.14 | Новое задание добавляется без переработки логики | — | `content/tasks.json` | `content.test.ts` | не начато |
 
@@ -58,7 +58,7 @@
 
 | Пункт | Требование | Где | Статус |
 | --- | --- | --- | --- |
-| 3.2 | Контент отделён от кода | `content/*.json`, см. [content.md](./content.md) | не начато |
+| 3.2 | Контент отделён от кода | `content/*.json`, см. [content.md](./content.md) | частично — есть `goals.json`, сейв хранит только id |
 | 3.3 | Подписанный релизный APK | `npm run build:apk`, см. [android-release.md](./android-release.md) | готово |
 | 3.4 | Разделение слоёв, автотесты | [architecture.md](./architecture.md) | частично |
 | 3.6 | Доступность: 48dp, 16sp, цвет не единственный носитель | [accessibility.md](./accessibility.md) | частично |
@@ -76,5 +76,5 @@
 | Игровые периоды в демо-режиме | 5 | 0 | не начато |
 | Задания | 6 по 3 темам | 0 | не начато |
 | Позиции каталога покупок | 8, двух типов | 0 | не начато |
-| Цели накопления | 3 | 0 | не начато |
+| Цели накопления | 3 | 3 | готово — `content/goals.json` |
 | Стадии развития питомца | 3 | 0 | не начато |

@@ -1,3 +1,5 @@
 export { clamp } from './clamp';
 export { formatMoney } from './formatMoney';
+export { isFiniteNumber } from './isFiniteNumber';
+export { isRecord } from './isRecord';
 export { isTextOnly } from './isTextOnly';

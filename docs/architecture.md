@@ -15,6 +15,7 @@ src/
 ├── _app/
 │   └── providers/          # ThemeProvider, QueryProvider, global init
 ├── screens/
+│   ├── entry/              # куда пускать на старте: /home или /onboarding
 │   ├── onboarding/         # цель игры, профиль, создание питомца
 │   ├── budget-plan/        # план по трём направлениям (2.5.5)
 │   ├── period-summary/     # план vs факт (2.5.5)
@@ -37,7 +38,7 @@ src/
 │   ├── demo-mode/          # тестовый профиль + 5 периодов подряд (2.5.13)
 │   └── feedback/           # «что изменилось и почему» после действия (2.5.9)
 ├── entities/
-│   ├── profile/            # сейв целиком, миграции, сброс и удаление
+│   ├── user/               # сейв целиком, миграции, сброс и удаление
 │   ├── period/             # конечный автомат периода + TimeSource
 │   ├── budget/             # план, факт, сравнение
 │   ├── wallet/             # баланс, история, запрет минуса
@@ -117,9 +118,12 @@ confirmation, chat, notifications.
 
 - Профиль, сохранение и абстракция времени — в
   [game-state.md](./game-state.md); игровой период — в
-  [game-period.md](./game-period.md).
+  [game-period.md](./game-period.md). Носитель — `expo-sqlite/kv-store`,
+  читается синхронно, поэтому сейв доступен уже на первом кадре;
+  единственное место, где носитель выбирается, — `shared/model/persist-storage`.
 - Учебный контент лежит в `content/*.json` и отделён от кода — требование
-  2.5.14, см. [content.md](./content.md).
+  2.5.14, см. [content.md](./content.md). Импортируется по алиасу
+  `@/content/*` (`tsconfig.json`), сейв хранит только id позиций.
 - `shared/api/api-client.ts` — axios instance, base URL from
   `EXPO_PUBLIC_API_URL`, 40s timeout.
 - `shared/api/query-client.ts` — TanStack Query defaults (60s `staleTime`,
@@ -154,5 +158,12 @@ Reanimated worklets in this project — the details and the symptom are in
 ```bash
 npx tsc --noEmit          # types
 npx biome check --write src   # lint + format + import order
+pnpm test                 # vitest, чистая логика и сторы
 npx expo start            # run
 ```
+
+Тесты бегут в node, без React Native: `vitest.config.mts` повторяет алиасы
+`tsconfig.json` и больше ничего не делает. Всё, что тянет RN, подменяется
+`vi.mock` в самом тесте — нативные модули вроде `expo-sqlite/kv-store` и баррель
+`@/shared/constants`, который через `theme.ts` тянет `react-native`
+(Flow-исходники, которые node не парсит).
