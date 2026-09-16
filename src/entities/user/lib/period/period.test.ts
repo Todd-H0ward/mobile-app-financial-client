@@ -4,8 +4,11 @@ import { REGULARITY_BONUS, WALLET_SOURCES } from '@/entities/economy';
 
 import { makeDemoTimeSource } from '@/shared/lib/time-source';
 
-import type { UserSave } from '../../model';
-import { createInitialUser } from '../../model';
+// The types and the factory directly, never the slice barrel: the barrel
+// carries the zustand store, and with it `expo-sqlite`, which the node test
+// runner cannot parse.
+import { createInitialUser } from '../../model/initial-user';
+import type { UserSave } from '../../model/types';
 
 import {
   acknowledgeSummary,

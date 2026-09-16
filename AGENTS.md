@@ -249,16 +249,27 @@ What the screen must show for a component:
    a real press, a real drag, not a screenshot of one.
 4. **Edge content**: long text, zero and maximum values, missing optional slots.
 
-## Navigation: five tabs, everything else on the stack
+## Navigation: three rooms, everything else on the stack
 
-`widgets/app-tabs.tsx` holds exactly five destinations — Дом, Магазин, Задания,
-Копилка, Питомец — because that is what fits a 320dp bar with readable labels.
-The house (`/house`), the parents' area (`/parents`), the achievements
-(`/achievements`) and the UI kit (`/ui-kit`) are pushed over the group by the
-root stack instead of living in it.
+The child moves through a **map, not a menu**: `street ↔ living ↔ kitchen`,
+in the order `ROOM_IDS` lists them (`entities/room`). The street is the shop,
+the kitchen is food, the living room is where the pet lives. There is no tab
+bar — a seven-year-old reads "the kitchen is that way" long before they read a
+row of labels, and a room can hold a scene while a tab can only hold a screen.
 
-Adding a route file under `src/app/(tabs)/` adds a tab. Anything that is not
-one of the five belongs next to `_layout.tsx`, registered on the stack.
+All three rooms live on one route (`/home`) inside `widgets/room-pager`, so a
+swipe slides between them without a navigation transition. Everything that is
+not a room — settings, the pet's meeting screen, the UI kit — is pushed over
+the world by the root stack.
+
+Two ways to walk, always both: a swipe, and a door button at the edge carrying
+the **name** of the room behind it. A gesture is invisible to a child who has
+never been taught it, and 3.6 forbids leaving one as the only way through. A
+door is drawn only where a room actually is — the end of the map has no
+greyed-out button.
+
+Adding a room is a row in `ROOM_IDS`, an image in `assets/images/rooms/` and a
+`<RoomPager.Room>` in the screen — in that tuple's order, which is the map.
 
 ## Native tabs are off — the stable navigator is used instead
 

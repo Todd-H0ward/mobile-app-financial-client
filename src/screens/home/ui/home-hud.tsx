@@ -1,10 +1,9 @@
 import { StyleSheet, View } from 'react-native';
 
-import { SPACING } from '@/shared/constants';
+import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import {
-  Card,
   CoinBadge,
   PawIcon,
   PiggyIcon,
@@ -19,16 +18,23 @@ import type { HomeHudCredit, HomeHudGoal, MoodTone } from '../model';
 // TYPES
 // ═══════════════════════════════════════════
 
-interface HomeHudProps {
-  /** The mood row under the pet. Absent while the box is still closed. */
-  moodLabel?: string;
-  /** Which color the mood row reads in. Ignored when `moodLabel` is absent. */
-  moodTone?: MoodTone;
+interface HomeHudStatsProps {
   balance: number;
   savingsTotal: number;
+}
+
+interface HomeHudLastCreditProps {
+  /** Hidden while the wallet has no history at all. */
+  credit: HomeHudCredit | null;
+}
+
+interface HomeHudMoodProps {
+  label: string;
+  tone: MoodTone;
+}
+
+interface HomeHudBoardProps {
   goal: HomeHudGoal | null;
-  /** The most recent credit — hidden while the wallet has no history yet. */
-  lastCredit: HomeHudCredit | null;
   taskHint: string;
 }
 
@@ -36,44 +42,18 @@ interface HomeHudProps {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/**
- * The pet's mood, under the box: an icon and a line, never a color alone.
- *
- * `moodTone` only ever picks between the muted reading color and `warning` —
- * amber, not the red docs/accessibility.md rules out for a low meter — so a
- * pet that is bored or uncomfortable draws the eye without alarming anyone.
- */
-const HomeHudMood = ({ label, tone }: { label: string; tone: MoodTone }) => {
-  const theme = useTheme();
-  const color = tone === 'attention' ? theme.warning : undefined;
-
-  return (
-    <View style={styles.mood}>
-      <PawIcon size={16} color={color} />
-      <Text
-        variant="small"
-        themeColor={tone === 'attention' ? 'warningStrong' : 'textSecondary'}
-      >
-        {label}
-      </Text>
-    </View>
-  );
-};
-
-/** Coins on hand and coins saved — the two stats requirement 2.5.3 asks for. */
-const HomeHudStats = ({
-  balance,
-  savingsTotal,
-}: {
-  balance: number;
-  savingsTotal: number;
-}) => {
+/** Coins on hand and coins saved — two of the six things 2.5.3 asks for. */
+export const HomeHudStats = ({ balance, savingsTotal }: HomeHudStatsProps) => {
   const { t } = useTranslation();
 
   return (
     <View style={styles.stats}>
-      <CoinBadge amount={balance} label={t('home.balance')} />
-      <CoinBadge amount={savingsTotal} label={t('home.savings')} />
+      <CoinBadge amount={balance} label={t('home.balance')} coinSize={18} />
+      <CoinBadge
+        amount={savingsTotal}
+        label={t('home.savings')}
+        coinSize={18}
+      />
     </View>
   );
 };
@@ -81,138 +61,149 @@ const HomeHudStats = ({
 /**
  * The most recent credit, named — 2.5.4: a coin is never shown alone.
  *
- * "+18 стартовый кошелёк" rather than a bare "+18" — the same pairing the
+ * "+50 стартовый кошелёк" rather than a bare "+50" — the same pairing the
  * settlement report and the history screen will read off `WalletEntry` later.
  */
-const HomeHudLastCredit = ({ credit }: { credit: HomeHudCredit | null }) => {
-  const { t } = useTranslation();
-
+export const HomeHudLastCredit = ({ credit }: HomeHudLastCreditProps) => {
   if (!credit) return null;
 
   return (
-    <View style={styles.lastCredit}>
-      <Text variant="label" themeColor="textMuted">
-        {t('home.lastCredit')}
+    <CoinBadge
+      amount={credit.amount}
+      variant="delta"
+      label={credit.reasonLabel}
+    />
+  );
+};
+
+/**
+ * The pet's state, under the pet: an icon and a line, never a colour alone.
+ *
+ * `tone` only ever picks between the muted reading colour and `warning` —
+ * amber, not the red docs/accessibility.md rules out for a low meter — so a
+ * pet that is bored or uncomfortable draws the eye without alarming anyone.
+ */
+export const HomeHudMood = ({ label, tone }: HomeHudMoodProps) => {
+  const theme = useTheme();
+  const isAttention = tone === 'attention';
+
+  return (
+    <View
+      style={[
+        styles.mood,
+        { backgroundColor: theme.surface, borderColor: theme.border },
+      ]}
+    >
+      <PawIcon size={16} color={isAttention ? theme.warning : undefined} />
+      <Text
+        variant="small"
+        themeColor={isAttention ? 'warningStrong' : 'textSecondary'}
+      >
+        {label}
       </Text>
-      <CoinBadge
-        amount={credit.amount}
-        variant="delta"
-        label={credit.reasonLabel}
-      />
     </View>
   );
 };
 
-/** The active goal, with how far the jar has got. */
-const HomeHudGoalCard = ({ goal }: { goal: HomeHudGoal | null }) => {
-  const { t } = useTranslation();
-
-  return (
-    <Card tone="surfaceSoft">
-      <View style={styles.goalHeading}>
-        <PiggyIcon />
-        <Card.Title>{goal ? goal.title : t('home.goal.none')}</Card.Title>
-      </View>
-
-      <Card.Content>
-        {goal ? (
-          <>
-            <ProgressBar value={goal.progress} />
-            <Text variant="small" themeColor="textMuted">
-              {goal.progressLabel}
-            </Text>
-          </>
-        ) : (
-          <Text themeColor="textSecondary">{t('home.goal.noneHint')}</Text>
-        )}
-      </Card.Content>
-    </Card>
-  );
-};
-
-/** The task slot. Placeholder until the task engine lands — roadmap wave 1/14. */
-const HomeHudTaskCard = ({ taskHint }: { taskHint: string }) => {
-  const { t } = useTranslation();
-
-  return (
-    <Card tone="backgroundAlt">
-      <View style={styles.goalHeading}>
-        <TasksIcon />
-        <Card.Title>{t('home.task.title')}</Card.Title>
-      </View>
-
-      <Card.Content>
-        <Text themeColor="textSecondary">{taskHint}</Text>
-      </Card.Content>
-    </Card>
-  );
-};
-
-// ═══════════════════════════════════════════
-// MAIN COMPONENT
-// ═══════════════════════════════════════════
-
 /**
- * The home screen's HUD: state, balance, savings, goal and the task slot,
- * all visible at once — requirement 2.5.3. The pet itself is laid out by the
- * caller, since it needs its own centred stage; this only carries the row
- * under it.
+ * The goal and the task, along the bottom of the room.
  *
- * A single column, narrow enough to hold at 360dp: `HomeHudStats` wraps its
- * two badges rather than forcing them side by side, and every card below is
- * full width.
+ * Two lines rather than two cards: 2.5.3 wants both visible at the same time
+ * as the pet, and a card stack tall enough to read would bury the scene the
+ * child is standing in.
  */
-export const HomeHud = ({
-  moodLabel,
-  moodTone = 'calm',
-  balance,
-  savingsTotal,
-  goal,
-  lastCredit,
-  taskHint,
-}: HomeHudProps) => (
-  <View style={styles.root}>
-    {moodLabel != null && <HomeHudMood label={moodLabel} tone={moodTone} />}
+export const HomeHudBoard = ({ goal, taskHint }: HomeHudBoardProps) => {
+  const theme = useTheme();
+  const { t } = useTranslation();
 
-    <HomeHudStats balance={balance} savingsTotal={savingsTotal} />
-    <HomeHudLastCredit credit={lastCredit} />
-    <HomeHudGoalCard goal={goal} />
-    <HomeHudTaskCard taskHint={taskHint} />
-  </View>
-);
+  return (
+    <View
+      style={[
+        styles.board,
+        { backgroundColor: theme.surface, borderColor: theme.border },
+      ]}
+    >
+      <View style={styles.boardRow}>
+        <PiggyIcon size={20} color={theme.textSecondary} />
+
+        <View style={styles.boardText}>
+          <Text variant="smallBold" numberOfLines={1}>
+            {goal ? goal.title : t('home.goal.none')}
+          </Text>
+
+          {goal ? (
+            <ProgressBar value={goal.progress} height={6} />
+          ) : (
+            <Text variant="small" themeColor="textMuted" numberOfLines={1}>
+              {t('home.goal.noneHint')}
+            </Text>
+          )}
+        </View>
+
+        {goal && (
+          <Text variant="small" themeColor="textMuted">
+            {goal.progressLabel}
+          </Text>
+        )}
+      </View>
+
+      <View style={styles.boardRow}>
+        <TasksIcon size={20} color={theme.textSecondary} />
+
+        <View style={styles.boardText}>
+          <Text variant="smallBold" numberOfLines={1}>
+            {t('home.task.title')}
+          </Text>
+          <Text variant="small" themeColor="textMuted" numberOfLines={1}>
+            {taskHint}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+};
 
 // ═══════════════════════════════════════════
 // STYLES
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  root: {
-    alignSelf: 'stretch',
+  board: {
+    borderRadius: RADII.l,
+    borderWidth: 1,
     gap: SPACING.two,
+    padding: SPACING.two,
   },
-  goalHeading: {
+  boardRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.one,
+    gap: SPACING.two,
   },
-  lastCredit: {
-    alignItems: 'center',
-    alignSelf: 'center',
-    gap: SPACING.half,
+  boardText: {
+    flex: 1,
+    gap: 3,
   },
   mood: {
     alignItems: 'center',
     alignSelf: 'center',
+    borderRadius: RADII.pill,
+    borderWidth: 1,
     flexDirection: 'row',
     gap: SPACING.half,
+    paddingHorizontal: SPACING.two,
+    paddingVertical: 3,
   },
   stats: {
-    alignSelf: 'stretch',
+    alignItems: 'flex-start',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.two,
-    justifyContent: 'center',
+    gap: SPACING.one,
   },
 });
 
-export type { HomeHudProps };
+export type {
+  HomeHudBoardProps,
+  HomeHudLastCreditProps,
+  HomeHudMoodProps,
+  HomeHudStatsProps,
+};
