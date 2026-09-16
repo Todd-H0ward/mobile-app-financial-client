@@ -202,7 +202,7 @@
       "body": [
         "The street has four shops: grocery, clothes, furniture and toys. Each has its own shelf.",
         "A purchase spends coins and updates the period fact — so the plan can be compared with real life.",
-        "If you do not have enough coins, I will say what is missing and what you can do. You cannot go below zero. Toys will get mini-games later."
+        "If you do not have enough coins, I will say exactly how many are missing and three options: earn, take from the jar, or wait. You cannot go below zero. Toys will get mini-games later."
       ]
     }
   },
@@ -371,7 +371,13 @@
     "cancel": "Not now",
     "shortageTitle": "Need {{count}} more coins",
     "shortageBody": "{{title}} costs {{price}}, you have {{balance}}.",
-    "shortageOptions": "What you can do:\n· finish a task to earn more\n· take from the savings jar (the goal will take longer)\n· wait and buy it next period",
+    "shortageOptionsIntro": "What you can do:",
+    "shortageOptionTask": "finish the chore «{{title}}» — that is {{reward}} coins",
+    "shortageOptionTaskPartial": "finish the chore «{{title}}» — that is {{reward}} coins (not enough alone, but closer)",
+    "shortageOptionJar": "take {{count}} from the jar (to «{{goal}}» it will be {{after}} left instead of {{before}})",
+    "shortageOptionJarShort": "the jar for «{{goal}}» has {{saved}}, and you need {{count}} — save a bit more first",
+    "shortageOptionJarNoGoal": "pick a savings goal first — then you can take from the jar",
+    "shortageOptionWait": "wait and buy it next period",
     "shortageTask": "Got it — I'll earn",
     "shortageJar": "Maybe from the jar later",
     "shortageWait": "Wait until next period",

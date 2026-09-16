@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import {
   type CatalogueItem,
@@ -9,6 +9,8 @@ import {
 import {
   applyPurchase,
   canAfford,
+  explainShortage,
+  type ShortageExplain,
   useUpdateUser,
   useUser,
 } from '@/entities/user';
@@ -44,6 +46,11 @@ interface ShopController {
   sheet: ShopSheet;
   /** Last shortfall details, when the wallet refused. */
   shortage: ShopShortage | null;
+  /**
+   * Named recovery options with consequences — null until a shortage opens.
+   * Built by `explainShortage` (docs/economy.md).
+   */
+  shortageExplain: ShortageExplain | null;
   /** How far the pending purchase would push fact over plan. */
   overPlanBy: number;
   selectItem: (item: CatalogueItem) => void;
@@ -59,6 +66,7 @@ interface ShopController {
  * Shop controller for one street shopfront.
  *
  * No wallet math here — `applyPurchase` owns debit, fact and influence.
+ * Shortage copy comes from `explainShortage`, not from hard-coded strings.
  */
 export const useShop = (shopId: ShopId): ShopController => {
   const user = useUser();
@@ -82,6 +90,16 @@ export const useShop = (shopId: ShopId): ShopController => {
         )
       : 0;
 
+  const shortageExplain = useMemo(() => {
+    if (!user || !shortage) return null;
+    return explainShortage({
+      shortfall: shortage.shortfall,
+      price: shortage.price,
+      balance: shortage.balance,
+      savings: user.savings,
+    });
+  }, [user, shortage]);
+
   return {
     shopId,
     balance,
@@ -90,6 +108,7 @@ export const useShop = (shopId: ShopId): ShopController => {
     selected,
     sheet,
     shortage,
+    shortageExplain,
     overPlanBy,
 
     selectItem: (item) => {

@@ -136,7 +136,11 @@ export const ShopScreen = ({ shopId }: ShopScreenProps) => {
       </Sheet.Modal>
 
       <Sheet.Modal
-        isVisible={shop.sheet === 'shortage' && shop.shortage != null}
+        isVisible={
+          shop.sheet === 'shortage' &&
+          shop.shortage != null &&
+          shop.shortageExplain != null
+        }
         onClose={shop.dismissSheet}
       >
         <Sheet.Title>
@@ -150,13 +154,55 @@ export const ShopScreen = ({ shopId }: ShopScreenProps) => {
             price: formatMoney(shop.shortage?.price ?? 0),
             balance: formatMoney(shop.shortage?.balance ?? 0),
           })}
-          {`\n\n${t('shop.shortageOptions')}`}
+          {`\n\n${t('shop.shortageOptionsIntro')}`}
+          {shop.shortageExplain?.task
+            ? `\n· ${t(
+                shop.shortageExplain.task.coversShortfall
+                  ? 'shop.shortageOptionTask'
+                  : 'shop.shortageOptionTaskPartial',
+                {
+                  title: shop.shortageExplain.task.taskTitle,
+                  reward: formatMoney(shop.shortageExplain.task.reward),
+                },
+              )}`
+            : ''}
+          {shop.shortageExplain
+            ? `\n· ${
+                shop.shortageExplain.jar.isAvailable &&
+                shop.shortageExplain.jar.goalTitle != null &&
+                shop.shortageExplain.jar.remainingBefore != null &&
+                shop.shortageExplain.jar.remainingAfter != null
+                  ? t('shop.shortageOptionJar', {
+                      count: formatMoney(shop.shortageExplain.shortfall),
+                      goal: shop.shortageExplain.jar.goalTitle,
+                      before: formatMoney(
+                        shop.shortageExplain.jar.remainingBefore,
+                      ),
+                      after: formatMoney(
+                        shop.shortageExplain.jar.remainingAfter,
+                      ),
+                    })
+                  : shop.shortageExplain.jar.goalTitle != null
+                    ? t('shop.shortageOptionJarShort', {
+                        goal: shop.shortageExplain.jar.goalTitle,
+                        saved: formatMoney(shop.shortageExplain.jar.saved),
+                        count: formatMoney(shop.shortageExplain.shortfall),
+                      })
+                    : t('shop.shortageOptionJarNoGoal')
+              }`
+            : ''}
+          {`\n· ${t('shop.shortageOptionWait')}`}
         </Sheet.Description>
         <Sheet.Actions>
           <Button variant="ghost" isFullWidth onPress={shop.dismissSheet}>
             {t('shop.shortageWait')}
           </Button>
-          <Button variant="secondary" isFullWidth onPress={shop.dismissSheet}>
+          <Button
+            variant="secondary"
+            isFullWidth
+            disabled={!shop.shortageExplain?.jar.isAvailable}
+            onPress={shop.dismissSheet}
+          >
             {t('shop.shortageJar')}
           </Button>
           <Button variant="primary" isFullWidth onPress={shop.dismissSheet}>

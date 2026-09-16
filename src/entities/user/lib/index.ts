@@ -23,6 +23,14 @@ export type { PurchaseFail, PurchaseOk, PurchaseResult } from './purchase';
 export { applyPurchase } from './purchase';
 export { resetUser } from './reset';
 export type {
+  ShortageExplain,
+  ShortageExplainInput,
+  ShortageJarOption,
+  ShortageTaskOption,
+  ShortageWaitOption,
+} from './shortage';
+export { explainShortage } from './shortage';
+export type {
   CreditInput,
   DebitFail,
   DebitInput,
