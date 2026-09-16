@@ -9,6 +9,7 @@ export const ROUTES = {
   ONBOARDING: '/onboarding',
   PET_CREATE: '/pet-create',
   BUDGET_PLAN: '/budget-plan',
+  PERIOD_SUMMARY: '/period-summary',
   SETTINGS: '/settings',
   UI_KIT: '/ui-kit',
 } as const;

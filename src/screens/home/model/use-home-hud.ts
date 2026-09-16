@@ -81,6 +81,16 @@ interface HomeHud {
    * budget screen. Hidden once the plan is confirmed.
    */
   isPlanning: boolean;
+  /**
+   * True while the period is `active` — the banner that opens the summary.
+   * Hidden in every other phase.
+   */
+  isActive: boolean;
+  /**
+   * True while the period is `summary` — home must redirect to the summary
+   * screen; the child cannot walk the rooms until they have seen the totals.
+   */
+  isSummary: boolean;
 }
 
 // ═══════════════════════════════════════════
@@ -210,6 +220,8 @@ export const useHomeHud = (): HomeHud => {
     lastCredit: lastEntry ? buildLastCredit(lastEntry, t) : null,
     taskHint: t('home.task.comingSoon'),
     isPlanning: user?.period.phase === 'planning',
+    isActive: user?.period.phase === 'active',
+    isSummary: user?.period.phase === 'summary',
   };
 };
 

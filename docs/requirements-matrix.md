@@ -28,14 +28,14 @@
 | 2.5.3 | Главный экран: питомец, баланс, накопления, цель, состояние, активное задание — одновременно | `screens/home` | — | — | не начато |
 | 2.5.4 | Валюта с явным источником и суммой каждого начисления | `screens/home`, `screens/history` | `entities/wallet` | `wallet.test.ts` | не начато |
 | 2.5.5 | План бюджета по трём направлениям, контроль остатка, подтверждение | `screens/budget-plan` | `entities/budget` | `plan.test.ts`, `compare.test.ts` | готово — валидация и остаток в entity, экран со слайдером и степпером, баннер на home в `planning` |
-| 2.5.5 | Сравнение плана с фактом после периода | `screens/period-summary` | `entities/budget/lib/compare` | `compare.test.ts` | не начато |
+| 2.5.5 | Сравнение плана с фактом после периода | `screens/period-summary` | `entities/budget` (`compare`, `explainSummary`) | `compare.test.ts`, `explain.test.ts` | готово — экран итогов с план/факт барами, историей и tips; вход с home в `active`, редирект в `summary` |
 | 2.5.6 | Каталог покупок: ≥8 позиций, обязательные и необязательные, цена, категория, влияние | `screens/shop` | `entities/catalogue` | `catalogue.test.ts` | не начато |
 | 2.5.6 | Запрет отрицательного баланса + объяснение вариантов | `screens/shop` | `entities/wallet/lib/rules` | `rules.test.ts` | не начато |
 | 2.5.7 | Накопления, ≥3 цели, прогресс | `screens/savings` | `entities/savings` + `content/goals.json` | `savings.test.ts` | в работе — три цели в контенте, прогресс хранится в сейве |
 | 2.5.7 | Снятие только по отдельному подтверждению с показом последствий | `screens/savings` | `entities/savings/lib/withdraw` | `withdraw.test.ts` | не начато |
 | 2.5.8 | ≥6 заданий по 3 темам, с последствиями, не только тесты | `screens/tasks` | `entities/task` + `content/tasks.json` | `task.test.ts` | не начато |
 | 2.5.9 | Обратная связь после каждого действия: что изменилось и почему | все экраны | `features/feedback` | — | не начато |
-| 2.5.9 | Путь восстановления после ошибки без обнуления прогресса | `screens/period-summary` | `entities/period/lib/recovery` | `recovery.test.ts` | не начато |
+| 2.5.9 | Путь восстановления после ошибки без обнуления прогресса | `screens/period-summary` | `entities/budget/lib/explain` | `explain.test.ts` | готово — tips на экране итогов, `acknowledgeSummary` не обнуляет сейв |
 | 2.5.10 | ≥3 состояния питомца с объяснением причины | `screens/home` | `entities/pet/lib/mood` | `mood.test.ts` | не начато |
 | 2.5.10 | ≥3 стадии развития по совокупности решений за несколько периодов | `screens/home` | `entities/pet/lib/growth` | `growth.test.ts` | не начато |
 | 2.5.11 | История, итоги последнего периода, справочник терминов | `screens/history`, `screens/glossary` | `entities/period/model` | — | не начато |

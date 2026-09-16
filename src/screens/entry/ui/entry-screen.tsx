@@ -11,5 +11,13 @@ import { ROUTES } from '@/shared/constants';
 export const EntryScreen = () => {
   const user = useUser();
 
-  return <Redirect href={user ? ROUTES.HOME : ROUTES.ONBOARDING} />;
+  if (!user) {
+    return <Redirect href={ROUTES.ONBOARDING} />;
+  }
+
+  if (user.period.phase === 'summary') {
+    return <Redirect href={ROUTES.PERIOD_SUMMARY} />;
+  }
+
+  return <Redirect href={ROUTES.HOME} />;
 };
