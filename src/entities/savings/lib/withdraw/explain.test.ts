@@ -4,19 +4,23 @@ import { explainWithdraw } from './explain';
 
 // ═══════════════════════════════════════════
 describe('explainWithdraw', () => {
-  it('names remaining before and after the take', () => {
-    // Scooter 140, saved 95 → 45 left; take 12 → 57 left (docs/economy.md shape).
+  it('recalculates remaining and periods before and after the take', () => {
+    // Scooter 140, saved 95 → 45 left (~2 periods at 40); take 50 → 95 left (~3).
     const explain = explainWithdraw({
-      amount: 12,
+      amount: 50,
       saved: 95,
       price: 140,
       goalTitle: 'Самокат',
       plannedDeposit: 40,
     });
 
+    expect(explain.savedBefore).toBe(95);
+    expect(explain.savedAfter).toBe(45);
     expect(explain.remainingBefore).toBe(45);
-    expect(explain.remainingAfter).toBe(57);
-    expect(explain.periodsAfter).toBe(2);
+    expect(explain.remainingAfter).toBe(95);
+    expect(explain.periodsBefore).toBe(2);
+    expect(explain.periodsAfter).toBe(3);
+    expect(explain.progressAfter).toBeLessThan(explain.progressBefore);
     expect(explain.goalTitle).toBe('Самокат');
   });
 
@@ -29,6 +33,22 @@ describe('explainWithdraw', () => {
       plannedDeposit: 0,
     });
 
+    expect(explain.periodsBefore).toBeNull();
     expect(explain.periodsAfter).toBeNull();
+  });
+
+  it('matches the economy.md shape: farther from the goal after a take', () => {
+    // «До самоката останется 85 вместо 45» — remaining grows when you withdraw.
+    const explain = explainWithdraw({
+      amount: 40,
+      saved: 95,
+      price: 140,
+      goalTitle: 'Самокат',
+      plannedDeposit: 40,
+    });
+
+    expect(explain.remainingBefore).toBe(45);
+    expect(explain.remainingAfter).toBe(85);
+    expect(explain.periodsAfter).toBe(3);
   });
 });

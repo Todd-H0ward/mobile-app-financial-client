@@ -210,7 +210,7 @@
       "body": [
         "There are three goals here. Pick one — it shows on the home screen.",
         "You can put coins in during any active period: they leave the wallet, fill the jar and update the savings fact.",
-        "Taking coins out needs a confirm: I will show how much is left to the goal. Not a ban — just the price of the choice."
+        "Taking coins out opens a confirm screen: I recalculate how much is left to the goal and roughly how many periods. Not a ban — just the price of the choice."
       ]
     }
   },
@@ -479,8 +479,14 @@
     "deposit": "Put in the jar",
     "withdraw": "Take from the jar",
     "withdrawTitle": "Take from the jar?",
-    "withdrawBody": "Take {{count}} from «{{goal}}». Then {{after}} will be left instead of {{before}}.",
+    "withdrawSubtitle": "{{count}} from «{{goal}}»",
+    "withdrawConsequence": "What changes",
+    "withdrawBody": "To «{{goal}}» it will be {{after}} left instead of {{before}}.",
     "withdrawPeriods": "That is about {{count}} more periods at this pace.",
+    "withdrawPeriodsCompare": "About {{after}} periods left instead of {{before}}.",
+    "withdrawNow": "Now",
+    "withdrawAfter": "If you take it",
+    "withdrawSoft": "This is not a ban — just the price of the choice. You can keep saving.",
     "withdrawKeep": "Keep saving",
     "withdrawConfirm": "Take the coins",
     "planFirstBanner": "First confirm a budget plan — then the jar opens for real.",

@@ -1,20 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+
+import { useRouter } from 'expo-router';
 
 import { getGoalById } from '@/entities/goal';
-import {
-  explainWithdraw,
-  progressFor,
-  remainingFor,
-  type WithdrawExplain,
-} from '@/entities/savings';
+import { progressFor, remainingFor } from '@/entities/savings';
 import {
   applyDeposit,
-  applyWithdraw,
   setActiveGoal,
   useUpdateUser,
   useUser,
 } from '@/entities/user';
 
+import { withdrawPath } from '@/shared/constants';
 import { useTimeSource } from '@/shared/lib';
 import { formatMoney } from '@/shared/utils';
 
@@ -22,7 +19,7 @@ import { formatMoney } from '@/shared/utils';
 // TYPES
 // ═══════════════════════════════════════════
 
-type GoalSheet = 'withdraw' | 'planning' | null;
+type GoalSheet = 'planning' | null;
 
 interface GoalController {
   goalId: string;
@@ -43,7 +40,6 @@ interface GoalController {
   maxDeposit: number;
   maxWithdraw: number;
   sheet: GoalSheet;
-  withdrawExplain: WithdrawExplain | null;
   setAmount: (value: number) => void;
   addCoin: () => void;
   removeCoin: () => void;
@@ -51,8 +47,8 @@ interface GoalController {
   setMaxWithdraw: () => void;
   makeActive: () => void;
   deposit: () => void;
+  /** Opens the dedicated withdraw confirm screen (1.15). */
   requestWithdraw: () => void;
-  confirmWithdraw: () => void;
   dismissSheet: () => void;
 }
 
@@ -61,12 +57,13 @@ interface GoalController {
 // ═══════════════════════════════════════════
 
 /**
- * One goal's jar — deposit, withdraw with consequence confirm, set active.
+ * One goal's jar — deposit here; withdraw goes to its own confirm screen.
  */
 export const useGoal = (goalId: string): GoalController | null => {
   const user = useUser();
   const updateUser = useUpdateUser();
   const time = useTimeSource();
+  const router = useRouter();
 
   const goal = getGoalById(goalId);
   const row = user?.savings.goals.find((entry) => entry.goalId === goalId);
@@ -80,17 +77,6 @@ export const useGoal = (goalId: string): GoalController | null => {
   const maxDeposit = Math.min(balance, remaining);
   const maxWithdraw = saved;
   const canTransfer = user?.period.phase === 'active';
-
-  const withdrawExplain = useMemo(() => {
-    if (!goal || sheet !== 'withdraw' || amount <= 0) return null;
-    return explainWithdraw({
-      amount,
-      saved,
-      price: goal.price,
-      goalTitle: goal.title,
-      plannedDeposit: user?.period.plan.savings ?? 0,
-    });
-  }, [goal, sheet, amount, saved, user?.period.plan.savings]);
 
   if (!goal || !user || !row) return null;
 
@@ -113,7 +99,6 @@ export const useGoal = (goalId: string): GoalController | null => {
     maxDeposit,
     maxWithdraw,
     sheet,
-    withdrawExplain,
 
     setAmount: (value) =>
       setAmount(clampAmount(value, Math.max(maxDeposit, maxWithdraw))),
@@ -149,17 +134,7 @@ export const useGoal = (goalId: string): GoalController | null => {
         return;
       }
       if (amount <= 0 || amount > maxWithdraw) return;
-      setSheet('withdraw');
-    },
-
-    confirmWithdraw: () => {
-      if (amount <= 0 || amount > maxWithdraw) return;
-      const result = applyWithdraw(user, goalId, amount, time);
-      if (result.ok) {
-        updateUser(() => result.user);
-        setAmount(0);
-      }
-      setSheet(null);
+      router.push(withdrawPath(goalId, amount));
     },
 
     dismissSheet: () => setSheet(null),

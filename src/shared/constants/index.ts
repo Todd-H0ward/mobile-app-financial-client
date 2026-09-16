@@ -1,6 +1,12 @@
 export { HIT_SLOP_SIZE } from './a11y';
 export { APP_VERSION } from './app-version';
-export { goalPath, ROUTES, type RoutePath, shopPath } from './routes';
+export {
+  goalPath,
+  ROUTES,
+  type RoutePath,
+  shopPath,
+  withdrawPath,
+} from './routes';
 export { STORAGE_KEYS } from './storage-keys';
 export type { Spacing, ThemeColor } from './theme';
 export {

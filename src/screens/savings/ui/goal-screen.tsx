@@ -207,34 +207,6 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
       </View>
 
       <Sheet.Modal
-        isVisible={goal.sheet === 'withdraw' && goal.withdrawExplain != null}
-        onClose={goal.dismissSheet}
-      >
-        <Sheet.Title>{t('savings.withdrawTitle')}</Sheet.Title>
-        <Sheet.Description>
-          {t('savings.withdrawBody', {
-            count: formatMoney(goal.withdrawExplain?.amount ?? 0),
-            goal: title,
-            before: formatMoney(goal.withdrawExplain?.remainingBefore ?? 0),
-            after: formatMoney(goal.withdrawExplain?.remainingAfter ?? 0),
-          })}
-          {goal.withdrawExplain?.periodsAfter != null
-            ? `\n\n${t('savings.withdrawPeriods', {
-                count: goal.withdrawExplain.periodsAfter,
-              })}`
-            : ''}
-        </Sheet.Description>
-        <Sheet.Actions>
-          <Button variant="ghost" isFullWidth onPress={goal.dismissSheet}>
-            {t('savings.withdrawKeep')}
-          </Button>
-          <Button variant="accent" isFullWidth onPress={goal.confirmWithdraw}>
-            {t('savings.withdrawConfirm')}
-          </Button>
-        </Sheet.Actions>
-      </Sheet.Modal>
-
-      <Sheet.Modal
         isVisible={goal.sheet === 'planning'}
         onClose={goal.dismissSheet}
       >
