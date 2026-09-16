@@ -5,6 +5,7 @@ import { STARTING_BALANCE } from '@/entities/economy';
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useTranslation } from '@/shared/i18n';
 import { CoinBadge, Text } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
@@ -21,6 +22,7 @@ const COIN_DURATION = 320;
 // ═══════════════════════════════════════════
 
 export const CoinsStep = () => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const coins = Array.from({ length: COIN_COUNT }, (_, index) => index);
 
@@ -28,7 +30,9 @@ export const CoinsStep = () => {
     <View style={styles.root}>
       <View
         accessibilityRole="image"
-        accessibilityLabel={`${STARTING_BALANCE} монет падают в кошелёк`}
+        accessibilityLabel={t('onboarding.starterCoinsA11y', {
+          count: STARTING_BALANCE,
+        })}
         style={styles.shower}
       >
         {coins.map((index) => (
@@ -45,13 +49,12 @@ export const CoinsStep = () => {
 
       <CoinBadge
         amount={STARTING_BALANCE}
-        label="стартовые монеты"
+        label={t('onboarding.starterCoins')}
         style={styles.badge}
       />
 
       <Text variant="small" themeColor="textSecondary" style={styles.caption}>
-        Рядом с монетами всегда написано, откуда они пришли. Дальше их будут
-        приносить задания.
+        {t('onboarding.starterCoinsCaption')}
       </Text>
     </View>
   );

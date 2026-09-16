@@ -1,8 +1,9 @@
 import { useState } from 'react';
 
+import { useTranslation } from '@/shared/i18n';
 import { Button, Sheet } from '@/shared/ui';
 
-import { useProfileRestart } from '../model/use-profile-restart';
+import { useProfileRestart } from '../model';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -24,8 +25,9 @@ interface RestartOnboardingButtonProps {
  * the app that wipes progress, and it must never happen on a single tap.
  */
 export const RestartOnboardingButton = ({
-  label = 'Пройти знакомство заново',
+  label,
 }: RestartOnboardingButtonProps) => {
+  const { t } = useTranslation();
   const { hasProfile, playerName, finishedPeriods, restart } =
     useProfileRestart();
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
@@ -34,6 +36,8 @@ export const RestartOnboardingButton = ({
     setIsConfirmVisible(false);
     restart();
   };
+
+  const buttonLabel = label ?? t('profileRestart.buttonLabel');
 
   return (
     <>
@@ -44,21 +48,24 @@ export const RestartOnboardingButton = ({
         disabled={!hasProfile}
         onPress={() => setIsConfirmVisible(true)}
       >
-        {label}
+        {buttonLabel}
       </Button>
 
       <Sheet.Modal
         isVisible={isConfirmVisible}
         onClose={() => setIsConfirmVisible(false)}
       >
-        <Sheet.Title>Удалить профиль?</Sheet.Title>
+        <Sheet.Title>{t('profileRestart.modalTitle')}</Sheet.Title>
         <Sheet.Description>
           {playerName.length > 0
-            ? `Профиль «${playerName}» удалится с устройства: монеты, копилка и история периодов (${finishedPeriods}) пропадут.`
-            : 'Профиль удалится с устройства: монеты, копилка и история периодов пропадут.'}
+            ? t('profileRestart.modalDescWithName', {
+                playerName,
+                finishedPeriods,
+              })
+            : t('profileRestart.modalDescWithoutName')}
         </Sheet.Description>
         <Sheet.Description>
-          Вернуть его будет нельзя — знакомство начнётся с чистого листа.
+          {t('profileRestart.modalWarning')}
         </Sheet.Description>
 
         <Sheet.Actions>
@@ -67,10 +74,10 @@ export const RestartOnboardingButton = ({
             isFullWidth
             onPress={() => setIsConfirmVisible(false)}
           >
-            Оставить как есть
+            {t('profileRestart.keepAsIs')}
           </Button>
           <Button variant="accent" isFullWidth onPress={confirm}>
-            Удалить и начать заново
+            {t('profileRestart.confirm')}
           </Button>
         </Sheet.Actions>
       </Sheet.Modal>

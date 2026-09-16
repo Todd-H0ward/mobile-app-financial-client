@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useTranslation } from '@/shared/i18n';
 import { Shape } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
@@ -34,13 +35,14 @@ const WALKED_PAW_SIZE = 18;
  * trail carries no time at all, because there are no timers in this app.
  */
 export const PawTrail = ({ current, total }: PawTrailProps) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const steps = Array.from({ length: total }, (_, index) => index + 1);
 
   return (
     <View
       accessibilityRole="progressbar"
-      accessibilityLabel={`Шаг ${current} из ${total}`}
+      accessibilityLabel={t('onboarding.pawTrailA11y', { current, total })}
       accessibilityValue={{ now: current, min: 1, max: total }}
       style={styles.root}
     >

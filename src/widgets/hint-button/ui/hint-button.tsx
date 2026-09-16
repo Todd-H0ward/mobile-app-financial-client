@@ -15,6 +15,7 @@ import { useUserStore } from '@/entities/user';
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useTranslation } from '@/shared/i18n';
 import { Button, Sheet, Text } from '@/shared/ui';
 import { hitSlopFor } from '@/shared/utils';
 
@@ -56,9 +57,17 @@ const PULSE_COUNT = 2;
  * `entities/hint`, so a screen's hint is rewritten without opening a `.tsx`.
  */
 export const HintButton = ({ screen, isPulsing = false }: HintButtonProps) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const hint = getHint(screen);
   const [isOpen, setIsOpen] = useState(false);
+
+  const title = t(`hints.${screen}.title`, { defaultValue: hint.title });
+  const rawBody = t(`hints.${screen}.body`, {
+    returnObjects: true,
+    defaultValue: hint.body,
+  });
+  const body = Array.isArray(rawBody) ? (rawBody as string[]) : hint.body;
 
   // There is no profile yet during onboarding, and the grown-up's switch is
   // still the authority once there is one — 3.6, weak devices.
@@ -96,8 +105,8 @@ export const HintButton = ({ screen, isPulsing = false }: HintButtonProps) => {
       <Animated.View style={pulseStyle}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Подсказка"
-          accessibilityHint={`Откроется подсказка: ${hint.title}`}
+          accessibilityLabel={t('hints.buttonA11y')}
+          accessibilityHint={t('hints.buttonA11yHint', { title })}
           hitSlop={hitSlopFor(BUTTON_SIZE)}
           onPress={() => setIsOpen(true)}
           style={({ pressed }) => [
@@ -116,17 +125,17 @@ export const HintButton = ({ screen, isPulsing = false }: HintButtonProps) => {
       </Animated.View>
 
       <Sheet.Modal isVisible={isOpen} onClose={() => setIsOpen(false)}>
-        <Sheet.Title>{hint.title}</Sheet.Title>
+        <Sheet.Title>{title}</Sheet.Title>
 
         <View style={styles.body}>
-          {hint.body.map((paragraph) => (
+          {body.map((paragraph) => (
             <Sheet.Description key={paragraph}>{paragraph}</Sheet.Description>
           ))}
         </View>
 
         <Sheet.Actions>
           <Button isFullWidth onPress={() => setIsOpen(false)}>
-            Понятно
+            {t('hints.understood')}
           </Button>
         </Sheet.Actions>
       </Sheet.Modal>

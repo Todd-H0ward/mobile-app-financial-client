@@ -26,12 +26,12 @@ export const OnboardingScreen = () => {
 
   return (
     <Screen gap="three" isTabBarVisible={false}>
-      <Screen.Header
-        title={title}
-        trailing={
-          <HintButton screen="onboarding" isPulsing={stepId === 'greeting'} />
-        }
-      />
+      <Screen.Header>
+        <Screen.Heading>
+          <Screen.Title>{title}</Screen.Title>
+        </Screen.Heading>
+        <HintButton screen="onboarding" isPulsing={stepId === 'greeting'} />
+      </Screen.Header>
 
       <PawTrail current={stepNumber} total={stepCount} />
 

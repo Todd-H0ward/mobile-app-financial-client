@@ -10,5 +10,6 @@ export { MinusIcon } from './minus-icon';
 export { PawIcon } from './paw-icon';
 export { PiggyIcon } from './piggy-icon';
 export { PlusIcon } from './plus-icon';
+export { SettingsIcon } from './settings-icon';
 export { ShopIcon } from './shop-icon';
 export { TasksIcon } from './tasks-icon';

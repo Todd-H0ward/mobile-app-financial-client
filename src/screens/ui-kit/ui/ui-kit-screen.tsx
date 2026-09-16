@@ -159,12 +159,16 @@ export const UiKitScreen = () => {
   return (
     <>
       <Screen gap="three" isTabBarVisible={false}>
-        <Screen.Header
-          title="UI-кит"
-          subtitle="Все компоненты @/shared/ui и их состояния"
-          leading={<Screen.Back />}
-          trailing={<HintButton screen="ui-kit" />}
-        />
+        <Screen.Header>
+          <Screen.Back />
+          <Screen.Heading>
+            <Screen.Title>UI-кит</Screen.Title>
+            <Screen.Subtitle>
+              Все компоненты @/shared/ui и их состояния
+            </Screen.Subtitle>
+          </Screen.Heading>
+          <HintButton screen="ui-kit" />
+        </Screen.Header>
 
         {/* ─── the two switches every section below reacts to ─── */}
         <KitSection
@@ -502,12 +506,14 @@ export const UiKitScreen = () => {
           caption="Этот экран и есть пример: фон, safe area, скролл и колонка по MAX_CONTENT_WIDTH"
         >
           <KitSection.Row label="Screen.Header со всеми слотами">
-            <Screen.Header
-              title="Заголовок"
-              subtitle="Подзаголовок"
-              leading={<Screen.Back />}
-              trailing={<CoinBadge amount={7} variant="plain" coinSize={16} />}
-            />
+            <Screen.Header>
+              <Screen.Back />
+              <Screen.Heading>
+                <Screen.Title>Заголовок</Screen.Title>
+                <Screen.Subtitle>Подзаголовок</Screen.Subtitle>
+              </Screen.Heading>
+              <CoinBadge amount={7} variant="plain" coinSize={16} />
+            </Screen.Header>
           </KitSection.Row>
         </KitSection>
 

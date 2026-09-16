@@ -5,9 +5,10 @@ import { StyleSheet, View } from 'react-native';
 import { DEMO_RUN_PERIODS } from '@/entities/user';
 
 import { SPACING } from '@/shared/constants';
+import { useTranslation } from '@/shared/i18n';
 import { Button, Card, Sheet, Switch, Text } from '@/shared/ui';
 
-import { useDemoMode } from '../model/use-demo-mode';
+import { useDemoMode } from '../model';
 
 // ═══════════════════════════════════════════
 // COMPONENTS
@@ -18,6 +19,7 @@ import { useDemoMode } from '../model/use-demo-mode';
  * The card is self-contained and will move behind the arithmetic gate as-is.
  */
 export const DemoModeCard = () => {
+  const { t } = useTranslation();
   const {
     isDemoMode,
     periodIndex,
@@ -49,26 +51,24 @@ export const DemoModeCard = () => {
   return (
     <>
       <Card tone="surfaceSoft">
-        <Card.Title>Демо-режим</Card.Title>
+        <Card.Title>{t('demoMode.title')}</Card.Title>
         <Card.Content style={styles.content}>
           <Switch
             isChecked={isDemoMode}
             onChange={onSwitchChange}
-            label="Тестовый профиль"
+            label={t('demoMode.switchLabel')}
           />
 
           <Text variant="small" themeColor="textSecondary">
-            Период {periodIndex} · периодов в истории {finishedPeriods}
+            {t('demoMode.periodInfo', { periodIndex, finishedPeriods })}
           </Text>
 
           <Text variant="small" themeColor="textSecondary">
-            Пять периодов подряд без ожидания реального времени. Факт по
-            направлениям пока нулевой — кошелёк и задания появятся позже.
+            {t('demoMode.desc1')}
           </Text>
 
           <Text variant="small" themeColor="textSecondary">
-            Профиль ребёнка не теряется: он ждёт, пока идёт демонстрация, и
-            возвращается целиком.
+            {t('demoMode.desc2')}
           </Text>
         </Card.Content>
         <Card.Footer>
@@ -79,7 +79,7 @@ export const DemoModeCard = () => {
               disabled={!isDemoMode}
               onPress={runPeriods}
             >
-              Прогнать {DEMO_RUN_PERIODS} периодов
+              {t('demoMode.runPeriods', { count: DEMO_RUN_PERIODS })}
             </Button>
             <Button
               size="m"
@@ -88,7 +88,7 @@ export const DemoModeCard = () => {
               disabled={!isDemoMode}
               onPress={resetProfile}
             >
-              Сбросить к исходному
+              {t('demoMode.resetProfile')}
             </Button>
           </View>
         </Card.Footer>
@@ -98,21 +98,18 @@ export const DemoModeCard = () => {
         isVisible={isConfirmVisible}
         onClose={() => setIsConfirmVisible(false)}
       >
-        <Sheet.Title>Включить демо-режим?</Sheet.Title>
-        <Sheet.Description>
-          Игра переключится на тестовый профиль. Прогресс ребёнка сохранится и
-          вернётся, когда демо-режим выключат.
-        </Sheet.Description>
+        <Sheet.Title>{t('demoMode.confirmTitle')}</Sheet.Title>
+        <Sheet.Description>{t('demoMode.confirmDesc')}</Sheet.Description>
         <Sheet.Actions>
           <Button
             variant="ghost"
             isFullWidth
             onPress={() => setIsConfirmVisible(false)}
           >
-            Отмена
+            {t('demoMode.confirmCancel')}
           </Button>
           <Button isFullWidth onPress={confirmEnable}>
-            Включить
+            {t('demoMode.confirmEnable')}
           </Button>
         </Sheet.Actions>
       </Sheet.Modal>

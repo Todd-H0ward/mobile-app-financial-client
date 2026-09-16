@@ -6,6 +6,7 @@ import type { BudgetDirection } from '@/entities/economy';
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useTranslation } from '@/shared/i18n';
 import { Shape, Text } from '@/shared/ui';
 
 import { DIRECTION_LOOK } from '../lib';
@@ -59,8 +60,16 @@ export const DecisionBasket = ({
   accessibilityLabel,
   isRow = false,
 }: DecisionBasketProps) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const look = DIRECTION_LOOK[direction];
+
+  const basketTitle = t(`onboarding.decisions.${direction}.title`, {
+    defaultValue: title,
+  });
+  const basketExample = t(`onboarding.decisions.${direction}.example`, {
+    defaultValue: example,
+  });
 
   const content = isRow ? (
     <>
@@ -71,10 +80,10 @@ export const DecisionBasket = ({
       />
       <View style={styles.rowText}>
         <Text variant="bodyBold" themeColor={look.label}>
-          {title}
+          {basketTitle}
         </Text>
         <Text variant="small" themeColor="textSecondary">
-          {example}
+          {basketExample}
         </Text>
       </View>
       {trailing}
@@ -87,14 +96,14 @@ export const DecisionBasket = ({
         color={theme[look.accent]}
       />
       <Text variant="bodyBold" themeColor={look.label} style={styles.boxTitle}>
-        {title}
+        {basketTitle}
       </Text>
       <Text
         variant="small"
         themeColor="textSecondary"
         style={styles.boxExample}
       >
-        {example}
+        {basketExample}
       </Text>
     </>
   );
@@ -126,7 +135,9 @@ export const DecisionBasket = ({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel ?? `${title}. ${example}`}
+      accessibilityLabel={
+        accessibilityLabel ?? `${basketTitle}. ${basketExample}`
+      }
       onPress={onPress}
       style={({ pressed }) => [...style, pressed && styles.pressed]}
     >

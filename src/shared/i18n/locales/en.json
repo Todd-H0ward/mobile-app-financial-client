@@ -1,5 +1,215 @@
 {
+  "common": {
+    "back": "Back",
+    "close": "Close",
+    "cancel": "Cancel",
+    "understood": "Got it"
+  },
   "tabs": {
     "home": "Home"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "system": "System",
+    "russian": "Русский",
+    "english": "English",
+    "interface": "Interface",
+    "animations": "Animations",
+    "animationsSubtitle": "Smooth transitions and pet movement",
+    "sound": "Sound",
+    "soundSubtitle": "Sound effects",
+    "development": "Development",
+    "uiKitDescription": "Design system showcase: all components and states on one screen.",
+    "openUiKit": "Open UI kit",
+    "profile": "Profile",
+    "profileDescription": "Deletes profile and restarts onboarding. Coins, savings jar, and period history will be permanently lost."
+  },
+  "demoMode": {
+    "title": "Demo mode",
+    "switchLabel": "Test profile",
+    "periodInfo": "Period {{periodIndex}} · historical periods {{finishedPeriods}}",
+    "desc1": "Five consecutive periods without waiting for real time. Direction actuals are currently zero — wallet and tasks will appear later.",
+    "desc2": "Child profile is preserved: it waits during the demo and is restored completely.",
+    "runPeriods": "Run {{count}} periods",
+    "resetProfile": "Reset to initial",
+    "confirmTitle": "Enable demo mode?",
+    "confirmDesc": "The game will switch to the test profile. Child progress will be saved and restored when demo mode is turned off.",
+    "confirmCancel": "Cancel",
+    "confirmEnable": "Enable"
+  },
+  "profileRestart": {
+    "buttonLabel": "Restart onboarding",
+    "modalTitle": "Delete profile?",
+    "modalDescWithName": "Profile “{{playerName}}” will be deleted from the device: coins, savings jar, and period history ({{finishedPeriods}}) will be lost.",
+    "modalDescWithoutName": "Profile will be deleted from the device: coins, savings jar, and period history will be lost.",
+    "modalWarning": "It cannot be restored — onboarding will start from scratch.",
+    "keepAsIs": "Keep as is",
+    "confirm": "Delete and restart"
+  },
+  "home": {
+    "settingsA11y": "Settings",
+    "title": "Paw",
+    "atHome": "At home: {{name}}",
+    "roomComingSoon": "Pet room will appear in the first wave",
+    "petBoxLabel": "Someone is scratching inside. Tap"
+  },
+  "pet": {
+    "species": {
+      "cat": "Cat",
+      "dog": "Dog",
+      "capybara": "Capybara"
+    },
+    "color": {
+      "sand": "Sand",
+      "graphite": "Graphite",
+      "mint": "Mint"
+    },
+    "pattern": {
+      "solid": "Solid",
+      "spots": "Spots",
+      "stripes": "Stripes"
+    },
+    "mood": {
+      "proud": "proud of itself",
+      "content": "calm",
+      "bored": "bored",
+      "uncomfortable": "uncomfortable",
+      "sad": "sad"
+    }
+  },
+  "petCreate": {
+    "title": "Who is in the box",
+    "subtitle": "Choose who you take home and come up with a name",
+    "whoIsThis": "WHO IS THIS",
+    "color": "COLOR",
+    "pattern": "PATTERN",
+    "namePlaceholder": "Pet name",
+    "nameHint": "Pick any name — you can change it later",
+    "takeHome": "Take home"
+  },
+  "hints": {
+    "buttonA11y": "Hint",
+    "buttonA11yHint": "Will open hint: {{title}}",
+    "understood": "Got it",
+    "onboarding": {
+      "title": "What is happening here",
+      "body": [
+        "You are getting to know the game: sorting things into three boxes, getting your first coins, and picking a player name.",
+        "Three boxes: Needs — essentials to live, Wants — nice to have, Savings — saving towards a goal.",
+        "You cannot fail. Any step can be retried, nothing will be lost."
+      ]
+    },
+    "home": {
+      "title": "Main Screen",
+      "body": [
+        "Here you see the pet, coins, savings jar, and what the pet is currently doing.",
+        "Coins come from chores and tasks. Each income shows where it came from.",
+        "Tap «?» on any screen — I will tell you what to do there."
+      ]
+    },
+    "uiKit": {
+      "title": "Developer Screen",
+      "body": [
+        "This is a component showcase: buttons, cards, meters, and sheets in all states.",
+        "It helps the team test the UI, and is not part of the game storyline."
+      ]
+    },
+    "ui-kit": {
+      "title": "Developer Screen",
+      "body": [
+        "This is a component showcase: buttons, cards, meters, and sheets in all states.",
+        "It helps the team test the UI, and is not part of the game storyline."
+      ]
+    }
+  },
+  "onboarding": {
+    "pawTrailA11y": "Step {{current}} of {{total}}",
+    "starterCoins": "starter coins",
+    "starterCoinsA11y": "{{count}} coins fall into the wallet",
+    "starterCoinsCaption": "Coins always show where they came from. Later, chores and tasks will bring them.",
+    "privacyNote": "No account needed: the game stays on this device and sends nothing anywhere.",
+    "emptySign": "Home ?",
+    "namedSign": "{{name}}'s Home",
+    "namePlaceholder": "Player name",
+    "nameHintEmpty": "Type any name — only you will see it",
+    "nameHintFilled": "You can change the name later in the parents section",
+    "remainder": "Left to allocate: {{count}}",
+    "remainderHint": "You do not have to allocate every coin — the remainder simply stays with you.",
+    "stepperMinusA11y": "Remove coin: {{label}}",
+    "stepperPlusA11y": "Add coin: {{label}}",
+    "sortedCounter": "Sorted {{done}} of {{total}}",
+    "whichBox": "Which box?",
+    "allSorted": "All sorted",
+    "sortCardA11y": "Put “{{item}}” into box “{{decision}}”",
+    "actions": {
+      "greeting": "Let's start",
+      "sorting": "Next",
+      "coins": "Next",
+      "plan": "Done",
+      "name": "Play"
+    },
+    "steps": {
+      "greeting": {
+        "title": "Hi! I am your pet",
+        "line": "Together we will decide what to spend coins on. If anything is unclear — tap «?» above, I'll explain."
+      },
+      "sorting": {
+        "title": "Three boxes",
+        "line": "Sort everything into boxes. You cannot make a mistake: if you miss, I will simply explain why."
+      },
+      "coins": {
+        "title": "First coins",
+        "line": "These are your first coins. Every coin shows where it came from and how many there are."
+      },
+      "plan": {
+        "title": "A small plan",
+        "line": "Distribute ten coins into boxes. Later in the game you will do the same at the start of each period."
+      },
+      "name": {
+        "title": "Sign by the door",
+        "line": "Type your player name — I will hang a sign over the door."
+      }
+    },
+    "decisions": {
+      "needs": {
+        "title": "Needs",
+        "example": "Food, heating at home"
+      },
+      "wants": {
+        "title": "Wants",
+        "example": "Toy car, stickers"
+      },
+      "savings": {
+        "title": "Savings",
+        "example": "Saving for a scooter"
+      }
+    },
+    "items": {
+      "bread": {
+        "title": "Bread and milk",
+        "explanation": "Food is a Need: you cannot get through the period without it."
+      },
+      "heating": {
+        "title": "Heating at home",
+        "explanation": "Heating is paid every period, otherwise it gets chilly. That's a Need."
+      },
+      "toy-car": {
+        "title": "Toy car",
+        "explanation": "A toy car is a Want: it's fun, but you can live without it."
+      },
+      "stickers": {
+        "title": "Stickers",
+        "explanation": "Stickers are a Want: you can buy them in the next period."
+      },
+      "scooter": {
+        "title": "Saving for a scooter",
+        "explanation": "Not enough to buy a scooter right away, so we put it in Savings."
+      },
+      "rainy-day": {
+        "title": "Saving for a rainy day",
+        "explanation": "Savings help when something breaks. That's also Savings."
+      }
+    }
   }
 }

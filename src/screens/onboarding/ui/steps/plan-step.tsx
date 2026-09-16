@@ -4,6 +4,7 @@ import { listDecisions } from '@/entities/onboarding';
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useTranslation } from '@/shared/i18n';
 import { ProgressBar, Text } from '@/shared/ui';
 import { hitSlopFor } from '@/shared/utils';
 
@@ -46,6 +47,7 @@ const CoinStepper = ({
   onAdd,
   onRemove,
 }: CoinStepperProps) => {
+  const { t } = useTranslation();
   const theme = useTheme();
 
   const key = (
@@ -78,13 +80,23 @@ const CoinStepper = ({
 
   return (
     <View style={styles.stepper}>
-      {key('−', onRemove, count === 0, `Убрать монету: ${label}`)}
+      {key(
+        '−',
+        onRemove,
+        count === 0,
+        t('onboarding.stepperMinusA11y', { label }),
+      )}
 
       <Text variant="bodyBold" style={styles.count}>
         {count}
       </Text>
 
-      {key('+', onAdd, isAddDisabled, `Добавить монету: ${label}`)}
+      {key(
+        '+',
+        onAdd,
+        isAddDisabled,
+        t('onboarding.stepperPlusA11y', { label }),
+      )}
     </View>
   );
 };
@@ -102,16 +114,18 @@ const CoinStepper = ({
  * unassigned is allowed — the task is not to spend everything.
  */
 export const PlanStep = ({ onboarding }: PlanStepProps) => {
+  const { t } = useTranslation();
   const { plan, planLeft, planTotal, addCoin, removeCoin } = onboarding;
 
   return (
     <View style={styles.root}>
       <View style={styles.remainder}>
-        <Text variant="bodyBold">{`Осталось разложить: ${planLeft}`}</Text>
+        <Text variant="bodyBold">
+          {t('onboarding.remainder', { count: planLeft })}
+        </Text>
         <ProgressBar value={(planTotal - planLeft) / planTotal} />
         <Text variant="small" themeColor="textSecondary">
-          Раскладывать всё до монеты не обязательно — остаток просто остаётся у
-          тебя.
+          {t('onboarding.remainderHint')}
         </Text>
       </View>
 
@@ -127,7 +141,9 @@ export const PlanStep = ({ onboarding }: PlanStepProps) => {
               <CoinStepper
                 count={plan[decision.id]}
                 isAddDisabled={planLeft === 0}
-                label={decision.title}
+                label={t(`onboarding.decisions.${decision.id}.title`, {
+                  defaultValue: decision.title,
+                })}
                 onAdd={() => addCoin(decision.id)}
                 onRemove={() => removeCoin(decision.id)}
               />

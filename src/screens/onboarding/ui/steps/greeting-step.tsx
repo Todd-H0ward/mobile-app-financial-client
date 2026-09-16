@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { listDecisions } from '@/entities/onboarding';
 
 import { SPACING } from '@/shared/constants';
+import { useTranslation } from '@/shared/i18n';
 import { Card, Text } from '@/shared/ui';
 
 import { DecisionBasket } from '../decision-basket';
@@ -12,6 +13,8 @@ import { DecisionBasket } from '../decision-basket';
 // ═══════════════════════════════════════════
 
 export const GreetingStep = () => {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.root}>
       <View style={styles.boxes}>
@@ -28,8 +31,7 @@ export const GreetingStep = () => {
       <Card tone="surfaceSoft">
         <Card.Content>
           <Text variant="small" themeColor="textSecondary">
-            Аккаунт не нужен: игра остаётся на этом устройстве и никуда ничего
-            не отправляет.
+            {t('onboarding.privacyNote')}
           </Text>
         </Card.Content>
       </Card>
