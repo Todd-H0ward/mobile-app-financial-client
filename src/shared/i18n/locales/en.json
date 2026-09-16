@@ -52,7 +52,18 @@
     "title": "Paw",
     "atHome": "At home: {{name}}",
     "roomComingSoon": "Pet room will appear in the first wave",
-    "petBoxLabel": "Someone is scratching inside. Tap"
+    "petBoxLabel": "Someone is scratching inside. Tap",
+    "balance": "Balance",
+    "savings": "Savings jar",
+    "goal": {
+      "none": "No goal chosen",
+      "noneHint": "Open the savings jar and pick what to save for",
+      "progress": "{{saved}} of {{price}}"
+    },
+    "task": {
+      "title": "Task",
+      "comingSoon": "Tasks will show up here very soon"
+    }
   },
   "pet": {
     "species": {

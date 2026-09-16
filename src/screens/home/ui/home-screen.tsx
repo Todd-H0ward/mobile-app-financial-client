@@ -4,15 +4,17 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { HintButton } from '@/widgets/hint-button';
 import { PetBox } from '@/widgets/pet-box';
 
-import { appearanceFor, emotionFor, moodFor } from '@/entities/pet';
 import { PetView } from '@/entities/pet/ui';
-import { useUserStore } from '@/entities/user';
 
 import { RADII, ROUTES, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { Screen, SettingsIcon } from '@/shared/ui';
 import { hitSlopFor } from '@/shared/utils';
+
+import { useHomeHud } from '../model';
+
+import { HomeHud } from './home-hud';
 
 // ═══════════════════════════════════════════
 // CONSTANTS
@@ -56,26 +58,23 @@ const GearButton = ({ onPress }: { onPress: () => void }) => {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
+/**
+ * The room screen: the pet plus everything requirement 2.5.3 asks to sit next
+ * to it at once — balance, savings, the active goal, the pet's state and the
+ * task slot. `useHomeHud` reads the save once and hands back that whole
+ * picture as one object; this component only lays it out.
+ */
 export const HomeScreen = () => {
   const router = useRouter();
   const { t } = useTranslation();
-  const pet = useUserStore((state) => state.user?.pet);
-  const isAnimationEnabled = useUserStore(
-    (state) => state.user?.settings.isAnimationEnabled ?? true,
-  );
-
-  const isPetMet = (pet?.name ?? '') !== '';
+  const hud = useHomeHud();
 
   return (
     <Screen gap="three" isTabBarVisible={false}>
       <Screen.Header>
         <Screen.Heading>
           <Screen.Title>{t('home.title')}</Screen.Title>
-          <Screen.Subtitle>
-            {isPetMet
-              ? t('home.atHome', { name: pet?.name })
-              : t('home.roomComingSoon')}
-          </Screen.Subtitle>
+          <Screen.Subtitle>{hud.subtitle}</Screen.Subtitle>
         </Screen.Heading>
 
         <View style={styles.headerActions}>
@@ -84,20 +83,29 @@ export const HomeScreen = () => {
         </View>
       </Screen.Header>
 
-      {isPetMet && pet != null ? (
+      {hud.pet ? (
         <View style={styles.stage}>
           <PetView
-            appearance={appearanceFor(pet.species, pet.color, pet.pattern)}
-            emotion={emotionFor(moodFor(pet.comfort, pet.spirit))}
-            stage={pet.stage}
+            appearance={hud.pet.appearance}
+            emotion={hud.pet.emotion}
+            stage={hud.pet.stage}
             size={PET_SIZE}
-            isAnimated={isAnimationEnabled}
-            accessibilityLabel={`${pet.name}, ${t(`pet.mood.${moodFor(pet.comfort, pet.spirit).name}`)}`}
+            isAnimated={hud.isAnimationEnabled}
+            accessibilityLabel={hud.pet.accessibilityLabel}
           />
         </View>
       ) : (
         <PetBox onPress={() => router.push(ROUTES.PET_CREATE)} />
       )}
+
+      <HomeHud
+        moodLabel={hud.pet?.moodLabel}
+        moodTone={hud.pet?.moodTone}
+        balance={hud.balance}
+        savingsTotal={hud.savingsTotal}
+        goal={hud.goal}
+        taskHint={hud.taskHint}
+      />
     </Screen>
   );
 };
