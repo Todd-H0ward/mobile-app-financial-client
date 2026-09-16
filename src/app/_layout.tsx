@@ -11,7 +11,9 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   return (
     <Providers>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
+      </Stack>
 
       <SplashOverlay />
     </Providers>
