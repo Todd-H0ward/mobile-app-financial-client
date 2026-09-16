@@ -20,17 +20,17 @@ export const COLORS = {
     textMuted: '#8A7A6E',
     textDisabled: '#A99788',
 
-    primary: '#2E8FA6',
-    primaryPressed: '#26798C',
-    primaryShadow: '#22707F',
-    primarySoft: '#E0EFF3',
-    primaryStrong: '#22707F',
+    primary: '#2AA4C0',
+    primaryPressed: '#238BA3',
+    primaryShadow: '#1E7A90',
+    primarySoft: '#D6F0F6',
+    primaryStrong: '#1A6F84',
 
-    accent: '#E58A2B',
-    accentPressed: '#C4761E',
-    accentShadow: '#B96C18',
-    accentSoft: '#FBEAD2',
-    accentStrong: '#A85F13',
+    accent: '#FF8F2A',
+    accentPressed: '#E07818',
+    accentShadow: '#C96810',
+    accentSoft: '#FFE8CC',
+    accentStrong: '#B85E0E',
 
     success: '#6DA97C',
     successPressed: '#5C9469',
@@ -42,9 +42,9 @@ export const COLORS = {
     warningSoft: '#F4EAD8',
     warningStrong: '#8A6A1E',
 
-    coin: '#F2C14E',
-    coinBorder: '#DCA82F',
-    coinSoft: '#F0D9A8',
+    coin: '#FFC84A',
+    coinBorder: '#E8A820',
+    coinSoft: '#FFE6A8',
 
     parent: '#5C6B7A',
     parentBackground: '#F4F5F7',
@@ -97,8 +97,8 @@ export const COLORS = {
     warningSoft: '#3A2E1B',
     warningStrong: '#F0CE8C',
 
-    coin: '#F2C14E',
-    coinBorder: '#DCA82F',
+    coin: '#FFC84A',
+    coinBorder: '#E8A820',
     coinSoft: '#4A3B1D',
 
     parent: '#8695A4',

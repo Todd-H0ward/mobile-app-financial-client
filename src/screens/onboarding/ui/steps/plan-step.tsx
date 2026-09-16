@@ -1,12 +1,10 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { listDecisions } from '@/entities/onboarding';
 
-import { RADII, SPACING } from '@/shared/constants';
-import { useTheme } from '@/shared/hooks';
+import { SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { ProgressBar, Text } from '@/shared/ui';
-import { hitSlopFor } from '@/shared/utils';
+import { Coin, Text } from '@/shared/ui';
 
 import type { OnboardingController } from '../../model';
 import { DecisionBasket } from '../decision-basket';
@@ -19,138 +17,107 @@ interface PlanStepProps {
   onboarding: OnboardingController;
 }
 
-interface CoinStepperProps {
-  /** Coins in this basket right now. */
-  count: number;
-  /** Disabled when nothing is left to lay out — the limit is physical. */
-  isAddDisabled: boolean;
-  label: string;
-  onAdd: () => void;
-  onRemove: () => void;
-}
-
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** Visual size of a stepper key; hitSlop expands the target to 48dp. */
-const KEY_SIZE = 36;
-
-// ═══════════════════════════════════════════
-// COMPONENTS
-// ═══════════════════════════════════════════
-
-const CoinStepper = ({
-  count,
-  isAddDisabled,
-  label,
-  onAdd,
-  onRemove,
-}: CoinStepperProps) => {
-  const { t } = useTranslation();
-  const theme = useTheme();
-
-  const key = (
-    sign: string,
-    onPress: () => void,
-    disabled: boolean,
-    accessibilityLabel: string,
-  ) => (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      accessibilityState={{ disabled }}
-      disabled={disabled}
-      hitSlop={hitSlopFor(KEY_SIZE)}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.key,
-        {
-          backgroundColor: disabled ? theme.disabled : theme.surface,
-          borderColor: theme.borderStrong,
-          opacity: pressed ? 0.7 : 1,
-        },
-      ]}
-    >
-      <Text variant="bodyBold" themeColor={disabled ? 'onDisabled' : 'text'}>
-        {sign}
-      </Text>
-    </Pressable>
-  );
-
-  return (
-    <View style={styles.stepper}>
-      {key(
-        '−',
-        onRemove,
-        count === 0,
-        t('onboarding.stepperMinusA11y', { label }),
-      )}
-
-      <Text variant="bodyBold" style={styles.count}>
-        {count}
-      </Text>
-
-      {key(
-        '+',
-        onAdd,
-        isAddDisabled,
-        t('onboarding.stepperPlusA11y', { label }),
-      )}
-    </View>
-  );
-};
+const COIN_SIZE = 30;
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
 /**
- * The rehearsal plan: ten coins laid out across the same three baskets.
- *
- * It follows the rules of the real budget screen (docs/budget.md) so that
- * screen arrives already familiar: the remainder is always visible, going over
- * the sum is impossible rather than corrected afterwards, and leaving coins
- * unassigned is allowed — the task is not to spend everything.
+ * Rehearsal plan: tap a basket to drop one coin into it. Remainder is fine —
+ * same rules as the real budget screen (docs/budget.md).
  */
 export const PlanStep = ({ onboarding }: PlanStepProps) => {
   const { t } = useTranslation();
   const { plan, planLeft, planTotal, addCoin, removeCoin } = onboarding;
 
+  const tray = Array.from({ length: planLeft }, (_, index) => index);
+
   return (
     <View style={styles.root}>
       <View style={styles.remainder}>
-        <Text variant="bodyBold">
+        <Text variant="bodyBold" style={styles.center}>
           {t('onboarding.remainder', { count: planLeft })}
         </Text>
-        <ProgressBar value={(planTotal - planLeft) / planTotal} />
-        <Text variant="small" themeColor="textSecondary">
+        <View style={styles.tray}>
+          {tray.map((index) => (
+            <Coin key={index} size={COIN_SIZE} isActive={index === 0} />
+          ))}
+          {planLeft === 0 && (
+            <Text variant="small" themeColor="successStrong">
+              {t('onboarding.trayEmpty')}
+            </Text>
+          )}
+        </View>
+        <Text variant="small" themeColor="textSecondary" style={styles.center}>
           {t('onboarding.remainderHint')}
         </Text>
       </View>
 
       <View style={styles.baskets}>
-        {listDecisions().map((decision) => (
-          <DecisionBasket
-            key={decision.id}
-            direction={decision.id}
-            title={decision.title}
-            example={decision.example}
-            isRow
-            trailing={
-              <CoinStepper
-                count={plan[decision.id]}
-                isAddDisabled={planLeft === 0}
-                label={t(`onboarding.decisions.${decision.id}.title`, {
-                  defaultValue: decision.title,
-                })}
-                onAdd={() => addCoin(decision.id)}
-                onRemove={() => removeCoin(decision.id)}
-              />
-            }
-          />
-        ))}
+        {listDecisions().map((decision) => {
+          const count = plan[decision.id];
+          const label = t(`onboarding.decisions.${decision.id}.title`, {
+            defaultValue: decision.title,
+          });
+
+          return (
+            <DecisionBasket
+              key={decision.id}
+              direction={decision.id}
+              title={decision.title}
+              example={decision.example}
+              isRow
+              onPress={planLeft > 0 ? () => addCoin(decision.id) : undefined}
+              accessibilityLabel={t('onboarding.dropCoinA11y', { label })}
+              trailing={
+                <View style={styles.slot}>
+                  {count > 0 ? (
+                    <View style={styles.stack}>
+                      {Array.from({ length: Math.min(count, 4) }, (_, i) => (
+                        <Coin key={i} size={22} />
+                      ))}
+                      {count > 4 && (
+                        <Text variant="label" themeColor="textMuted">
+                          +{count - 4}
+                        </Text>
+                      )}
+                    </View>
+                  ) : (
+                    <Text variant="label" themeColor="textMuted">
+                      0
+                    </Text>
+                  )}
+                  {count > 0 && (
+                    <Text
+                      variant="label"
+                      themeColor="primaryStrong"
+                      onPress={() => removeCoin(decision.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('onboarding.stepperMinusA11y', {
+                        label,
+                      })}
+                    >
+                      {t('onboarding.takeBack')}
+                    </Text>
+                  )}
+                </View>
+              }
+            />
+          );
+        })}
       </View>
+
+      <Text variant="label" themeColor="textMuted" style={styles.center}>
+        {t('onboarding.planProgress', {
+          laid: planTotal - planLeft,
+          total: planTotal,
+        })}
+      </Text>
     </View>
   );
 };
@@ -160,32 +127,36 @@ export const PlanStep = ({ onboarding }: PlanStepProps) => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  root: {
-    gap: SPACING.three,
-  },
   baskets: {
     gap: SPACING.two,
   },
-  count: {
-    minWidth: 20,
+  center: {
     textAlign: 'center',
-  },
-  key: {
-    alignItems: 'center',
-    borderRadius: RADII.s,
-    borderWidth: 1.5,
-    height: KEY_SIZE,
-    justifyContent: 'center',
-    width: KEY_SIZE,
   },
   remainder: {
     gap: SPACING.two,
   },
-  stepper: {
+  root: {
+    gap: SPACING.three,
+  },
+  slot: {
+    alignItems: 'flex-end',
+    gap: SPACING.half,
+    minWidth: 72,
+  },
+  stack: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: 2,
+  },
+  tray: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.one,
+    justifyContent: 'center',
+    minHeight: 36,
   },
 });
 
-export type { CoinStepperProps, PlanStepProps };
+export type { PlanStepProps };

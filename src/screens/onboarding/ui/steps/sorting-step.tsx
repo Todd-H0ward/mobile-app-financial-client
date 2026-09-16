@@ -1,6 +1,17 @@
-import { StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
+import { useCallback, useRef } from 'react';
 
+import { type View as RNView, StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  FadeIn,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  ZoomIn,
+} from 'react-native-reanimated';
+
+import type { BudgetDirection } from '@/entities/economy';
 import { listDecisions } from '@/entities/onboarding';
 
 import { RADII, SPACING } from '@/shared/constants';
@@ -19,6 +30,14 @@ interface SortingStepProps {
   onboarding: OnboardingController;
 }
 
+interface BasketFrame {
+  direction: BudgetDirection;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
@@ -26,23 +45,26 @@ interface SortingStepProps {
 const CARD_ENTRANCE_DURATION = 220;
 const EXPLANATION_DURATION = 180;
 const DONE_MARK_SIZE = 28;
+const SPRING = { damping: 18, stiffness: 200 };
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
 /**
- * The sorting step: a card in hand and three baskets under it.
- *
- * Nothing can be failed here. A card tapped into the wrong basket still goes
- * away — into its own basket — and the pet names the rule instead of marking
- * the answer (2.2, 3.5). That is why there is no score on this screen and no
- * way back to a card.
+ * Drag a card into one of three baskets. A miss still lands in the right
+ * basket and the pet names the rule — nothing can be failed (2.2, 3.5).
+ * Tapping a basket still works for accessibility.
  */
 export const SortingStep = ({ onboarding }: SortingStepProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const { sortItem, lastOutcome, sortProgress, placeItem } = onboarding;
+
+  const basketFrames = useRef<BasketFrame[]>([]);
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const dragScale = useSharedValue(1);
 
   const itemTitle = sortItem
     ? t(`onboarding.items.${sortItem.id}.title`, {
@@ -56,6 +78,63 @@ export const SortingStep = ({ onboarding }: SortingStepProps) => {
       })
     : '';
 
+  const resetCard = useCallback(() => {
+    translateX.value = withSpring(0, SPRING);
+    translateY.value = withSpring(0, SPRING);
+    dragScale.value = withSpring(1, SPRING);
+  }, [dragScale, translateX, translateY]);
+
+  const dropAt = useCallback(
+    (absX: number, absY: number) => {
+      const hit = basketFrames.current.find(
+        (frame: BasketFrame) =>
+          absX >= frame.x &&
+          absX <= frame.x + frame.width &&
+          absY >= frame.y &&
+          absY <= frame.y + frame.height,
+      );
+      if (hit) {
+        placeItem(hit.direction);
+      }
+      resetCard();
+    },
+    [placeItem, resetCard],
+  );
+
+  const pan = Gesture.Pan()
+    .enabled(sortItem != null)
+    .onBegin(() => {
+      dragScale.value = withSpring(1.05, SPRING);
+    })
+    .onUpdate((e) => {
+      translateX.value = e.translationX;
+      translateY.value = e.translationY;
+    })
+    .onEnd((e) => {
+      runOnJS(dropAt)(e.absoluteX, e.absoluteY);
+    });
+
+  const cardStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+      { scale: dragScale.value },
+    ],
+    zIndex: 20,
+  }));
+
+  const registerBasket = (direction: BudgetDirection, ref: RNView | null) => {
+    if (!ref) return;
+    ref.measureInWindow((x, y, width, height) => {
+      basketFrames.current = [
+        ...basketFrames.current.filter(
+          (frame: BasketFrame) => frame.direction !== direction,
+        ),
+        { direction, x, y, width, height },
+      ];
+    });
+  };
+
   return (
     <View style={styles.root}>
       <Text variant="small" themeColor="textMuted" style={styles.counter}>
@@ -66,19 +145,29 @@ export const SortingStep = ({ onboarding }: SortingStepProps) => {
       </Text>
 
       {sortItem ? (
-        <Animated.View
-          key={sortItem.id}
-          entering={ZoomIn.duration(CARD_ENTRANCE_DURATION)}
-          style={[
-            styles.card,
-            { backgroundColor: theme.surface, borderColor: theme.borderStrong },
-          ]}
-        >
-          <Text variant="subtitle">{itemTitle}</Text>
-          <Text variant="small" themeColor="textSecondary">
-            {t('onboarding.whichBox')}
-          </Text>
-        </Animated.View>
+        <GestureDetector gesture={pan}>
+          <Animated.View
+            key={sortItem.id}
+            entering={ZoomIn.duration(CARD_ENTRANCE_DURATION)}
+          >
+            <Animated.View
+              style={[
+                styles.card,
+                cardStyle,
+                {
+                  backgroundColor: theme.surface,
+                  borderColor: theme.borderStrong,
+                  shadowColor: theme.text,
+                },
+              ]}
+            >
+              <Text variant="subtitle">{itemTitle}</Text>
+              <Text variant="small" themeColor="textSecondary">
+                {t('onboarding.whichBox')}
+              </Text>
+            </Animated.View>
+          </Animated.View>
+        </GestureDetector>
       ) : (
         <View
           style={[
@@ -95,7 +184,6 @@ export const SortingStep = ({ onboarding }: SortingStepProps) => {
 
       {lastOutcome && (
         <Animated.View
-          // Keyed by the card, so each explanation re-enters on its own.
           key={lastOutcome.placement.itemId}
           entering={FadeIn.duration(EXPLANATION_DURATION)}
         >
@@ -112,22 +200,31 @@ export const SortingStep = ({ onboarding }: SortingStepProps) => {
           });
 
           return (
-            <DecisionBasket
+            <View
               key={decision.id}
-              direction={decision.id}
-              title={decision.title}
-              example={decision.example}
-              isRow
-              onPress={sortItem ? () => placeItem(decision.id) : undefined}
-              accessibilityLabel={
-                sortItem
-                  ? t('onboarding.sortCardA11y', {
-                      item: itemTitle,
-                      decision: decisionTitle,
-                    })
-                  : decisionTitle
-              }
-            />
+              ref={(node) => {
+                registerBasket(decision.id, node as RNView | null);
+              }}
+              onLayout={() => {
+                // Re-measure after layout settles.
+              }}
+            >
+              <DecisionBasket
+                direction={decision.id}
+                title={decision.title}
+                example={decision.example}
+                isRow
+                onPress={sortItem ? () => placeItem(decision.id) : undefined}
+                accessibilityLabel={
+                  sortItem
+                    ? t('onboarding.sortCardA11y', {
+                        item: itemTitle,
+                        decision: decisionTitle,
+                      })
+                    : decisionTitle
+                }
+              />
+            </View>
           );
         })}
       </View>
@@ -140,22 +237,26 @@ export const SortingStep = ({ onboarding }: SortingStepProps) => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  root: {
-    gap: SPACING.three,
-  },
   baskets: {
     gap: SPACING.two,
   },
   card: {
     alignItems: 'center',
     borderRadius: RADII.xl,
-    borderWidth: 1.5,
+    borderWidth: 2,
+    elevation: 4,
     gap: SPACING.one,
     paddingHorizontal: SPACING.three,
     paddingVertical: SPACING.four,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
   },
   counter: {
     textAlign: 'center',
+  },
+  root: {
+    gap: SPACING.three,
   },
 });
 

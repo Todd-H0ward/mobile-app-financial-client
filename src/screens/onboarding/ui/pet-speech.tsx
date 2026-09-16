@@ -1,9 +1,18 @@
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
+import {
+  appearanceFor,
+  type PetColor,
+  type PetPattern,
+  type PetSpecies,
+} from '@/entities/pet';
+import { PetView } from '@/entities/pet/ui';
+
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
-import { Shape, Text } from '@/shared/ui';
+import { useTranslation } from '@/shared/i18n';
+import { Text } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -14,28 +23,50 @@ interface PetSpeechProps {
   line: string;
   /** Changing it replays the entrance, so a new line is noticed. */
   stepId: string;
+  species?: PetSpecies;
+  color?: PetColor;
+  pattern?: PetPattern;
+  /** Smaller pet next to the bubble — for steps that already show a big pet. */
+  isCompact?: boolean;
 }
 
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-const PET_SIZE = 64;
+const PET_SIZE = 72;
+const PET_SIZE_COMPACT = 48;
 const ENTRANCE_DURATION = 260;
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-export const PetSpeech = ({ line, stepId }: PetSpeechProps) => {
+export const PetSpeech = ({
+  line,
+  stepId,
+  species = 'cat',
+  color = 'sand',
+  pattern = 'solid',
+  isCompact = false,
+}: PetSpeechProps) => {
+  const { t } = useTranslation();
   const theme = useTheme();
+  const appearance = appearanceFor(species, color, pattern);
+  const size = isCompact ? PET_SIZE_COMPACT : PET_SIZE;
 
   return (
     <View style={styles.root}>
-      <Shape variant="dome" size={PET_SIZE} color={theme.primarySoft} />
+      <PetView
+        appearance={appearance}
+        emotion="calm"
+        stage="baby"
+        size={size}
+        isAnimated={!isCompact}
+        accessibilityLabel={t('onboarding.petPreviewA11y')}
+      />
 
       <Animated.View
-        // Keyed by step, so the bubble re-enters with every new line.
         key={stepId}
         entering={FadeInDown.duration(ENTRANCE_DURATION)}
         style={[styles.bubble, { backgroundColor: theme.surface }]}
@@ -51,15 +82,15 @@ export const PetSpeech = ({ line, stepId }: PetSpeechProps) => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  root: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: SPACING.two,
-  },
   bubble: {
     borderRadius: RADII.l,
     flex: 1,
     padding: SPACING.three,
+  },
+  root: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: SPACING.two,
   },
 });
 

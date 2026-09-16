@@ -21,10 +21,10 @@
 
 | Пункт | Требование | Экран | Модуль | Тест | Статус |
 | --- | --- | --- | --- | --- | --- |
-| 2.5.1 | Онбординг: цель игры и три типа решений (обязательное / желаемое / отложить) | `screens/onboarding` | `entities/onboarding` + `content/onboarding.json` | `content.test.ts`, `sorting.test.ts` | в работе — три типа ребёнок раскладывает сам, промах объясняется и ничего не проваливает; осталось пройти на устройстве |
+| 2.5.1 | Онбординг: цель игры и три типа решений (обязательное / желаемое / отложить) | `screens/onboarding` | `entities/onboarding` + `content/onboarding.json` | `content.test.ts`, `sorting.test.ts` | в работе — drag-сортировка, скретч монет, boop; осталось пройти на устройстве |
 | 2.5.1 | Гостевой режим, локальный профиль, игровое имя | `screens/onboarding` | `entities/user` + `lib/player-name` | `player-name.test.ts`, `store.test.ts` | в работе — профиль создаётся в конце знакомства, аккаунта нет; осталось пройти на устройстве |
 | 2.5.1 | Доступ к подсказке в любой момент | все экраны | `widgets/hint-button` + `entities/hint` | `content.test.ts` | в работе — «?» в шапке каждого экрана, тексты в `content/hints.json`; осталось пройти на устройстве |
-| 2.5.2 | Создание питомца: внешность + имя, ≥9 различимых комбинаций | `screens/onboarding` | `entities/pet/model/appearance` | `appearance.test.ts` | не начато |
+| 2.5.2 | Создание питомца: внешность + имя, ≥9 различимых комбинаций | `screens/onboarding` (шаг `pet`) | `entities/pet` appearance axes | `appearance` / skin tests | в работе — вид/окрас/узор выбираются в онбординге; имя питомца позже |
 | 2.5.3 | Главный экран: питомец, баланс, накопления, цель, состояние, активное задание — одновременно | `screens/home` | — | — | не начато |
 | 2.5.4 | Валюта с явным источником и суммой каждого начисления | `screens/home`, `screens/history` | `entities/wallet` | `wallet.test.ts` | не начато |
 | 2.5.5 | План бюджета по трём направлениям, контроль остатка, подтверждение | `screens/budget-plan` | `entities/budget` | `plan.test.ts`, `compare.test.ts` | готово — валидация и остаток в entity, экран со слайдером и степпером, баннер на home в `planning` |

@@ -26,6 +26,7 @@ import {
   CheckIcon,
   Chip,
   CloseIcon,
+  Coin,
   CoinBadge,
   CoinIcon,
   Collapsible,
@@ -43,6 +44,7 @@ import {
   PiggyIcon,
   PlusIcon,
   ProgressBar,
+  ScratchCard,
   Screen,
   Shape,
   Sheet,
@@ -322,6 +324,14 @@ export const UiKitScreen = () => {
           </KitSection.Row>
         </KitSection>
 
+        <KitSection title="Coin" caption="Гурт, тень и перелив — idle и active">
+          <KitSection.Row label="размеры" isInline>
+            <Coin size={22} />
+            <Coin size={34} isActive />
+            <Coin size={48} isActive />
+          </KitSection.Row>
+        </KitSection>
+
         <KitSection
           title="CoinBadge"
           caption="Баланс, дельта в обе стороны, ноль и крайние значения"
@@ -343,6 +353,16 @@ export const UiKitScreen = () => {
             <CoinBadge amount={42} variant="plain" />
             <CoinBadge amount={42} coinSize={34} />
           </KitSection.Row>
+        </KitSection>
+
+        <KitSection
+          title="ScratchCard"
+          caption="Сотри защитный слой пальцем — как на лотерейном билете"
+        >
+          <ScratchCard foilLabel="Потри пальцем">
+            <Coin size={40} isActive />
+            <CoinBadge amount={100} label="стартовые" />
+          </ScratchCard>
         </KitSection>
 
         <KitSection

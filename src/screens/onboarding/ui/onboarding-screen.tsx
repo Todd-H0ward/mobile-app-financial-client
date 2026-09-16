@@ -12,6 +12,7 @@ import {
   CoinsStep,
   GreetingStep,
   NameStep,
+  PetStep,
   PlanStep,
   SortingStep,
 } from './steps';
@@ -35,12 +36,50 @@ export const OnboardingScreen = () => {
 
       <PawTrail current={stepNumber} total={stepCount} />
 
-      <PetSpeech line={line} stepId={stepId} />
+      {stepId !== 'greeting' && stepId !== 'pet' && (
+        <PetSpeech
+          line={line}
+          stepId={stepId}
+          species={onboarding.petSpecies}
+          color={onboarding.petColor}
+          pattern={onboarding.petPattern}
+        />
+      )}
 
-      {stepId === 'greeting' && <GreetingStep />}
+      {stepId === 'greeting' && (
+        <>
+          <PetSpeech
+            line={line}
+            stepId={stepId}
+            species="cat"
+            color="sand"
+            pattern="solid"
+            isCompact
+          />
+          <GreetingStep
+            hasMetPet={onboarding.hasMetPet}
+            onBoop={onboarding.markPetMet}
+          />
+        </>
+      )}
       {stepId === 'sorting' && <SortingStep onboarding={onboarding} />}
-      {stepId === 'coins' && <CoinsStep />}
+      {stepId === 'coins' && (
+        <CoinsStep onReveal={onboarding.markCoinsRevealed} />
+      )}
       {stepId === 'plan' && <PlanStep onboarding={onboarding} />}
+      {stepId === 'pet' && (
+        <>
+          <PetSpeech
+            line={line}
+            stepId={stepId}
+            species={onboarding.petSpecies}
+            color={onboarding.petColor}
+            pattern={onboarding.petPattern}
+            isCompact
+          />
+          <PetStep onboarding={onboarding} />
+        </>
+      )}
       {stepId === 'name' && <NameStep onboarding={onboarding} />}
 
       <Button

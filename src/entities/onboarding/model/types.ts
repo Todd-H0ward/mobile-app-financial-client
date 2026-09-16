@@ -17,6 +17,7 @@ const ONBOARDING_STEPS = [
   'sorting',
   'coins',
   'plan',
+  'pet',
   'name',
 ] as const;
 

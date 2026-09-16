@@ -5,6 +5,7 @@ import { useTheme } from '@/shared/hooks';
 
 import { formatMoney } from '../utils';
 
+import { Coin } from './coin';
 import { Text } from './text';
 
 // ═══════════════════════════════════════════
@@ -61,20 +62,7 @@ export const CoinBadge = ({
         style,
       ]}
     >
-      {!isDelta && (
-        <View
-          style={[
-            styles.coin,
-            {
-              backgroundColor: theme.coin,
-              borderColor: theme.coinBorder,
-              borderRadius: coinSize / 2,
-              height: coinSize,
-              width: coinSize,
-            },
-          ]}
-        />
-      )}
+      {!isDelta && <Coin size={coinSize} isActive />}
 
       <Text
         variant="subtitle"
@@ -108,9 +96,6 @@ const styles = StyleSheet.create({
     gap: 7,
     paddingHorizontal: 13,
     paddingVertical: 6,
-  },
-  coin: {
-    borderWidth: 2,
   },
   amount: {
     fontWeight: 900,
