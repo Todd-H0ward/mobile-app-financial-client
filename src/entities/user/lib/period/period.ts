@@ -3,7 +3,9 @@ import { type GrowthFacts, growPet } from '@/entities/pet';
 
 import type { TimeSource } from '@/shared/lib/time-source';
 
-import type { PeriodRecord, UserSave } from '../../model';
+// The types module, not the slice barrel: the barrel carries the store,
+// and with it `expo-sqlite`, which the node test runner cannot parse.
+import type { PeriodRecord, UserSave } from '../../model/types';
 
 // ═══════════════════════════════════════════
 // HELPERS

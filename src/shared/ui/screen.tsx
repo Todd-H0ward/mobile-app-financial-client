@@ -26,7 +26,7 @@ import {
 import { useTheme } from '@/shared/hooks';
 import { hitSlopFor } from '@/shared/utils';
 
-import { Text } from './text';
+import { Text, type TextProps } from './text';
 import { ThemedView } from './themed-view';
 
 // ═══════════════════════════════════════════
@@ -47,14 +47,25 @@ interface ScreenBackProps {
   color?: ThemeColor;
 }
 
+/**
+ * The header is a row: an optional leading control, the heading, an optional
+ * trailing one. Children are laid out in the order they are written, so the
+ * arrangement is readable at the call site instead of hidden behind slots.
+ */
 interface ScreenHeaderProps {
-  title: string;
-  subtitle?: string;
-  trailing?: ReactNode;
-  leading?: ReactNode;
-  titleColor?: ThemeColor;
-  subtitleColor?: ThemeColor;
+  children?: ReactNode;
+  style?: StyleProp<ViewStyle>;
 }
+
+/** The title and subtitle together — the part that takes the free width. */
+interface ScreenHeadingProps {
+  children?: ReactNode;
+  style?: StyleProp<ViewStyle>;
+}
+
+type ScreenTitleProps = TextProps;
+
+type ScreenSubtitleProps = TextProps;
 
 // ═══════════════════════════════════════════
 // CONSTANTS
@@ -100,34 +111,41 @@ const ScreenBack = ({ tone = 'surface', color = 'text' }: ScreenBackProps) => {
   );
 };
 
-const ScreenHeader = ({
-  title,
-  subtitle,
-  trailing,
-  leading,
-  titleColor = 'text',
-  subtitleColor = 'textMuted',
-}: ScreenHeaderProps) => {
-  return (
-    <View style={styles.header}>
-      {leading}
+const ScreenTitle = ({
+  children,
+  variant = 'title',
+  themeColor = 'text',
+  numberOfLines = 1,
+  ...props
+}: ScreenTitleProps) => (
+  <Text
+    variant={variant}
+    themeColor={themeColor}
+    numberOfLines={numberOfLines}
+    {...props}
+  >
+    {children}
+  </Text>
+);
 
-      <View style={styles.headerText}>
-        <Text variant="title" themeColor={titleColor} numberOfLines={1}>
-          {title}
-        </Text>
+const ScreenSubtitle = ({
+  children,
+  variant = 'small',
+  themeColor = 'textMuted',
+  ...props
+}: ScreenSubtitleProps) => (
+  <Text variant={variant} themeColor={themeColor} {...props}>
+    {children}
+  </Text>
+);
 
-        {subtitle != null && (
-          <Text variant="small" themeColor={subtitleColor}>
-            {subtitle}
-          </Text>
-        )}
-      </View>
+const ScreenHeading = ({ children, style }: ScreenHeadingProps) => (
+  <View style={[styles.heading, style]}>{children}</View>
+);
 
-      {trailing}
-    </View>
-  );
-};
+const ScreenHeader = ({ children, style }: ScreenHeaderProps) => (
+  <View style={[styles.header, style]}>{children}</View>
+);
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
@@ -178,6 +196,9 @@ const ScreenRoot = ({
 export const Screen = Object.assign(ScreenRoot, {
   Back: ScreenBack,
   Header: ScreenHeader,
+  Heading: ScreenHeading,
+  Title: ScreenTitle,
+  Subtitle: ScreenSubtitle,
 });
 
 // ═══════════════════════════════════════════
@@ -213,7 +234,7 @@ const styles = StyleSheet.create({
     gap: 10,
     justifyContent: 'space-between',
   },
-  headerText: {
+  heading: {
     flex: 1,
     gap: 2,
   },
@@ -222,4 +243,11 @@ const styles = StyleSheet.create({
   },
 });
 
-export type { ScreenBackProps, ScreenHeaderProps, ScreenRootProps };
+export type {
+  ScreenBackProps,
+  ScreenHeaderProps,
+  ScreenHeadingProps,
+  ScreenRootProps,
+  ScreenSubtitleProps,
+  ScreenTitleProps,
+};

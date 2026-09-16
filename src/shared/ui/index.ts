@@ -45,6 +45,7 @@ export {
   PawIcon,
   PiggyIcon,
   PlusIcon,
+  SettingsIcon,
   ShopIcon,
   TasksIcon,
   useIconColor,
@@ -60,7 +61,10 @@ export { ProgressBar } from './progress-bar';
 export type {
   ScreenBackProps,
   ScreenHeaderProps,
+  ScreenHeadingProps,
   ScreenRootProps,
+  ScreenSubtitleProps,
+  ScreenTitleProps,
 } from './screen';
 export { Screen } from './screen';
 export type { ShapeProps, ShapeVariant } from './shape';

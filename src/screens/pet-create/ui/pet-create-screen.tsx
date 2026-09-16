@@ -59,11 +59,15 @@ export const PetCreateScreen = () => {
 
   return (
     <Screen gap="three" isTabBarVisible={false}>
-      <Screen.Header
-        title="Кто в коробке"
-        subtitle="Выбери, кого ты забираешь домой, и придумай имя"
-        leading={<Screen.Back />}
-      />
+      <Screen.Header>
+        <Screen.Back />
+        <Screen.Heading>
+          <Screen.Title>Кто в коробке</Screen.Title>
+          <Screen.Subtitle>
+            Выбери, кого ты забираешь домой, и придумай имя
+          </Screen.Subtitle>
+        </Screen.Heading>
+      </Screen.Header>
 
       <View style={styles.stage}>
         <PetView
