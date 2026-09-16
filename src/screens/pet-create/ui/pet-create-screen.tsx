@@ -10,6 +10,7 @@ import {
 import { PetView } from '@/entities/pet/ui';
 
 import { SPACING } from '@/shared/constants';
+import { useTranslation } from '@/shared/i18n';
 import { Button, Chip, Input, Screen, Text } from '@/shared/ui';
 
 import { usePetCreate } from '../model/use-pet-create';
@@ -55,6 +56,7 @@ const PATTERN_LABEL: Record<(typeof PET_PATTERNS)[number], string> = {
  * is chosen: the child picks a pet they can see, not a word from a list.
  */
 export const PetCreateScreen = () => {
+  const { t } = useTranslation();
   const petCreate = usePetCreate();
 
   return (
@@ -62,10 +64,8 @@ export const PetCreateScreen = () => {
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
-          <Screen.Title>Кто в коробке</Screen.Title>
-          <Screen.Subtitle>
-            Выбери, кого ты забираешь домой, и придумай имя
-          </Screen.Subtitle>
+          <Screen.Title>{t('petCreate.title')}</Screen.Title>
+          <Screen.Subtitle>{t('petCreate.subtitle')}</Screen.Subtitle>
         </Screen.Heading>
       </Screen.Header>
 
@@ -84,7 +84,7 @@ export const PetCreateScreen = () => {
 
       <View style={styles.row}>
         <Text variant="label" themeColor="textMuted">
-          КТО ЭТО
+          {t('petCreate.whoIsThis')}
         </Text>
         <View style={styles.chips}>
           {PET_SPECIES.map((species) => (
@@ -93,7 +93,9 @@ export const PetCreateScreen = () => {
               variant={petCreate.species === species ? 'selected' : 'neutral'}
               onPress={() => petCreate.setSpecies(species)}
             >
-              {SPECIES_LABEL[species]}
+              {t(`pet.species.${species}`, {
+                defaultValue: SPECIES_LABEL[species],
+              })}
             </Chip>
           ))}
         </View>
@@ -101,7 +103,7 @@ export const PetCreateScreen = () => {
 
       <View style={styles.row}>
         <Text variant="label" themeColor="textMuted">
-          ОКРАС
+          {t('petCreate.color')}
         </Text>
         <View style={styles.chips}>
           {PET_COLORS.map((color) => (
@@ -110,7 +112,9 @@ export const PetCreateScreen = () => {
               variant={petCreate.color === color ? 'selected' : 'neutral'}
               onPress={() => petCreate.setColor(color)}
             >
-              {COLOR_LABEL[color]}
+              {t(`pet.color.${color}`, {
+                defaultValue: COLOR_LABEL[color],
+              })}
             </Chip>
           ))}
         </View>
@@ -118,7 +122,7 @@ export const PetCreateScreen = () => {
 
       <View style={styles.row}>
         <Text variant="label" themeColor="textMuted">
-          УЗОР
+          {t('petCreate.pattern')}
         </Text>
         <View style={styles.chips}>
           {PET_PATTERNS.map((pattern) => (
@@ -127,7 +131,9 @@ export const PetCreateScreen = () => {
               variant={petCreate.pattern === pattern ? 'selected' : 'neutral'}
               onPress={() => petCreate.setPattern(pattern)}
             >
-              {PATTERN_LABEL[pattern]}
+              {t(`pet.pattern.${pattern}`, {
+                defaultValue: PATTERN_LABEL[pattern],
+              })}
             </Chip>
           ))}
         </View>
@@ -138,8 +144,8 @@ export const PetCreateScreen = () => {
         onChangeText={petCreate.setName}
         maxLength={PET_NAME_MAX_LENGTH}
         isCounterVisible
-        placeholder="Имя питомца"
-        hint="Придумай любое — менять его потом можно"
+        placeholder={t('petCreate.namePlaceholder')}
+        hint={t('petCreate.nameHint')}
       />
 
       <Button
@@ -147,7 +153,7 @@ export const PetCreateScreen = () => {
         disabled={!petCreate.canFinish}
         onPress={petCreate.finish}
       >
-        Забрать домой
+        {t('petCreate.takeHome')}
       </Button>
     </Screen>
   );

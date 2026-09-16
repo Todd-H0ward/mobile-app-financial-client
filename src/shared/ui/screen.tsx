@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import {
   Pressable,
   ScrollView,
@@ -45,6 +46,7 @@ interface ScreenRootProps {
 interface ScreenBackProps {
   tone?: ThemeColor;
   color?: ThemeColor;
+  accessibilityLabel?: string;
 }
 
 /**
@@ -78,14 +80,19 @@ const BACK_SIZE = 40;
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-const ScreenBack = ({ tone = 'surface', color = 'text' }: ScreenBackProps) => {
+const ScreenBack = ({
+  tone = 'surface',
+  color = 'text',
+  accessibilityLabel,
+}: ScreenBackProps) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const router = useRouter();
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Назад"
+      accessibilityLabel={accessibilityLabel ?? t('common.back')}
       hitSlop={hitSlopFor(BACK_SIZE)}
       onPress={() => {
         if (router.canGoBack()) {

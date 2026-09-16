@@ -22,6 +22,7 @@ import {
   useUserStore,
 } from '@/entities/user';
 
+import { useTranslation } from '@/shared/i18n';
 import { useTimeSource } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
@@ -111,6 +112,7 @@ interface OnboardingController {
 export const useOnboarding = (): OnboardingController => {
   const router = useRouter();
   const time = useTimeSource();
+  const { t } = useTranslation();
   const createUser = useUserStore((state) => state.createUser);
 
   const [stepIndex, setStepIndex] = useState(0);
@@ -143,8 +145,12 @@ export const useOnboarding = (): OnboardingController => {
 
   return {
     stepId,
-    title: step?.title ?? '',
-    line: step?.line ?? '',
+    title: t(`onboarding.steps.${stepId}.title`, {
+      defaultValue: step?.title ?? '',
+    }),
+    line: t(`onboarding.steps.${stepId}.line`, {
+      defaultValue: step?.line ?? '',
+    }),
     stepNumber: stepIndex + 1,
     stepCount: ONBOARDING_STEPS.length,
     sortItem: currentSortItem(sorting),
@@ -155,7 +161,9 @@ export const useOnboarding = (): OnboardingController => {
     planTotal: MINI_PLAN_COINS,
     playerName,
     canContinue,
-    actionLabel: ACTION_LABEL[stepId],
+    actionLabel: t(`onboarding.actions.${stepId}`, {
+      defaultValue: ACTION_LABEL[stepId],
+    }),
 
     placeItem: (direction) => {
       const outcome = placeSortItem(sorting, direction);

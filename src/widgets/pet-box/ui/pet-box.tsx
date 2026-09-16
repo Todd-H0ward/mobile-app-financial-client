@@ -21,6 +21,7 @@ import { useUserStore } from '@/entities/user';
 
 import { SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useTranslation } from '@/shared/i18n';
 import { Text } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
@@ -80,10 +81,12 @@ const HOLE_RADIUS = 3.2;
 export const PetBox = ({
   onPress,
   size = DEFAULT_SIZE,
-  label = 'Кто-то скребётся внутри. Нажми',
+  label,
   style,
 }: PetBoxProps) => {
+  const { t } = useTranslation();
   const theme = useTheme();
+  const boxLabel = label ?? t('home.petBoxLabel');
 
   // There is no profile during onboarding, and the grown-up's switch is the
   // authority once there is one — 3.6, weak devices.
@@ -132,7 +135,7 @@ export const PetBox = ({
     <View style={[styles.root, style]}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={label}
+        accessibilityLabel={boxLabel}
         onPressIn={() => {
           press.value = withTiming(PRESS_SCALE, { duration: PRESS_DURATION });
         }}
@@ -219,7 +222,7 @@ export const PetBox = ({
       </Pressable>
 
       <Text variant="small" themeColor="textSecondary" style={styles.label}>
-        {label}
+        {boxLabel}
       </Text>
     </View>
   );

@@ -17,6 +17,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { ClipPath, Defs, Ellipse, G, Path } from 'react-native-svg';
 
+import { useTranslation } from '@/shared/i18n';
+
 import { type PetSkinLayer, skinLayerFor } from '../lib';
 import { anchorsFor } from '../lib/anchors';
 import { poseFor } from '../lib/pose';
@@ -313,6 +315,7 @@ const PetRoot = ({
   children,
   style,
 }: PetProps) => {
+  const { t } = useTranslation();
   const clipId = useId();
 
   // The skeleton depends on the species alone, the coat on the skin: two
@@ -400,7 +403,7 @@ const PetRoot = ({
 
   const label =
     accessibilityLabel ??
-    `${SPECIES_LABEL[skin.species]}, ${MOOD_LABEL[mood.name]}`;
+    `${t(`pet.species.${skin.species}`, { defaultValue: SPECIES_LABEL[skin.species] })}, ${t(`pet.mood.${mood.name}`, { defaultValue: MOOD_LABEL[mood.name] })}`;
 
   return (
     <View

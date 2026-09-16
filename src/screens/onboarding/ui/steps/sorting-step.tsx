@@ -5,6 +5,7 @@ import { listDecisions } from '@/entities/onboarding';
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useTranslation } from '@/shared/i18n';
 import { Shape, Text } from '@/shared/ui';
 
 import type { OnboardingController } from '../../model';
@@ -39,13 +40,29 @@ const DONE_MARK_SIZE = 28;
  * way back to a card.
  */
 export const SortingStep = ({ onboarding }: SortingStepProps) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { sortItem, lastOutcome, sortProgress, placeItem } = onboarding;
+
+  const itemTitle = sortItem
+    ? t(`onboarding.items.${sortItem.id}.title`, {
+        defaultValue: sortItem.title,
+      })
+    : '';
+
+  const outcomeExplanation = lastOutcome
+    ? t(`onboarding.items.${lastOutcome.placement.itemId}.explanation`, {
+        defaultValue: lastOutcome.explanation,
+      })
+    : '';
 
   return (
     <View style={styles.root}>
       <Text variant="small" themeColor="textMuted" style={styles.counter}>
-        {`Разложено ${sortProgress.done} из ${sortProgress.total}`}
+        {t('onboarding.sortedCounter', {
+          done: sortProgress.done,
+          total: sortProgress.total,
+        })}
       </Text>
 
       {sortItem ? (
@@ -57,9 +74,9 @@ export const SortingStep = ({ onboarding }: SortingStepProps) => {
             { backgroundColor: theme.surface, borderColor: theme.borderStrong },
           ]}
         >
-          <Text variant="subtitle">{sortItem.title}</Text>
+          <Text variant="subtitle">{itemTitle}</Text>
           <Text variant="small" themeColor="textSecondary">
-            В какую коробку?
+            {t('onboarding.whichBox')}
           </Text>
         </Animated.View>
       ) : (
@@ -71,7 +88,7 @@ export const SortingStep = ({ onboarding }: SortingStepProps) => {
         >
           <Shape variant="leaf" size={DONE_MARK_SIZE} color={theme.success} />
           <Text variant="subtitle" themeColor="successStrong">
-            Всё разложено
+            {t('onboarding.allSorted')}
           </Text>
         </View>
       )}
@@ -83,27 +100,36 @@ export const SortingStep = ({ onboarding }: SortingStepProps) => {
           entering={FadeIn.duration(EXPLANATION_DURATION)}
         >
           <Text variant="small" themeColor="textSecondary">
-            {lastOutcome.explanation}
+            {outcomeExplanation}
           </Text>
         </Animated.View>
       )}
 
       <View style={styles.baskets}>
-        {listDecisions().map((decision) => (
-          <DecisionBasket
-            key={decision.id}
-            direction={decision.id}
-            title={decision.title}
-            example={decision.example}
-            isRow
-            onPress={sortItem ? () => placeItem(decision.id) : undefined}
-            accessibilityLabel={
-              sortItem
-                ? `Положить «${sortItem.title}» в коробку «${decision.title}»`
-                : decision.title
-            }
-          />
-        ))}
+        {listDecisions().map((decision) => {
+          const decisionTitle = t(`onboarding.decisions.${decision.id}.title`, {
+            defaultValue: decision.title,
+          });
+
+          return (
+            <DecisionBasket
+              key={decision.id}
+              direction={decision.id}
+              title={decision.title}
+              example={decision.example}
+              isRow
+              onPress={sortItem ? () => placeItem(decision.id) : undefined}
+              accessibilityLabel={
+                sortItem
+                  ? t('onboarding.sortCardA11y', {
+                      item: itemTitle,
+                      decision: decisionTitle,
+                    })
+                  : decisionTitle
+              }
+            />
+          );
+        })}
       </View>
     </View>
   );

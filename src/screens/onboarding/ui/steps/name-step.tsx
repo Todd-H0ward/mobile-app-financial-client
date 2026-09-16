@@ -8,6 +8,7 @@ import {
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useTranslation } from '@/shared/i18n';
 import { Input, Text } from '@/shared/ui';
 
 import type { OnboardingController } from '../../model';
@@ -21,13 +22,6 @@ interface NameStepProps {
 }
 
 // ═══════════════════════════════════════════
-// CONSTANTS
-// ═══════════════════════════════════════════
-
-/** What the sign says before anything is typed. */
-const EMPTY_SIGN = 'Дом ?';
-
-// ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
@@ -39,6 +33,7 @@ const EMPTY_SIGN = 'Дом ?';
  * up on the sign as it is typed, so the field reads as part of the game.
  */
 export const NameStep = ({ onboarding }: NameStepProps) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { playerName, setPlayerName } = onboarding;
 
@@ -54,20 +49,22 @@ export const NameStep = ({ onboarding }: NameStepProps) => {
         ]}
       >
         <Text variant="subtitle" numberOfLines={1}>
-          {isEmpty ? EMPTY_SIGN : `Дом ${sign}`}
+          {isEmpty
+            ? t('onboarding.emptySign')
+            : t('onboarding.namedSign', { name: sign })}
         </Text>
       </View>
 
       <Input
         value={playerName}
         onChangeText={setPlayerName}
-        placeholder="Игровое имя"
+        placeholder={t('onboarding.namePlaceholder')}
         maxLength={PLAYER_NAME_MAX_LENGTH}
         isCounterVisible
         hint={
           isEmpty
-            ? 'Напиши любое имя — его увидишь только ты'
-            : 'Имя можно будет поменять в разделе для взрослых'
+            ? t('onboarding.nameHintEmpty')
+            : t('onboarding.nameHintFilled')
         }
       />
     </View>

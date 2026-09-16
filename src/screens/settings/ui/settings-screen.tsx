@@ -8,6 +8,7 @@ import { RestartOnboardingButton } from '@/features/profile-restart';
 import { useUserStore } from '@/entities/user';
 
 import { SPACING } from '@/shared/constants';
+import { useTranslation } from '@/shared/i18n';
 import type { LanguagePreference } from '@/shared/types';
 import { Button, Card, ListRow, Screen, Switch, Text } from '@/shared/ui';
 
@@ -15,10 +16,10 @@ import { Button, Card, ListRow, Screen, Switch, Text } from '@/shared/ui';
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-const LANGUAGE_OPTIONS: { value: LanguagePreference; label: string }[] = [
-  { value: 'system', label: 'Системный' },
-  { value: 'ru', label: 'Русский' },
-  { value: 'en', label: 'English' },
+const LANGUAGE_OPTIONS: { value: LanguagePreference; labelKey: string }[] = [
+  { value: 'system', labelKey: 'settings.system' },
+  { value: 'ru', labelKey: 'settings.russian' },
+  { value: 'en', labelKey: 'settings.english' },
 ];
 
 // ═══════════════════════════════════════════
@@ -27,6 +28,7 @@ const LANGUAGE_OPTIONS: { value: LanguagePreference; label: string }[] = [
 
 export const SettingsScreen = () => {
   const router = useRouter();
+  const { t } = useTranslation();
   const { languagePreference, changeLanguage } = useChangeLanguage();
   const updateUser = useUserStore((state) => state.updateUser);
 
@@ -54,15 +56,15 @@ export const SettingsScreen = () => {
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
-          <Screen.Title>Настройки</Screen.Title>
+          <Screen.Title>{t('settings.title')}</Screen.Title>
         </Screen.Heading>
       </Screen.Header>
 
       <Card tone="surfaceSoft">
-        <Card.Title>Язык</Card.Title>
+        <Card.Title>{t('settings.language')}</Card.Title>
         <Card.Content>
           <View style={styles.langButtons}>
-            {LANGUAGE_OPTIONS.map(({ value, label }) => (
+            {LANGUAGE_OPTIONS.map(({ value, labelKey }) => (
               <Button
                 key={value}
                 size="m"
@@ -70,7 +72,7 @@ export const SettingsScreen = () => {
                 isFullWidth
                 onPress={() => changeLanguage(value)}
               >
-                {label}
+                {t(labelKey)}
               </Button>
             ))}
           </View>
@@ -78,27 +80,27 @@ export const SettingsScreen = () => {
       </Card>
 
       <Card tone="surfaceSoft">
-        <Card.Title>Интерфейс</Card.Title>
+        <Card.Title>{t('settings.interface')}</Card.Title>
         <Card.Content style={styles.toggles}>
           <ListRow
-            title="Анимации"
-            subtitle="Плавные переходы и движение питомца"
+            title={t('settings.animations')}
+            subtitle={t('settings.animationsSubtitle')}
             trailing={
               <Switch
                 isChecked={isAnimationEnabled}
                 onChange={setAnimation}
-                label="Анимации"
+                label={t('settings.animations')}
               />
             }
           />
           <ListRow
-            title="Звук"
-            subtitle="Звуковые эффекты"
+            title={t('settings.sound')}
+            subtitle={t('settings.soundSubtitle')}
             trailing={
               <Switch
                 isChecked={isSoundEnabled}
                 onChange={setSound}
-                label="Звук"
+                label={t('settings.sound')}
               />
             }
           />
@@ -108,26 +110,24 @@ export const SettingsScreen = () => {
       <DemoModeCard />
 
       <Card tone="surfaceSoft">
-        <Card.Title>Разработка</Card.Title>
+        <Card.Title>{t('settings.development')}</Card.Title>
         <Card.Content>
           <Text variant="small" themeColor="textSecondary">
-            Витрина дизайн-системы: все компоненты и их состояния на одном
-            экране.
+            {t('settings.uiKitDescription')}
           </Text>
         </Card.Content>
         <Card.Footer>
           <Button size="m" isFullWidth onPress={() => router.push('/ui-kit')}>
-            Открыть UI-кит
+            {t('settings.openUiKit')}
           </Button>
         </Card.Footer>
       </Card>
 
       <Card tone="surfaceSoft">
-        <Card.Title>Профиль</Card.Title>
+        <Card.Title>{t('settings.profile')}</Card.Title>
         <Card.Content>
           <Text variant="small" themeColor="textSecondary">
-            Удаляет профиль и открывает знакомство заново. Монеты, копилка и
-            история периодов пропадут безвозвратно.
+            {t('settings.profileDescription')}
           </Text>
         </Card.Content>
         <Card.Footer>

@@ -10,6 +10,7 @@ import { useUserStore } from '@/entities/user';
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useTranslation } from '@/shared/i18n';
 import { Screen, SettingsIcon } from '@/shared/ui';
 import { hitSlopFor } from '@/shared/utils';
 
@@ -28,12 +29,13 @@ const GEAR_SIZE = 40;
 // ═══════════════════════════════════════════
 
 const GearButton = ({ onPress }: { onPress: () => void }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Настройки"
+      accessibilityLabel={t('home.settingsA11y')}
       hitSlop={hitSlopFor(GEAR_SIZE)}
       onPress={onPress}
       style={({ pressed }) => [
@@ -56,6 +58,7 @@ const GearButton = ({ onPress }: { onPress: () => void }) => {
 
 export const HomeScreen = () => {
   const router = useRouter();
+  const { t } = useTranslation();
   const pet = useUserStore((state) => state.user?.pet);
   const isAnimationEnabled = useUserStore(
     (state) => state.user?.settings.isAnimationEnabled ?? true,
@@ -67,11 +70,11 @@ export const HomeScreen = () => {
     <Screen gap="three" isTabBarVisible={false}>
       <Screen.Header>
         <Screen.Heading>
-          <Screen.Title>Лапка</Screen.Title>
+          <Screen.Title>{t('home.title')}</Screen.Title>
           <Screen.Subtitle>
             {isPetMet
-              ? `Дома: ${pet?.name}`
-              : 'Комната питомца появится в первой волне'}
+              ? t('home.atHome', { name: pet?.name })
+              : t('home.roomComingSoon')}
           </Screen.Subtitle>
         </Screen.Heading>
 
@@ -89,7 +92,7 @@ export const HomeScreen = () => {
             stage={pet.stage}
             size={PET_SIZE}
             isAnimated={isAnimationEnabled}
-            accessibilityLabel={`${pet.name}, ${moodFor(pet.comfort, pet.spirit).name}`}
+            accessibilityLabel={`${pet.name}, ${t(`pet.mood.${moodFor(pet.comfort, pet.spirit).name}`)}`}
           />
         </View>
       ) : (
