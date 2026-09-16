@@ -4,6 +4,7 @@ import {
   WALLET_SOURCES,
 } from '@/entities/economy';
 import { type GrowthFacts, growPet } from '@/entities/pet';
+import { nextTaskId } from '@/entities/task';
 
 import type { TimeSource } from '@/shared/lib/time-source';
 
@@ -197,6 +198,11 @@ export const acknowledgeSummary = (
       ...savings,
       // Reset so that the regularity bonus counts only this period's deposits.
       depositsThisPeriod: 0,
+    },
+    tasks: {
+      // Open the catalogue again — every chore is available each period.
+      completedThisPeriod: [],
+      activeTaskId: nextTaskId([]),
     },
     history,
   };

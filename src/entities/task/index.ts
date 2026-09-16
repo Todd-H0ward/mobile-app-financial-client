@@ -1,8 +1,11 @@
 export {
   assertTasksContent,
   getTaskById,
+  isTaskAvailable,
+  listOpenTasks,
   listTasks,
   listTasksByTheme,
+  nextTaskId,
   rewardForTask,
 } from './lib';
 export type {

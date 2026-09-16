@@ -1,4 +1,5 @@
 import { listGoals } from '@/entities/goal';
+import { nextTaskId } from '@/entities/task';
 
 import { startingWallet } from '../../lib/wallet';
 import type { UserSave } from '../types';
@@ -8,7 +9,7 @@ import type { UserSave } from '../types';
 // ═══════════════════════════════════════════
 
 /** Save schema version. Bumped on every incompatible change. */
-const USER_SAVE_VERSION = 3;
+const USER_SAVE_VERSION = 4;
 
 /** Starting thermostat position: chilly, but not cold. */
 const STARTING_TEMPERATURE = 0.5;
@@ -80,6 +81,11 @@ export const createInitialUser = ({
     })),
     activeGoalId: listGoals()[0]?.id ?? null,
     depositsThisPeriod: 0,
+  },
+  tasks: {
+    // First chore in catalogue order — every task is unlocked at once.
+    activeTaskId: nextTaskId([]),
+    completedThisPeriod: [],
   },
   period: {
     index: 1,

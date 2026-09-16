@@ -67,6 +67,19 @@ const MIGRATIONS: Record<number, MigrationStep> = {
       version: 3,
     };
   },
+
+  // v3 — chores engine: active task + per-period completions (2.5.8). Fresh
+  // profiles get the first catalogue task; a mid-game save starts the same
+  // way so the HUD never shows an empty slot for no reason.
+  3: (save) => {
+    const fresh = createInitialUser();
+
+    return {
+      ...save,
+      tasks: fresh.tasks,
+      version: 4,
+    };
+  },
 };
 
 // ═══════════════════════════════════════════
@@ -132,6 +145,12 @@ const isSettings = (value: unknown): boolean =>
   typeof value.isAnimationEnabled === 'boolean' &&
   typeof value.isDemoMode === 'boolean';
 
+const isTasks = (value: unknown): boolean =>
+  isRecord(value) &&
+  (value.activeTaskId === null || typeof value.activeTaskId === 'string') &&
+  Array.isArray(value.completedThisPeriod) &&
+  value.completedThisPeriod.every((id) => typeof id === 'string');
+
 /**
  * Checks the shape of the save, not its meaning: passing means no screen will
  * crash reading a field. Economic invariants (balance >= 0 and the rest) are
@@ -145,6 +164,7 @@ export const isUserSave = (value: unknown): value is UserSave =>
   isPet(value.pet) &&
   isWallet(value.wallet) &&
   isSavings(value.savings) &&
+  isTasks(value.tasks) &&
   isPeriod(value.period) &&
   Array.isArray(value.history) &&
   isHome(value.home) &&

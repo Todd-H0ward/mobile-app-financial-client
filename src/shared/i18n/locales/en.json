@@ -69,7 +69,8 @@
     "lastCredit": "Latest credit",
     "task": {
       "title": "Task",
-      "comingSoon": "Tasks will show up here very soon"
+      "comingSoon": "Tasks will show up here very soon",
+      "allDone": "Every chore this period is done — well done"
     }
   },
   "rooms": {
@@ -114,6 +115,7 @@
     "source": {
       "startingWallet": "starting wallet",
       "regularityBonus": "regularity bonus",
+      "task": "chore «{{title}}»",
       "unknown": "credit"
     }
   },

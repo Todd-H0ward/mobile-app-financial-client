@@ -48,6 +48,13 @@ describe('createInitialUser', () => {
     expect(user.savings.activeGoalId).toBe(GOALS_CONTENT.goals[0]?.id);
   });
 
+  it('issues the first catalogue chore with nothing done yet — 2.5.8', () => {
+    const user = createInitialUser();
+
+    expect(user.tasks.activeTaskId).not.toBeNull();
+    expect(user.tasks.completedThisPeriod).toEqual([]);
+  });
+
   it('stores only the goal id — the title and the price stay in content, 3.2', () => {
     const [goal] = createInitialUser().savings.goals;
 

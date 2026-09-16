@@ -32,6 +32,12 @@ export type {
   ShortageWaitOption,
 } from './shortage';
 export { explainShortage } from './shortage';
+export type { TaskFail, TaskOk, TaskResult } from './tasks';
+export {
+  applyCompleteTask,
+  issueNextTask,
+  selectTask,
+} from './tasks';
 export type {
   CreditInput,
   DebitFail,
