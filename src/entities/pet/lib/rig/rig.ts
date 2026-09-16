@@ -1,4 +1,4 @@
-import type { PetAnchor, PetSkin } from '../../model';
+import type { PetAnchor, PetSilhouette } from '../../model';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -50,7 +50,7 @@ interface RigPivots {
 }
 
 /**
- * One pet, as geometry a renderer can hand straight to SVG.
+ * One skeleton, as geometry a renderer can hand straight to SVG.
  *
  * Everything is in viewBox units of a 100 × 100 box, which is also what the
  * anchors are fractions of: one `size` then scales the drawing, the attachment
@@ -71,8 +71,6 @@ interface PetRig {
   eyes: RigEyes;
   /** Both cheeks — the one warm accent on the face, below the eyes. */
   cheeks: RigEyes;
-  /** Pattern marks, exactly `skin.marks.count` of them, all inside the body. */
-  marks: RigEllipse[];
   /** Where each animated layer turns around. */
   pivots: RigPivots;
 }
@@ -96,18 +94,6 @@ const HEAD_OVERLAP = 0.18;
 /** Head half-width ÷ half-height. Slightly wide reads as young. */
 const HEAD_WIDTH = 1.05;
 
-/** Ring the spots sit on, as a share of the body's radii. */
-const SPOT_RING = 0.5;
-
-/** Where the ring starts, in radians. Fixed, so a coat never reshuffles. */
-const SPOT_PHASE = -Math.PI / 2;
-
-/** Half-width of a stripe, as a share of the body's half-width. */
-const STRIPE_WIDTH = 0.7;
-
-/** How far the outermost stripes sit from the body's middle. */
-const STRIPE_SPREAD = 10;
-
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
@@ -126,7 +112,7 @@ const fraction = (x: number, y: number): RigPivot => ({
  */
 const earPath = (
   head: RigEllipse,
-  shape: PetSkin['silhouette']['earShape'],
+  shape: PetSilhouette['earShape'],
   side: number,
 ) => {
   const baseX = head.cx + side * head.rx * 0.55;
@@ -165,10 +151,7 @@ const earPath = (
 };
 
 /** The tail, or `null` when the species has none. */
-const tailPath = (
-  body: RigEllipse,
-  shape: PetSkin['silhouette']['tailShape'],
-) => {
+const tailPath = (body: RigEllipse, shape: PetSilhouette['tailShape']) => {
   if (shape === 'none') return null;
 
   const rootX = body.cx + body.rx * 0.8;
@@ -187,56 +170,20 @@ const tailPath = (
   ].join(' ');
 };
 
-/**
- * The pattern layer.
- *
- * Deterministic on purpose: the same coat draws the same spots every render,
- * so a pet does not reshuffle its markings when the screen re-renders.
- */
-const markEllipses = (
-  body: RigEllipse,
-  marks: PetSkin['marks'],
-): RigEllipse[] => {
-  if (marks.kind === 'none' || marks.count <= 0) return [];
-
-  const radius = (marks.size * VIEW_BOX) / 2;
-
-  if (marks.kind === 'spots') {
-    return Array.from({ length: marks.count }, (_, index) => {
-      const angle = SPOT_PHASE + (index * 2 * Math.PI) / marks.count;
-
-      return {
-        cx: body.cx + body.rx * SPOT_RING * Math.cos(angle),
-        cy: body.cy + body.ry * SPOT_RING * Math.sin(angle),
-        rx: radius,
-        ry: radius,
-      };
-    });
-  }
-
-  // Stripes run across the body, spread evenly around its middle.
-  const step = marks.count > 1 ? (STRIPE_SPREAD * 2) / (marks.count - 1) : 0;
-
-  return Array.from({ length: marks.count }, (_, index) => ({
-    cx: body.cx,
-    cy: body.cy - STRIPE_SPREAD + index * step,
-    rx: body.rx * STRIPE_WIDTH,
-    ry: radius,
-  }));
-};
-
 // ═══════════════════════════════════════════
 // RIG
 // ═══════════════════════════════════════════
 
 /**
- * The whole pet as geometry, in a 100 × 100 viewBox.
+ * The pet's skeleton, in a 100 × 100 viewBox.
  *
- * Pure and total: every skin produces a rig, and nothing here reads the theme
- * or the pose — the pose only moves the layers this function lays out.
+ * It takes the silhouette and nothing else: the rig knows *where* every part
+ * lies, never what colour it is or what is drawn on it. That is the skin
+ * layer's job (`skinLayerFor`), and the split is what lets three skeletons
+ * serve all twenty-seven looks.
  */
-export const rigFor = (skin: PetSkin): PetRig => {
-  const { bodyRatio, headRatio, earShape, tailShape } = skin.silhouette;
+export const rigFor = (silhouette: PetSilhouette): PetRig => {
+  const { bodyRatio, headRatio, earShape, tailShape } = silhouette;
 
   const body: RigEllipse = {
     cx: VIEW_BOX / 2,
@@ -286,7 +233,6 @@ export const rigFor = (skin: PetSkin): PetRig => {
     tail: tailPath(body, tailShape),
     eyes: { left: eye(-1), right: eye(1) },
     cheeks: { left: cheek(-1), right: cheek(1) },
-    marks: markEllipses(body, skin.marks),
     pivots: {
       body: fraction(body.cx, GROUND),
       head: fraction(head.cx, head.cy + head.ry * 0.8),

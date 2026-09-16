@@ -1,3 +1,5 @@
+import { normalizeName } from '@/shared/utils';
+
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
@@ -34,7 +36,7 @@ type PlayerNameStatus = 'ok' | 'empty';
  * is never called a real name and never leaves the device (docs/privacy.md).
  */
 export const normalizePlayerName = (raw: string): string =>
-  raw.trim().replace(/\s+/g, ' ').slice(0, PLAYER_NAME_MAX_LENGTH);
+  normalizeName(raw, PLAYER_NAME_MAX_LENGTH);
 
 /** Whether the normalized name may be saved, and why not when it may not. */
 export const validatePlayerName = (raw: string): PlayerNameStatus =>

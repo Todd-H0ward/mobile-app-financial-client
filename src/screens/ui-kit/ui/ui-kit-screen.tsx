@@ -3,39 +3,54 @@ import { StyleSheet, View } from 'react-native';
 import { HintButton } from '@/widgets/hint-button';
 
 import {
+  appearanceFor,
+  EMOTION_KEYS,
+  EMOTIONS,
+  emotionFor,
   moodFor,
   PET_COLORS,
   PET_MOOD_NAMES,
   PET_PATTERNS,
   PET_SPECIES,
   PET_STAGES,
-  skinFor,
 } from '@/entities/pet';
-import { Pet } from '@/entities/pet/ui';
+import { PetView } from '@/entities/pet/ui';
 
 import { SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import {
   AnimatedIcon,
+  BackIcon,
   Button,
   Card,
+  CheckIcon,
   Chip,
+  CloseIcon,
   CoinBadge,
+  CoinIcon,
   Collapsible,
   clearToasts,
   dismissToast,
   ExternalLink,
+  HelpIcon,
   HintRow,
+  HomeIcon,
   Input,
   ListRow,
   MeterCard,
+  MinusIcon,
+  PawIcon,
+  PiggyIcon,
+  PlusIcon,
   ProgressBar,
   Screen,
   Shape,
   Sheet,
+  ShopIcon,
   Slider,
   SplashOverlay,
   Switch,
+  TasksIcon,
   Text,
   ThemedView,
   Toast,
@@ -76,8 +91,6 @@ const TEXT_VARIANTS = [
 
 const CHIP_VARIANTS = ['neutral', 'selected', 'need', 'want', 'muted'] as const;
 
-const PET_ANCHORS = ['speech', 'accessory', 'food', 'heart', 'ground'] as const;
-
 /** Axes that land on each mood, so the static row can show all five. */
 const PET_MOOD_AXES: Record<(typeof PET_MOOD_NAMES)[number], [number, number]> =
   {
@@ -90,6 +103,25 @@ const PET_MOOD_AXES: Record<(typeof PET_MOOD_NAMES)[number], [number, number]> =
 
 /** Side of a pet in the static galleries — the size 2.5.2 is judged at. */
 const PET_TILE = 64;
+
+/** The whole icon set, in the order the kit shows it. */
+const ICONS = [
+  ['HomeIcon', HomeIcon],
+  ['ShopIcon', ShopIcon],
+  ['TasksIcon', TasksIcon],
+  ['PiggyIcon', PiggyIcon],
+  ['PawIcon', PawIcon],
+  ['BackIcon', BackIcon],
+  ['PlusIcon', PlusIcon],
+  ['MinusIcon', MinusIcon],
+  ['CheckIcon', CheckIcon],
+  ['CloseIcon', CloseIcon],
+  ['HelpIcon', HelpIcon],
+  ['CoinIcon', CoinIcon],
+] as const;
+
+/** Sizes an icon is asked for today: inline, default, and a tab bar's. */
+const ICON_SIZES = [16, 24, 32] as const;
 
 const SHAPE_VARIANTS = [
   'circle',
@@ -479,6 +511,55 @@ export const UiKitScreen = () => {
           </KitSection.Row>
         </KitSection>
 
+        <KitSection
+          title="Icons"
+          caption="24×24, обводка 2 — цвет по умолчанию читаемый"
+        >
+          <KitSection.Row label="весь набор" isInline>
+            {ICONS.map(([name, Icon]) => (
+              <View key={name} style={styles.iconCell}>
+                <Icon />
+                <Text variant="label" themeColor="textMuted">
+                  {name.replace('Icon', '')}
+                </Text>
+              </View>
+            ))}
+          </KitSection.Row>
+
+          <KitSection.Row label="размеры — 16, 24, 32" isInline>
+            {ICON_SIZES.map((size) => (
+              <HomeIcon key={size} size={size} />
+            ))}
+          </KitSection.Row>
+
+          <KitSection.Row label="цвет — проп перебивает тему" isInline>
+            <CoinIcon color={theme.coin} />
+            <CheckIcon color={theme.success} />
+            <CloseIcon color={theme.textMuted} />
+            <PawIcon color={theme.primary} />
+          </KitSection.Row>
+
+          <KitSection.Row label="иконка рядом с подписью — 3.6" isInline>
+            <Button variant="accent" onPress={() => toast('Куплено')}>
+              <CoinIcon size={18} color={theme.inverseText} />
+              <Button.Label>Купить за 15</Button.Label>
+            </Button>
+          </KitSection.Row>
+
+          <KitSection.Row label="на цветной подложке" isInline>
+            <View
+              style={[styles.iconPlate, { backgroundColor: theme.primary }]}
+            >
+              <HomeIcon color={theme.inverseText} />
+            </View>
+            <View
+              style={[styles.iconPlate, { backgroundColor: theme.surfaceDeep }]}
+            >
+              <HomeIcon color={theme.textMuted} />
+            </View>
+          </KitSection.Row>
+        </KitSection>
+
         <KitSection title="Shape" caption="6 геометрий, заливка и обводка">
           <KitSection.Row label="заливка" isInline>
             {SHAPE_VARIANTS.map((variant) => (
@@ -663,23 +744,32 @@ export const UiKitScreen = () => {
 
         <KitSection
           title="Питомец"
-          caption="Риг собирается из PetSkin, PetPose и точек привязки"
+          caption="Слои SVG, лицо из каталога эмоций, анимации на UI-потоке"
         >
-          <KitSection.Row label="живой — дышит и переезжает между позами">
+          <KitSection.Row label="живой — управляется переключателями ниже">
             <View style={styles.petStage}>
-              <Pet
-                skin={skinFor(
+              <PetView
+                appearance={appearanceFor(
                   playground.petSpecies,
                   playground.petColor,
                   playground.petPattern,
                 )}
+                emotion={emotionFor(
+                  moodFor(playground.petComfort, playground.petSpirit),
+                )}
                 stage={playground.petStage}
-                mood={moodFor(playground.petComfort, playground.petSpirit)}
               />
             </View>
             <Text variant="small" themeColor="textMuted">
               {moodFor(playground.petComfort, playground.petSpirit).name} ·{' '}
-              {moodFor(playground.petComfort, playground.petSpirit).reason}
+              {moodFor(playground.petComfort, playground.petSpirit).reason} →{' '}
+              {
+                EMOTIONS[
+                  emotionFor(
+                    moodFor(playground.petComfort, playground.petSpirit),
+                  )
+                ].title
+              }
             </Text>
           </KitSection.Row>
 
@@ -761,11 +851,11 @@ export const UiKitScreen = () => {
           >
             {PET_SPECIES.flatMap((species) =>
               PET_COLORS.map((color) => (
-                <Pet
+                <PetView
                   key={`${species}:${color}`}
-                  skin={skinFor(species, color, 'solid')}
+                  appearance={appearanceFor(species, color, 'solid')}
+                  emotion="calm"
                   stage="adult"
-                  mood={moodFor(1, 1)}
                   size={PET_TILE}
                   isAnimated={false}
                 />
@@ -775,11 +865,11 @@ export const UiKitScreen = () => {
 
           <KitSection.Row label="узоры" isInline>
             {PET_PATTERNS.map((pattern) => (
-              <Pet
+              <PetView
                 key={pattern}
-                skin={skinFor('cat', 'mint', pattern)}
+                appearance={appearanceFor('cat', 'mint', pattern)}
+                emotion="calm"
                 stage="adult"
-                mood={moodFor(1, 1)}
                 size={PET_TILE}
                 isAnimated={false}
               />
@@ -788,27 +878,27 @@ export const UiKitScreen = () => {
 
           <KitSection.Row label="стадии — малыш, подросток, взрослый" isInline>
             {PET_STAGES.map((stage) => (
-              <Pet
+              <PetView
                 key={stage}
-                skin={skinFor('dog', 'sand', 'solid')}
+                appearance={appearanceFor('dog', 'sand', 'solid')}
+                emotion="calm"
                 stage={stage}
-                mood={moodFor(1, 1)}
                 size={PET_TILE}
                 isAnimated={false}
               />
             ))}
           </KitSection.Row>
 
-          <KitSection.Row label="пять состояний" isInline>
+          <KitSection.Row label="пять состояний — через emotionFor" isInline>
             {PET_MOOD_NAMES.map((name) => {
               const [comfort, spirit] = PET_MOOD_AXES[name];
 
               return (
                 <View key={name} style={styles.petMood}>
-                  <Pet
-                    skin={skinFor('capybara', 'graphite', 'solid')}
+                  <PetView
+                    appearance={appearanceFor('capybara', 'graphite', 'solid')}
+                    emotion={emotionFor(moodFor(comfort, spirit))}
                     stage="adult"
-                    mood={moodFor(comfort, spirit)}
                     size={PET_TILE}
                     isAnimated={false}
                   />
@@ -820,25 +910,21 @@ export const UiKitScreen = () => {
             })}
           </KitSection.Row>
 
-          <KitSection.Row label="точки привязки — Pet.At">
-            <View style={styles.petStage}>
-              <Pet
-                skin={skinFor(
-                  playground.petSpecies,
-                  playground.petColor,
-                  'solid',
-                )}
-                stage={playground.petStage}
-                mood={moodFor(1, 1)}
-                isAnimated={false}
-              >
-                {PET_ANCHORS.map((anchor) => (
-                  <Pet.At key={anchor} anchor={anchor}>
-                    <Shape variant="circle" size={10} color={theme.accent} />
-                  </Pet.At>
-                ))}
-              </Pet>
-            </View>
+          <KitSection.Row label="весь каталог лиц" isInline>
+            {EMOTION_KEYS.map((key) => (
+              <View key={key} style={styles.petMood}>
+                <PetView
+                  appearance={appearanceFor('cat', 'sand', 'spots')}
+                  emotion={key}
+                  stage="teen"
+                  size={PET_TILE}
+                  isAnimated={false}
+                />
+                <Text variant="label" themeColor="textMuted">
+                  {EMOTIONS[key].title}
+                </Text>
+              </View>
+            ))}
           </KitSection.Row>
         </KitSection>
 
@@ -915,6 +1001,18 @@ const styles = StyleSheet.create({
   petStage: {
     alignItems: 'center',
     alignSelf: 'stretch',
+  },
+  iconCell: {
+    alignItems: 'center',
+    gap: SPACING.half,
+    width: 62,
+  },
+  iconPlate: {
+    alignItems: 'center',
+    borderRadius: SPACING.two,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
   },
   iconStage: {
     alignItems: 'center',

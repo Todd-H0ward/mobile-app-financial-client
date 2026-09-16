@@ -8,6 +8,14 @@ export {
   PET_MOOD_HIGH,
   PET_MOOD_LOW,
 } from './mood';
+export type { PetNameStatus } from './pet-name';
+export {
+  isPetNameValid,
+  normalizePetName,
+  PET_NAME_MAX_LENGTH,
+  PET_NAME_MIN_LENGTH,
+  validatePetName,
+} from './pet-name';
 export {
   lerpPose,
   MOOD_POSE_FLOOR,
@@ -16,6 +24,7 @@ export {
   poseFor,
   STAGE_POSE,
 } from './pose';
+export { appearanceFor, emotionFor } from './presentation';
 export type {
   PetRig,
   RigEars,
@@ -26,3 +35,5 @@ export type {
 } from './rig';
 export { anchorPoint, rigFor, VIEW_BOX } from './rig';
 export { silhouetteFor, skinFor } from './skin';
+export type { PetFills, PetSkinLayer } from './skin-layer';
+export { skinLayerFor } from './skin-layer';

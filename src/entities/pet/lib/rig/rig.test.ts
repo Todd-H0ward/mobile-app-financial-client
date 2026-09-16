@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { PET_COLORS, PET_PATTERNS, PET_SPECIES } from '../../model';
-import { skinFor } from '../skin';
+import { PET_SPECIES } from '../../model';
+import { silhouetteFor } from '../skin';
 
 import { anchorPoint, type RigEllipse, rigFor, VIEW_BOX } from './rig';
 
@@ -9,18 +9,17 @@ import { anchorPoint, type RigEllipse, rigFor, VIEW_BOX } from './rig';
 // HELPERS
 // ═══════════════════════════════════════════
 
-/** Every combination of the three appearance axes. */
+/**
+ * One skeleton per species — and that is the whole set now.
+ *
+ * Twenty-seven looks share three skeletons: the coat and the pattern moved out
+ * to the skin layer, so nothing here varies with them.
+ */
 const everyRig = () =>
-  PET_SPECIES.flatMap((species) =>
-    PET_COLORS.flatMap((color) =>
-      PET_PATTERNS.map((pattern) => ({
-        color,
-        pattern,
-        rig: rigFor(skinFor(species, color, pattern)),
-        species,
-      })),
-    ),
-  );
+  PET_SPECIES.map((species) => ({
+    rig: rigFor(silhouetteFor(species)),
+    species,
+  }));
 
 /** Whether an ellipse sits entirely inside the box. */
 const isInBox = (ellipse: RigEllipse) =>
@@ -56,9 +55,7 @@ const numbersIn = (path: string) =>
 
 describe('the species are different animals', () => {
   it('gives each one its own body width, ears and tail', () => {
-    const rigs = PET_SPECIES.map((species) =>
-      rigFor(skinFor(species, 'sand', 'solid')),
-    );
+    const rigs = PET_SPECIES.map((species) => rigFor(silhouetteFor(species)));
 
     expect(new Set(rigs.map((rig) => rig.body.rx)).size).toBe(3);
     expect(new Set(rigs.map((rig) => rig.ears.left)).size).toBe(3);
@@ -73,9 +70,9 @@ describe('the species are different animals', () => {
   });
 
   it('leaves the capybara tailless and gives the other two a tail', () => {
-    expect(rigFor(skinFor('capybara', 'mint', 'solid')).tail).toBeNull();
-    expect(rigFor(skinFor('cat', 'mint', 'solid')).tail).not.toBeNull();
-    expect(rigFor(skinFor('dog', 'mint', 'solid')).tail).not.toBeNull();
+    expect(rigFor(silhouetteFor('capybara')).tail).toBeNull();
+    expect(rigFor(silhouetteFor('cat')).tail).not.toBeNull();
+    expect(rigFor(silhouetteFor('dog')).tail).not.toBeNull();
   });
 });
 
@@ -164,41 +161,7 @@ describe('the anatomy holds together', () => {
 });
 
 // ═══════════════════════════════════════════
-// 4. The pattern layer
-// ═══════════════════════════════════════════
-
-describe('marks', () => {
-  it('draws exactly as many as the skin asks for', () => {
-    for (const { rig, pattern, species, color } of everyRig()) {
-      expect(rig.marks).toHaveLength(
-        skinFor(species, color, pattern).marks.count,
-      );
-    }
-  });
-
-  it('draws none at all for a solid coat', () => {
-    for (const species of PET_SPECIES) {
-      expect(rigFor(skinFor(species, 'sand', 'solid')).marks).toHaveLength(0);
-    }
-  });
-
-  it('keeps every mark on the coat, not hanging off the side', () => {
-    for (const { rig } of everyRig()) {
-      for (const mark of rig.marks) {
-        expect(isInside(mark, rig.body)).toBe(true);
-      }
-    }
-  });
-
-  it('places the same marks every time, so a coat never reshuffles', () => {
-    expect(rigFor(skinFor('dog', 'mint', 'spots')).marks).toEqual(
-      rigFor(skinFor('dog', 'mint', 'spots')).marks,
-    );
-  });
-});
-
-// ═══════════════════════════════════════════
-// 5. Pivots and anchors
+// 4. Pivots and anchors
 // ═══════════════════════════════════════════
 
 describe('pivots', () => {
@@ -243,14 +206,14 @@ describe('anchorPoint', () => {
 });
 
 // ═══════════════════════════════════════════
-// 6. Pure
+// 5. Pure
 // ═══════════════════════════════════════════
 
 describe('rigFor is pure', () => {
-  it('gives equal rigs for one skin, in separate objects', () => {
-    const skin = skinFor('cat', 'graphite', 'stripes');
-    const first = rigFor(skin);
-    const second = rigFor(skin);
+  it('gives equal rigs for one silhouette, in separate objects', () => {
+    const silhouette = silhouetteFor('cat');
+    const first = rigFor(silhouette);
+    const second = rigFor(silhouette);
 
     expect(first).toEqual(second);
     expect(first).not.toBe(second);

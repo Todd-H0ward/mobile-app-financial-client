@@ -7,3 +7,5 @@ export { isOneOf } from './isOneOf';
 export { isPositiveInt } from './isPositiveInt';
 export { isRecord } from './isRecord';
 export { isTextOnly } from './isTextOnly';
+export { normalizeName } from './normalizeName';
+export { shade } from './shade';

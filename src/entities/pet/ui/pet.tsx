@@ -17,6 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { ClipPath, Defs, Ellipse, G, Path } from 'react-native-svg';
 
+import { type PetSkinLayer, skinLayerFor } from '../lib';
 import { anchorsFor } from '../lib/anchors';
 import { poseFor } from '../lib/pose';
 import {
@@ -185,15 +186,15 @@ const PetAt = ({ anchor, children }: PetAtProps) => {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** The body, its belly and the pattern layer clipped to the coat. */
+/** The body, its belly and the pattern clipped to the coat. */
 const PetBody = ({
   rig,
-  skin,
+  layer,
   size,
   clipId,
 }: {
   rig: PetRig;
-  skin: PetSkin;
+  layer: PetSkinLayer;
   size: number;
   clipId: string;
 }) => (
@@ -219,8 +220,8 @@ const PetBody = ({
       cy={rig.body.cy}
       rx={rig.body.rx}
       ry={rig.body.ry}
-      fill={skin.coat}
-      stroke={skin.outline}
+      fill={layer.fills.body}
+      stroke={layer.fills.outline}
       strokeWidth={STROKE}
     />
 
@@ -231,17 +232,17 @@ const PetBody = ({
         cy={rig.belly.cy}
         rx={rig.belly.rx}
         ry={rig.belly.ry}
-        fill={skin.belly}
+        fill={layer.fills.belly}
       />
 
-      {rig.marks.map((mark) => (
+      {layer.marks.map((mark) => (
         <Ellipse
           key={`${mark.cx}:${mark.cy}`}
           cx={mark.cx}
           cy={mark.cy}
           rx={mark.rx}
           ry={mark.ry}
-          fill={skin.ink}
+          fill={layer.fills.mark}
         />
       ))}
     </G>
@@ -251,11 +252,11 @@ const PetBody = ({
 /** The head shape, with the cheeks that never blink. */
 const PetHead = ({
   rig,
-  skin,
+  layer,
   size,
 }: {
   rig: PetRig;
-  skin: PetSkin;
+  layer: PetSkinLayer;
   size: number;
 }) => (
   <Svg
@@ -269,8 +270,8 @@ const PetHead = ({
       cy={rig.head.cy}
       rx={rig.head.rx}
       ry={rig.head.ry}
-      fill={skin.coat}
-      stroke={skin.outline}
+      fill={layer.fills.head}
+      stroke={layer.fills.outline}
       strokeWidth={STROKE}
     />
 
@@ -281,7 +282,7 @@ const PetHead = ({
         cy={cheek.cy}
         rx={cheek.rx}
         ry={cheek.ry}
-        fill={skin.blush}
+        fill={layer.fills.cheek}
       />
     ))}
   </Svg>
@@ -314,7 +315,10 @@ const PetRoot = ({
 }: PetProps) => {
   const clipId = useId();
 
-  const rig = useMemo(() => rigFor(skin), [skin]);
+  // The skeleton depends on the species alone, the coat on the skin: two
+  // memos, so switching a coat in the picker does not rebuild the anatomy.
+  const rig = useMemo(() => rigFor(skin.silhouette), [skin.silhouette]);
+  const layer = useMemo(() => skinLayerFor(rig, skin), [rig, skin]);
   const pose = useMemo(
     () => poseFor(stage, mood),
     // The pose depends on what the mood *is*, not on the caller's object.
@@ -417,8 +421,8 @@ const PetRoot = ({
             >
               <Path
                 d={rig.tail}
-                fill={skin.shade}
-                stroke={skin.outline}
+                fill={layer.fills.limb}
+                stroke={layer.fills.outline}
                 strokeWidth={STROKE}
               />
             </Svg>
@@ -428,7 +432,7 @@ const PetRoot = ({
         <Animated.View
           style={[styles.layer, { transformOrigin: bodyOrigin }, bodyStyle]}
         >
-          <PetBody rig={rig} skin={skin} size={size} clipId={clipId} />
+          <PetBody rig={rig} layer={layer} size={size} clipId={clipId} />
         </Animated.View>
 
         <Animated.View
@@ -448,15 +452,15 @@ const PetRoot = ({
                 <Path
                   key={ear}
                   d={ear}
-                  fill={skin.shade}
-                  stroke={skin.outline}
+                  fill={layer.fills.limb}
+                  stroke={layer.fills.outline}
                   strokeWidth={STROKE}
                 />
               ))}
             </Svg>
           </Animated.View>
 
-          <PetHead rig={rig} skin={skin} size={size} />
+          <PetHead rig={rig} layer={layer} size={size} />
 
           <Animated.View
             style={[styles.layer, { transformOrigin: eyeOrigin }, eyeStyle]}
@@ -474,7 +478,7 @@ const PetRoot = ({
                   cy={eye.cy}
                   rx={eye.rx}
                   ry={eye.ry}
-                  fill={skin.eye}
+                  fill={layer.fills.eye}
                 />
               ))}
             </Svg>
