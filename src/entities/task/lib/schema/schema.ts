@@ -1,4 +1,9 @@
-import { isNonEmptyString, isPositiveInt, isRecord } from '@/shared/utils';
+import {
+  isNonEmptyString,
+  isOneOf,
+  isPositiveInt,
+  isRecord,
+} from '@/shared/utils';
 
 import {
   MECHANIC_TYPES,
@@ -16,16 +21,13 @@ import {
 // ═══════════════════════════════════════════
 
 const isTheme = (value: unknown): value is TaskTheme =>
-  typeof value === 'string' &&
-  (TASK_THEMES as readonly string[]).includes(value);
+  isOneOf(value, TASK_THEMES);
 
 const isMechanic = (value: unknown): value is MechanicType =>
-  typeof value === 'string' &&
-  (MECHANIC_TYPES as readonly string[]).includes(value);
+  isOneOf(value, MECHANIC_TYPES);
 
 const isDifficulty = (value: unknown): value is TaskDifficulty =>
-  typeof value === 'string' &&
-  (TASK_DIFFICULTIES as readonly string[]).includes(value);
+  isOneOf(value, TASK_DIFFICULTIES);
 
 const assertOptions = (options: unknown, path: string): void => {
   if (!Array.isArray(options) || options.length < 2) {

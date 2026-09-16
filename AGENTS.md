@@ -360,7 +360,12 @@ Full rationale: [docs/layout.md](docs/layout.md).
 - Do not add a UI kit or styling library (NativeWind, Tamagui, …) — this template
   is plain `StyleSheet` + theme tokens.
 - Do not create `src/components`; that folder is gone on purpose.
-- Do not hardcode colors outside `shared/constants/theme.ts`.
+- Do not hardcode colors outside `shared/constants/theme.ts`. The one exception
+  is an entity's own art data — the pet's coats are the child's pet, not the
+  design system, and `shared/` may not know about them (rule 7). Such colors
+  live in a **single** palette file inside that entity
+  (`entities/pet/model/palette.ts`), nothing else in the slice writes a hex, and
+  a test asserts it.
 - Do not add barrels that re-export a whole layer (`src/screens/index.ts`);
   import the slice.
 - Do not use `export *` in a barrel — list every export by name, values and

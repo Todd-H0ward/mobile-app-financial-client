@@ -1,14 +1,14 @@
-import { isFiniteNumber, isRecord } from '@/shared/utils';
-
-import { createInitialUser, USER_SAVE_VERSION } from '../initial-user';
 import {
-  PERIOD_PHASES,
   PET_COLORS,
   PET_PATTERNS,
   PET_SPECIES,
   PET_STAGES,
-  type UserSave,
-} from '../types';
+} from '@/entities/pet';
+
+import { isFiniteNumber, isOneOf, isRecord } from '@/shared/utils';
+
+import { createInitialUser, USER_SAVE_VERSION } from '../initial-user';
+import { PERIOD_PHASES, type UserSave } from '../types';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -38,14 +38,6 @@ const MIGRATIONS: Record<number, MigrationStep> = {
 // ═══════════════════════════════════════════
 // VALIDATION
 // ═══════════════════════════════════════════
-
-/**
- * Membership in one of the save's enums. A plain `typeof === 'string'` check
- * would pass `phase: "banana"` on to the screens, which is exactly the crash
- * this guard exists to prevent.
- */
-const isOneOf = (value: unknown, allowed: readonly string[]): boolean =>
-  typeof value === 'string' && allowed.includes(value);
 
 const isBudget = (value: unknown): boolean =>
   isRecord(value) &&

@@ -1,0 +1,1 @@
+export { anchorsFor } from './anchors';

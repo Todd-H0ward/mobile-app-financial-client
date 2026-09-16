@@ -10,11 +10,7 @@ export type {
   PeriodPhase,
   PeriodRecord,
   PeriodSave,
-  PetColor,
-  PetPattern,
   PetSave,
-  PetSpecies,
-  PetStage,
   SavingsGoalSave,
   SavingsSave,
   SettingsSave,
@@ -22,10 +18,4 @@ export type {
   WalletEntry,
   WalletSave,
 } from './types';
-export {
-  PERIOD_PHASES,
-  PET_COLORS,
-  PET_PATTERNS,
-  PET_SPECIES,
-  PET_STAGES,
-} from './types';
+export { PERIOD_PHASES } from './types';
