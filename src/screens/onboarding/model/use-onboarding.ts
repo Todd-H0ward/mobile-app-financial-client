@@ -16,7 +16,6 @@ import {
   type SortOutcome,
   sortingProgress,
 } from '@/entities/onboarding';
-import type { PetColor, PetPattern, PetSpecies } from '@/entities/pet';
 import {
   isPlayerNameValid,
   normalizePlayerName,
@@ -50,7 +49,6 @@ const ACTION_LABEL: Record<OnboardingStepId, string> = {
   sorting: 'Дальше',
   coins: 'Дальше',
   plan: 'Готово',
-  pet: 'Дальше',
   name: 'Играть',
 };
 
@@ -88,10 +86,6 @@ interface OnboardingController {
   hasMetPet: boolean;
   /** Whether the scratch ticket is open. */
   isCoinsRevealed: boolean;
-  /** Species / coat / pattern picked on the pet step. */
-  petSpecies: PetSpecies;
-  petColor: PetColor;
-  petPattern: PetPattern;
   /** Whether the bottom button is live on this step. */
   canContinue: boolean;
   /** Label of the bottom button on this step. */
@@ -108,9 +102,6 @@ interface OnboardingController {
   markPetMet: () => void;
   /** Marks the scratch ticket as revealed. */
   markCoinsRevealed: () => void;
-  setPetSpecies: (species: PetSpecies) => void;
-  setPetColor: (color: PetColor) => void;
-  setPetPattern: (pattern: PetPattern) => void;
   /** Moves on; on the last step it creates the profile and leaves onboarding. */
   goNext: () => void;
 }
@@ -124,8 +115,8 @@ interface OnboardingController {
  * typed.
  *
  * Nothing is written to the save until the last step: the profile is created
- * once, with the name and the look, which is why `user === null` keeps meaning
- * "onboarding not finished" without a flag of its own.
+ * once with the player name. The pet's look is chosen later, from the closed
+ * box on home (2.5.2) — picking it twice felt like a bug.
  */
 export const useOnboarding = (): OnboardingController => {
   const router = useRouter();
@@ -140,9 +131,6 @@ export const useOnboarding = (): OnboardingController => {
   const [playerName, setPlayerName] = useState('');
   const [hasMetPet, setHasMetPet] = useState(false);
   const [isCoinsRevealed, setIsCoinsRevealed] = useState(false);
-  const [petSpecies, setPetSpecies] = useState<PetSpecies>('cat');
-  const [petColor, setPetColor] = useState<PetColor>('sand');
-  const [petPattern, setPetPattern] = useState<PetPattern>('solid');
 
   const stepId = ONBOARDING_STEPS[stepIndex] ?? ONBOARDING_STEPS[0];
   const step = getOnboardingStep(stepId);
@@ -162,11 +150,6 @@ export const useOnboarding = (): OnboardingController => {
   const finish = () => {
     createUser({
       playerName: normalizePlayerName(playerName),
-      pet: {
-        species: petSpecies,
-        color: petColor,
-        pattern: petPattern,
-      },
       createdAt: time.now(),
     });
 
@@ -192,9 +175,6 @@ export const useOnboarding = (): OnboardingController => {
     playerName,
     hasMetPet,
     isCoinsRevealed,
-    petSpecies,
-    petColor,
-    petPattern,
     canContinue,
     actionLabel: t(`onboarding.actions.${stepId}`, {
       defaultValue: ACTION_LABEL[stepId],
@@ -228,9 +208,6 @@ export const useOnboarding = (): OnboardingController => {
     setPlayerName,
     markPetMet: () => setHasMetPet(true),
     markCoinsRevealed: () => setIsCoinsRevealed(true),
-    setPetSpecies,
-    setPetColor,
-    setPetPattern,
 
     goNext: () => {
       if (stepIndex === ONBOARDING_STEPS.length - 1) {

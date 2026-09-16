@@ -8,16 +8,14 @@ import type { BudgetDirection } from '@/entities/economy';
  * The steps of onboarding, in the order the child walks them.
  *
  * A runtime tuple: the screen maps over it, and the schema checks that the
- * content file describes every step and invents none. The pet step of 2.5.2
- * is inserted between `plan` and `name` — it needs a name of its own, and the
- * child gives both names in a row.
+ * content file describes every step and invents none. The pet's look is not
+ * here — that choice lives on the closed box at home (2.5.2), once.
  */
 const ONBOARDING_STEPS = [
   'greeting',
   'sorting',
   'coins',
   'plan',
-  'pet',
   'name',
 ] as const;
 

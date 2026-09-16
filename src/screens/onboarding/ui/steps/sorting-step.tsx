@@ -120,7 +120,6 @@ export const SortingStep = ({ onboarding }: SortingStepProps) => {
       { translateY: translateY.value },
       { scale: dragScale.value },
     ],
-    zIndex: 20,
   }));
 
   const registerBasket = (direction: BudgetDirection, ref: RNView | null) => {
@@ -149,22 +148,24 @@ export const SortingStep = ({ onboarding }: SortingStepProps) => {
           <Animated.View
             key={sortItem.id}
             entering={ZoomIn.duration(CARD_ENTRANCE_DURATION)}
+            style={styles.cardLift}
           >
-            <Animated.View
-              style={[
-                styles.card,
-                cardStyle,
-                {
-                  backgroundColor: theme.surface,
-                  borderColor: theme.borderStrong,
-                  shadowColor: theme.text,
-                },
-              ]}
-            >
-              <Text variant="subtitle">{itemTitle}</Text>
-              <Text variant="small" themeColor="textSecondary">
-                {t('onboarding.whichBox')}
-              </Text>
+            <Animated.View style={cardStyle}>
+              <View
+                style={[
+                  styles.card,
+                  {
+                    backgroundColor: theme.surface,
+                    borderColor: theme.borderStrong,
+                    shadowColor: theme.text,
+                  },
+                ]}
+              >
+                <Text variant="subtitle">{itemTitle}</Text>
+                <Text variant="small" themeColor="textSecondary">
+                  {t('onboarding.whichBox')}
+                </Text>
+              </View>
             </Animated.View>
           </Animated.View>
         </GestureDetector>
@@ -205,9 +206,6 @@ export const SortingStep = ({ onboarding }: SortingStepProps) => {
               ref={(node) => {
                 registerBasket(decision.id, node as RNView | null);
               }}
-              onLayout={() => {
-                // Re-measure after layout settles.
-              }}
             >
               <DecisionBasket
                 direction={decision.id}
@@ -239,24 +237,30 @@ export const SortingStep = ({ onboarding }: SortingStepProps) => {
 const styles = StyleSheet.create({
   baskets: {
     gap: SPACING.two,
+    zIndex: 1,
   },
   card: {
     alignItems: 'center',
     borderRadius: RADII.xl,
     borderWidth: 2,
-    elevation: 4,
     gap: SPACING.one,
     paddingHorizontal: SPACING.three,
     paddingVertical: SPACING.four,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
+  },
+  cardLift: {
+    elevation: 16,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    zIndex: 20,
   },
   counter: {
     textAlign: 'center',
   },
   root: {
+    elevation: 8,
     gap: SPACING.three,
+    zIndex: 2,
   },
 });
 

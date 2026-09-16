@@ -144,7 +144,7 @@
     "onboarding": {
       "title": "What is happening here",
       "body": [
-        "You are getting to know the game: boop the pet, sort into boxes, scratch a coin ticket, and pick how I look.",
+        "You are getting to know the game: boop the pet, sort into boxes, and scratch a coin ticket.",
         "Three boxes: Needs — essentials, Wants — nice things, Savings — for a goal.",
         "You cannot fail. Any step can be retried, nothing will be lost."
       ]
@@ -204,7 +204,6 @@
       "sorting": "Next",
       "coins": "Next",
       "plan": "Done",
-      "pet": "Next",
       "name": "Play"
     },
     "steps": {
@@ -224,13 +223,9 @@
         "title": "Place the coins",
         "line": "Put coins into the boxes. You may keep some — you'll do the same at the start of every period."
       },
-      "pet": {
-        "title": "How will I look?",
-        "line": "Pick who I am: cat, dog or capybara — and a coat colour. Names come next!"
-      },
       "name": {
         "title": "Sign by the door",
-        "line": "Type your player name — I will hang a sign over the door."
+        "line": "Type your player name — I will hang a sign over the door. Who I am — you'll find out at home, in the box."
       }
     },
     "decisions": {
@@ -281,25 +276,7 @@
     "dropCoinA11y": "Drop a coin into “{{label}}”",
     "takeBack": "take back",
     "planProgress": "Placed {{laid}} of {{total}}",
-    "petPreviewA11y": "This is how the pet will look",
-    "pickSpecies": "Who am I?",
-    "pickColor": "Coat colour",
-    "pickPattern": "Pattern",
-    "species": {
-      "cat": "Cat",
-      "dog": "Dog",
-      "capybara": "Capybara"
-    },
-    "colors": {
-      "sand": "Sand",
-      "graphite": "Graphite",
-      "mint": "Mint"
-    },
-    "patterns": {
-      "solid": "Plain",
-      "spots": "Spots",
-      "stripes": "Stripes"
-    }
+    "petPreviewA11y": "Pet"
   },
   "budgetPlan": {
     "title": "Budget plan",
