@@ -9,6 +9,7 @@ import {
   type PetMoodName,
   type PetStage,
 } from '@/entities/pet';
+import { progressFor } from '@/entities/savings';
 import {
   type PetSave,
   type UserSave,
@@ -17,7 +18,7 @@ import {
 } from '@/entities/user';
 
 import { useTranslation } from '@/shared/i18n';
-import { clamp, formatMoney } from '@/shared/utils';
+import { formatMoney } from '@/shared/utils';
 
 /** The translator, exactly as `useTranslation()` hands it out. */
 type Translate = ReturnType<typeof useTranslation>['t'];
@@ -165,12 +166,14 @@ const buildGoal = (
   saved: number,
   t: Translate,
 ): HomeHudGoal => ({
-  title: content.title,
+  title: t(`savings.goals.${content.id}.title`, {
+    defaultValue: content.title,
+  }),
   progressLabel: t('home.goal.progress', {
     saved: formatMoney(saved),
     price: formatMoney(content.price),
   }),
-  progress: content.price > 0 ? clamp(saved / content.price, 0, 1) : 0,
+  progress: progressFor(saved, content.price),
 });
 
 /**

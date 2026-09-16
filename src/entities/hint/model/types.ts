@@ -16,6 +16,7 @@ const HINT_SCREENS = [
   'ui-kit',
   'period-summary',
   'shop',
+  'savings',
 ] as const;
 
 // ═══════════════════════════════════════════

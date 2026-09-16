@@ -139,11 +139,11 @@ export const HomeScreen = () => {
         style={[styles.top, { paddingTop: insets.top + SPACING.two }]}
       >
         <View pointerEvents="box-none" style={styles.topRow}>
-          {/* Read-only, so it must not swallow a swipe that starts on it. */}
-          <View pointerEvents="none">
+          <View pointerEvents="box-none">
             <HomeHudStats
               balance={hud.balance}
               savingsTotal={hud.savingsTotal}
+              onOpenSavings={() => router.push(ROUTES.SAVINGS)}
             />
           </View>
 
@@ -164,13 +164,15 @@ export const HomeScreen = () => {
         {hud.isActive && canEnd && <HomeHudEndBanner onPress={endPeriod} />}
       </View>
 
-      {/* Reading matter, not a control: `none` keeps the lower third of the
-          room swipeable. It becomes pressable when the goal screen exists. */}
       <View
-        pointerEvents="none"
+        pointerEvents="box-none"
         style={[styles.bottom, { paddingBottom: insets.bottom + SPACING.two }]}
       >
-        <HomeHudBoard goal={hud.goal} taskHint={hud.taskHint} />
+        <HomeHudBoard
+          goal={hud.goal}
+          taskHint={hud.taskHint}
+          onOpenSavings={() => router.push(ROUTES.SAVINGS)}
+        />
       </View>
     </ThemedView>
   );

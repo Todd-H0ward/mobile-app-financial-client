@@ -12,6 +12,8 @@ export const ROUTES = {
   PERIOD_SUMMARY: '/period-summary',
   /** Dynamic shopfront — append `/${shopId}`. Prefer `shopPath`. */
   SHOP: '/shop',
+  /** Savings showcase — every goal with progress. */
+  SAVINGS: '/savings',
   SETTINGS: '/settings',
   UI_KIT: '/ui-kit',
 } as const;
@@ -20,3 +22,7 @@ export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
 
 /** Route into one of the four street shops. */
 export const shopPath = (shopId: string) => `${ROUTES.SHOP}/${shopId}` as const;
+
+/** Route into one savings goal's jar. */
+export const goalPath = (goalId: string) =>
+  `${ROUTES.SAVINGS}/${goalId}` as const;

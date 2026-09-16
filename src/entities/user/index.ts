@@ -8,6 +8,9 @@ export type {
   PurchaseFail,
   PurchaseOk,
   PurchaseResult,
+  SavingsFail,
+  SavingsOk,
+  SavingsResult,
   ShortageExplain,
   ShortageExplainInput,
   ShortageJarOption,
@@ -16,7 +19,9 @@ export type {
 } from './lib';
 export {
   acknowledgeSummary,
+  applyDeposit,
   applyPurchase,
+  applyWithdraw,
   canAfford,
   canFinishPeriod,
   createDemoProfile,
@@ -33,6 +38,7 @@ export {
   PLAYER_NAME_MIN_LENGTH,
   resetUser,
   runDemoPeriods,
+  setActiveGoal,
   startPeriod,
   validatePlayerName,
 } from './lib';

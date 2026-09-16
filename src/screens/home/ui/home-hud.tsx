@@ -21,6 +21,8 @@ import type { HomeHudCredit, HomeHudGoal, MoodTone } from '../model';
 interface HomeHudStatsProps {
   balance: number;
   savingsTotal: number;
+  /** Opens the savings showcase when the piggy badge is tapped. */
+  onOpenSavings?: () => void;
 }
 
 interface HomeHudLastCreditProps {
@@ -36,6 +38,8 @@ interface HomeHudMoodProps {
 interface HomeHudBoardProps {
   goal: HomeHudGoal | null;
   taskHint: string;
+  /** Opens the savings showcase from the goal row. */
+  onOpenSavings?: () => void;
 }
 
 interface HomeHudPlanBannerProps {
@@ -51,17 +55,28 @@ interface HomeHudEndBannerProps {
 // ═══════════════════════════════════════════
 
 /** Coins on hand and coins saved — two of the six things 2.5.3 asks for. */
-export const HomeHudStats = ({ balance, savingsTotal }: HomeHudStatsProps) => {
+export const HomeHudStats = ({
+  balance,
+  savingsTotal,
+  onOpenSavings,
+}: HomeHudStatsProps) => {
   const { t } = useTranslation();
 
   return (
     <View style={styles.stats}>
       <CoinBadge amount={balance} label={t('home.balance')} coinSize={18} />
-      <CoinBadge
-        amount={savingsTotal}
-        label={t('home.savings')}
-        coinSize={18}
-      />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('home.savings')}
+        disabled={!onOpenSavings}
+        onPress={onOpenSavings}
+      >
+        <CoinBadge
+          amount={savingsTotal}
+          label={t('home.savings')}
+          coinSize={18}
+        />
+      </Pressable>
     </View>
   );
 };
@@ -120,7 +135,11 @@ export const HomeHudMood = ({ label, tone }: HomeHudMoodProps) => {
  * as the pet, and a card stack tall enough to read would bury the scene the
  * child is standing in.
  */
-export const HomeHudBoard = ({ goal, taskHint }: HomeHudBoardProps) => {
+export const HomeHudBoard = ({
+  goal,
+  taskHint,
+  onOpenSavings,
+}: HomeHudBoardProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -131,7 +150,13 @@ export const HomeHudBoard = ({ goal, taskHint }: HomeHudBoardProps) => {
         { backgroundColor: theme.surface, borderColor: theme.border },
       ]}
     >
-      <View style={styles.boardRow}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={goal ? goal.title : t('home.goal.none')}
+        disabled={!onOpenSavings}
+        onPress={onOpenSavings}
+        style={styles.boardRow}
+      >
         <PiggyIcon size={20} color={theme.textSecondary} />
 
         <View style={styles.boardText}>
@@ -153,7 +178,7 @@ export const HomeHudBoard = ({ goal, taskHint }: HomeHudBoardProps) => {
             {goal.progressLabel}
           </Text>
         )}
-      </View>
+      </Pressable>
 
       <View style={styles.boardRow}>
         <TasksIcon size={20} color={theme.textSecondary} />

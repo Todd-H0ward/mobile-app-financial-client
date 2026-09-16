@@ -31,8 +31,8 @@
 | 2.5.5 | Сравнение плана с фактом после периода | `screens/period-summary` | `entities/budget` (`compare`, `explainSummary`) | `compare.test.ts`, `explain.test.ts` | готово — экран итогов с план/факт барами, историей и tips; вход с home в `active`, редирект в `summary` |
 | 2.5.6 | Каталог покупок: ≥8 позиций, обязательные и необязательные, цена, категория, влияние | `screens/shop` | `entities/catalogue` | `content.test.ts` | готово — 11 позиций в четырёх витринах (продукты, одежда, мебель, игрушки); мини-игры игрушек — позже |
 | 2.5.6 | Запрет отрицательного баланса + объяснение вариантов | `screens/shop` | `entities/user/lib/wallet` + `lib/shortage` (`explainShortage`) | `wallet.test.ts`, `purchase.test.ts`, `shortage.test.ts` | готово — shortfall, задание с наградой, последствие копилки, ожидание |
-| 2.5.7 | Накопления, ≥3 цели, прогресс | `screens/savings` | `entities/savings` + `content/goals.json` | `savings.test.ts` | в работе — три цели в контенте, прогресс хранится в сейве |
-| 2.5.7 | Снятие только по отдельному подтверждению с показом последствий | `screens/savings` | `entities/savings/lib/withdraw` | `withdraw.test.ts` | не начато |
+| 2.5.7 | Накопления, ≥3 цели, прогресс | `screens/savings` | `entities/savings` + `entities/user/lib/savings` + `content/goals.json` | `progress.test.ts`, `savings.test.ts` | готово — витрина, экран цели, депозит/снятие |
+| 2.5.7 | Снятие только по отдельному подтверждению с показом последствий | `screens/savings` | `entities/savings/lib/withdraw` (`explainWithdraw`) | `explain.test.ts`, `savings.test.ts` | готово — шторка с remaining before/after и оценкой периодов |
 | 2.5.8 | ≥6 заданий по 3 темам, с последствиями, не только тесты | `screens/tasks` | `entities/task` + `content/tasks.json` | `task.test.ts` | не начато |
 | 2.5.9 | Обратная связь после каждого действия: что изменилось и почему | все экраны | `features/feedback` | — | не начато |
 | 2.5.9 | Путь восстановления после ошибки без обнуления прогресса | `screens/period-summary` | `entities/budget/lib/explain` | `explain.test.ts` | готово — tips на экране итогов, `acknowledgeSummary` не обнуляет сейв |

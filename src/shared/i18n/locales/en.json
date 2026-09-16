@@ -204,6 +204,14 @@
         "A purchase spends coins and updates the period fact — so the plan can be compared with real life.",
         "If you do not have enough coins, I will say exactly how many are missing and three options: earn, take from the jar, or wait. You cannot go below zero. Toys will get mini-games later."
       ]
+    },
+    "savings": {
+      "title": "Savings jar",
+      "body": [
+        "There are three goals here. Pick one — it shows on the home screen.",
+        "You can put coins in during any active period: they leave the wallet, fill the jar and update the savings fact.",
+        "Taking coins out needs a confirm: I will show how much is left to the goal. Not a ban — just the price of the choice."
+      ]
     }
   },
   "onboarding": {
@@ -451,6 +459,44 @@
       "scarf": {
         "title": "Scarf",
         "note": "A warm scarf — nice to have, not required."
+      }
+    }
+  },
+  "savings": {
+    "title": "Savings jar",
+    "subtitle": "Three goals — pick one and put coins aside",
+    "balance": "On hand",
+    "total": "In the jar",
+    "pickHint": "Tap a goal to open its jar. The highlighted one shows on the home screen.",
+    "reached": "Goal reached!",
+    "remaining": "{{count}} left to go",
+    "makeActive": "Show this goal at home",
+    "amountLabel": "How many coins?",
+    "amountAdd": "Add one coin",
+    "amountRemove": "Remove one coin",
+    "quickDeposit": "All I can put: {{count}}",
+    "quickWithdraw": "All in the jar: {{count}}",
+    "deposit": "Put in the jar",
+    "withdraw": "Take from the jar",
+    "withdrawTitle": "Take from the jar?",
+    "withdrawBody": "Take {{count}} from «{{goal}}». Then {{after}} will be left instead of {{before}}.",
+    "withdrawPeriods": "That is about {{count}} more periods at this pace.",
+    "withdrawKeep": "Keep saving",
+    "withdrawConfirm": "Take the coins",
+    "planFirstBanner": "First confirm a budget plan — then the jar opens for real.",
+    "planFirstTitle": "Plan first",
+    "planFirstBody": "Putting coins aside waits on a confirmed plan. Make one, then come back.",
+    "goPlan": "Make a plan",
+    "cancel": "Not now",
+    "goals": {
+      "paints": {
+        "title": "Paint set"
+      },
+      "scooter": {
+        "title": "Scooter"
+      },
+      "telescope": {
+        "title": "Telescope"
       }
     }
   }
