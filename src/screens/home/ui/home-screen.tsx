@@ -23,6 +23,7 @@ import {
   HomeHudPlanBanner,
   HomeHudStats,
 } from './home-hud';
+import { HomePetCompanion } from './home-pet-companion';
 import { KitchenRoom } from './rooms/kitchen-room';
 import { LivingRoom } from './rooms/living-room';
 import { StreetRoom } from './rooms/street-room';
@@ -76,7 +77,8 @@ const GearButton = ({ onPress }: { onPress: () => void }) => {
  *
  * Everything requirement 2.5.3 asks to see at once stays on screen while the
  * child walks: the coins and the jar along the top, the goal and the task
- * along the bottom, and the pet with its state in the room it lives in.
+ * along the bottom, and the pet — once met — walking with them from room to
+ * room as a single companion over the strip.
  */
 export const HomeScreen = () => {
   const router = useRouter();
@@ -110,8 +112,7 @@ export const HomeScreen = () => {
 
         <RoomPager.Room room="living">
           <LivingRoom
-            pet={hud.pet}
-            isAnimated={hud.isAnimationEnabled}
+            isPetMet={hud.pet !== null}
             onOpenBox={() => router.push(ROUTES.PET_CREATE)}
           />
         </RoomPager.Room>
@@ -120,6 +121,10 @@ export const HomeScreen = () => {
           <KitchenRoom />
         </RoomPager.Room>
       </RoomPager>
+
+      {hud.pet && (
+        <HomePetCompanion pet={hud.pet} isAnimated={hud.isAnimationEnabled} />
+      )}
 
       {/* box-none: the scene keeps every touch the controls do not want, so a
           swipe started next to a badge still walks to the next room. */}

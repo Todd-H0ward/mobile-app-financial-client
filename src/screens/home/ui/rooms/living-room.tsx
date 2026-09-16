@@ -2,21 +2,18 @@ import { StyleSheet, View } from 'react-native';
 
 import { PetBox } from '@/widgets/pet-box';
 
-import { PetView } from '@/entities/pet/ui';
-
 import { SPACING } from '@/shared/constants';
-
-import type { HomeHudPet } from '../../model';
-import { HomeHudMood } from '../home-hud';
 
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
 
 interface LivingRoomProps {
-  /** `null` while the box has not been opened yet. */
-  pet: HomeHudPet | null;
-  isAnimated: boolean;
+  /**
+   * Whether the meeting has happened. Once the pet is met it walks with the
+   * child as `HomePetCompanion` — this room only keeps the closed box.
+   */
+  isPetMet: boolean;
   /** Opens the meeting screen. Only reachable while the box is closed. */
   onOpenBox: () => void;
 }
@@ -25,15 +22,9 @@ interface LivingRoomProps {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** Side of the pet standing on the floor. */
-const PET_SIZE = 190;
-
 /**
- * How far up from the bottom the pet stands.
- *
- * The art leaves the lower third of every room empty for exactly this: the pet
- * has to stand *on* the floorboards, not float over them or sit behind the
- * board along the bottom edge.
+ * How far up from the bottom the box sits — the same inset the companion uses
+ * once the pet is out, so the hand-off does not jump on the floor.
  */
 const FLOOR_INSET = 190;
 
@@ -42,34 +33,25 @@ const FLOOR_INSET = 190;
 // ═══════════════════════════════════════════
 
 /**
- * Home: the pet on the floor, with what it feels written under it.
+ * Home before the meeting: the closed box on the floorboards.
  *
- * The pet lives here and stays here — the child walks to the kitchen for food
- * and out to the street to shop. One pet, one room, which is also what
- * docs/performance.md asks for: never more than one animated pet on screen.
+ * After the box opens, the pet leaves with the child — see
+ * `HomePetCompanion`. Keeping the box here (and only here) is what makes
+ * "this is where we live" readable on the first visit.
  */
-export const LivingRoom = ({ pet, isAnimated, onOpenBox }: LivingRoomProps) => (
-  <View pointerEvents="box-none" style={styles.root}>
-    {pet ? (
-      <View pointerEvents="box-none" style={styles.stage}>
-        <PetView
-          appearance={pet.appearance}
-          emotion={pet.emotion}
-          stage={pet.stage}
-          size={PET_SIZE}
-          isAnimated={isAnimated}
-          accessibilityLabel={pet.accessibilityLabel}
-        />
+export const LivingRoom = ({ isPetMet, onOpenBox }: LivingRoomProps) => {
+  if (isPetMet) {
+    return <View pointerEvents="box-none" style={styles.root} />;
+  }
 
-        <HomeHudMood label={pet.moodLabel} tone={pet.moodTone} />
-      </View>
-    ) : (
+  return (
+    <View pointerEvents="box-none" style={styles.root}>
       <View style={styles.stage}>
         <PetBox onPress={onOpenBox} />
       </View>
-    )}
-  </View>
-);
+    </View>
+  );
+};
 
 // ═══════════════════════════════════════════
 // STYLES

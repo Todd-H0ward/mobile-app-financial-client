@@ -128,8 +128,8 @@ const RoomPagerRoot = ({
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        // The offset is read on settle only: a per-frame handler would put the
-        // JS thread in the middle of every swipe for nothing.
+        bounces={false}
+        overScrollMode="never"
         onMomentumScrollEnd={handleSettled}
         contentOffset={{ x: index * width, y: 0 }}
         style={styles.strip}
