@@ -14,6 +14,8 @@ import {
 import {
   type AnimatedLayer,
   type AnimationKey,
+  BREATH_DEPTH,
+  BREATH_PERIOD_MS,
   type Channel,
   getAnimation,
   type Keyframe,
@@ -49,6 +51,9 @@ const BLINK_CLOSE_MS = 70;
 
 /** How long a layer the new animation does not touch takes to reach rest. */
 const RELEASE_MS = 260;
+
+/** How long a still pet takes to settle when animation is switched off. */
+const SETTLE_MS = 180;
 
 // ═══════════════════════════════════════════
 // LIB
@@ -113,7 +118,7 @@ const useLayerValues = (): LayerValues => {
  * thread does nothing per frame — the pet keeps moving even while the app is
  * busy rendering a list or writing the save.
  */
-export const usePetAnimation = (animation: AnimationKey) => {
+export const usePetAnimation = (animation: AnimationKey, isAnimated = true) => {
   // Hooks must be unconditional, so the full grid is allocated up front.
   const body = useLayerValues();
   const head = useLayerValues();
@@ -121,14 +126,41 @@ export const usePetAnimation = (animation: AnimationKey) => {
   const tail = useLayerValues();
   const overlay = useLayerValues();
   const blink = useSharedValue(1);
+  const breath = useSharedValue(0);
 
   const values: Record<AnimatedLayer, LayerValues> = useMemo(
     () => ({ body, head, ears, tail, overlay }),
     [body, head, ears, tail, overlay],
   );
 
+  // Read on the JS thread and captured as a number: the style below is a
+  // worklet, and a worklet may only call worklets.
+  const breathDepth = isAnimated
+    ? (getAnimation(animation).breathDepth ?? BREATH_DEPTH)
+    : 0;
+
   useEffect(() => {
     const definition = getAnimation(animation);
+
+    if (!isAnimated) {
+      // A still pet is legible on its own: the face carries the state, and
+      // motion is never its only carrier — docs/accessibility.md.
+      for (const layer of LAYERS) {
+        for (const channel of CHANNELS) {
+          const value = values[layer][channel];
+          cancelAnimation(value);
+          value.value = withTiming(REST[channel], { duration: SETTLE_MS });
+        }
+      }
+
+      cancelAnimation(blink);
+      blink.value = withTiming(1, { duration: SETTLE_MS });
+      cancelAnimation(breath);
+      breath.value = withTiming(0, { duration: SETTLE_MS });
+
+      return;
+    }
+
     const touched = new Set<string>();
 
     for (const track of definition.tracks) {
@@ -136,8 +168,11 @@ export const usePetAnimation = (animation: AnimationKey) => {
       touched.add(`${track.layer}.${track.channel}`);
 
       cancelAnimation(value);
-      value.value = REST[track.channel];
 
+      // No snap to rest first: `withTiming` starts from wherever the value is,
+      // so the first step of the new track interpolates out of the old pose
+      // instead of teleporting through it. Later repetitions start from rest
+      // anyway, because `buildKeyframes` closes the loop there.
       const sequence = buildSequence(track, definition.loop);
 
       // `reverse` stays false — see `buildKeyframes`.
@@ -170,10 +205,34 @@ export const usePetAnimation = (animation: AnimationKey) => {
           false,
         )
       : withTiming(1, { duration: 120 });
-  }, [animation, values, blink]);
 
-  return { values, blink };
+    // Breathing rides over the pose rather than being one of its tracks: a pet
+    // that stopped breathing while it hopped would read as a puppet. It is the
+    // one loop that never restarts on a mood change.
+    cancelAnimation(breath);
+    breath.value = withRepeat(
+      withTiming(1, {
+        duration: (definition.breathPeriodMs ?? BREATH_PERIOD_MS) / 2,
+        easing: EASING,
+      }),
+      -1,
+      true,
+    );
+  }, [animation, isAnimated, values, blink, breath]);
+
+  return { values, blink, breath, breathDepth };
 };
+
+/**
+ * The chest, over everything else.
+ *
+ * `depth` is a plain number captured on the JS thread — a worklet may only call
+ * worklets, so nothing is looked up from the catalogue inside the style.
+ */
+export const useBreathStyle = (breath: SharedValue<number>, depth: number) =>
+  useAnimatedStyle(() => ({
+    transform: [{ scale: 1 + breath.value * depth }],
+  }));
 
 /** Turns a layer's channels into a style; `blinking` squashes the eye layer. */
 export const useLayerStyle = (

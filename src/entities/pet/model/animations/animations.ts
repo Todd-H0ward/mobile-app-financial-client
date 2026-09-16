@@ -32,6 +32,17 @@ interface PetAnimation {
   loop: boolean;
   /** Whether the eyes blink while it plays. Off for closed-eye faces. */
   blink: boolean;
+  /**
+   * How deep this animation breathes, as a share of the pet's size.
+   *
+   * Breathing is not a track: it runs over whatever else is playing, because a
+   * pet that stops breathing while it hops reads as a puppet. An animation only
+   * tunes it — a sleeping pet breathes deeper and slower. `0` holds the chest
+   * still, for a pose where a rising chest would fight the drawing.
+   */
+  breathDepth?: number;
+  /** A full inhale and exhale, ms. Longer is calmer. */
+  breathPeriodMs?: number;
   /** Everything it moves. Layers not listed ease back to rest. */
   tracks: Track[];
 }
@@ -54,6 +65,12 @@ const REST: Record<Channel, number> = {
   scaleY: 1,
 };
 
+/** How deep a pet breathes when its animation does not say otherwise. */
+const BREATH_DEPTH = 0.025;
+
+/** A full breath, ms. Slow enough to read as calm rather than as panting. */
+const BREATH_PERIOD_MS = 3400;
+
 /**
  * The animation catalogue.
  *
@@ -68,7 +85,9 @@ const ANIMATIONS = {
     title: 'Дышит',
     loop: true,
     blink: true,
-    tracks: [{ layer: 'body', channel: 'scale', keyframes: [[1.025, 1700]] }],
+    // No tracks on purpose: breathing is the layer every animation rides on,
+    // so the calm idle is breathing and nothing else.
+    tracks: [],
   },
   hop: {
     id: 'hop',
@@ -126,8 +145,9 @@ const ANIMATIONS = {
     loop: true,
     // The eyes are already closed by the face — blinking them would twitch.
     blink: false,
+    breathDepth: 0.05,
+    breathPeriodMs: 4800,
     tracks: [
-      { layer: 'body', channel: 'scale', keyframes: [[1.035, 2400]] },
       { layer: 'overlay', channel: 'translateY', keyframes: [[-10, 2400]] },
     ],
   },
@@ -263,6 +283,8 @@ const ANIMATIONS = {
     title: 'Приосанился',
     loop: true,
     blink: true,
+    // Puffing the chest out is the pose; breathing on top would undo it.
+    breathDepth: 0,
     tracks: [
       {
         layer: 'body',
@@ -314,4 +336,4 @@ export type {
   PetAnimation,
   Track,
 };
-export { ANIMATION_KEYS, ANIMATIONS, REST };
+export { ANIMATION_KEYS, ANIMATIONS, BREATH_DEPTH, BREATH_PERIOD_MS, REST };

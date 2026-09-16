@@ -16,7 +16,11 @@ import { buildFace } from './face';
 import { buildPalette } from './palette';
 import { CANVAS, GROUP_ORDER, type GroupId, type Shape } from './shapes';
 import { getSpecies } from './species';
-import { useLayerStyle, usePetAnimation } from './use-pet-animation';
+import {
+  useBreathStyle,
+  useLayerStyle,
+  usePetAnimation,
+} from './use-pet-animation';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -74,9 +78,6 @@ const LAYER_DRIVER: Record<
   eyes: 'head',
   overlay: 'overlay',
 };
-
-/** The animation a still pet holds: the first frame of a calm breath. */
-const STILL_ANIMATION: AnimationKey = 'breathe';
 
 // ═══════════════════════════════════════════
 // COMPONENTS
@@ -151,10 +152,9 @@ export const PetView = ({
   const face = getEmotion(emotion);
   const parts = buildFace(face, species.face);
 
-  const { values, blink } = usePetAnimation(
-    isAnimated
-      ? (animation ?? (face.animation as AnimationKey))
-      : STILL_ANIMATION,
+  const { values, blink, breath, breathDepth } = usePetAnimation(
+    animation ?? (face.animation as AnimationKey),
+    isAnimated,
   );
 
   const layerStyles = {
@@ -165,6 +165,8 @@ export const PetView = ({
     overlay: useLayerStyle(values.overlay),
     eyes: useLayerStyle(values.head, blink),
   };
+
+  const breathStyle = useBreathStyle(breath, breathDepth);
 
   const layers: Record<GroupId, Shape[]> = {
     ...geometry.shapes,
@@ -181,39 +183,42 @@ export const PetView = ({
       accessibilityLabel={accessibilityLabel ?? face.title}
       style={[{ height: box, width: box }, style]}
     >
-      {GROUP_ORDER.map((group) => {
-        const driver = LAYER_DRIVER[group];
-        const pivot = geometry.pivots[group];
+      {/* The chest, over the pose: whatever plays inside still breathes. */}
+      <Animated.View style={[StyleSheet.absoluteFill, breathStyle]}>
+        {GROUP_ORDER.map((group) => {
+          const driver = LAYER_DRIVER[group];
+          const pivot = geometry.pivots[group];
 
-        if (!driver || !isAnimated) {
+          if (!driver || !isAnimated) {
+            return (
+              <View key={group} style={StyleSheet.absoluteFill}>
+                <Layer shapes={layers[group]} palette={palette} />
+              </View>
+            );
+          }
+
           return (
-            <View key={group} style={StyleSheet.absoluteFill}>
+            <Animated.View
+              key={group}
+              style={[
+                StyleSheet.absoluteFill,
+                // Ears swivel at their base and the tail at its root, so each
+                // layer rotates around its own pivot rather than the canvas.
+                pivot && {
+                  transformOrigin: [
+                    `${(pivot[0] / CANVAS) * 100}%`,
+                    `${(pivot[1] / CANVAS) * 100}%`,
+                    0,
+                  ],
+                },
+                group === 'eyes' ? layerStyles.eyes : layerStyles[driver],
+              ]}
+            >
               <Layer shapes={layers[group]} palette={palette} />
-            </View>
+            </Animated.View>
           );
-        }
-
-        return (
-          <Animated.View
-            key={group}
-            style={[
-              StyleSheet.absoluteFill,
-              // Ears swivel at their base and the tail at its root, so each
-              // layer rotates around its own pivot rather than the canvas.
-              pivot && {
-                transformOrigin: [
-                  `${(pivot[0] / CANVAS) * 100}%`,
-                  `${(pivot[1] / CANVAS) * 100}%`,
-                  0,
-                ],
-              },
-              group === 'eyes' ? layerStyles.eyes : layerStyles[driver],
-            ]}
-          >
-            <Layer shapes={layers[group]} palette={palette} />
-          </Animated.View>
-        );
-      })}
+        })}
+      </Animated.View>
     </View>
   );
 
