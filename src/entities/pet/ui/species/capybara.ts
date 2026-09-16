@@ -27,42 +27,46 @@ export const capybaraGeometry = (appearance: PetAppearance): PetGeometry => {
       eyes: [CENTER, 140],
     },
     shapes: {
-      shadow: [ellipse(CENTER, 268, 82, 13, 'shadow', { opacity: 0.16 })],
+      shadow: [ellipse(CENTER, 270, 86, 14, 'shadow', { opacity: 0.18 })],
 
       tail: [],
 
       body: [
-        // Stocky, almost square body.
         path(
-          'M 74 254 q -6 -70 76 -70 q 82 0 76 70 q -2 12 -18 12 l -116 0 q -16 0 -18 -12 z',
+          'M 70 256 q -8 -74 80 -74 q 88 0 80 74 q -2 14 -20 14 l -120 0 q -18 0 -20 -14 z',
           'body',
         ),
-        ellipse(CENTER, 246, 70, 22, 'bodyDark', { opacity: 0.45 }),
-        ellipse(CENTER, 234, 46, 28, 'belly'),
-        ellipse(112, 256, 22, 12, 'bodyLight'),
-        ellipse(188, 256, 22, 12, 'bodyLight'),
+        ellipse(CENTER, 248, 74, 24, 'bodyDark', { opacity: 0.5 }),
+        ellipse(CENTER, 232, 50, 32, 'belly'),
+        ellipse(110, 220, 16, 26, 'bodyLight', { opacity: 0.22, rotate: -12 }),
+        ellipse(190, 220, 16, 26, 'bodyLight', { opacity: 0.22, rotate: 12 }),
+        ellipse(110, 258, 24, 13, 'bodyLight'),
+        ellipse(190, 258, 24, 13, 'bodyLight'),
         ...pattern.body,
       ],
 
       ears: [
-        ellipse(96, 116, 15, 13, 'bodyDark'),
-        ellipse(204, 116, 15, 13, 'bodyDark'),
-        ellipse(96, 117, 8, 7, 'inner', { opacity: 0.6 }),
-        ellipse(204, 117, 8, 7, 'inner', { opacity: 0.6 }),
+        ellipse(94, 114, 16, 14, 'bodyDark'),
+        ellipse(206, 114, 16, 14, 'bodyDark'),
+        ellipse(94, 116, 9, 8, 'inner', { opacity: 0.7 }),
+        ellipse(206, 116, 9, 8, 'inner', { opacity: 0.7 }),
       ],
 
       head: [
-        // Wide, low-set head with a flat top.
         path(
-          'M 82 154 q 0 -46 68 -46 q 68 0 68 46 q 0 52 -68 52 q -68 0 -68 -52 z',
+          'M 78 154 q 0 -48 72 -48 q 72 0 72 48 q 0 54 -72 54 q -72 0 -72 -54 z',
           'body',
         ),
-        ellipse(CENTER, 128, 52, 20, 'bodyLight', { opacity: 0.45 }),
+        ellipse(CENTER, 126, 56, 22, 'bodyLight', { opacity: 0.5 }),
         // The heavy muzzle a capybara is all about.
-        ellipse(CENTER, 186, 46, 24, 'belly'),
-        ellipse(CENTER, 174, 13, 8, 'ink'),
-        ellipse(120, 180, 16, 10, 'blush', { opacity: 0.45 }),
-        ellipse(180, 180, 16, 10, 'blush', { opacity: 0.45 }),
+        ellipse(CENTER, 188, 50, 26, 'belly'),
+        ellipse(CENTER, 172, 16, 10, 'ink'),
+        ellipse(CENTER - 4, 169, 4, 3, 'white', { opacity: 0.45 }),
+        // Nostrils.
+        ellipse(142, 180, 3.5, 2.5, 'ink', { opacity: 0.55 }),
+        ellipse(158, 180, 3.5, 2.5, 'ink', { opacity: 0.55 }),
+        ellipse(118, 182, 18, 11, 'blush', { opacity: 0.5 }),
+        ellipse(182, 182, 18, 11, 'blush', { opacity: 0.5 }),
         ...pattern.head,
       ],
 

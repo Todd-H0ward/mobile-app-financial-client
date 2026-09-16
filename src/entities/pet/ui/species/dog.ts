@@ -27,45 +27,50 @@ export const dogGeometry = (appearance: PetAppearance): PetGeometry => {
       eyes: [CENTER, 134],
     },
     shapes: {
-      shadow: [ellipse(CENTER, 268, 76, 13, 'shadow', { opacity: 0.16 })],
+      shadow: [ellipse(CENTER, 270, 80, 14, 'shadow', { opacity: 0.18 })],
 
       tail: [
         path(
-          'M 198 244 C 236 250 254 224 244 198 C 240 186 224 188 228 200 C 234 216 226 230 196 232 Z',
+          'M 196 244 C 240 252 258 222 246 194 C 242 180 224 184 230 198 C 238 218 228 232 194 232 Z',
           'bodyDark',
         ),
-        ellipse(240, 196, 9, 9, 'bodyLight', { opacity: 0.5 }),
+        ellipse(242, 196, 11, 11, 'bodyLight', { opacity: 0.6 }),
+        ellipse(246, 192, 4, 4, 'white', { opacity: 0.35 }),
       ],
 
       body: [
-        ellipse(CENTER, 216, 76, 60, 'body'),
-        ellipse(CENTER, 238, 68, 36, 'bodyDark', { opacity: 0.5 }),
-        ellipse(CENTER, 228, 48, 34, 'belly'),
-        ellipse(110, 258, 23, 13, 'body'),
-        ellipse(190, 258, 23, 13, 'body'),
-        ellipse(110, 258, 15, 8, 'belly', { opacity: 0.7 }),
-        ellipse(190, 258, 15, 8, 'belly', { opacity: 0.7 }),
-        ellipse(130, 250, 18, 11, 'bodyLight'),
-        ellipse(170, 250, 18, 11, 'bodyLight'),
+        ellipse(CENTER, 216, 80, 62, 'body'),
+        ellipse(CENTER, 240, 72, 38, 'bodyDark', { opacity: 0.55 }),
+        ellipse(CENTER, 226, 52, 38, 'belly'),
+        ellipse(116, 212, 20, 30, 'bodyLight', { opacity: 0.25, rotate: -16 }),
+        ellipse(184, 212, 20, 30, 'bodyLight', { opacity: 0.25, rotate: 16 }),
+        ellipse(108, 258, 25, 14, 'body'),
+        ellipse(192, 258, 25, 14, 'body'),
+        ellipse(108, 260, 15, 8, 'belly', { opacity: 0.75 }),
+        ellipse(192, 260, 15, 8, 'belly', { opacity: 0.75 }),
+        ellipse(128, 248, 19, 12, 'bodyLight'),
+        ellipse(172, 248, 19, 12, 'bodyLight'),
         ...pattern.body,
       ],
 
       ears: [
-        // Long ears hanging past the jaw — the dog's whole silhouette.
-        ellipse(80, 168, 22, 46, 'bodyDark', { rotate: 8 }),
-        ellipse(220, 168, 22, 46, 'bodyDark', { rotate: -8 }),
-        ellipse(82, 160, 13, 30, 'inner', { rotate: 8, opacity: 0.55 }),
-        ellipse(218, 160, 13, 30, 'inner', { rotate: -8, opacity: 0.55 }),
+        ellipse(78, 170, 24, 50, 'bodyDark', { rotate: 10 }),
+        ellipse(222, 170, 24, 50, 'bodyDark', { rotate: -10 }),
+        ellipse(80, 162, 14, 34, 'inner', { rotate: 10, opacity: 0.65 }),
+        ellipse(220, 162, 14, 34, 'inner', { rotate: -10, opacity: 0.65 }),
+        ellipse(76, 148, 8, 14, 'bodyLight', { rotate: 10, opacity: 0.35 }),
+        ellipse(224, 148, 8, 14, 'bodyLight', { rotate: -10, opacity: 0.35 }),
       ],
 
       head: [
-        ellipse(CENTER, 152, 74, 66, 'body'),
-        ellipse(CENTER, 126, 54, 26, 'bodyLight', { opacity: 0.5 }),
-        // Broad muzzle with a nose on top of it.
-        ellipse(CENTER, 184, 40, 26, 'belly'),
-        ellipse(CENTER, 170, 11, 8, 'ink'),
-        ellipse(124, 176, 17, 11, 'blush', { opacity: 0.5 }),
-        ellipse(176, 176, 17, 11, 'blush', { opacity: 0.5 }),
+        ellipse(CENTER, 152, 76, 68, 'body'),
+        ellipse(CENTER, 124, 56, 28, 'bodyLight', { opacity: 0.55 }),
+        // Broad muzzle with a shiny nose.
+        ellipse(CENTER, 186, 44, 28, 'belly'),
+        ellipse(CENTER, 168, 14, 10, 'ink'),
+        ellipse(CENTER - 3, 165, 4, 3, 'white', { opacity: 0.5 }),
+        ellipse(122, 178, 19, 12, 'blush', { opacity: 0.55 }),
+        ellipse(178, 178, 19, 12, 'blush', { opacity: 0.55 }),
         ...pattern.head,
       ],
 

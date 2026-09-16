@@ -315,6 +315,93 @@ const ANIMATIONS = {
       },
     ],
   },
+  flinch: {
+    id: 'flinch',
+    title: 'Вздрогнул',
+    loop: true,
+    blink: true,
+    tracks: [
+      {
+        layer: 'body',
+        channel: 'translateY',
+        keyframes: [
+          [-8, 90],
+          [0, 140],
+          [0, 900],
+        ],
+      },
+      {
+        layer: 'head',
+        channel: 'rotate',
+        keyframes: [
+          [-6, 90],
+          [4, 120],
+          [0, 900],
+        ],
+      },
+    ],
+  },
+  nuzzle: {
+    id: 'nuzzle',
+    title: 'Трётся',
+    loop: true,
+    blink: true,
+    tracks: [
+      {
+        layer: 'head',
+        channel: 'rotate',
+        keyframes: [
+          [8, 280],
+          [-6, 280],
+          [4, 240],
+          [0, 700],
+        ],
+      },
+      {
+        layer: 'tail',
+        channel: 'rotate',
+        keyframes: [
+          [16, 260],
+          [-12, 260],
+        ],
+      },
+    ],
+  },
+  dangle: {
+    id: 'dangle',
+    title: 'Висит',
+    loop: true,
+    blink: true,
+    breathDepth: 0.015,
+    tracks: [
+      {
+        layer: 'body',
+        channel: 'rotate',
+        keyframes: [
+          [5, 420],
+          [-5, 840],
+          [0, 420],
+        ],
+      },
+      {
+        layer: 'ears',
+        channel: 'rotate',
+        keyframes: [
+          [-10, 420],
+          [8, 840],
+          [0, 420],
+        ],
+      },
+      {
+        layer: 'tail',
+        channel: 'rotate',
+        keyframes: [
+          [10, 500],
+          [-8, 500],
+        ],
+      },
+    ],
+  },
 } satisfies Record<string, PetAnimation>;
 
 type AnimationKey = keyof typeof ANIMATIONS;

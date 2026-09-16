@@ -118,6 +118,10 @@
       "bored": "bored",
       "uncomfortable": "uncomfortable",
       "sad": "sad"
+    },
+    "play": {
+      "a11y": "You can stroke, tap and lift",
+      "hint": "Swipe to stroke. Tap to boop. Hold and pull up to lift"
     }
   },
   "petCreate": {

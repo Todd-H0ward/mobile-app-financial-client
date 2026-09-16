@@ -1,12 +1,9 @@
 import { StyleSheet, View } from 'react-native';
 
-import { PetView } from '@/entities/pet/ui';
-
-import { SPACING } from '@/shared/constants';
-
 import type { HomeHudPet } from '../model';
 
 import { HomeHudMood } from './home-hud';
+import { PetPlay } from './pet-play';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -39,30 +36,27 @@ const FLOOR_INSET = 190;
 // ═══════════════════════════════════════════
 
 /**
- * The pet that stays with the child between rooms.
+ * The pet that stays with the child between rooms — and answers to touch.
  *
  * It sits above the room strip, not inside a page: the scenery swipes away
- * while one pet stays planted on the floor. No hop on room change — a nudge
- * next to the doors mounting looked like a layout glitch. docs/performance.md
- * also asks for never more than one animated pet on screen.
+ * while one pet stays planted on the floor. Pokes, strokes and a scruff lift
+ * live on `PetPlay`; docs/performance.md still asks for never more than one
+ * animated pet on screen.
  */
 export const HomePetCompanion = ({
   pet,
   isAnimated,
 }: HomePetCompanionProps) => (
   <View pointerEvents="box-none" style={styles.root}>
-    <View pointerEvents="none" style={styles.stage}>
-      <PetView
-        appearance={pet.appearance}
-        emotion={pet.emotion}
-        stage={pet.stage}
-        size={PET_SIZE}
-        isAnimated={isAnimated}
-        accessibilityLabel={pet.accessibilityLabel}
-      />
-
-      <HomeHudMood label={pet.moodLabel} tone={pet.moodTone} />
-    </View>
+    <PetPlay
+      appearance={pet.appearance}
+      emotion={pet.emotion}
+      stage={pet.stage}
+      size={PET_SIZE}
+      isAnimated={isAnimated}
+      accessibilityLabel={pet.accessibilityLabel}
+      footer={<HomeHudMood label={pet.moodLabel} tone={pet.moodTone} />}
+    />
   </View>
 );
 
@@ -75,11 +69,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     justifyContent: 'flex-end',
     paddingBottom: FLOOR_INSET,
-  },
-  stage: {
-    alignItems: 'center',
-    alignSelf: 'center',
-    gap: SPACING.two,
   },
 });
 

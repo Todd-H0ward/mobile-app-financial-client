@@ -235,6 +235,39 @@ const EMOTIONS = {
     overlay: 'drop',
     animation: 'shake',
   },
+  /** Soft poke on the nose — never an alarm, just a blink of surprise. */
+  booped: {
+    id: 'booped',
+    title: 'Ткнули',
+    eyes: 'wide',
+    mouth: 'open',
+    brows: 'raised',
+    blush: true,
+    overlay: 'none',
+    animation: 'flinch',
+  },
+  /** Long stroke along the coat. */
+  tickled: {
+    id: 'tickled',
+    title: 'Пощекотали',
+    eyes: 'arc',
+    mouth: 'tongue',
+    brows: 'none',
+    blush: true,
+    overlay: 'hearts',
+    animation: 'nuzzle',
+  },
+  /** Lifted gently by the scruff — a hang, not a fall. */
+  dangled: {
+    id: 'dangled',
+    title: 'На весу',
+    eyes: 'dizzy',
+    mouth: 'wobble',
+    brows: 'raised',
+    blush: true,
+    overlay: 'question',
+    animation: 'dangle',
+  },
 } as const satisfies Record<string, Emotion>;
 
 type EmotionKey = keyof typeof EMOTIONS;
