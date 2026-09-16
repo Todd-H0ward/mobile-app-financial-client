@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { makeDemoTimeSource } from '@/shared/lib/time-source';
 
-import { createInitialUser } from '../../model/initial-user';
-import type { UserSave } from '../../model/types';
+import type { UserSave } from '../../model';
+import { createInitialUser } from '../../model';
 
 import {
   acknowledgeSummary,
@@ -329,5 +329,78 @@ describe('isPlanKept', () => {
         { needs: 5, wants: 999, savings: 0 },
       ),
     ).toBe(false);
+  });
+});
+
+// ═══════════════════════════════════════════
+// The pet grows on settlement — docs/pet.md
+// ═══════════════════════════════════════════
+
+describe('growth', () => {
+  it('leaves a pet a baby until the whole formula is met', () => {
+    const time = makeDemoTimeSource(0);
+    let user = makeUser();
+
+    // Two periods with a kept plan, but no goal reached: teen asks for one.
+    user = runOnePeriod(user, time);
+    user = runOnePeriod(user, time);
+
+    expect(user.history).toHaveLength(2);
+    expect(user.history.every((record) => record.isPlanKept)).toBe(true);
+    expect(user.pet.stage).toBe('baby');
+  });
+
+  it('grows the pet once the periods, a goal and a kept plan add up', () => {
+    const time = makeDemoTimeSource(0);
+    const base = makeUser();
+    // A goal reached in period 1 — the condition the two periods were missing.
+    const withGoal: UserSave = {
+      ...base,
+      savings: {
+        ...base.savings,
+        goals: base.savings.goals.map((goal, index) =>
+          index === 0 ? { ...goal, reachedInPeriod: 1 } : goal,
+        ),
+      },
+    };
+
+    let user = runOnePeriod(withGoal, time);
+    expect(user.pet.stage).toBe('baby');
+
+    user = runOnePeriod(user, time);
+    expect(user.pet.stage).toBe('teen');
+  });
+
+  it('never takes a stage back, whatever the later periods look like', () => {
+    const time = makeDemoTimeSource(0);
+    const grown: UserSave = {
+      ...makeUser(),
+      pet: { ...makeUser().pet, stage: 'adult' },
+    };
+
+    const user = runOnePeriod(grown, time);
+
+    expect(user.pet.stage).toBe('adult');
+  });
+
+  it('owes a ceremony for a stage the child has not been shown yet', () => {
+    const time = makeDemoTimeSource(0);
+    const base = makeUser();
+    const withGoal: UserSave = {
+      ...base,
+      savings: {
+        ...base.savings,
+        goals: base.savings.goals.map((goal, index) =>
+          index === 0 ? { ...goal, reachedInPeriod: 1 } : goal,
+        ),
+      },
+    };
+
+    const user = runOnePeriod(runOnePeriod(withGoal, time), time);
+
+    expect(user.pet.stage).toBe('teen');
+    // Settlement grows the pet and owes the scene; showing it is the screen's
+    // job, and only that catches `celebratedStage` up.
+    expect(user.pet.celebratedStage).toBe('baby');
   });
 });

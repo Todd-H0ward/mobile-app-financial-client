@@ -33,6 +33,19 @@ const MIGRATIONS: Record<number, MigrationStep> = {
   // v0 — a save from a build before versioning: fewer fields, no `version`.
   // Missing fields come from the starting profile; what the player earned stays.
   0: (save) => ({ ...createInitialUser(), ...save, version: 1 }),
+
+  // v1 — the pet grew a `celebratedStage`. An existing pet is taken as already
+  // celebrated: a child who has been playing for a week must not be handed a
+  // ceremony for a stage they reached three periods ago.
+  1: (save) => {
+    const pet = isRecord(save.pet) ? save.pet : {};
+
+    return {
+      ...save,
+      pet: { ...pet, celebratedStage: pet.stage ?? 'baby' },
+      version: 2,
+    };
+  },
 };
 
 // ═══════════════════════════════════════════
@@ -54,6 +67,7 @@ const isPet = (value: unknown): boolean =>
   Array.isArray(value.traitIds) &&
   value.traitIds.every((id) => typeof id === 'string') &&
   isOneOf(value.stage, PET_STAGES) &&
+  isOneOf(value.celebratedStage, PET_STAGES) &&
   isFiniteNumber(value.comfort) &&
   isFiniteNumber(value.spirit);
 

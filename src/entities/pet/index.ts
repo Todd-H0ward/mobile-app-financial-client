@@ -4,7 +4,15 @@
  * drag react-native into the node test runner, which is how `entities/user`
  * reads the appearance tuples.
  */
-export type { PetFills, PetNameStatus, PetRig, PetSkinLayer } from './lib';
+export type {
+  GrowthFacts,
+  GrowthProgress,
+  GrowthRule,
+  PetFills,
+  PetNameStatus,
+  PetRig,
+  PetSkinLayer,
+} from './lib';
 export {
   anchorPoint,
   anchorsFor,
@@ -12,6 +20,8 @@ export {
   easePetAxes,
   easeTowards,
   emotionFor,
+  GROWTH_RULES,
+  growPet,
   isPetNameValid,
   lerpPose,
   moodFor,
@@ -23,10 +33,12 @@ export {
   PET_NAME_MIN_LENGTH,
   POSE_NEUTRAL,
   poseFor,
+  progressToNextStage,
   rigFor,
   silhouetteFor,
   skinFor,
   skinLayerFor,
+  stageFor,
   validatePetName,
 } from './lib';
 export type {

@@ -65,6 +65,15 @@ interface PetSave {
   traitIds: string[];
   /** Growth stage. Recomputed by the settlement step, and only upwards. */
   stage: PetStage;
+  /**
+   * The stage the child has already been shown a ceremony for.
+   *
+   * Behind `stage` for exactly as long as the growth scene is owed. It lives
+   * in the save rather than in a screen's state because growing up is the most
+   * visible reward in the game (docs/pet.md) — an app killed between the
+   * settlement and the scene must still owe it, not swallow it.
+   */
+  celebratedStage: PetStage;
   /** Body: fed and warm. 0…1, with inertia — the mood eases, never jumps. */
   comfort: number;
   /** Everything else: goal proximity, tasks done, how the period ended. 0…1. */

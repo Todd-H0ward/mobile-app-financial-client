@@ -65,6 +65,23 @@ const STAGE_SCALE: Record<PetStage, number> = {
   adult: 1.12,
 };
 
+/**
+ * How big the head is for the stage, against the body.
+ *
+ * Growing up is not just a bigger drawing: a baby is head-heavy and an adult
+ * has grown into its body. Without this the three stages read as one pet at
+ * three zoom levels, and the most visible reward in the game (docs/pet.md)
+ * would only be legible with a ruler.
+ */
+const STAGE_HEAD: Record<PetStage, number> = {
+  baby: 1.14,
+  teen: 1,
+  adult: 0.93,
+};
+
+/** Layers that belong to the head and grow with it. */
+const HEAD_GROUP: GroupId[] = ['ears', 'head', 'eyes'];
+
 /** Which animated layer each drawing layer follows. */
 const LAYER_DRIVER: Record<
   GroupId,
@@ -176,6 +193,14 @@ export const PetView = ({
   };
 
   const box = size * STAGE_SCALE[stage];
+  const headScale = STAGE_HEAD[stage];
+  // The head grows out of the neck, not out of the canvas centre — a head
+  // scaled about the middle of the box would sink into the body.
+  const neckOrigin: (string | number)[] = [
+    '50%',
+    `${((geometry.pivots.head?.[1] ?? CANVAS / 2) / CANVAS) * 100}%`,
+    0,
+  ];
 
   const pet = (
     <View
@@ -189,33 +214,43 @@ export const PetView = ({
           const driver = LAYER_DRIVER[group];
           const pivot = geometry.pivots[group];
 
+          // The proportion sits on its own wrapper: the animated style owns
+          // `transform` outright, so the two cannot share a style object.
+          const proportion = HEAD_GROUP.includes(group)
+            ? {
+                transform: [{ scale: headScale }],
+                transformOrigin: neckOrigin,
+              }
+            : undefined;
+
           if (!driver || !isAnimated) {
             return (
-              <View key={group} style={StyleSheet.absoluteFill}>
+              <View key={group} style={[StyleSheet.absoluteFill, proportion]}>
                 <Layer shapes={layers[group]} palette={palette} />
               </View>
             );
           }
 
           return (
-            <Animated.View
-              key={group}
-              style={[
-                StyleSheet.absoluteFill,
-                // Ears swivel at their base and the tail at its root, so each
-                // layer rotates around its own pivot rather than the canvas.
-                pivot && {
-                  transformOrigin: [
-                    `${(pivot[0] / CANVAS) * 100}%`,
-                    `${(pivot[1] / CANVAS) * 100}%`,
-                    0,
-                  ],
-                },
-                group === 'eyes' ? layerStyles.eyes : layerStyles[driver],
-              ]}
-            >
-              <Layer shapes={layers[group]} palette={palette} />
-            </Animated.View>
+            <View key={group} style={[StyleSheet.absoluteFill, proportion]}>
+              <Animated.View
+                style={[
+                  StyleSheet.absoluteFill,
+                  // Ears swivel at their base and the tail at its root, so each
+                  // layer rotates around its own pivot rather than the canvas.
+                  pivot && {
+                    transformOrigin: [
+                      `${(pivot[0] / CANVAS) * 100}%`,
+                      `${(pivot[1] / CANVAS) * 100}%`,
+                      0,
+                    ],
+                  },
+                  group === 'eyes' ? layerStyles.eyes : layerStyles[driver],
+                ]}
+              >
+                <Layer shapes={layers[group]} palette={palette} />
+              </Animated.View>
+            </View>
           );
         })}
       </Animated.View>
