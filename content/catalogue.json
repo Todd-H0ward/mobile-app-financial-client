@@ -1,0 +1,116 @@
+{
+  "items": [
+    {
+      "id": "bread",
+      "title": "Хлеб и молоко",
+      "price": 8,
+      "kind": "need",
+      "shop": "grocery",
+      "category": "food",
+      "comfortDelta": 0.08,
+      "note": "Еда на период — без неё питомцу зябко в животе."
+    },
+    {
+      "id": "porridge",
+      "title": "Каша",
+      "price": 10,
+      "kind": "need",
+      "shop": "grocery",
+      "category": "food",
+      "comfortDelta": 0.1,
+      "note": "Сытный завтрак: питомец дольше остаётся довольным."
+    },
+    {
+      "id": "heating",
+      "title": "Тёплый дом",
+      "price": 15,
+      "kind": "need",
+      "shop": "grocery",
+      "category": "warmth",
+      "comfortDelta": 0.12,
+      "note": "Отопление на период — иначе дома будет зябко."
+    },
+    {
+      "id": "soap",
+      "title": "Мыло",
+      "price": 6,
+      "kind": "need",
+      "shop": "grocery",
+      "category": "hygiene",
+      "comfortDelta": 0.05,
+      "note": "Чистота — тоже нужное, не роскошь."
+    },
+    {
+      "id": "sweater",
+      "title": "Свитер",
+      "price": 40,
+      "kind": "want",
+      "shop": "clothes",
+      "category": "clothes",
+      "comfortDelta": 0.06,
+      "furnitureId": "sweater",
+      "note": "Красивый свитер. Дорогой — стоит сначала накопить."
+    },
+    {
+      "id": "scarf",
+      "title": "Шарф",
+      "price": 14,
+      "kind": "want",
+      "shop": "clothes",
+      "category": "clothes",
+      "comfortDelta": 0.04,
+      "furnitureId": "scarf",
+      "note": "Тёплый шарф — хочется, а не обязательно."
+    },
+    {
+      "id": "rug",
+      "title": "Коврик",
+      "price": 20,
+      "kind": "want",
+      "shop": "furniture",
+      "category": "decor",
+      "furnitureId": "rug",
+      "note": "Мягкий пол в комнате питомца."
+    },
+    {
+      "id": "lamp",
+      "title": "Ночник",
+      "price": 18,
+      "kind": "want",
+      "shop": "furniture",
+      "category": "decor",
+      "furnitureId": "lamp",
+      "note": "Тёплый свет вечером — украшение, не нужное."
+    },
+    {
+      "id": "stickers",
+      "title": "Наклейки",
+      "price": 5,
+      "kind": "want",
+      "shop": "furniture",
+      "category": "decor",
+      "furnitureId": "stickers",
+      "note": "Украсят стену. Можно и в следующий период."
+    },
+    {
+      "id": "toy-car",
+      "title": "Машинка",
+      "price": 12,
+      "kind": "want",
+      "shop": "toys",
+      "category": "toy",
+      "furnitureId": "toy-car",
+      "note": "Игрушка для комнаты. Позже с ней можно будет поиграть."
+    },
+    {
+      "id": "ball",
+      "title": "Мячик",
+      "price": 7,
+      "kind": "want",
+      "shop": "toys",
+      "category": "toy",
+      "furnitureId": "ball",
+      "note": "Катать и ловить. Мини-игра появится чуть позже."
+    }
+  ]
+}

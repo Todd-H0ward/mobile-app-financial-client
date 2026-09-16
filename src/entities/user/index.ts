@@ -1,8 +1,22 @@
-export type { PlayerNameStatus } from './lib';
+export type {
+  CreditInput,
+  DebitFail,
+  DebitInput,
+  DebitOk,
+  DebitResult,
+  PlayerNameStatus,
+  PurchaseFail,
+  PurchaseOk,
+  PurchaseResult,
+} from './lib';
 export {
   acknowledgeSummary,
+  applyPurchase,
+  canAfford,
   canFinishPeriod,
   createDemoProfile,
+  creditWallet,
+  debitWallet,
   DEMO_RUN_PERIODS,
   enterDemoMode,
   exitDemoMode,

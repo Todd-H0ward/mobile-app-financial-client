@@ -1,2 +1,8 @@
-export type { CreditInput } from './wallet';
-export { creditWallet, startingWallet } from './wallet';
+export type {
+  CreditInput,
+  DebitFail,
+  DebitInput,
+  DebitOk,
+  DebitResult,
+} from './wallet';
+export { canAfford, creditWallet, debitWallet, startingWallet } from './wallet';

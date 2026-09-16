@@ -19,6 +19,19 @@ export {
   PLAYER_NAME_MIN_LENGTH,
   validatePlayerName,
 } from './player-name';
+export type { PurchaseFail, PurchaseOk, PurchaseResult } from './purchase';
+export { applyPurchase } from './purchase';
 export { resetUser } from './reset';
-export type { CreditInput } from './wallet';
-export { creditWallet, startingWallet } from './wallet';
+export type {
+  CreditInput,
+  DebitFail,
+  DebitInput,
+  DebitOk,
+  DebitResult,
+} from './wallet';
+export {
+  canAfford,
+  creditWallet,
+  debitWallet,
+  startingWallet,
+} from './wallet';

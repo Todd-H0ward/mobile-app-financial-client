@@ -29,8 +29,8 @@
 | 2.5.4 | Валюта с явным источником и суммой каждого начисления | `screens/home`, `screens/history` | `entities/wallet` | `wallet.test.ts` | не начато |
 | 2.5.5 | План бюджета по трём направлениям, контроль остатка, подтверждение | `screens/budget-plan` | `entities/budget` | `plan.test.ts`, `compare.test.ts` | готово — валидация и остаток в entity, экран со слайдером и степпером, баннер на home в `planning` |
 | 2.5.5 | Сравнение плана с фактом после периода | `screens/period-summary` | `entities/budget` (`compare`, `explainSummary`) | `compare.test.ts`, `explain.test.ts` | готово — экран итогов с план/факт барами, историей и tips; вход с home в `active`, редирект в `summary` |
-| 2.5.6 | Каталог покупок: ≥8 позиций, обязательные и необязательные, цена, категория, влияние | `screens/shop` | `entities/catalogue` | `catalogue.test.ts` | не начато |
-| 2.5.6 | Запрет отрицательного баланса + объяснение вариантов | `screens/shop` | `entities/wallet/lib/rules` | `rules.test.ts` | не начато |
+| 2.5.6 | Каталог покупок: ≥8 позиций, обязательные и необязательные, цена, категория, влияние | `screens/shop` | `entities/catalogue` | `content.test.ts` | готово — 11 позиций в четырёх витринах (продукты, одежда, мебель, игрушки); мини-игры игрушек — позже |
+| 2.5.6 | Запрет отрицательного баланса + объяснение вариантов | `screens/shop` | `entities/user/lib/wallet` (`debitWallet`) | `wallet.test.ts`, `purchase.test.ts` | готово — отказ с shortfall и тремя вариантами на шторке |
 | 2.5.7 | Накопления, ≥3 цели, прогресс | `screens/savings` | `entities/savings` + `content/goals.json` | `savings.test.ts` | в работе — три цели в контенте, прогресс хранится в сейве |
 | 2.5.7 | Снятие только по отдельному подтверждению с показом последствий | `screens/savings` | `entities/savings/lib/withdraw` | `withdraw.test.ts` | не начато |
 | 2.5.8 | ≥6 заданий по 3 темам, с последствиями, не только тесты | `screens/tasks` | `entities/task` + `content/tasks.json` | `task.test.ts` | не начато |
@@ -82,6 +82,6 @@
 | Комбинации внешности питомца | 9 | 0 | не начато |
 | Игровые периоды в демо-режиме | 5 | 5 | готово — `runDemoPeriods` + `demo.test.ts` |
 | Задания | 6 по 3 темам | 6 | контент в `tasks.json`; движок/экран — волна 1 (2.5.8) |
-| Позиции каталога покупок | 8, двух типов | 0 | не начато |
+| Позиции каталога покупок | 8, двух типов | 11 | готово |
 | Цели накопления | 3 | 3 | готово — `content/goals.json` |
 | Стадии развития питомца | 3 | 0 | не начато |
