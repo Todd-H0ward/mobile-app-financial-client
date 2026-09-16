@@ -117,7 +117,11 @@ export const SettingsScreen = () => {
           </Text>
         </Card.Content>
         <Card.Footer>
-          <Button size="m" isFullWidth onPress={() => router.push(ROUTES.UI_KIT)}>
+          <Button
+            size="m"
+            isFullWidth
+            onPress={() => router.push(ROUTES.UI_KIT)}
+          >
             {t('settings.openUiKit')}
           </Button>
         </Card.Footer>
