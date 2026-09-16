@@ -8,7 +8,7 @@ import type { UserSave } from '../types';
 // ═══════════════════════════════════════════
 
 /** Save schema version. Bumped on every incompatible change. */
-const USER_SAVE_VERSION = 1;
+const USER_SAVE_VERSION = 2;
 
 /** Starting thermostat position: chilly, but not cold. */
 const STARTING_TEMPERATURE = 0.5;
@@ -61,6 +61,8 @@ export const createInitialUser = ({
     name: DEFAULT_PET_NAME,
     traitIds: [],
     stage: 'baby',
+    // A baby is where every pet starts, so nothing is owed on a fresh profile.
+    celebratedStage: 'baby',
     comfort: 1,
     spirit: 1,
     ...pet,

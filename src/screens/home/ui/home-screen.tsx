@@ -2,12 +2,24 @@ import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
+import { PetBox } from '@/widgets/pet-box';
 
 import { DemoModeCard } from '@/features/demo-mode';
 import { RestartOnboardingButton } from '@/features/profile-restart';
 
+import { appearanceFor, emotionFor, moodFor } from '@/entities/pet';
+import { PetView } from '@/entities/pet/ui';
+import { useUserStore } from '@/entities/user';
+
 import { SPACING } from '@/shared/constants';
 import { Button, Card, Screen, Text } from '@/shared/ui';
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/** Side of the pet in the room. */
+const PET_SIZE = 200;
 
 // ═══════════════════════════════════════════
 // COMPONENTS
@@ -15,14 +27,39 @@ import { Button, Card, Screen, Text } from '@/shared/ui';
 
 export const HomeScreen = () => {
   const router = useRouter();
+  const pet = useUserStore((state) => state.user?.pet);
+  const isAnimationEnabled = useUserStore(
+    (state) => state.user?.settings.isAnimationEnabled ?? true,
+  );
+
+  const isPetMet = (pet?.name ?? '') !== '';
 
   return (
     <Screen gap="three" isTabBarVisible={false}>
       <Screen.Header
         title="Лапка"
-        subtitle="Комната питомца появится в первой волне"
+        subtitle={
+          isPetMet
+            ? `Дома: ${pet?.name}`
+            : 'Комната питомца появится в первой волне'
+        }
         trailing={<HintButton screen="home" />}
       />
+
+      {isPetMet && pet != null ? (
+        <View style={styles.stage}>
+          <PetView
+            appearance={appearanceFor(pet.species, pet.color, pet.pattern)}
+            emotion={emotionFor(moodFor(pet.comfort, pet.spirit))}
+            stage={pet.stage}
+            size={PET_SIZE}
+            isAnimated={isAnimationEnabled}
+            accessibilityLabel={`${pet.name}, ${moodFor(pet.comfort, pet.spirit).name}`}
+          />
+        </View>
+      ) : (
+        <PetBox onPress={() => router.push('/pet-create')} />
+      )}
 
       <Card tone="surfaceSoft">
         <Card.Title>Разработка</Card.Title>
@@ -57,5 +94,9 @@ const styles = StyleSheet.create({
   actions: {
     gap: SPACING.two,
     width: '100%',
+  },
+  stage: {
+    alignItems: 'center',
+    alignSelf: 'stretch',
   },
 });

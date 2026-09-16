@@ -1,4 +1,10 @@
 import type { BudgetDirection } from '@/entities/economy';
+import type {
+  PetColor,
+  PetPattern,
+  PetSpecies,
+  PetStage,
+} from '@/entities/pet';
 
 // ═══════════════════════════════════════════
 // CONSTANTS
@@ -11,21 +17,14 @@ import type { BudgetDirection } from '@/entities/economy';
  * membership: a save is JSON, so `phase: "banana"` is as likely as a typo in a
  * hand-edited file, and a string check alone would let it reach the screens.
  *
- * The budget directions are the exception: they live in `entities/economy`,
- * because the onboarding content and the budget screens need the three
- * directions without needing the save.
+ * Two sets live elsewhere for the same reason: the budget directions in
+ * `entities/economy` and the pet's appearance axes in `entities/pet`, because
+ * the onboarding content, the budget screens and the pet's skin, pose and
+ * anchors all need them without needing the save.
  */
 
 /** Phases the machine can actually be in. See docs/game-period.md. */
 const PERIOD_PHASES = ['planning', 'active', 'summary'] as const;
-
-const PET_SPECIES = ['cat', 'dog', 'capybara'] as const;
-
-const PET_COLORS = ['sand', 'graphite', 'mint'] as const;
-
-const PET_PATTERNS = ['solid', 'spots', 'stripes'] as const;
-
-const PET_STAGES = ['baby', 'teen', 'adult'] as const;
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -52,18 +51,6 @@ type BudgetFact = BudgetPlan;
  */
 type PeriodPhase = (typeof PERIOD_PHASES)[number];
 
-/** Pet species — the appearance axis you read from the silhouette alone. */
-type PetSpecies = (typeof PET_SPECIES)[number];
-
-/** Coat — three contrasting colors, never shades of one. */
-type PetColor = (typeof PET_COLORS)[number];
-
-/** Pattern on top of the coat: the third axis, spare capacity past the nine. */
-type PetPattern = (typeof PET_PATTERNS)[number];
-
-/** Growth stage. Never goes backwards — 2.2 forbids wiping progress. */
-type PetStage = (typeof PET_STAGES)[number];
-
 /** The pet: how it looks, what it is called, how it feels. */
 interface PetSave {
   /** Species. Picked during onboarding, never changes afterwards. */
@@ -78,6 +65,15 @@ interface PetSave {
   traitIds: string[];
   /** Growth stage. Recomputed by the settlement step, and only upwards. */
   stage: PetStage;
+  /**
+   * The stage the child has already been shown a ceremony for.
+   *
+   * Behind `stage` for exactly as long as the growth scene is owed. It lives
+   * in the save rather than in a screen's state because growing up is the most
+   * visible reward in the game (docs/pet.md) — an app killed between the
+   * settlement and the scene must still owe it, not swallow it.
+   */
+  celebratedStage: PetStage;
   /** Body: fed and warm. 0…1, with inertia — the mood eases, never jumps. */
   comfort: number;
   /** Everything else: goal proximity, tasks done, how the period ended. 0…1. */
@@ -235,11 +231,7 @@ export type {
   PeriodPhase,
   PeriodRecord,
   PeriodSave,
-  PetColor,
-  PetPattern,
   PetSave,
-  PetSpecies,
-  PetStage,
   SavingsGoalSave,
   SavingsSave,
   SettingsSave,
@@ -247,4 +239,4 @@ export type {
   WalletEntry,
   WalletSave,
 };
-export { PERIOD_PHASES, PET_COLORS, PET_PATTERNS, PET_SPECIES, PET_STAGES };
+export { PERIOD_PHASES };

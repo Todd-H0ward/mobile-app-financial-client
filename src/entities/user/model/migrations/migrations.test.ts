@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
+import { PET_SPECIES } from '@/entities/pet';
+
 import { createInitialUser, USER_SAVE_VERSION } from '../initial-user';
-import { PERIOD_PHASES, PET_SPECIES } from '../types';
+import { PERIOD_PHASES } from '../types';
 
 import { isUserSave, migrateUser } from './migrations';
 

@@ -48,6 +48,13 @@ Rules:
    In `shared/ui` a component is a single flat file — `button.tsx` —
    re-exported from `src/shared/ui/index.ts`. Import components from
    `@/shared/ui`, never by file path.
+   The one exception is an **entity that owns a component**: its `ui/` segment
+   gets an entry point of its own (`@/entities/pet/ui`) and the slice barrel
+   stays free of React. `entities/user` reads the pet's appearance tuples from
+   `@/entities/pet`, and those reads happen inside `vitest`'s node environment,
+   where importing a component would drag react-native in and fail the suite.
+   Two entry points, still no deep imports: `@/entities/pet` for the logic,
+   `@/entities/pet/ui` for the rig.
 3. **Segments inside a slice:** `ui/` (components), `model/` (state, stores,
    selectors, types), `lib/` (pure helpers), `api/` (requests). Create a segment
    only when it has content — do not scaffold empty folders.
@@ -360,7 +367,12 @@ Full rationale: [docs/layout.md](docs/layout.md).
 - Do not add a UI kit or styling library (NativeWind, Tamagui, …) — this template
   is plain `StyleSheet` + theme tokens.
 - Do not create `src/components`; that folder is gone on purpose.
-- Do not hardcode colors outside `shared/constants/theme.ts`.
+- Do not hardcode colors outside `shared/constants/theme.ts`. The one exception
+  is an entity's own art data — the pet's coats are the child's pet, not the
+  design system, and `shared/` may not know about them (rule 7). Such colors
+  live in a **single** palette file inside that entity
+  (`entities/pet/model/palette.ts`), nothing else in the slice writes a hex, and
+  a test asserts it.
 - Do not add barrels that re-export a whole layer (`src/screens/index.ts`);
   import the slice.
 - Do not use `export *` in a barrel — list every export by name, values and

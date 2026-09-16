@@ -31,6 +31,24 @@ export type {
   HintRowTitleProps,
 } from './hint-row';
 export { HintRow } from './hint-row';
+export type { IconProps } from './icons';
+export {
+  BackIcon,
+  CheckIcon,
+  CloseIcon,
+  CoinIcon,
+  HelpIcon,
+  HomeIcon,
+  ICON_SIZE,
+  ICON_STROKE,
+  MinusIcon,
+  PawIcon,
+  PiggyIcon,
+  PlusIcon,
+  ShopIcon,
+  TasksIcon,
+  useIconColor,
+} from './icons';
 export type { InputProps } from './input';
 export { Input } from './input';
 export type { ListRowIconProps, ListRowRootProps } from './list-row';

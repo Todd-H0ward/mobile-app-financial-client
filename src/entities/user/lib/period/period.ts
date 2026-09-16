@@ -1,8 +1,9 @@
 import { BUDGET_DIRECTIONS } from '@/entities/economy';
+import { type GrowthFacts, growPet } from '@/entities/pet';
 
 import type { TimeSource } from '@/shared/lib/time-source';
 
-import type { UserSave } from '../../model/types';
+import type { PeriodRecord, UserSave } from '../../model';
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -16,6 +17,23 @@ const hasPlanEntry = (user: UserSave): boolean =>
   user.period.plan.needs > 0 ||
   user.period.plan.wants > 0 ||
   user.period.plan.savings > 0;
+
+/**
+ * What the child has decided across every finished period.
+ *
+ * Counted from the history rather than kept as three counters in the save:
+ * the history is the record, and a counter that can drift from it is a bug
+ * waiting for a refund or a corrected period.
+ *
+ * Goals are counted as distinct ids — reaching one goal twice, which a
+ * withdrawal and a re-save make possible, is still one goal.
+ */
+const growthFacts = (history: PeriodRecord[]): GrowthFacts => ({
+  periods: history.length,
+  goalsReached: new Set(history.flatMap((record) => record.reachedGoalIds))
+    .size,
+  plansKept: history.filter((record) => record.isPlanKept).length,
+});
 
 // ═══════════════════════════════════════════
 // STATE MACHINE TRANSITIONS
@@ -97,6 +115,7 @@ export const finishPeriod = (user: UserSave, time: TimeSource): UserSave => {
  * 4. The period counter advances.
  * 5. `depositsThisPeriod` is reset so the regularity bonus starts clean.
  * 6. Plan and fact are wiped for the new period.
+ * 7. The pet grows if the whole history has earned it — and only upwards.
  *
  * @throws {Error} If the current phase is not `summary`.
  */
@@ -124,8 +143,26 @@ export const acknowledgeSummary = (
     .filter((g) => g.reachedInPeriod === period.index)
     .map((g) => g.goalId);
 
+  const history: PeriodRecord[] = [
+    ...user.history,
+    {
+      index: period.index,
+      plan: period.plan,
+      fact: period.fact,
+      isPlanKept,
+      reachedGoalIds,
+      endedAt,
+    },
+  ];
+
   return {
     ...user,
+    pet: {
+      ...user.pet,
+      // Growth is judged on the whole history, not on this period: 2.5.10 asks
+      // for a decision made over several periods, see docs/pet.md.
+      stage: growPet(user.pet.stage, growthFacts(history)),
+    },
     period: {
       index: period.index + 1,
       phase: 'planning',
@@ -138,17 +175,7 @@ export const acknowledgeSummary = (
       // Reset so that the regularity bonus counts only this period's deposits.
       depositsThisPeriod: 0,
     },
-    history: [
-      ...user.history,
-      {
-        index: period.index,
-        plan: period.plan,
-        fact: period.fact,
-        isPlanKept,
-        reachedGoalIds,
-        endedAt,
-      },
-    ],
+    history,
   };
 };
 
