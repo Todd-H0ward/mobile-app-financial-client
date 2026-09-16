@@ -48,6 +48,13 @@ Rules:
    In `shared/ui` a component is a single flat file — `button.tsx` —
    re-exported from `src/shared/ui/index.ts`. Import components from
    `@/shared/ui`, never by file path.
+   The one exception is an **entity that owns a component**: its `ui/` segment
+   gets an entry point of its own (`@/entities/pet/ui`) and the slice barrel
+   stays free of React. `entities/user` reads the pet's appearance tuples from
+   `@/entities/pet`, and those reads happen inside `vitest`'s node environment,
+   where importing a component would drag react-native in and fail the suite.
+   Two entry points, still no deep imports: `@/entities/pet` for the logic,
+   `@/entities/pet/ui` for the rig.
 3. **Segments inside a slice:** `ui/` (components), `model/` (state, stores,
    selectors, types), `lib/` (pure helpers), `api/` (requests). Create a segment
    only when it has content — do not scaffold empty folders.

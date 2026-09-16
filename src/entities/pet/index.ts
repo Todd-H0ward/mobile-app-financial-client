@@ -1,4 +1,12 @@
+/**
+ * The slice's logic and vocabulary. The rig has an entry point of its own,
+ * `@/entities/pet/ui`, because pulling a React component through here would
+ * drag react-native into the node test runner, which is how `entities/user`
+ * reads the appearance tuples.
+ */
+export type { PetRig } from './lib';
 export {
+  anchorPoint,
   anchorsFor,
   easePetAxes,
   easeTowards,
@@ -9,6 +17,7 @@ export {
   PET_MOOD_LOW,
   POSE_NEUTRAL,
   poseFor,
+  rigFor,
   silhouetteFor,
   skinFor,
 } from './lib';

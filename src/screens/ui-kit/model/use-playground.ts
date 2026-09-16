@@ -1,5 +1,12 @@
 import { useState } from 'react';
 
+import type {
+  PetColor,
+  PetPattern,
+  PetSpecies,
+  PetStage,
+} from '@/entities/pet';
+
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
@@ -47,6 +54,24 @@ interface Playground {
    */
   splashRun: number;
   replaySplash: () => void;
+  /** Species of the one live pet on the screen. */
+  petSpecies: PetSpecies;
+  setPetSpecies: (petSpecies: PetSpecies) => void;
+  /** Its coat. */
+  petColor: PetColor;
+  setPetColor: (petColor: PetColor) => void;
+  /** Its pattern. */
+  petPattern: PetPattern;
+  setPetPattern: (petPattern: PetPattern) => void;
+  /** Its growth stage — scale, liveliness and the anchor table. */
+  petStage: PetStage;
+  setPetStage: (petStage: PetStage) => void;
+  /** Body axis, 0…1. Together with `petSpirit` it decides the mood shown. */
+  petComfort: number;
+  setPetComfort: (petComfort: number) => void;
+  /** Heart axis, 0…1. */
+  petSpirit: number;
+  setPetSpirit: (petSpirit: number) => void;
 }
 
 // ═══════════════════════════════════════════
@@ -72,6 +97,12 @@ export const usePlayground = (): Playground => {
   const [isSheetDismissible, setIsSheetDismissible] = useState(true);
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
   const [splashRun, setSplashRun] = useState(0);
+  const [petSpecies, setPetSpecies] = useState<PetSpecies>('cat');
+  const [petColor, setPetColor] = useState<PetColor>('sand');
+  const [petPattern, setPetPattern] = useState<PetPattern>('spots');
+  const [petStage, setPetStage] = useState<PetStage>('teen');
+  const [petComfort, setPetComfort] = useState(0.8);
+  const [petSpirit, setPetSpirit] = useState(0.8);
 
   return {
     isLoading,
@@ -100,6 +131,18 @@ export const usePlayground = (): Playground => {
     setIsCollapsibleOpen,
     splashRun,
     replaySplash: () => setSplashRun((run) => run + 1),
+    petSpecies,
+    setPetSpecies,
+    petColor,
+    setPetColor,
+    petPattern,
+    setPetPattern,
+    petStage,
+    setPetStage,
+    petComfort,
+    setPetComfort,
+    petSpirit,
+    setPetSpirit,
   };
 };
 

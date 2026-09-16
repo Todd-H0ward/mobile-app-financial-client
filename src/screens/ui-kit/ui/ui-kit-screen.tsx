@@ -2,6 +2,17 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
+import {
+  moodFor,
+  PET_COLORS,
+  PET_MOOD_NAMES,
+  PET_PATTERNS,
+  PET_SPECIES,
+  PET_STAGES,
+  skinFor,
+} from '@/entities/pet';
+import { Pet } from '@/entities/pet/ui';
+
 import { SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import {
@@ -64,6 +75,21 @@ const TEXT_VARIANTS = [
 ] as const;
 
 const CHIP_VARIANTS = ['neutral', 'selected', 'need', 'want', 'muted'] as const;
+
+const PET_ANCHORS = ['speech', 'accessory', 'food', 'heart', 'ground'] as const;
+
+/** Axes that land on each mood, so the static row can show all five. */
+const PET_MOOD_AXES: Record<(typeof PET_MOOD_NAMES)[number], [number, number]> =
+  {
+    proud: [1, 1],
+    content: [0.5, 0.5],
+    bored: [1, 0.1],
+    uncomfortable: [0.1, 1],
+    sad: [0, 0],
+  };
+
+/** Side of a pet in the static galleries — the size 2.5.2 is judged at. */
+const PET_TILE = 64;
 
 const SHAPE_VARIANTS = [
   'circle',
@@ -636,6 +662,187 @@ export const UiKitScreen = () => {
         </KitSection>
 
         <KitSection
+          title="Питомец"
+          caption="Риг собирается из PetSkin, PetPose и точек привязки"
+        >
+          <KitSection.Row label="живой — дышит и переезжает между позами">
+            <View style={styles.petStage}>
+              <Pet
+                skin={skinFor(
+                  playground.petSpecies,
+                  playground.petColor,
+                  playground.petPattern,
+                )}
+                stage={playground.petStage}
+                mood={moodFor(playground.petComfort, playground.petSpirit)}
+              />
+            </View>
+            <Text variant="small" themeColor="textMuted">
+              {moodFor(playground.petComfort, playground.petSpirit).name} ·{' '}
+              {moodFor(playground.petComfort, playground.petSpirit).reason}
+            </Text>
+          </KitSection.Row>
+
+          <KitSection.Row label="вид" isInline>
+            {PET_SPECIES.map((species) => (
+              <Chip
+                key={species}
+                variant={
+                  playground.petSpecies === species ? 'selected' : 'neutral'
+                }
+                onPress={() => playground.setPetSpecies(species)}
+              >
+                {species}
+              </Chip>
+            ))}
+          </KitSection.Row>
+
+          <KitSection.Row label="окрас" isInline>
+            {PET_COLORS.map((color) => (
+              <Chip
+                key={color}
+                variant={playground.petColor === color ? 'selected' : 'neutral'}
+                onPress={() => playground.setPetColor(color)}
+              >
+                {color}
+              </Chip>
+            ))}
+          </KitSection.Row>
+
+          <KitSection.Row label="узор" isInline>
+            {PET_PATTERNS.map((pattern) => (
+              <Chip
+                key={pattern}
+                variant={
+                  playground.petPattern === pattern ? 'selected' : 'neutral'
+                }
+                onPress={() => playground.setPetPattern(pattern)}
+              >
+                {pattern}
+              </Chip>
+            ))}
+          </KitSection.Row>
+
+          <KitSection.Row label="стадия роста" isInline>
+            {PET_STAGES.map((stage) => (
+              <Chip
+                key={stage}
+                variant={playground.petStage === stage ? 'selected' : 'neutral'}
+                onPress={() => playground.setPetStage(stage)}
+              >
+                {stage}
+              </Chip>
+            ))}
+          </KitSection.Row>
+
+          <KitSection.Row label="comfort — тело: сытость и тепло">
+            <Slider
+              value={Math.round(playground.petComfort * 100)}
+              min={0}
+              max={100}
+              onChange={(value) => playground.setPetComfort(value / 100)}
+              style={styles.fullWidth}
+            />
+          </KitSection.Row>
+
+          <KitSection.Row label="spirit — цель, задания, итог периода">
+            <Slider
+              value={Math.round(playground.petSpirit * 100)}
+              min={0}
+              max={100}
+              onChange={(value) => playground.setPetSpirit(value / 100)}
+              style={styles.fullWidth}
+            />
+          </KitSection.Row>
+
+          <KitSection.Row
+            label="девятка — 3 вида × 3 окраса, статично"
+            isInline
+          >
+            {PET_SPECIES.flatMap((species) =>
+              PET_COLORS.map((color) => (
+                <Pet
+                  key={`${species}:${color}`}
+                  skin={skinFor(species, color, 'solid')}
+                  stage="adult"
+                  mood={moodFor(1, 1)}
+                  size={PET_TILE}
+                  isAnimated={false}
+                />
+              )),
+            )}
+          </KitSection.Row>
+
+          <KitSection.Row label="узоры" isInline>
+            {PET_PATTERNS.map((pattern) => (
+              <Pet
+                key={pattern}
+                skin={skinFor('cat', 'mint', pattern)}
+                stage="adult"
+                mood={moodFor(1, 1)}
+                size={PET_TILE}
+                isAnimated={false}
+              />
+            ))}
+          </KitSection.Row>
+
+          <KitSection.Row label="стадии — малыш, подросток, взрослый" isInline>
+            {PET_STAGES.map((stage) => (
+              <Pet
+                key={stage}
+                skin={skinFor('dog', 'sand', 'solid')}
+                stage={stage}
+                mood={moodFor(1, 1)}
+                size={PET_TILE}
+                isAnimated={false}
+              />
+            ))}
+          </KitSection.Row>
+
+          <KitSection.Row label="пять состояний" isInline>
+            {PET_MOOD_NAMES.map((name) => {
+              const [comfort, spirit] = PET_MOOD_AXES[name];
+
+              return (
+                <View key={name} style={styles.petMood}>
+                  <Pet
+                    skin={skinFor('capybara', 'graphite', 'solid')}
+                    stage="adult"
+                    mood={moodFor(comfort, spirit)}
+                    size={PET_TILE}
+                    isAnimated={false}
+                  />
+                  <Text variant="label" themeColor="textMuted">
+                    {name}
+                  </Text>
+                </View>
+              );
+            })}
+          </KitSection.Row>
+
+          <KitSection.Row label="точки привязки — Pet.At">
+            <View style={styles.petStage}>
+              <Pet
+                skin={skinFor(
+                  playground.petSpecies,
+                  playground.petColor,
+                  'solid',
+                )}
+                stage={playground.petStage}
+                mood={moodFor(1, 1)}
+                isAnimated={false}
+              >
+                {PET_ANCHORS.map((anchor) => (
+                  <Pet.At key={anchor} anchor={anchor}>
+                    <Shape variant="circle" size={10} color={theme.accent} />
+                  </Pet.At>
+                ))}
+              </Pet>
+            </View>
+          </KitSection.Row>
+        </KitSection>
+
+        <KitSection
           title="AnimatedIcon / SplashOverlay"
           caption="Обе анимации играют по-настоящему"
         >
@@ -700,6 +907,14 @@ export const UiKitScreen = () => {
 const styles = StyleSheet.create({
   fullWidth: {
     width: '100%',
+  },
+  petMood: {
+    alignItems: 'center',
+    gap: SPACING.one,
+  },
+  petStage: {
+    alignItems: 'center',
+    alignSelf: 'stretch',
   },
   iconStage: {
     alignItems: 'center',
