@@ -20,3 +20,5 @@ export {
   validatePlayerName,
 } from './player-name';
 export { resetUser } from './reset';
+export type { CreditInput } from './wallet';
+export { creditWallet, startingWallet } from './wallet';

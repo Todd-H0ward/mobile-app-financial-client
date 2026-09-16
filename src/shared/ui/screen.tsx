@@ -20,6 +20,7 @@ import {
   CONTENT_PADDING,
   MAX_CONTENT_WIDTH,
   RADII,
+  ROUTES,
   SPACING,
   type Spacing,
   type ThemeColor,
@@ -100,7 +101,7 @@ const ScreenBack = ({
           return;
         }
 
-        router.replace('/');
+        router.replace(ROUTES.ENTRY);
       }}
       style={({ pressed }) => [
         styles.back,

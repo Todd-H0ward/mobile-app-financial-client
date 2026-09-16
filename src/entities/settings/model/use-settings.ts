@@ -1,44 +1,42 @@
 import { useUserStore } from '@/entities/user';
 
-import { usePreferencesStore } from '@/shared/model';
+import { useLanguagePreference } from '@/shared/model';
+
+// ═══════════════════════════════════════════
+// SELECTORS
+// ═══════════════════════════════════════════
+
+/** Animations on, unless the grown-up turned them off. Default `true` with no profile. */
+export const useIsAnimationEnabled = () =>
+  useUserStore((state) => state.user?.settings.isAnimationEnabled ?? true);
+
+/** Sound on, unless the grown-up turned it off. Default `true` with no profile. */
+export const useIsSoundEnabled = () =>
+  useUserStore((state) => state.user?.settings.isSoundEnabled ?? true);
+
+/** Whether demo mode is playing. Default `false` with no profile. */
+export const useIsDemoMode = () =>
+  useUserStore((state) => state.user?.settings.isDemoMode ?? false);
+
+/** Arithmetic gate in front of the parents' section. Default `true` with no profile. */
+export const useIsParentGateEnabled = () =>
+  useUserStore((state) => state.user?.settings.isParentGateEnabled ?? true);
 
 // ═══════════════════════════════════════════
 // MAIN HOOK
 // ═══════════════════════════════════════════
 
 /**
- * Convenience read-selector for the settings screen and any widget that
- * shows a settings value without being a feature itself.
+ * Convenience read for the settings screen and widgets that show a value
+ * without being a feature themselves.
  *
- * Write-side actions come through the dedicated features:
- * `change-language` for the language, `update-user` for the booleans.
+ * Write-side actions come through dedicated features: `change-language` for
+ * the language, `useUpdateUser` for the booleans.
  */
-export const useSettings = () => {
-  const languagePreference = usePreferencesStore(
-    (state) => state.languagePreference,
-  );
-
-  const isAnimationEnabled = useUserStore(
-    (state) => state.user?.settings.isAnimationEnabled ?? true,
-  );
-
-  const isSoundEnabled = useUserStore(
-    (state) => state.user?.settings.isSoundEnabled ?? true,
-  );
-
-  const isDemoMode = useUserStore(
-    (state) => state.user?.settings.isDemoMode ?? false,
-  );
-
-  const isParentGateEnabled = useUserStore(
-    (state) => state.user?.settings.isParentGateEnabled ?? true,
-  );
-
-  return {
-    languagePreference,
-    isAnimationEnabled,
-    isSoundEnabled,
-    isDemoMode,
-    isParentGateEnabled,
-  };
-};
+export const useSettings = () => ({
+  languagePreference: useLanguagePreference(),
+  isAnimationEnabled: useIsAnimationEnabled(),
+  isSoundEnabled: useIsSoundEnabled(),
+  isDemoMode: useIsDemoMode(),
+  isParentGateEnabled: useIsParentGateEnabled(),
+});

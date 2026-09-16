@@ -1,1 +1,7 @@
-export { useSettings } from './use-settings';
+export {
+  useIsAnimationEnabled,
+  useIsDemoMode,
+  useIsParentGateEnabled,
+  useIsSoundEnabled,
+  useSettings,
+} from './use-settings';

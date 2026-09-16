@@ -19,13 +19,16 @@ export const buildPalette = (
   appearance: PetAppearance,
 ): Record<FillSlot, string> => ({
   body: appearance.fur,
-  bodyDark: shade(appearance.fur, -0.22),
-  bodyLight: shade(appearance.fur, 0.16),
+  bodyDark: shade(appearance.fur, -0.28),
+  bodyLight: shade(appearance.fur, 0.22),
   belly: appearance.belly,
-  inner: shade(appearance.cheeks, -0.05),
-  ink: '#3F332C',
+  inner: shade(appearance.cheeks, -0.08),
+  ink: '#2A231E',
   blush: appearance.cheeks,
   accent: appearance.accent,
-  white: '#FFFFFF',
-  shadow: '#3F332C',
+  // Warm iris that still contrasts the coat — a flat black pupil alone reads
+  // as a sticker, not as an eye.
+  iris: shade(appearance.accent, -0.12),
+  white: '#FFFEFA',
+  shadow: '#2A231E',
 });

@@ -15,6 +15,7 @@ type FillSlot =
   | 'ink'
   | 'blush'
   | 'accent'
+  | 'iris'
   | 'white'
   | 'shadow';
 

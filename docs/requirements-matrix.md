@@ -21,13 +21,13 @@
 
 | Пункт | Требование | Экран | Модуль | Тест | Статус |
 | --- | --- | --- | --- | --- | --- |
-| 2.5.1 | Онбординг: цель игры и три типа решений (обязательное / желаемое / отложить) | `screens/onboarding` | `entities/onboarding` + `content/onboarding.json` | `content.test.ts`, `sorting.test.ts` | в работе — три типа ребёнок раскладывает сам, промах объясняется и ничего не проваливает; осталось пройти на устройстве |
+| 2.5.1 | Онбординг: цель игры и три типа решений (обязательное / желаемое / отложить) | `screens/onboarding` | `entities/onboarding` + `content/onboarding.json` | `content.test.ts`, `sorting.test.ts` | в работе — drag-сортировка, скретч монет, boop; осталось пройти на устройстве |
 | 2.5.1 | Гостевой режим, локальный профиль, игровое имя | `screens/onboarding` | `entities/user` + `lib/player-name` | `player-name.test.ts`, `store.test.ts` | в работе — профиль создаётся в конце знакомства, аккаунта нет; осталось пройти на устройстве |
 | 2.5.1 | Доступ к подсказке в любой момент | все экраны | `widgets/hint-button` + `entities/hint` | `content.test.ts` | в работе — «?» в шапке каждого экрана, тексты в `content/hints.json`; осталось пройти на устройстве |
-| 2.5.2 | Создание питомца: внешность + имя, ≥9 различимых комбинаций | `screens/onboarding` | `entities/pet/model/appearance` | `appearance.test.ts` | не начато |
+| 2.5.2 | Создание питомца: внешность + имя, ≥9 различимых комбинаций | `screens/onboarding` (шаг `pet`) | `entities/pet` appearance axes | `appearance` / skin tests | в работе — вид/окрас/узор выбираются в онбординге; имя питомца позже |
 | 2.5.3 | Главный экран: питомец, баланс, накопления, цель, состояние, активное задание — одновременно | `screens/home` | — | — | не начато |
 | 2.5.4 | Валюта с явным источником и суммой каждого начисления | `screens/home`, `screens/history` | `entities/wallet` | `wallet.test.ts` | не начато |
-| 2.5.5 | План бюджета по трём направлениям, контроль остатка, подтверждение | `screens/budget-plan` | `entities/budget` | `budget.test.ts` | не начато |
+| 2.5.5 | План бюджета по трём направлениям, контроль остатка, подтверждение | `screens/budget-plan` | `entities/budget` | `plan.test.ts`, `compare.test.ts` | готово — валидация и остаток в entity, экран со слайдером и степпером, баннер на home в `planning` |
 | 2.5.5 | Сравнение плана с фактом после периода | `screens/period-summary` | `entities/budget/lib/compare` | `compare.test.ts` | не начато |
 | 2.5.6 | Каталог покупок: ≥8 позиций, обязательные и необязательные, цена, категория, влияние | `screens/shop` | `entities/catalogue` | `catalogue.test.ts` | не начато |
 | 2.5.6 | Запрет отрицательного баланса + объяснение вариантов | `screens/shop` | `entities/wallet/lib/rules` | `rules.test.ts` | не начато |
@@ -44,6 +44,13 @@
 | 2.5.13 | Сохранение состояния между запусками | — | `entities/user` | `store.test.ts`, `migrations.test.ts` | готово |
 | 2.5.13 | Демо-режим: тестовый профиль, сброс, 5 периодов подряд | `screens/home` (временно; позже `screens/parents`) | `entities/user/lib/demo` + `features/demo-mode` | `demo.test.ts` | готово |
 | 2.5.14 | Новое задание добавляется без переработки логики | — | `content/tasks.json` + `entities/task` | `content.test.ts` | готово |
+
+## 2.8 Дополнительные возможности (корзина B)
+
+| Пункт | Требование | Экран | Модуль | Статус |
+| --- | --- | --- | --- | --- |
+| — | Питомец следует за игроком между комнатами | `screens/home` | `HomePetCompanion` | готово — один питомец над пейджером |
+| — | Жесты с питомцем: ткнуть / гладить / поднять | `screens/home` | `PetPlay` + `entities/pet/lib/interaction` | готово — мягкие реакции, без «пинка» |
 
 ## 2.2, 2.7 Рамки
 

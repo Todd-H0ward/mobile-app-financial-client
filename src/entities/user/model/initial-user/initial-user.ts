@@ -1,6 +1,6 @@
-import { STARTING_BALANCE } from '@/entities/economy';
 import { listGoals } from '@/entities/goal';
 
+import { startingWallet } from '../../lib/wallet';
 import type { UserSave } from '../types';
 
 // ═══════════════════════════════════════════
@@ -8,7 +8,7 @@ import type { UserSave } from '../types';
 // ═══════════════════════════════════════════
 
 /** Save schema version. Bumped on every incompatible change. */
-const USER_SAVE_VERSION = 2;
+const USER_SAVE_VERSION = 3;
 
 /** Starting thermostat position: chilly, but not cold. */
 const STARTING_TEMPERATURE = 0.5;
@@ -67,10 +67,9 @@ export const createInitialUser = ({
     spirit: 1,
     ...pet,
   },
-  wallet: {
-    balance: STARTING_BALANCE,
-    history: [],
-  },
+  // Credited, not materialized: the starting balance is named income too —
+  // 2.5.4 makes no exception for the very first coin.
+  wallet: startingWallet(createdAt),
   savings: {
     // Goals come from the validated catalogue, never straight from the JSON:
     // a broken row must fail in tests, not end up inside a child's save.

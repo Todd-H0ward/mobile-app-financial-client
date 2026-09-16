@@ -16,12 +16,14 @@ import {
   type SortOutcome,
   sortingProgress,
 } from '@/entities/onboarding';
+import type { PetColor, PetPattern, PetSpecies } from '@/entities/pet';
 import {
   isPlayerNameValid,
   normalizePlayerName,
-  useUserStore,
+  useCreateUser,
 } from '@/entities/user';
 
+import { ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { useTimeSource } from '@/shared/lib';
 
@@ -44,10 +46,11 @@ const EMPTY_PLAN: Record<BudgetDirection, number> = {
 };
 
 const ACTION_LABEL: Record<OnboardingStepId, string> = {
-  greeting: 'Начнём',
+  greeting: 'Пойдём!',
   sorting: 'Дальше',
   coins: 'Дальше',
   plan: 'Готово',
+  pet: 'Дальше',
   name: 'Играть',
 };
 
@@ -81,6 +84,14 @@ interface OnboardingController {
   planTotal: number;
   /** What the child typed, unnormalized — the field shows it back verbatim. */
   playerName: string;
+  /** Whether the greeting boop happened. */
+  hasMetPet: boolean;
+  /** Whether the scratch ticket is open. */
+  isCoinsRevealed: boolean;
+  /** Species / coat / pattern picked on the pet step. */
+  petSpecies: PetSpecies;
+  petColor: PetColor;
+  petPattern: PetPattern;
   /** Whether the bottom button is live on this step. */
   canContinue: boolean;
   /** Label of the bottom button on this step. */
@@ -93,6 +104,13 @@ interface OnboardingController {
   removeCoin: (direction: BudgetDirection) => void;
   /** Types into the name field. */
   setPlayerName: (value: string) => void;
+  /** Marks the greeting boop as done. */
+  markPetMet: () => void;
+  /** Marks the scratch ticket as revealed. */
+  markCoinsRevealed: () => void;
+  setPetSpecies: (species: PetSpecies) => void;
+  setPetColor: (color: PetColor) => void;
+  setPetPattern: (pattern: PetPattern) => void;
   /** Moves on; on the last step it creates the profile and leaves onboarding. */
   goNext: () => void;
 }
@@ -106,20 +124,25 @@ interface OnboardingController {
  * typed.
  *
  * Nothing is written to the save until the last step: the profile is created
- * once, with the name, which is why `user === null` keeps meaning "onboarding
- * not finished" without a flag of its own.
+ * once, with the name and the look, which is why `user === null` keeps meaning
+ * "onboarding not finished" without a flag of its own.
  */
 export const useOnboarding = (): OnboardingController => {
   const router = useRouter();
   const time = useTimeSource();
   const { t } = useTranslation();
-  const createUser = useUserStore((state) => state.createUser);
+  const createUser = useCreateUser();
 
   const [stepIndex, setStepIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>(createSortingState);
   const [lastOutcome, setLastOutcome] = useState<SortOutcome | null>(null);
   const [plan, setPlan] = useState(EMPTY_PLAN);
   const [playerName, setPlayerName] = useState('');
+  const [hasMetPet, setHasMetPet] = useState(false);
+  const [isCoinsRevealed, setIsCoinsRevealed] = useState(false);
+  const [petSpecies, setPetSpecies] = useState<PetSpecies>('cat');
+  const [petColor, setPetColor] = useState<PetColor>('sand');
+  const [petPattern, setPetPattern] = useState<PetPattern>('solid');
 
   const stepId = ONBOARDING_STEPS[stepIndex] ?? ONBOARDING_STEPS[0];
   const step = getOnboardingStep(stepId);
@@ -131,16 +154,23 @@ export const useOnboarding = (): OnboardingController => {
   const planLeft = MINI_PLAN_COINS - planLaidOut;
 
   const canContinue =
+    (stepId !== 'greeting' || hasMetPet) &&
     (stepId !== 'sorting' || isSortingDone(sorting)) &&
+    (stepId !== 'coins' || isCoinsRevealed) &&
     (stepId !== 'name' || isPlayerNameValid(playerName));
 
   const finish = () => {
     createUser({
       playerName: normalizePlayerName(playerName),
+      pet: {
+        species: petSpecies,
+        color: petColor,
+        pattern: petPattern,
+      },
       createdAt: time.now(),
     });
 
-    router.replace('/home');
+    router.replace(ROUTES.HOME);
   };
 
   return {
@@ -160,6 +190,11 @@ export const useOnboarding = (): OnboardingController => {
     planLeft,
     planTotal: MINI_PLAN_COINS,
     playerName,
+    hasMetPet,
+    isCoinsRevealed,
+    petSpecies,
+    petColor,
+    petPattern,
     canContinue,
     actionLabel: t(`onboarding.actions.${stepId}`, {
       defaultValue: ACTION_LABEL[stepId],
@@ -191,6 +226,11 @@ export const useOnboarding = (): OnboardingController => {
     },
 
     setPlayerName,
+    markPetMet: () => setHasMetPet(true),
+    markCoinsRevealed: () => setIsCoinsRevealed(true),
+    setPetSpecies,
+    setPetColor,
+    setPetPattern,
 
     goNext: () => {
       if (stepIndex === ONBOARDING_STEPS.length - 1) {

@@ -38,38 +38,38 @@ const SPECIES: Record<PetSpecies, SpeciesRenderer> = {
     geometry: catGeometry,
     // Eyes above the muzzle pad at 178, brows clear of the ear line.
     face: {
-      eyeX: 26,
-      eyeY: 142,
-      eyeRx: 11,
-      eyeRy: 13,
-      mouthY: 176,
-      browY: 112,
+      eyeX: 28,
+      eyeY: 140,
+      eyeRx: 13,
+      eyeRy: 15,
+      mouthY: 178,
+      browY: 110,
       overlay: [214, 84],
     },
   },
   dog: {
     geometry: dogGeometry,
-    // The nose sits at 170, so the mouth has to clear it.
+    // The nose sits at 168, so the mouth has to clear it.
     face: {
-      eyeX: 26,
-      eyeY: 144,
-      eyeRx: 11,
-      eyeRy: 13,
-      mouthY: 190,
-      browY: 114,
+      eyeX: 28,
+      eyeY: 142,
+      eyeRx: 13,
+      eyeRy: 15,
+      mouthY: 192,
+      browY: 112,
       overlay: [216, 86],
     },
   },
   capybara: {
     geometry: capybaraGeometry,
-    // Wider skull, so the eyes sit further apart and lower.
+    // Wider skull, so the eyes sit further apart and a bit lower.
     face: {
-      eyeX: 30,
-      eyeY: 148,
-      eyeRx: 10,
-      eyeRy: 12,
-      mouthY: 192,
-      browY: 120,
+      eyeX: 32,
+      eyeY: 146,
+      eyeRx: 12,
+      eyeRy: 14,
+      mouthY: 196,
+      browY: 118,
       overlay: [220, 90],
     },
   },

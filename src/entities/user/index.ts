@@ -40,6 +40,12 @@ export {
   migrateUser,
   PERIOD_PHASES,
   USER_SAVE_VERSION,
+  useCreateUser,
+  useDeleteUser,
+  useResetUser,
+  useSetDemoMode,
+  useUpdateUser,
   useUser,
+  useUserPet,
   useUserStore,
 } from './model';

@@ -15,6 +15,8 @@ export type {
 export { Card } from './card';
 export type { ChipProps, ChipVariant } from './chip';
 export { Chip } from './chip';
+export type { CoinProps } from './coin';
+export { Coin } from './coin';
 export type { CoinBadgeProps, CoinBadgeVariant } from './coin-badge';
 export { CoinBadge } from './coin-badge';
 export type {
@@ -58,6 +60,8 @@ export type { MeterCardProps, MeterTone } from './meter-card';
 export { MeterCard } from './meter-card';
 export type { ProgressBarProps } from './progress-bar';
 export { ProgressBar } from './progress-bar';
+export type { ScratchCardProps } from './scratch-card';
+export { ScratchCard } from './scratch-card';
 export type {
   ScreenBackProps,
   ScreenHeaderProps,

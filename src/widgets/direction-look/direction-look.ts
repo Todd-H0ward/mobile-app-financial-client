@@ -28,11 +28,10 @@ interface DirectionLook {
 // ═══════════════════════════════════════════
 
 /**
- * The look of the three directions.
+ * The look of the three budget directions.
  *
- * It lives in the onboarding slice while onboarding is the only screen showing
- * all three at once; it moves to `widgets` the moment the budget screen
- * (2.5.5) needs the same baskets.
+ * Shared by onboarding and the real plan screen so the same three words keep
+ * the same colours and markers everywhere — docs/budget.md.
  */
 export const DIRECTION_LOOK: Record<BudgetDirection, DirectionLook> = {
   needs: {

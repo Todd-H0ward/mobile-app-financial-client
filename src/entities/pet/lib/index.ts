@@ -6,6 +6,12 @@ export {
   progressToNextStage,
   stageFor,
 } from './growth';
+export type {
+  PetInteractionKind,
+  PetReaction,
+  PetZone,
+} from './interaction';
+export { reactionFor, zoneAt } from './interaction';
 export {
   easePetAxes,
   easeTowards,

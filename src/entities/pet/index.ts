@@ -9,9 +9,12 @@ export type {
   GrowthProgress,
   GrowthRule,
   PetFills,
+  PetInteractionKind,
   PetNameStatus,
+  PetReaction,
   PetRig,
   PetSkinLayer,
+  PetZone,
 } from './lib';
 export {
   anchorPoint,
@@ -34,12 +37,14 @@ export {
   POSE_NEUTRAL,
   poseFor,
   progressToNextStage,
+  reactionFor,
   rigFor,
   silhouetteFor,
   skinFor,
   skinLayerFor,
   stageFor,
   validatePetName,
+  zoneAt,
 } from './lib';
 export type {
   AnimationKey,

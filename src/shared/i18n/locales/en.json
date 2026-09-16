@@ -52,7 +52,49 @@
     "title": "Paw",
     "atHome": "At home: {{name}}",
     "roomComingSoon": "Pet room will appear in the first wave",
-    "petBoxLabel": "Someone is scratching inside. Tap"
+    "petBoxLabel": "Someone is scratching inside. Tap",
+    "balance": "Balance",
+    "savings": "Savings jar",
+    "planBannerTitle": "Make a budget plan",
+    "planBannerBody": "Decide where the coins go first — then you can spend.",
+    "planBannerAction": "Make a plan",
+    "goal": {
+      "none": "No goal chosen",
+      "noneHint": "Open the savings jar and pick what to save for",
+      "progress": "{{saved}} of {{price}}"
+    },
+    "lastCredit": "Latest credit",
+    "task": {
+      "title": "Task",
+      "comingSoon": "Tasks will show up here very soon"
+    }
+  },
+  "rooms": {
+    "name": {
+      "street": "Street",
+      "living": "Room",
+      "kitchen": "Kitchen"
+    },
+    "goA11y": "Go to: {{room}}",
+    "hint": "Swipe, or tap a door",
+    "soon": {
+      "shopTitle": "Shop",
+      "shopText": "The shop will open here: food, warmth and everything a home needs.",
+      "toysTitle": "Toys",
+      "toysText": "Toys and decorations for the room will arrive here.",
+      "fridgeTitle": "Fridge",
+      "fridgeText": "You will be able to feed the pet here.",
+      "stoveTitle": "Stove",
+      "stoveText": "You will be able to cook here.",
+      "close": "Got it"
+    }
+  },
+  "wallet": {
+    "source": {
+      "startingWallet": "starting wallet",
+      "regularityBonus": "regularity bonus",
+      "unknown": "credit"
+    }
   },
   "pet": {
     "species": {
@@ -76,6 +118,10 @@
       "bored": "bored",
       "uncomfortable": "uncomfortable",
       "sad": "sad"
+    },
+    "play": {
+      "a11y": "You can stroke, tap and lift",
+      "hint": "Swipe to stroke. Tap to boop. Hold and pull up to lift"
     }
   },
   "petCreate": {
@@ -95,8 +141,8 @@
     "onboarding": {
       "title": "What is happening here",
       "body": [
-        "You are getting to know the game: sorting things into three boxes, getting your first coins, and picking a player name.",
-        "Three boxes: Needs — essentials to live, Wants — nice to have, Savings — saving towards a goal.",
+        "You are getting to know the game: boop the pet, sort into boxes, scratch a coin ticket, and pick how I look.",
+        "Three boxes: Needs — essentials, Wants — nice things, Savings — for a goal.",
         "You cannot fail. Any step can be retried, nothing will be lost."
       ]
     },
@@ -127,44 +173,49 @@
     "pawTrailA11y": "Step {{current}} of {{total}}",
     "starterCoins": "starter coins",
     "starterCoinsA11y": "{{count}} coins fall into the wallet",
-    "starterCoinsCaption": "Coins always show where they came from. Later, chores and tasks will bring them.",
-    "privacyNote": "No account needed: the game stays on this device and sends nothing anywhere.",
+    "starterCoinsCaption": "Coins always show where they came from. Later, chores will bring more.",
+    "privacyNote": "The game stays on this device — it sends nothing anywhere.",
     "emptySign": "Home ?",
     "namedSign": "{{name}}'s Home",
     "namePlaceholder": "Player name",
     "nameHintEmpty": "Type any name — only you will see it",
     "nameHintFilled": "You can change the name later in the parents section",
-    "remainder": "Left to allocate: {{count}}",
-    "remainderHint": "You do not have to allocate every coin — the remainder simply stays with you.",
+    "remainder": "Coins in hand: {{count}}",
+    "remainderHint": "Tap a box — a coin jumps in. You may keep some for yourself.",
     "stepperMinusA11y": "Remove coin: {{label}}",
     "stepperPlusA11y": "Add coin: {{label}}",
-    "sortedCounter": "Sorted {{done}} of {{total}}",
-    "whichBox": "Which box?",
+    "sortedCounter": "{{done}} of {{total}} done",
+    "whichBox": "Drag into a box",
     "allSorted": "All sorted",
     "sortCardA11y": "Put “{{item}}” into box “{{decision}}”",
     "actions": {
-      "greeting": "Let's start",
+      "greeting": "Let's go!",
       "sorting": "Next",
       "coins": "Next",
       "plan": "Done",
+      "pet": "Next",
       "name": "Play"
     },
     "steps": {
       "greeting": {
-        "title": "Hi! I am your pet",
-        "line": "Together we will decide what to spend coins on. If anything is unclear — tap «?» above, I'll explain."
+        "title": "Meet me!",
+        "line": "Boop my nose — then we'll look at three magic boxes. If anything is unclear, tap «?» above."
       },
       "sorting": {
         "title": "Three boxes",
-        "line": "Sort everything into boxes. You cannot make a mistake: if you miss, I will simply explain why."
+        "line": "Drag the card into a box. If you miss, I will simply say where it belongs. You cannot fail!"
       },
       "coins": {
-        "title": "First coins",
-        "line": "These are your first coins. Every coin shows where it came from and how many there are."
+        "title": "Secret ticket",
+        "line": "Rub the grey layer with your finger, like a lottery ticket — and see your first coins."
       },
       "plan": {
-        "title": "A small plan",
-        "line": "Distribute ten coins into boxes. Later in the game you will do the same at the start of each period."
+        "title": "Place the coins",
+        "line": "Put coins into the boxes. You may keep some — you'll do the same at the start of every period."
+      },
+      "pet": {
+        "title": "How will I look?",
+        "line": "Pick who I am: cat, dog or capybara — and a coat colour. Names come next!"
       },
       "name": {
         "title": "Sign by the door",
@@ -209,6 +260,60 @@
       "rainy-day": {
         "title": "Saving for a rainy day",
         "explanation": "Savings help when something breaks. That's also Savings."
+      }
+    },
+    "scratchFoil": "Rub with your finger",
+    "scratchHint": "Scratch off the grey layer — like a lottery ticket.",
+    "boopA11y": "Boop the pet on the nose",
+    "boopHint": "Tap me!",
+    "trayEmpty": "All coins are in the boxes",
+    "dropCoinA11y": "Drop a coin into “{{label}}”",
+    "takeBack": "take back",
+    "planProgress": "Placed {{laid}} of {{total}}",
+    "petPreviewA11y": "This is how the pet will look",
+    "pickSpecies": "Who am I?",
+    "pickColor": "Coat colour",
+    "pickPattern": "Pattern",
+    "species": {
+      "cat": "Cat",
+      "dog": "Dog",
+      "capybara": "Capybara"
+    },
+    "colors": {
+      "sand": "Sand",
+      "graphite": "Graphite",
+      "mint": "Mint"
+    },
+    "patterns": {
+      "solid": "Plain",
+      "spots": "Spots",
+      "stripes": "Stripes"
+    }
+  },
+  "budgetPlan": {
+    "title": "Budget plan",
+    "available": "Available this period: {{count}}",
+    "remainder": "Left to allocate: {{count}}",
+    "remainderHint": "You do not have to allocate every coin — the remainder carries into the next period.",
+    "confirm": "Confirm plan",
+    "stepperMinusA11y": "Remove coin: {{label}}",
+    "stepperPlusA11y": "Add coin: {{label}}",
+    "needsZeroTitle": "Nothing set aside for needs",
+    "needsZeroBody": "There will be nothing to buy food and heating with. Confirm the plan anyway?",
+    "needsZeroKeep": "Back to the plan",
+    "needsZeroConfirm": "Confirm anyway",
+    "directions": {
+      "needs": {
+        "title": "Needs",
+        "example": "Food, heating at home"
+      },
+      "wants": {
+        "title": "Wants",
+        "example": "Toy car, stickers"
+      },
+      "savings": {
+        "title": "Savings",
+        "example": "Saving for a scooter"
       }
     }
   }

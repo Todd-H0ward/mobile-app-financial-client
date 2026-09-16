@@ -37,14 +37,14 @@ interface PetAppearance {
 
 /** Fur palette offered during customization — soft, no saturated colors. */
 const FUR_PALETTE = [
-  { id: 'ginger', fur: '#F2C88C', belly: '#FFF0DC', cheeks: '#F2A79E' },
-  { id: 'ash', fur: '#E9E4DC', belly: '#FFFDF8', cheeks: '#F0BDB6' },
-  { id: 'lilac', fur: '#C9A0DC', belly: '#F3E7F7', cheeks: '#F0A9C0' },
-  { id: 'mint', fur: '#8FBFAE', belly: '#E6F3EE', cheeks: '#F0A9A2' },
-  { id: 'cocoa', fur: '#6E5B4E', belly: '#D6C3B4', cheeks: '#C98F86' },
-  { id: 'peach', fur: '#F0A9A2', belly: '#FFECE6', cheeks: '#E68FA0' },
-  { id: 'sky', fur: '#9FC3D6', belly: '#E7F2F7', cheeks: '#F0A9A2' },
-  { id: 'sand', fur: '#DCD3A8', belly: '#F6F2DE', cheeks: '#E9B6A0' },
+  { id: 'ginger', fur: '#F0B86A', belly: '#FFF3E0', cheeks: '#F29B90' },
+  { id: 'ash', fur: '#E6E0D6', belly: '#FFFEF9', cheeks: '#F0B8B0' },
+  { id: 'lilac', fur: '#C894D8', belly: '#F7ECFA', cheeks: '#F0A0B8' },
+  { id: 'mint', fur: '#7EC4A8', belly: '#E8F7F0', cheeks: '#F0A8A0' },
+  { id: 'cocoa', fur: '#5C4A3E', belly: '#DCC8B6', cheeks: '#D08A80' },
+  { id: 'peach', fur: '#F09890', belly: '#FFECE6', cheeks: '#E88898' },
+  { id: 'sky', fur: '#8EBAD4', belly: '#EAF5FA', cheeks: '#F0A8A0' },
+  { id: 'sand', fur: '#E0C878', belly: '#F8F4DC', cheeks: '#ECA888' },
 ] as const;
 
 const ACCENT_PALETTE = [

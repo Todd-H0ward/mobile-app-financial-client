@@ -48,4 +48,24 @@ export const usePreferencesStore = create<PreferencesStore>()(
   ),
 );
 
+// ═══════════════════════════════════════════
+// SELECTORS
+// ═══════════════════════════════════════════
+
+/** Appearance preference, or `'system'` to follow the device. */
+export const useThemePreference = () =>
+  usePreferencesStore((state) => state.themePreference);
+
+/** Language preference, or `'system'` to follow the device. */
+export const useLanguagePreference = () =>
+  usePreferencesStore((state) => state.languagePreference);
+
+/** Persists the appearance preference. */
+export const useSetThemePreference = () =>
+  usePreferencesStore((state) => state.setThemePreference);
+
+/** Persists the language preference. */
+export const useSetLanguagePreference = () =>
+  usePreferencesStore((state) => state.setLanguagePreference);
+
 export type { PreferencesPersistedState, PreferencesStore };

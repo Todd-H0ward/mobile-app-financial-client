@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { STARTING_BALANCE } from '@/entities/economy';
+import { STARTING_BALANCE, WALLET_SOURCES } from '@/entities/economy';
 
 import { createInitialUser, USER_SAVE_VERSION } from './initial-user';
 
@@ -21,11 +21,19 @@ describe('createInitialUser', () => {
     expect(user.period.fact).toEqual({ needs: 0, wants: 0, savings: 0 });
   });
 
-  it('hands out the starting wallet and nothing else', () => {
+  it('hands out the starting wallet, named — 2.5.4 bans a nameless credit', () => {
     const user = createInitialUser();
 
     expect(user.wallet.balance).toBe(STARTING_BALANCE);
-    expect(user.wallet.history).toEqual([]);
+    expect(user.wallet.history).toEqual([
+      expect.objectContaining({
+        source: WALLET_SOURCES.startingWallet,
+        amount: STARTING_BALANCE,
+        kind: 'earn',
+        direction: null,
+      }),
+    ]);
+    expect(user.wallet.entryCount).toBe(1);
     expect(user.history).toEqual([]);
   });
 
