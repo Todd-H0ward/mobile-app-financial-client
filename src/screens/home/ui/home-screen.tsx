@@ -8,7 +8,7 @@ import { appearanceFor, emotionFor, moodFor } from '@/entities/pet';
 import { PetView } from '@/entities/pet/ui';
 import { useUserStore } from '@/entities/user';
 
-import { RADII, SPACING } from '@/shared/constants';
+import { RADII, ROUTES, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { Screen, SettingsIcon } from '@/shared/ui';
@@ -79,7 +79,7 @@ export const HomeScreen = () => {
         </Screen.Heading>
 
         <View style={styles.headerActions}>
-          <GearButton onPress={() => router.push('/settings')} />
+          <GearButton onPress={() => router.push(ROUTES.SETTINGS)} />
           <HintButton screen="home" />
         </View>
       </Screen.Header>
@@ -96,7 +96,7 @@ export const HomeScreen = () => {
           />
         </View>
       ) : (
-        <PetBox onPress={() => router.push('/pet-create')} />
+        <PetBox onPress={() => router.push(ROUTES.PET_CREATE)} />
       )}
     </Screen>
   );

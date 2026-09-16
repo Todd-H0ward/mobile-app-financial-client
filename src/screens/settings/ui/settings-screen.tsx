@@ -7,7 +7,7 @@ import { RestartOnboardingButton } from '@/features/profile-restart';
 
 import { useUserStore } from '@/entities/user';
 
-import { SPACING } from '@/shared/constants';
+import { ROUTES, SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import type { LanguagePreference } from '@/shared/types';
 import { Button, Card, ListRow, Screen, Switch, Text } from '@/shared/ui';
@@ -117,7 +117,7 @@ export const SettingsScreen = () => {
           </Text>
         </Card.Content>
         <Card.Footer>
-          <Button size="m" isFullWidth onPress={() => router.push('/ui-kit')}>
+          <Button size="m" isFullWidth onPress={() => router.push(ROUTES.UI_KIT)}>
             {t('settings.openUiKit')}
           </Button>
         </Card.Footer>

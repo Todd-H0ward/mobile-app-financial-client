@@ -22,6 +22,7 @@ import {
   useUserStore,
 } from '@/entities/user';
 
+import { ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { useTimeSource } from '@/shared/lib';
 
@@ -140,7 +141,7 @@ export const useOnboarding = (): OnboardingController => {
       createdAt: time.now(),
     });
 
-    router.replace('/home');
+    router.replace(ROUTES.HOME);
   };
 
   return {
