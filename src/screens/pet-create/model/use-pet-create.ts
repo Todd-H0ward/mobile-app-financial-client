@@ -9,7 +9,7 @@ import {
   type PetPattern,
   type PetSpecies,
 } from '@/entities/pet';
-import { useUserStore } from '@/entities/user';
+import { useUpdateUser, useUserPet } from '@/entities/user';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -56,8 +56,8 @@ interface PetCreateController {
  */
 export const usePetCreate = (): PetCreateController => {
   const router = useRouter();
-  const updateUser = useUserStore((state) => state.updateUser);
-  const pet = useUserStore((state) => state.user?.pet);
+  const updateUser = useUpdateUser();
+  const pet = useUserPet();
 
   const [species, setSpecies] = useState<PetSpecies>(pet?.species ?? 'cat');
   const [color, setColor] = useState<PetColor>(pet?.color ?? 'sand');

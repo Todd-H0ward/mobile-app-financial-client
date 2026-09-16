@@ -1,3 +1,4 @@
+import type { BudgetFact, BudgetPlan } from '@/entities/budget';
 import type { BudgetDirection } from '@/entities/economy';
 import type {
   PetColor,
@@ -20,7 +21,8 @@ import type {
  * Two sets live elsewhere for the same reason: the budget directions in
  * `entities/economy` and the pet's appearance axes in `entities/pet`, because
  * the onboarding content, the budget screens and the pet's skin, pose and
- * anchors all need them without needing the save.
+ * anchors all need them without needing the save. Plan/fact shapes live in
+ * `entities/budget` — the leaf that owns the allocation rules.
  */
 
 /** Phases the machine can actually be in. See docs/game-period.md. */
@@ -29,19 +31,6 @@ const PERIOD_PHASES = ['planning', 'active', 'summary'] as const;
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
-
-/** What the child set aside per direction. Coins, whole numbers, >= 0. */
-interface BudgetPlan {
-  /** Must-haves: food, heating. */
-  needs: number;
-  /** Nice-to-haves: toys, room decorations. */
-  wants: number;
-  /** Put away towards a financial goal. */
-  savings: number;
-}
-
-/** What actually went out. Same shape, so comparing is a subtraction. */
-type BudgetFact = BudgetPlan;
 
 /**
  * Phase of the period state machine. See docs/game-period.md.

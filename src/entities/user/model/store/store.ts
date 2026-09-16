@@ -151,6 +151,25 @@ export const useUserStore = create<UserStore>()(
 // SELECTORS
 // ═══════════════════════════════════════════
 
+/** The whole save, or `null` before onboarding finishes. */
 export const useUser = () => useUserStore((state) => state.user);
+
+/** The pet slice of the save, or `undefined` before there is a profile. */
+export const useUserPet = () => useUserStore((state) => state.user?.pet);
+
+/** Creates the profile during onboarding. Overwrites an existing one. */
+export const useCreateUser = () => useUserStore((state) => state.createUser);
+
+/** The only way to change the save — takes a pure update function. */
+export const useUpdateUser = () => useUserStore((state) => state.updateUser);
+
+/** Turns demo mode on and off, parking and restoring the child's save. */
+export const useSetDemoMode = () => useUserStore((state) => state.setDemoMode);
+
+/** Resets progress; name, looks and settings survive — 2.5.12. */
+export const useResetUser = () => useUserStore((state) => state.resetUser);
+
+/** Deletes the profile key irreversibly — 2.5.12. */
+export const useDeleteUser = () => useUserStore((state) => state.deleteUser);
 
 export type { UserPersistedState, UserStore };

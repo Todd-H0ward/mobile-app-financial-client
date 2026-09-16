@@ -55,6 +55,9 @@
     "petBoxLabel": "Someone is scratching inside. Tap",
     "balance": "Balance",
     "savings": "Savings jar",
+    "planBannerTitle": "Make a budget plan",
+    "planBannerBody": "Decide where the coins go first — then you can spend.",
+    "planBannerAction": "Make a plan",
     "goal": {
       "none": "No goal chosen",
       "noneHint": "Open the savings jar and pick what to save for",
@@ -248,6 +251,33 @@
       "rainy-day": {
         "title": "Saving for a rainy day",
         "explanation": "Savings help when something breaks. That's also Savings."
+      }
+    }
+  },
+  "budgetPlan": {
+    "title": "Budget plan",
+    "available": "Available this period: {{count}}",
+    "remainder": "Left to allocate: {{count}}",
+    "remainderHint": "You do not have to allocate every coin — the remainder carries into the next period.",
+    "confirm": "Confirm plan",
+    "stepperMinusA11y": "Remove coin: {{label}}",
+    "stepperPlusA11y": "Add coin: {{label}}",
+    "needsZeroTitle": "Nothing set aside for needs",
+    "needsZeroBody": "There will be nothing to buy food and heating with. Confirm the plan anyway?",
+    "needsZeroKeep": "Back to the plan",
+    "needsZeroConfirm": "Confirm anyway",
+    "directions": {
+      "needs": {
+        "title": "Needs",
+        "example": "Food, heating at home"
+      },
+      "wants": {
+        "title": "Wants",
+        "example": "Toy car, stickers"
+      },
+      "savings": {
+        "title": "Savings",
+        "example": "Saving for a scooter"
       }
     }
   }

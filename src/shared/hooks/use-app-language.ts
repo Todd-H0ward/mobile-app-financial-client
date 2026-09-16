@@ -4,7 +4,7 @@ import {
   applyLanguagePreference,
   resolveLanguagePreference,
 } from '@/shared/i18n';
-import { usePreferencesStore } from '@/shared/model';
+import { useLanguagePreference } from '@/shared/model';
 
 /**
  * Keeps i18next on the language the preferences ask for.
@@ -13,7 +13,7 @@ import { usePreferencesStore } from '@/shared/model';
  * i18next only follows it, so nothing has to remember to call `changeLanguage`.
  */
 export const useAppLanguage = () => {
-  const preference = usePreferencesStore((state) => state.languagePreference);
+  const preference = useLanguagePreference();
 
   useEffect(() => {
     applyLanguagePreference(preference);

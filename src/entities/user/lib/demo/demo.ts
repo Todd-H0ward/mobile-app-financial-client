@@ -1,7 +1,9 @@
+import type { BudgetPlan } from '@/entities/budget';
+
 import type { DemoTimeSource, TimeSource } from '@/shared/lib/time-source';
 
 import { createInitialUser } from '../../model/initial-user';
-import type { BudgetPlan, UserSave } from '../../model/types';
+import type { UserSave } from '../../model/types';
 import { acknowledgeSummary, finishPeriod, startPeriod } from '../period';
 
 // ═══════════════════════════════════════════

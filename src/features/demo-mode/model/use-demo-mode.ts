@@ -1,8 +1,10 @@
 import {
   DEMO_RUN_PERIODS,
   runDemoPeriods,
+  useResetUser,
+  useSetDemoMode,
+  useUpdateUser,
   useUser,
-  useUserStore,
 } from '@/entities/user';
 
 import { isDemoTimeSource, useTimeSource } from '@/shared/lib';
@@ -24,9 +26,9 @@ export const useDemoMode = () => {
   // The clock comes from the provider, never from the module: in demo mode it
   // is the demo clock, and `runPeriods` refuses to run against any other.
   const time = useTimeSource();
-  const updateUser = useUserStore((state) => state.updateUser);
-  const setDemoMode = useUserStore((state) => state.setDemoMode);
-  const resetUser = useUserStore((state) => state.resetUser);
+  const updateUser = useUpdateUser();
+  const setDemoMode = useSetDemoMode();
+  const resetUser = useResetUser();
 
   const isDemoMode = user?.settings.isDemoMode ?? false;
   const periodIndex = user?.period.index ?? 1;

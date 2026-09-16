@@ -2,14 +2,14 @@ import type { ReactNode } from 'react';
 
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { DIRECTION_LOOK } from '@/widgets/direction-look';
+
 import type { BudgetDirection } from '@/entities/economy';
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { Shape, Text } from '@/shared/ui';
-
-import { DIRECTION_LOOK } from '../lib';
 
 // ═══════════════════════════════════════════
 // TYPES

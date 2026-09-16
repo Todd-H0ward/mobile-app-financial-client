@@ -19,7 +19,7 @@ import {
 import {
   isPlayerNameValid,
   normalizePlayerName,
-  useUserStore,
+  useCreateUser,
 } from '@/entities/user';
 
 import { ROUTES } from '@/shared/constants';
@@ -114,7 +114,7 @@ export const useOnboarding = (): OnboardingController => {
   const router = useRouter();
   const time = useTimeSource();
   const { t } = useTranslation();
-  const createUser = useUserStore((state) => state.createUser);
+  const createUser = useCreateUser();
 
   const [stepIndex, setStepIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>(createSortingState);

@@ -17,7 +17,12 @@ import { hitSlopFor } from '@/shared/utils';
 
 import { useHomeHud } from '../model';
 
-import { HomeHudBoard, HomeHudLastCredit, HomeHudStats } from './home-hud';
+import {
+  HomeHudBoard,
+  HomeHudLastCredit,
+  HomeHudPlanBanner,
+  HomeHudStats,
+} from './home-hud';
 import { KitchenRoom } from './rooms/kitchen-room';
 import { LivingRoom } from './rooms/living-room';
 import { StreetRoom } from './rooms/street-room';
@@ -140,6 +145,10 @@ export const HomeScreen = () => {
         <View pointerEvents="none">
           <HomeHudLastCredit credit={hud.lastCredit} />
         </View>
+
+        {hud.isPlanning && (
+          <HomeHudPlanBanner onPress={() => router.push(ROUTES.BUDGET_PLAN)} />
+        )}
       </View>
 
       {/* Reading matter, not a control: `none` keeps the lower third of the

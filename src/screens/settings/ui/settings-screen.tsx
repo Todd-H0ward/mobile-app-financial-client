@@ -5,7 +5,8 @@ import { useChangeLanguage } from '@/features/change-language';
 import { DemoModeCard } from '@/features/demo-mode';
 import { RestartOnboardingButton } from '@/features/profile-restart';
 
-import { useUserStore } from '@/entities/user';
+import { useIsAnimationEnabled, useIsSoundEnabled } from '@/entities/settings';
+import { useUpdateUser } from '@/entities/user';
 
 import { ROUTES, SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
@@ -30,14 +31,9 @@ export const SettingsScreen = () => {
   const router = useRouter();
   const { t } = useTranslation();
   const { languagePreference, changeLanguage } = useChangeLanguage();
-  const updateUser = useUserStore((state) => state.updateUser);
-
-  const isAnimationEnabled = useUserStore(
-    (state) => state.user?.settings.isAnimationEnabled ?? true,
-  );
-  const isSoundEnabled = useUserStore(
-    (state) => state.user?.settings.isSoundEnabled ?? true,
-  );
+  const updateUser = useUpdateUser();
+  const isAnimationEnabled = useIsAnimationEnabled();
+  const isSoundEnabled = useIsSoundEnabled();
 
   const setAnimation = (isEnabled: boolean) =>
     updateUser((u) => ({

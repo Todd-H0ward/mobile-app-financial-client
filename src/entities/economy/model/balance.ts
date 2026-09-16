@@ -28,6 +28,13 @@ export const REGULARITY_BONUS = 5;
 export const WALLET_HISTORY_LIMIT = 100;
 
 /**
+ * How close fact may sit to plan before the summary calls a direction "on
+ * plan". Zero means exact coins — see docs/budget.md. Named so a playtest
+ * can widen it without hunting through screens.
+ */
+export const BUDGET_TOLERANCE = 0;
+
+/**
  * Source ids for wallet entries that name a rule rather than one task or
  * purchase — 2.5.4 bans a nameless credit, and a hand-typed string is one typo
  * from becoming one. `task:<id>` and `purchase:<id>` sources come from the

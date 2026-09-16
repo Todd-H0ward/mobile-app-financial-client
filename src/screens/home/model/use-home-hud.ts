@@ -12,7 +12,7 @@ import {
 import {
   type PetSave,
   type UserSave,
-  useUserStore,
+  useUser,
   type WalletEntry,
 } from '@/entities/user';
 
@@ -76,6 +76,11 @@ interface HomeHud {
   lastCredit: HomeHudCredit | null;
   /** The task slot's placeholder line — the engine is a later wave. */
   taskHint: string;
+  /**
+   * True while the period is still in `planning` — the banner that opens the
+   * budget screen. Hidden once the plan is confirmed.
+   */
+  isPlanning: boolean;
 }
 
 // ═══════════════════════════════════════════
@@ -182,7 +187,7 @@ const buildLastCredit = (entry: WalletEntry, t: Translate): HomeHudCredit => ({
  */
 export const useHomeHud = (): HomeHud => {
   const { t } = useTranslation();
-  const user = useUserStore((state) => state.user);
+  const user = useUser();
 
   const activeGoal = user ? findActiveGoal(user.savings) : null;
   // Newest first — `history[0]` is the most recent operation, and every
@@ -204,6 +209,7 @@ export const useHomeHud = (): HomeHud => {
       : null,
     lastCredit: lastEntry ? buildLastCredit(lastEntry, t) : null,
     taskHint: t('home.task.comingSoon'),
+    isPlanning: user?.period.phase === 'planning',
   };
 };
 

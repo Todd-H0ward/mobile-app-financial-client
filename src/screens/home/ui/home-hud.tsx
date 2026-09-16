@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
@@ -36,6 +36,10 @@ interface HomeHudMoodProps {
 interface HomeHudBoardProps {
   goal: HomeHudGoal | null;
   taskHint: string;
+}
+
+interface HomeHudPlanBannerProps {
+  onPress: () => void;
 }
 
 // ═══════════════════════════════════════════
@@ -163,6 +167,45 @@ export const HomeHudBoard = ({ goal, taskHint }: HomeHudBoardProps) => {
   );
 };
 
+/**
+ * Opens the budget plan while the period is still in `planning`.
+ *
+ * Spending waits on a confirmed plan — the banner is the door into that step,
+ * and it disappears the moment `startPeriod` runs.
+ */
+export const HomeHudPlanBanner = ({ onPress }: HomeHudPlanBannerProps) => {
+  const { t } = useTranslation();
+  const theme = useTheme();
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('home.planBannerAction')}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.planBanner,
+        {
+          backgroundColor: theme.primarySoft,
+          borderColor: theme.primary,
+          opacity: pressed ? 0.85 : 1,
+        },
+      ]}
+    >
+      <View style={styles.planBannerText}>
+        <Text variant="bodyBold" themeColor="primaryStrong">
+          {t('home.planBannerTitle')}
+        </Text>
+        <Text variant="small" themeColor="textSecondary">
+          {t('home.planBannerBody')}
+        </Text>
+      </View>
+      <Text variant="smallBold" themeColor="primary">
+        {t('home.planBannerAction')}
+      </Text>
+    </Pressable>
+  );
+};
+
 // ═══════════════════════════════════════════
 // STYLES
 // ═══════════════════════════════════════════
@@ -193,6 +236,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.two,
     paddingVertical: 3,
   },
+  planBanner: {
+    alignItems: 'center',
+    borderRadius: RADII.l,
+    borderWidth: 1.5,
+    flexDirection: 'row',
+    gap: SPACING.two,
+    paddingHorizontal: SPACING.three,
+    paddingVertical: SPACING.two,
+  },
+  planBannerText: {
+    flex: 1,
+    gap: SPACING.half,
+  },
   stats: {
     alignItems: 'flex-start',
     flexDirection: 'row',
@@ -205,5 +261,6 @@ export type {
   HomeHudBoardProps,
   HomeHudLastCreditProps,
   HomeHudMoodProps,
+  HomeHudPlanBannerProps,
   HomeHudStatsProps,
 };

@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 
-import { useUser, useUserStore } from '@/entities/user';
+import { useDeleteUser, useUser } from '@/entities/user';
 
 import { ROUTES } from '@/shared/constants';
 import { toast } from '@/shared/ui';
@@ -20,7 +20,7 @@ import { toast } from '@/shared/ui';
 export const useProfileRestart = () => {
   const router = useRouter();
   const user = useUser();
-  const deleteUser = useUserStore((state) => state.deleteUser);
+  const deleteUser = useDeleteUser();
 
   return {
     /** Whether there is anything to delete. */

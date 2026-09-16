@@ -27,7 +27,7 @@
 | 2.5.2 | Создание питомца: внешность + имя, ≥9 различимых комбинаций | `screens/onboarding` | `entities/pet/model/appearance` | `appearance.test.ts` | не начато |
 | 2.5.3 | Главный экран: питомец, баланс, накопления, цель, состояние, активное задание — одновременно | `screens/home` | — | — | не начато |
 | 2.5.4 | Валюта с явным источником и суммой каждого начисления | `screens/home`, `screens/history` | `entities/wallet` | `wallet.test.ts` | не начато |
-| 2.5.5 | План бюджета по трём направлениям, контроль остатка, подтверждение | `screens/budget-plan` | `entities/budget` | `budget.test.ts` | не начато |
+| 2.5.5 | План бюджета по трём направлениям, контроль остатка, подтверждение | `screens/budget-plan` | `entities/budget` | `plan.test.ts`, `compare.test.ts` | готово — валидация и остаток в entity, экран со слайдером и степпером, баннер на home в `planning` |
 | 2.5.5 | Сравнение плана с фактом после периода | `screens/period-summary` | `entities/budget/lib/compare` | `compare.test.ts` | не начато |
 | 2.5.6 | Каталог покупок: ≥8 позиций, обязательные и необязательные, цена, категория, влияние | `screens/shop` | `entities/catalogue` | `catalogue.test.ts` | не начато |
 | 2.5.6 | Запрет отрицательного баланса + объяснение вариантов | `screens/shop` | `entities/wallet/lib/rules` | `rules.test.ts` | не начато |

@@ -17,7 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Ellipse, Path, Rect } from 'react-native-svg';
 
-import { useUserStore } from '@/entities/user';
+import { useIsAnimationEnabled } from '@/entities/settings';
 
 import { SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
@@ -90,9 +90,7 @@ export const PetBox = ({
 
   // There is no profile during onboarding, and the grown-up's switch is the
   // authority once there is one — 3.6, weak devices.
-  const isAnimationEnabled = useUserStore(
-    (state) => state.user?.settings.isAnimationEnabled ?? true,
-  );
+  const isAnimationEnabled = useIsAnimationEnabled();
 
   const rock = useSharedValue(0);
   const press = useSharedValue(1);

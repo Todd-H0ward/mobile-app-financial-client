@@ -8,6 +8,7 @@ export const ROUTES = {
   HOME: '/home',
   ONBOARDING: '/onboarding',
   PET_CREATE: '/pet-create',
+  BUDGET_PLAN: '/budget-plan',
   SETTINGS: '/settings',
   UI_KIT: '/ui-kit',
 } as const;

@@ -1,5 +1,8 @@
 import { applyLanguagePreference } from '@/shared/i18n';
-import { usePreferencesStore } from '@/shared/model';
+import {
+  useLanguagePreference,
+  useSetLanguagePreference,
+} from '@/shared/model';
 import type { LanguagePreference } from '@/shared/types';
 
 // ═══════════════════════════════════════════
@@ -16,12 +19,8 @@ import type { LanguagePreference } from '@/shared/types';
  * switches before the next render cycle, without waiting for the effect.
  */
 export const useChangeLanguage = () => {
-  const languagePreference = usePreferencesStore(
-    (state) => state.languagePreference,
-  );
-  const setLanguagePreference = usePreferencesStore(
-    (state) => state.setLanguagePreference,
-  );
+  const languagePreference = useLanguagePreference();
+  const setLanguagePreference = useSetLanguagePreference();
 
   const changeLanguage = (preference: LanguagePreference) => {
     setLanguagePreference(preference);

@@ -1,2 +1,2 @@
-export type { DirectionLook } from './direction-look';
-export { DIRECTION_LOOK } from './direction-look';
+export type { DirectionLook } from '@/widgets/direction-look';
+export { DIRECTION_LOOK } from '@/widgets/direction-look';

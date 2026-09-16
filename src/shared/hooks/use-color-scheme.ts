@@ -1,6 +1,6 @@
 import { useColorScheme as useSystemColorScheme } from 'react-native';
 
-import { usePreferencesStore } from '@/shared/model';
+import { useThemePreference } from '@/shared/model';
 
 /**
  * The scheme the app actually paints with.
@@ -9,7 +9,7 @@ import { usePreferencesStore } from '@/shared/model';
  * back to the device appearance, and to light when it says nothing.
  */
 export const useColorScheme = (): 'light' | 'dark' => {
-  const preference = usePreferencesStore((state) => state.themePreference);
+  const preference = useThemePreference();
   const system = useSystemColorScheme();
 
   if (preference !== 'system') return preference;
