@@ -22,6 +22,8 @@ export {
 export type { PurchaseFail, PurchaseOk, PurchaseResult } from './purchase';
 export { applyPurchase } from './purchase';
 export { resetUser } from './reset';
+export type { SavingsFail, SavingsOk, SavingsResult } from './savings';
+export { applyDeposit, applyWithdraw, setActiveGoal } from './savings';
 export type {
   ShortageExplain,
   ShortageExplainInput,
