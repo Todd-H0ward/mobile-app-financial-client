@@ -1,3 +1,4 @@
+import { WALLET_SOURCES } from '@/entities/economy';
 import { type GoalContent, getGoalById } from '@/entities/goal';
 import {
   appearanceFor,
@@ -8,7 +9,12 @@ import {
   type PetMoodName,
   type PetStage,
 } from '@/entities/pet';
-import { type PetSave, type UserSave, useUserStore } from '@/entities/user';
+import {
+  type PetSave,
+  type UserSave,
+  useUserStore,
+  type WalletEntry,
+} from '@/entities/user';
 
 import { useTranslation } from '@/shared/i18n';
 import { clamp, formatMoney } from '@/shared/utils';
@@ -45,6 +51,14 @@ interface HomeHudGoal {
   progress: number;
 }
 
+/** The most recent credit — `null` for a wallet with no history at all. */
+interface HomeHudCredit {
+  /** Coins credited. Fed straight to `CoinBadge`, which adds its own "+". */
+  amount: number;
+  /** Why, already translated — "стартовый кошелёк", never a bare number. */
+  reasonLabel: string;
+}
+
 /** Everything the home screen's HUD lays out, computed from one save read. */
 interface HomeHud {
   /** Header subtitle: the pet's name once met, an onboarding line before. */
@@ -58,6 +72,8 @@ interface HomeHud {
   /** Coins across every goal, not only the active one. */
   savingsTotal: number;
   goal: HomeHudGoal | null;
+  /** The coins that landed most recently — 2.5.4's "источник и сумма", shown. */
+  lastCredit: HomeHudCredit | null;
   /** The task slot's placeholder line — the engine is a later wave. */
   taskHint: string;
 }
@@ -78,6 +94,18 @@ const MOOD_TONE: Record<PetMoodName, MoodTone> = {
   bored: 'attention',
   uncomfortable: 'attention',
   sad: 'attention',
+};
+
+/**
+ * The i18n key for each source `WALLET_SOURCES` currently names.
+ *
+ * `task:<id>` and `purchase:<id>` sources carry their own title from content
+ * once the engine and the catalogue exist, so they never belong in a static
+ * table like this one — only the rule-shaped sources do.
+ */
+const CREDIT_REASON_KEY: Record<string, string> = {
+  [WALLET_SOURCES.startingWallet]: 'wallet.source.startingWallet',
+  [WALLET_SOURCES.regularityBonus]: 'wallet.source.regularityBonus',
 };
 
 // ═══════════════════════════════════════════
@@ -130,6 +158,16 @@ const buildGoal = (
   progress: content.price > 0 ? clamp(saved / content.price, 0, 1) : 0,
 });
 
+/**
+ * The last coin the child was given, named — "стартовый кошелёк", never a
+ * bare "+50". `entry.source` outside the static table still resolves: it
+ * falls back to a generic line rather than showing nothing.
+ */
+const buildLastCredit = (entry: WalletEntry, t: Translate): HomeHudCredit => ({
+  amount: entry.amount,
+  reasonLabel: t(CREDIT_REASON_KEY[entry.source] ?? 'wallet.source.unknown'),
+});
+
 // ═══════════════════════════════════════════
 // HOOK
 // ═══════════════════════════════════════════
@@ -147,6 +185,9 @@ export const useHomeHud = (): HomeHud => {
   const user = useUserStore((state) => state.user);
 
   const activeGoal = user ? findActiveGoal(user.savings) : null;
+  // Newest first — `history[0]` is the most recent operation, and every
+  // operation credited so far is an `earn`: `spend` has no caller yet.
+  const lastEntry = user?.wallet.history[0];
 
   return {
     subtitle:
@@ -161,8 +202,9 @@ export const useHomeHud = (): HomeHud => {
     goal: activeGoal
       ? buildGoal(activeGoal.content, activeGoal.saved, t)
       : null,
+    lastCredit: lastEntry ? buildLastCredit(lastEntry, t) : null,
     taskHint: t('home.task.comingSoon'),
   };
 };
 
-export type { HomeHud, HomeHudGoal, HomeHudPet, MoodTone };
+export type { HomeHud, HomeHudCredit, HomeHudGoal, HomeHudPet, MoodTone };

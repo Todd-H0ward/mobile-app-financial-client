@@ -60,9 +60,17 @@
       "noneHint": "Загляни в копилку и выбери, на что копить",
       "progress": "{{saved}} из {{price}}"
     },
+    "lastCredit": "Последнее начисление",
     "task": {
       "title": "Задание",
       "comingSoon": "Задания появятся здесь совсем скоро"
+    }
+  },
+  "wallet": {
+    "source": {
+      "startingWallet": "стартовый кошелёк",
+      "regularityBonus": "бонус за регулярность",
+      "unknown": "начисление"
     }
   },
   "pet": {

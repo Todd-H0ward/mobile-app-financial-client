@@ -13,7 +13,7 @@ import {
   Text,
 } from '@/shared/ui';
 
-import type { HomeHudGoal, MoodTone } from '../model';
+import type { HomeHudCredit, HomeHudGoal, MoodTone } from '../model';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -27,6 +27,8 @@ interface HomeHudProps {
   balance: number;
   savingsTotal: number;
   goal: HomeHudGoal | null;
+  /** The most recent credit — hidden while the wallet has no history yet. */
+  lastCredit: HomeHudCredit | null;
   taskHint: string;
 }
 
@@ -72,6 +74,31 @@ const HomeHudStats = ({
     <View style={styles.stats}>
       <CoinBadge amount={balance} label={t('home.balance')} />
       <CoinBadge amount={savingsTotal} label={t('home.savings')} />
+    </View>
+  );
+};
+
+/**
+ * The most recent credit, named — 2.5.4: a coin is never shown alone.
+ *
+ * "+18 стартовый кошелёк" rather than a bare "+18" — the same pairing the
+ * settlement report and the history screen will read off `WalletEntry` later.
+ */
+const HomeHudLastCredit = ({ credit }: { credit: HomeHudCredit | null }) => {
+  const { t } = useTranslation();
+
+  if (!credit) return null;
+
+  return (
+    <View style={styles.lastCredit}>
+      <Text variant="label" themeColor="textMuted">
+        {t('home.lastCredit')}
+      </Text>
+      <CoinBadge
+        amount={credit.amount}
+        variant="delta"
+        label={credit.reasonLabel}
+      />
     </View>
   );
 };
@@ -141,12 +168,14 @@ export const HomeHud = ({
   balance,
   savingsTotal,
   goal,
+  lastCredit,
   taskHint,
 }: HomeHudProps) => (
   <View style={styles.root}>
     {moodLabel != null && <HomeHudMood label={moodLabel} tone={moodTone} />}
 
     <HomeHudStats balance={balance} savingsTotal={savingsTotal} />
+    <HomeHudLastCredit credit={lastCredit} />
     <HomeHudGoalCard goal={goal} />
     <HomeHudTaskCard taskHint={taskHint} />
   </View>
@@ -165,6 +194,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: SPACING.one,
+  },
+  lastCredit: {
+    alignItems: 'center',
+    alignSelf: 'center',
+    gap: SPACING.half,
   },
   mood: {
     alignItems: 'center',

@@ -104,6 +104,7 @@ export const HomeScreen = () => {
         balance={hud.balance}
         savingsTotal={hud.savingsTotal}
         goal={hud.goal}
+        lastCredit={hud.lastCredit}
         taskHint={hud.taskHint}
       />
     </Screen>

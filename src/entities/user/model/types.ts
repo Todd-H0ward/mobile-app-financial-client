@@ -110,6 +110,12 @@ interface WalletSave {
   balance: number;
   /** Recent operations, newest first. */
   history: WalletEntry[];
+  /**
+   * How many entries have ever been credited or spent, never reset and never
+   * trimmed along with `history`. It is what `WalletEntry.id` is built from,
+   * so an id stays unique even once its entry has aged out of the array.
+   */
+  entryCount: number;
 }
 
 /** Progress towards one financial goal. Title and price live in content. */

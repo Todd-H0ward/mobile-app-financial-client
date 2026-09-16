@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
+import { REGULARITY_BONUS, WALLET_SOURCES } from '@/entities/economy';
+
 import { makeDemoTimeSource } from '@/shared/lib/time-source';
 
-import { createInitialUser } from '../../model/initial-user';
-import type { UserSave } from '../../model/types';
+import type { UserSave } from '../../model';
+import { createInitialUser } from '../../model';
 
 import {
   acknowledgeSummary,
@@ -402,5 +404,58 @@ describe('growth', () => {
     // Settlement grows the pet and owes the scene; showing it is the screen's
     // job, and only that catches `celebratedStage` up.
     expect(user.pet.celebratedStage).toBe('baby');
+  });
+});
+
+// ═══════════════════════════════════════════
+// The regularity bonus — a named credit, 2.5.4
+// ═══════════════════════════════════════════
+
+describe('the regularity bonus', () => {
+  it('is credited when the child deposited at least once', () => {
+    const time = makeDemoTimeSource(0);
+    const depositing: UserSave = {
+      ...makeUser(),
+      savings: { ...makeUser().savings, depositsThisPeriod: 1 },
+    };
+    const startBalance = depositing.wallet.balance;
+
+    const user = runOnePeriod(depositing, time);
+
+    expect(user.wallet.balance).toBe(startBalance + REGULARITY_BONUS);
+    expect(user.wallet.history[0]).toMatchObject({
+      source: WALLET_SOURCES.regularityBonus,
+      amount: REGULARITY_BONUS,
+      kind: 'earn',
+      direction: null,
+      periodIndex: 1,
+    });
+  });
+
+  it('is not credited when nothing was set aside that period', () => {
+    const time = makeDemoTimeSource(0);
+    const untouched = makeUser();
+    const startBalance = untouched.wallet.balance;
+    const startEntries = untouched.wallet.history.length;
+
+    const user = runOnePeriod(untouched, time);
+
+    expect(user.wallet.balance).toBe(startBalance);
+    expect(user.wallet.history).toHaveLength(startEntries);
+  });
+
+  it('resets so a deposit has to happen again each period', () => {
+    const time = makeDemoTimeSource(0);
+    const depositing: UserSave = {
+      ...makeUser(),
+      savings: { ...makeUser().savings, depositsThisPeriod: 1 },
+    };
+
+    const oncePaid = runOnePeriod(depositing, time);
+    const balanceAfterFirst = oncePaid.wallet.balance;
+    // No deposit this time — `depositsThisPeriod` came back at zero.
+    const twice = runOnePeriod(oncePaid, time);
+
+    expect(twice.wallet.balance).toBe(balanceAfterFirst);
   });
 });

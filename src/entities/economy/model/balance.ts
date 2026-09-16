@@ -27,6 +27,20 @@ export const REGULARITY_BONUS = 5;
  */
 export const WALLET_HISTORY_LIMIT = 100;
 
+/**
+ * Source ids for wallet entries that name a rule rather than one task or
+ * purchase — 2.5.4 bans a nameless credit, and a hand-typed string is one typo
+ * from becoming one. `task:<id>` and `purchase:<id>` sources come from the
+ * task engine and the catalogue instead, once those exist, and carry their own
+ * title from content — they have no place in this table.
+ */
+export const WALLET_SOURCES = {
+  /** The wallet a profile starts with, credited once at creation. */
+  startingWallet: 'wallet:starting',
+  /** Credited at settlement when the child deposited at least once. */
+  regularityBonus: 'bonus:regularity',
+} as const;
+
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════

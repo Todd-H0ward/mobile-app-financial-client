@@ -46,6 +46,27 @@ const MIGRATIONS: Record<number, MigrationStep> = {
       version: 2,
     };
   },
+
+  // v2 — the wallet grew `entryCount`, the counter `WalletEntry.id` is built
+  // from. A save from before this step never credited a named entry, so its
+  // history is empty and the honest backfill is the length of that history —
+  // zero, for every real save this migration will ever see.
+  2: (save) => {
+    const wallet = isRecord(save.wallet) ? save.wallet : {};
+    const history = Array.isArray(wallet.history) ? wallet.history : [];
+
+    return {
+      ...save,
+      wallet: {
+        ...wallet,
+        entryCount:
+          typeof wallet.entryCount === 'number'
+            ? wallet.entryCount
+            : history.length,
+      },
+      version: 3,
+    };
+  },
 };
 
 // ═══════════════════════════════════════════
@@ -74,7 +95,8 @@ const isPet = (value: unknown): boolean =>
 const isWallet = (value: unknown): boolean =>
   isRecord(value) &&
   isFiniteNumber(value.balance) &&
-  Array.isArray(value.history);
+  Array.isArray(value.history) &&
+  isFiniteNumber(value.entryCount);
 
 const isSavings = (value: unknown): boolean =>
   isRecord(value) &&

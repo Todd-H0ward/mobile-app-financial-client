@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { createInitialUser } from '../../model/initial-user';
-import type { UserSave } from '../../model/types';
+import { STARTING_BALANCE, WALLET_SOURCES } from '@/entities/economy';
+
+import type { UserSave } from '../../model';
+import { createInitialUser } from '../../model';
 
 import { resetUser } from './reset';
 
@@ -38,6 +40,7 @@ const playedProfile = (): UserSave => {
           at: 2000,
         },
       ],
+      entryCount: 1,
     },
     savings: {
       ...user.savings,
@@ -108,7 +111,20 @@ describe('resetUser', () => {
   it('clears the progress: wallet, savings, home, history and the period', () => {
     const reset = resetUser(playedProfile());
 
-    expect(reset.wallet.history).toEqual([]);
+    // Not empty: a reset gives the wallet back its one named credit, the
+    // starting balance — 2.5.4 forbids a wallet with coins and no history.
+    expect(reset.wallet.history).toEqual([
+      {
+        id: `${WALLET_SOURCES.startingWallet}:0`,
+        source: WALLET_SOURCES.startingWallet,
+        amount: STARTING_BALANCE,
+        kind: 'earn',
+        direction: null,
+        periodIndex: 1,
+        at: 1000,
+      },
+    ]);
+    expect(reset.wallet.balance).toBe(STARTING_BALANCE);
     expect(reset.savings.goals.every((goal) => goal.saved === 0)).toBe(true);
     expect(reset.savings.depositsThisPeriod).toBe(0);
     expect(reset.history).toEqual([]);

@@ -1,5 +1,6 @@
 export type {
   HomeHud,
+  HomeHudCredit,
   HomeHudGoal,
   HomeHudPet,
   MoodTone,

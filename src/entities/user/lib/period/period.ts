@@ -1,11 +1,16 @@
-import { BUDGET_DIRECTIONS } from '@/entities/economy';
+import {
+  BUDGET_DIRECTIONS,
+  REGULARITY_BONUS,
+  WALLET_SOURCES,
+} from '@/entities/economy';
 import { type GrowthFacts, growPet } from '@/entities/pet';
 
 import type { TimeSource } from '@/shared/lib/time-source';
 
 // The types module, not the slice barrel: the barrel carries the store,
 // and with it `expo-sqlite`, which the node test runner cannot parse.
-import type { PeriodRecord, UserSave } from '../../model/types';
+import type { PeriodRecord, UserSave } from '../../model';
+import { creditWallet } from '../wallet';
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -115,9 +120,11 @@ export const finishPeriod = (user: UserSave, time: TimeSource): UserSave => {
  * 2. `isPlanKept` — no direction exceeded its allocation.
  * 3. Goals reached during this period are captured in `reachedGoalIds`.
  * 4. The period counter advances.
- * 5. `depositsThisPeriod` is reset so the regularity bonus starts clean.
- * 6. Plan and fact are wiped for the new period.
- * 7. The pet grows if the whole history has earned it — and only upwards.
+ * 5. The regularity bonus is credited if the child deposited at least once —
+ *    named in the wallet history like every other coin, 2.5.4.
+ * 6. `depositsThisPeriod` is reset so the bonus starts clean next period.
+ * 7. Plan and fact are wiped for the new period.
+ * 8. The pet grows if the whole history has earned it — and only upwards.
  *
  * @throws {Error} If the current phase is not `summary`.
  */
@@ -157,6 +164,19 @@ export const acknowledgeSummary = (
     },
   ];
 
+  // The reward for a habit, not for a balance — see docs/economy.md. Credited
+  // for the period that just ended, before its own index moves on.
+  const wallet =
+    savings.depositsThisPeriod > 0
+      ? creditWallet(user.wallet, {
+          source: WALLET_SOURCES.regularityBonus,
+          amount: REGULARITY_BONUS,
+          direction: null,
+          periodIndex: period.index,
+          at: endedAt,
+        })
+      : user.wallet;
+
   return {
     ...user,
     pet: {
@@ -165,6 +185,7 @@ export const acknowledgeSummary = (
       // for a decision made over several periods, see docs/pet.md.
       stage: growPet(user.pet.stage, growthFacts(history)),
     },
+    wallet,
     period: {
       index: period.index + 1,
       phase: 'planning',

@@ -5,4 +5,5 @@ export {
   STARTING_BALANCE,
   TASK_REWARD,
   WALLET_HISTORY_LIMIT,
+  WALLET_SOURCES,
 } from './model';

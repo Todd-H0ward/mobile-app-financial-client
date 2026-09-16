@@ -60,9 +60,17 @@
       "noneHint": "Open the savings jar and pick what to save for",
       "progress": "{{saved}} of {{price}}"
     },
+    "lastCredit": "Latest credit",
     "task": {
       "title": "Task",
       "comingSoon": "Tasks will show up here very soon"
+    }
+  },
+  "wallet": {
+    "source": {
+      "startingWallet": "starting wallet",
+      "regularityBonus": "regularity bonus",
+      "unknown": "credit"
     }
   },
   "pet": {
