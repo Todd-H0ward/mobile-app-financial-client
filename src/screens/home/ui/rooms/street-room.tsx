@@ -1,36 +1,67 @@
-import { StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { StyleSheet, View, type ViewStyle } from 'react-native';
 
+import { SHOP_IDS, type ShopId } from '@/entities/catalogue';
+
+import { shopPath } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 
-import { RoomHotspot } from './room-hotspot';
+import { RoomHotspot, type RoomHotspotTone } from './room-hotspot';
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/**
+ * Where each shopfront sits on the street art.
+ *
+ * Left side: food and clothes. Right side: furniture and toys — the two
+ * façades the background already suggests.
+ */
+const SHOP_PLACEMENT: Record<ShopId, ViewStyle> = {
+  grocery: { left: '6%', top: '48%' },
+  clothes: { left: '6%', top: '34%' },
+  furniture: { right: '8%', top: '50%' },
+  toys: { right: '8%', top: '36%' },
+};
+
+/**
+ * One soft colour per shop so the four plates read as four doors.
+ *
+ * Grocery → green (food). Clothes → orange. Furniture → teal. Toys → coin.
+ */
+const SHOP_TONE: Record<ShopId, RoomHotspotTone> = {
+  grocery: 'success',
+  clothes: 'accent',
+  furniture: 'primary',
+  toys: 'coin',
+};
 
 // ═══════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════
 
 /**
- * The street: where the shop will be — roadmap wave 1, item 11.
+ * The street: four named shopfronts (grocery, clothes, furniture, toys).
  *
- * The plates sit on the two shopfronts the art already draws, so the room
- * teaches its own layout before it does anything: this side is groceries,
- * that side is toys.
+ * Toys will grow mini-games later; today they still sell like the others.
  */
 export const StreetRoom = () => {
   const { t } = useTranslation();
+  const router = useRouter();
 
   return (
     <View pointerEvents="box-none" style={styles.root}>
-      <RoomHotspot
-        label={t('rooms.soon.shopTitle')}
-        text={t('rooms.soon.shopText')}
-        style={styles.shop}
-      />
-
-      <RoomHotspot
-        label={t('rooms.soon.toysTitle')}
-        text={t('rooms.soon.toysText')}
-        style={styles.toys}
-      />
+      {SHOP_IDS.map((shopId) => (
+        <RoomHotspot
+          key={shopId}
+          label={t(`rooms.shop.${shopId}.label`)}
+          text={t(`rooms.shop.${shopId}.hint`)}
+          tone={SHOP_TONE[shopId]}
+          onPress={() => router.push(shopPath(shopId))}
+          style={SHOP_PLACEMENT[shopId]}
+        />
+      ))}
     </View>
   );
 };
@@ -42,13 +73,5 @@ export const StreetRoom = () => {
 const styles = StyleSheet.create({
   root: {
     ...StyleSheet.absoluteFill,
-  },
-  shop: {
-    left: '6%',
-    top: '46%',
-  },
-  toys: {
-    right: '8%',
-    top: '38%',
   },
 });

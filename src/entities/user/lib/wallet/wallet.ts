@@ -26,6 +26,32 @@ interface CreditInput {
   at: number;
 }
 
+/** Everything a debit needs — same shape as a credit, but money leaves. */
+type DebitInput = CreditInput;
+
+/** Debit that went through — balance never went below zero. */
+interface DebitOk {
+  ok: true;
+  wallet: WalletSave;
+}
+
+/**
+ * Debit refused — 2.5.6. Returned, never thrown: the shop must explain the
+ * shortfall rather than crash.
+ */
+interface DebitFail {
+  ok: false;
+  reason: 'insufficient_funds';
+  /** How many more coins are needed. */
+  shortfall: number;
+  /** What the child tried to spend. */
+  price: number;
+  /** What they actually have. */
+  balance: number;
+}
+
+type DebitResult = DebitOk | DebitFail;
+
 // ═══════════════════════════════════════════
 // WALLET
 // ═══════════════════════════════════════════
@@ -72,6 +98,58 @@ export const creditWallet = (
 };
 
 /**
+ * Debits coins from the wallet — the only door out of `balance`.
+ *
+ * Never goes below zero: a shortfall is a returned result, not a throw and
+ * not a silent clamp — docs/economy.md / 2.5.6.
+ *
+ * @throws {Error} If `amount` is not a finite number above zero.
+ */
+export const debitWallet = (
+  wallet: WalletSave,
+  input: DebitInput,
+): DebitResult => {
+  if (!Number.isFinite(input.amount) || input.amount <= 0) {
+    throw new Error(
+      `debitWallet: amount must be a positive number, got ${input.amount}`,
+    );
+  }
+
+  if (wallet.balance < input.amount) {
+    return {
+      ok: false,
+      reason: 'insufficient_funds',
+      shortfall: input.amount - wallet.balance,
+      price: input.amount,
+      balance: wallet.balance,
+    };
+  }
+
+  const entry: WalletEntry = {
+    id: `${input.source}:${wallet.entryCount}`,
+    source: input.source,
+    amount: input.amount,
+    kind: 'spend',
+    direction: input.direction,
+    periodIndex: input.periodIndex,
+    at: input.at,
+  };
+
+  return {
+    ok: true,
+    wallet: {
+      balance: wallet.balance - input.amount,
+      history: [entry, ...wallet.history].slice(0, WALLET_HISTORY_LIMIT),
+      entryCount: wallet.entryCount + 1,
+    },
+  };
+};
+
+/** Whether the wallet can pay `price` without going negative. */
+export const canAfford = (wallet: WalletSave, price: number): boolean =>
+  Number.isFinite(price) && price > 0 && wallet.balance >= price;
+
+/**
  * The wallet a fresh profile starts with: the starting balance, credited as a
  * named entry rather than materialized as a bare number — 2.5.4 makes no
  * exception for the very first coin.
@@ -88,4 +166,4 @@ export const startingWallet = (createdAt: number): WalletSave =>
     },
   );
 
-export type { CreditInput };
+export type { CreditInput, DebitFail, DebitInput, DebitOk, DebitResult };

@@ -42,6 +42,10 @@ interface HomeHudPlanBannerProps {
   onPress: () => void;
 }
 
+interface HomeHudEndBannerProps {
+  onPress: () => void;
+}
+
 // ═══════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════
@@ -206,6 +210,45 @@ export const HomeHudPlanBanner = ({ onPress }: HomeHudPlanBannerProps) => {
   );
 };
 
+/**
+ * Closes the active period and opens plan-vs-fact (1.11 / 2.5.5).
+ *
+ * Soft colours on purpose — ending a period is not an alarm, it is the door
+ * into the totals the child is meant to read.
+ */
+export const HomeHudEndBanner = ({ onPress }: HomeHudEndBannerProps) => {
+  const { t } = useTranslation();
+  const theme = useTheme();
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('home.endBannerAction')}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.planBanner,
+        {
+          backgroundColor: theme.accentSoft,
+          borderColor: theme.accent,
+          opacity: pressed ? 0.85 : 1,
+        },
+      ]}
+    >
+      <View style={styles.planBannerText}>
+        <Text variant="bodyBold" themeColor="accentStrong">
+          {t('home.endBannerTitle')}
+        </Text>
+        <Text variant="small" themeColor="textSecondary">
+          {t('home.endBannerBody')}
+        </Text>
+      </View>
+      <Text variant="smallBold" themeColor="accent">
+        {t('home.endBannerAction')}
+      </Text>
+    </Pressable>
+  );
+};
+
 // ═══════════════════════════════════════════
 // STYLES
 // ═══════════════════════════════════════════
@@ -259,6 +302,7 @@ const styles = StyleSheet.create({
 
 export type {
   HomeHudBoardProps,
+  HomeHudEndBannerProps,
   HomeHudLastCreditProps,
   HomeHudMoodProps,
   HomeHudPlanBannerProps,

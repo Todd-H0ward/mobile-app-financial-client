@@ -10,7 +10,13 @@
  * the app and forgotten here, the content test fails instead of a child
  * finding a "?" that opens nothing.
  */
-const HINT_SCREENS = ['onboarding', 'home', 'ui-kit'] as const;
+const HINT_SCREENS = [
+  'onboarding',
+  'home',
+  'ui-kit',
+  'period-summary',
+  'shop',
+] as const;
 
 // ═══════════════════════════════════════════
 // TYPES

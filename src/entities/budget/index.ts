@@ -1,8 +1,10 @@
+export type { SummaryExplain } from './lib';
 export {
   addCoin,
   allocate,
   canConfirm,
   compare,
+  explainSummary,
   isOnPlan,
   isValidPlan,
   planSum,

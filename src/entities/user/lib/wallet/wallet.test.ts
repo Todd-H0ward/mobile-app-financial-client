@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { WalletSave } from '../../model';
 
-import { creditWallet } from './wallet';
+import { canAfford, creditWallet, debitWallet } from './wallet';
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -14,10 +14,16 @@ const emptyWallet = (): WalletSave => ({
   entryCount: 0,
 });
 
-// ═══════════════════════════════════════════
-// 1. A credit is never nameless — 2.5.4
-// ═══════════════════════════════════════════
+const funded = (balance: number): WalletSave =>
+  creditWallet(emptyWallet(), {
+    source: 'wallet:starting',
+    amount: balance,
+    direction: null,
+    periodIndex: 1,
+    at: 0,
+  });
 
+// ═══════════════════════════════════════════
 describe('creditWallet', () => {
   it('raises the balance by exactly the amount credited', () => {
     const wallet = creditWallet(emptyWallet(), {
@@ -109,9 +115,6 @@ describe('creditWallet', () => {
 });
 
 // ═══════════════════════════════════════════
-// 2. The id survives the history being trimmed
-// ═══════════════════════════════════════════
-
 describe('entry ids', () => {
   it('gives two credits from the same source two different ids', () => {
     const wallet = creditWallet(
@@ -148,11 +151,74 @@ describe('entry ids', () => {
       });
     }
 
-    // The array is capped, the counter behind the ids is not.
     expect(wallet.history.length).toBeLessThan(150);
     expect(wallet.entryCount).toBe(150);
 
     const ids = wallet.history.map((entry) => entry.id);
     expect(new Set(ids).size).toBe(wallet.history.length);
+  });
+});
+
+// ═══════════════════════════════════════════
+// 3. Spend never goes negative — 2.5.6
+// ═══════════════════════════════════════════
+
+describe('debitWallet', () => {
+  it('lowers the balance and records a spend', () => {
+    const result = debitWallet(funded(50), {
+      source: 'purchase:bread',
+      amount: 8,
+      direction: 'needs',
+      periodIndex: 1,
+      at: 10,
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.wallet.balance).toBe(42);
+    expect(result.wallet.history[0]).toMatchObject({
+      source: 'purchase:bread',
+      amount: 8,
+      kind: 'spend',
+      direction: 'needs',
+    });
+  });
+
+  it('refuses a shortfall instead of going negative', () => {
+    const result = debitWallet(funded(10), {
+      source: 'purchase:sweater',
+      amount: 40,
+      direction: 'wants',
+      periodIndex: 1,
+      at: 10,
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      reason: 'insufficient_funds',
+      shortfall: 30,
+      price: 40,
+      balance: 10,
+    });
+  });
+
+  it('leaves the wallet untouched when refused', () => {
+    const wallet = funded(10);
+    const snapshot = structuredClone(wallet);
+    debitWallet(wallet, {
+      source: 'purchase:sweater',
+      amount: 40,
+      direction: 'wants',
+      periodIndex: 1,
+      at: 10,
+    });
+    expect(wallet).toEqual(snapshot);
+  });
+});
+
+describe('canAfford', () => {
+  it('is true when the balance covers the price', () => {
+    expect(canAfford(funded(12), 12)).toBe(true);
+    expect(canAfford(funded(11), 12)).toBe(false);
   });
 });

@@ -58,6 +58,9 @@
     "planBannerTitle": "Make a budget plan",
     "planBannerBody": "Decide where the coins go first — then you can spend.",
     "planBannerAction": "Make a plan",
+    "endBannerTitle": "Period is over",
+    "endBannerBody": "See where the coins went — plan next to fact.",
+    "endBannerAction": "See totals",
     "goal": {
       "none": "No goal chosen",
       "noneHint": "Open the savings jar and pick what to save for",
@@ -87,6 +90,24 @@
       "stoveTitle": "Stove",
       "stoveText": "You will be able to cook here.",
       "close": "Got it"
+    },
+    "shop": {
+      "grocery": {
+        "label": "Grocery",
+        "hint": "Food, soap and warmth for the home."
+      },
+      "clothes": {
+        "label": "Clothes",
+        "hint": "Sweaters and scarves — mostly wants."
+      },
+      "furniture": {
+        "label": "Furniture",
+        "hint": "Rugs, lamps and stickers for the room."
+      },
+      "toys": {
+        "label": "Toys",
+        "hint": "Toys to buy now — mini-games come later."
+      }
     }
   },
   "wallet": {
@@ -141,7 +162,7 @@
     "onboarding": {
       "title": "What is happening here",
       "body": [
-        "You are getting to know the game: boop the pet, sort into boxes, scratch a coin ticket, and pick how I look.",
+        "You are getting to know the game: boop the pet, sort into boxes, and scratch a coin ticket.",
         "Three boxes: Needs — essentials, Wants — nice things, Savings — for a goal.",
         "You cannot fail. Any step can be retried, nothing will be lost."
       ]
@@ -166,6 +187,22 @@
       "body": [
         "This is a component showcase: buttons, cards, meters, and sheets in all states.",
         "It helps the team test the UI, and is not part of the game storyline."
+      ]
+    },
+    "period-summary": {
+      "title": "Period totals",
+      "body": [
+        "We compare plan and fact across three directions: needs, wants, savings.",
+        "If more went somewhere — those coins did not vanish, they went somewhere else.",
+        "At the bottom are one or two steps for the next period. Progress is never wiped."
+      ]
+    },
+    "shop": {
+      "title": "Shop",
+      "body": [
+        "The street has four shops: grocery, clothes, furniture and toys. Each has its own shelf.",
+        "A purchase spends coins and updates the period fact — so the plan can be compared with real life.",
+        "If you do not have enough coins, I will say exactly how many are missing and three options: earn, take from the jar, or wait. You cannot go below zero. Toys will get mini-games later."
       ]
     }
   },
@@ -193,7 +230,6 @@
       "sorting": "Next",
       "coins": "Next",
       "plan": "Done",
-      "pet": "Next",
       "name": "Play"
     },
     "steps": {
@@ -213,13 +249,9 @@
         "title": "Place the coins",
         "line": "Put coins into the boxes. You may keep some — you'll do the same at the start of every period."
       },
-      "pet": {
-        "title": "How will I look?",
-        "line": "Pick who I am: cat, dog or capybara — and a coat colour. Names come next!"
-      },
       "name": {
         "title": "Sign by the door",
-        "line": "Type your player name — I will hang a sign over the door."
+        "line": "Type your player name — I will hang a sign over the door. Who I am — you'll find out at home, in the box."
       }
     },
     "decisions": {
@@ -270,25 +302,7 @@
     "dropCoinA11y": "Drop a coin into “{{label}}”",
     "takeBack": "take back",
     "planProgress": "Placed {{laid}} of {{total}}",
-    "petPreviewA11y": "This is how the pet will look",
-    "pickSpecies": "Who am I?",
-    "pickColor": "Coat colour",
-    "pickPattern": "Pattern",
-    "species": {
-      "cat": "Cat",
-      "dog": "Dog",
-      "capybara": "Capybara"
-    },
-    "colors": {
-      "sand": "Sand",
-      "graphite": "Graphite",
-      "mint": "Mint"
-    },
-    "patterns": {
-      "solid": "Plain",
-      "spots": "Spots",
-      "stripes": "Stripes"
-    }
+    "petPreviewA11y": "Pet"
   },
   "budgetPlan": {
     "title": "Budget plan",
@@ -314,6 +328,129 @@
       "savings": {
         "title": "Savings",
         "example": "Saving for a scooter"
+      }
+    }
+  },
+  "periodSummary": {
+    "title": "Period {{period}} — totals",
+    "subtitle": "Plan next to fact",
+    "plan": "Plan",
+    "fact": "Fact",
+    "onPlan": "on plan",
+    "over": "+{{count}} over plan",
+    "under": "−{{count}} under plan",
+    "whatHappened": "What happened",
+    "nextPeriod": "What you can do next period",
+    "continue": "Next period",
+    "story": {
+      "allOnPlan": "Every direction landed on the plan. Nice work keeping the three boxes in balance.",
+      "wantsAteSavings": "Wants took more than planned, and those coins did not reach the savings jar. The money moved — it did not vanish.",
+      "needsOver": "Needs went over the plan. Sometimes that happens — food and heating come first.",
+      "mixed": "Some boxes went over ({{over}}), some finished under ({{under}}). The coins moved between them.",
+      "underspent": "You spent less than planned on {{under}}. The leftover coins stay with you for the next period."
+    },
+    "tips": {
+      "saveFirst": "Put coins in the savings jar right after you get them",
+      "waitOnWant": "Move one want purchase to later",
+      "protectNeeds": "Keep enough for needs before spending on wants",
+      "keepHabit": "Keep checking the plan before you spend",
+      "checkPlan": "Look at the three boxes again when you make the next plan"
+    }
+  },
+  "shop": {
+    "title": "Shop",
+    "subtitle": "Needs and wants — pick what to buy",
+    "balance": "On hand",
+    "sectionNeeds": "Needs",
+    "sectionWants": "Wants",
+    "notEnough": "not enough",
+    "confirmTitle": "Buy this?",
+    "confirmBody": "{{title}} costs {{price}}. It goes to «{{direction}}».",
+    "overPlan": "That is {{count}} over the plan for this box — the purchase still works.",
+    "buy": "Buy",
+    "cancel": "Not now",
+    "shortageTitle": "Need {{count}} more coins",
+    "shortageBody": "{{title}} costs {{price}}, you have {{balance}}.",
+    "shortageOptionsIntro": "What you can do:",
+    "shortageOptionTask": "finish the chore «{{title}}» — that is {{reward}} coins",
+    "shortageOptionTaskPartial": "finish the chore «{{title}}» — that is {{reward}} coins (not enough alone, but closer)",
+    "shortageOptionJar": "take {{count}} from the jar (to «{{goal}}» it will be {{after}} left instead of {{before}})",
+    "shortageOptionJarShort": "the jar for «{{goal}}» has {{saved}}, and you need {{count}} — save a bit more first",
+    "shortageOptionJarNoGoal": "pick a savings goal first — then you can take from the jar",
+    "shortageOptionWait": "wait and buy it next period",
+    "shortageTask": "Got it — I'll earn",
+    "shortageJar": "Maybe from the jar later",
+    "shortageWait": "Wait until next period",
+    "planFirstBanner": "First confirm a budget plan — then the shop opens for real.",
+    "planFirstTitle": "Plan first",
+    "planFirstBody": "Spending waits on a confirmed plan. Make one, then come back.",
+    "goPlan": "Make a plan",
+    "stores": {
+      "grocery": {
+        "title": "Grocery",
+        "subtitle": "Food, soap and warmth"
+      },
+      "clothes": {
+        "title": "Clothes",
+        "subtitle": "What you want to wear"
+      },
+      "furniture": {
+        "title": "Furniture",
+        "subtitle": "For the pet's room"
+      },
+      "toys": {
+        "title": "Toys",
+        "subtitle": "Buy now — play later"
+      }
+    },
+    "toys": {
+      "gamesTitle": "Mini-games soon",
+      "gamesBody": "You can buy toys today. Playing with them in mini-games will arrive a little later."
+    },
+    "items": {
+      "bread": {
+        "title": "Bread and milk",
+        "note": "Food for the period — without it the pet gets hungry."
+      },
+      "porridge": {
+        "title": "Porridge",
+        "note": "A filling breakfast: the pet stays content longer."
+      },
+      "heating": {
+        "title": "Warm home",
+        "note": "Heating for the period — otherwise it gets chilly."
+      },
+      "soap": {
+        "title": "Soap",
+        "note": "Cleanliness is a need, not a luxury."
+      },
+      "stickers": {
+        "title": "Stickers",
+        "note": "They decorate the wall. Can wait until next period."
+      },
+      "toy-car": {
+        "title": "Toy car",
+        "note": "A toy for the room. You will be able to play with it later."
+      },
+      "ball": {
+        "title": "Ball",
+        "note": "Roll and catch. The mini-game comes a little later."
+      },
+      "rug": {
+        "title": "Rug",
+        "note": "A soft floor in the pet's room."
+      },
+      "lamp": {
+        "title": "Night light",
+        "note": "Warm light in the evening — a want, not a need."
+      },
+      "sweater": {
+        "title": "Sweater",
+        "note": "A fancy sweater. Expensive — worth saving first."
+      },
+      "scarf": {
+        "title": "Scarf",
+        "note": "A warm scarf — nice to have, not required."
       }
     }
   }

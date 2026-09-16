@@ -12,7 +12,6 @@ import {
   CoinsStep,
   GreetingStep,
   NameStep,
-  PetStep,
   PlanStep,
   SortingStep,
 } from './steps';
@@ -36,26 +35,11 @@ export const OnboardingScreen = () => {
 
       <PawTrail current={stepNumber} total={stepCount} />
 
-      {stepId !== 'greeting' && stepId !== 'pet' && (
-        <PetSpeech
-          line={line}
-          stepId={stepId}
-          species={onboarding.petSpecies}
-          color={onboarding.petColor}
-          pattern={onboarding.petPattern}
-        />
-      )}
+      {stepId !== 'greeting' && <PetSpeech line={line} stepId={stepId} />}
 
       {stepId === 'greeting' && (
         <>
-          <PetSpeech
-            line={line}
-            stepId={stepId}
-            species="cat"
-            color="sand"
-            pattern="solid"
-            isCompact
-          />
+          <PetSpeech line={line} stepId={stepId} isCompact />
           <GreetingStep
             hasMetPet={onboarding.hasMetPet}
             onBoop={onboarding.markPetMet}
@@ -67,19 +51,6 @@ export const OnboardingScreen = () => {
         <CoinsStep onReveal={onboarding.markCoinsRevealed} />
       )}
       {stepId === 'plan' && <PlanStep onboarding={onboarding} />}
-      {stepId === 'pet' && (
-        <>
-          <PetSpeech
-            line={line}
-            stepId={stepId}
-            species={onboarding.petSpecies}
-            color={onboarding.petColor}
-            pattern={onboarding.petPattern}
-            isCompact
-          />
-          <PetStep onboarding={onboarding} />
-        </>
-      )}
       {stepId === 'name' && <NameStep onboarding={onboarding} />}
 
       <Button
@@ -87,7 +58,11 @@ export const OnboardingScreen = () => {
         isFullWidth
         disabled={!onboarding.canContinue}
         onPress={onboarding.goNext}
-        style={styles.button}
+        style={[
+          styles.button,
+          // Stay under the sorting card while it is dragged across the screen.
+          stepId === 'sorting' && styles.buttonUnderDrag,
+        ]}
       >
         {onboarding.actionLabel}
       </Button>
@@ -102,5 +77,10 @@ export const OnboardingScreen = () => {
 const styles = StyleSheet.create({
   button: {
     marginTop: 'auto',
+    zIndex: 1,
+  },
+  buttonUnderDrag: {
+    elevation: 0,
+    zIndex: 0,
   },
 });

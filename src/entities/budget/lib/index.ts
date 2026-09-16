@@ -1,4 +1,6 @@
 export { compare, isOnPlan } from './compare';
+export type { SummaryExplain } from './explain';
+export { explainSummary } from './explain';
 export {
   addCoin,
   allocate,

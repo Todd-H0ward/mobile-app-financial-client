@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -15,10 +15,11 @@ import { useTranslation } from '@/shared/i18n';
 import { SettingsIcon, ThemedView } from '@/shared/ui';
 import { hitSlopFor } from '@/shared/utils';
 
-import { useHomeHud } from '../model';
+import { useEndPeriod, useHomeHud } from '../model';
 
 import {
   HomeHudBoard,
+  HomeHudEndBanner,
   HomeHudLastCredit,
   HomeHudPlanBanner,
   HomeHudStats,
@@ -84,6 +85,7 @@ export const HomeScreen = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const hud = useHomeHud();
+  const { canEnd, endPeriod } = useEndPeriod();
 
   const [room, setRoom] = useState<RoomId>(DEFAULT_ROOM);
   /**
@@ -93,6 +95,10 @@ export const HomeScreen = () => {
    * button that keeps pulsing forever is a banner, not a hint.
    */
   const [hasWalked, setHasWalked] = useState(false);
+
+  if (hud.isSummary) {
+    return <Redirect href={ROUTES.PERIOD_SUMMARY} />;
+  }
 
   const handleRoomChange = (next: RoomId) => {
     setHasWalked(true);
@@ -154,6 +160,8 @@ export const HomeScreen = () => {
         {hud.isPlanning && (
           <HomeHudPlanBanner onPress={() => router.push(ROUTES.BUDGET_PLAN)} />
         )}
+
+        {hud.isActive && canEnd && <HomeHudEndBanner onPress={endPeriod} />}
       </View>
 
       {/* Reading matter, not a control: `none` keeps the lower third of the
