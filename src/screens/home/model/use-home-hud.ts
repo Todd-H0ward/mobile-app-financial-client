@@ -37,10 +37,12 @@ interface HomeHudPet {
   appearance: PetAppearance;
   emotion: EmotionKey;
   stage: PetStage;
-  /** What a screen reader says. Built from the name and the mood. */
+  /** What a screen reader says — name, mood and why (2.5.10). */
   accessibilityLabel: string;
-  /** The mood, already translated — "доволен собой". */
+  /** The mood, already translated — "скучает". */
   moodLabel: string;
+  /** Why, already translated — "нечего делать". Never empty. */
+  moodReasonLabel: string;
   moodTone: MoodTone;
 }
 
@@ -147,13 +149,15 @@ const isPetMet = (pet: PetSave): boolean => pet.name !== '';
 const buildPet = (pet: PetSave, t: Translate): HomeHudPet => {
   const mood = moodFor(pet.comfort, pet.spirit);
   const moodLabel = t(`pet.mood.${mood.name}`);
+  const moodReasonLabel = t(`pet.reason.${mood.reason}`);
 
   return {
     appearance: appearanceFor(pet.species, pet.color, pet.pattern),
     emotion: emotionFor(mood),
     stage: pet.stage,
-    accessibilityLabel: `${pet.name}, ${moodLabel}`,
+    accessibilityLabel: `${pet.name}, ${moodLabel}, ${moodReasonLabel}`,
     moodLabel,
+    moodReasonLabel,
     moodTone: MOOD_TONE[mood.name],
   };
 };

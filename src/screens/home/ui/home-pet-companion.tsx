@@ -55,7 +55,13 @@ export const HomePetCompanion = ({
       size={PET_SIZE}
       isAnimated={isAnimated}
       accessibilityLabel={pet.accessibilityLabel}
-      footer={<HomeHudMood label={pet.moodLabel} tone={pet.moodTone} />}
+      footer={
+        <HomeHudMood
+          label={pet.moodLabel}
+          reason={pet.moodReasonLabel}
+          tone={pet.moodTone}
+        />
+      }
     />
   </View>
 );

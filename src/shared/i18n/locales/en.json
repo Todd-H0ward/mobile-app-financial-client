@@ -224,6 +224,18 @@
       "uncomfortable": "uncomfortable",
       "sad": "sad"
     },
+    "reason": {
+      "fed": "full",
+      "warm": "the house is warm",
+      "hungry": "wants to eat",
+      "cold": "the house feels chilly",
+      "goal-near": "the goal is close",
+      "tasks-done": "chores are done",
+      "plan-kept": "the plan held",
+      "goal-far": "the goal is still far",
+      "nothing-to-do": "nothing to do",
+      "plan-broken": "the plan slipped"
+    },
     "play": {
       "a11y": "You can stroke, tap and lift",
       "hint": "Swipe to stroke. Tap to boop. Hold and pull up to lift"
