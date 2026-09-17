@@ -1,24 +1,23 @@
 name: CI
 
-# Everything a PR needs before review: types, tests, format. No Android SDK,
-# no credentials — this is the fast loop, see build-apk.yml for the release.
+# Everything a PR needs before review: types, tests, coverage, format.
+# No Android SDK, no credentials — see build-apk.yml for the release.
 on:
   pull_request:
   push:
     branches: [main]
 
-# Autofix may push a format commit back onto the PR branch.
+# Least privilege by default. Only the autofix job may write.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
-        with:
-          # PR head ref so a format commit lands on the branch, not a detached SHA.
-          ref: ${{ github.head_ref || github.ref_name }}
 
       - uses: pnpm/action-setup@v4
         with:
@@ -32,21 +31,45 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Typecheck
-        run: npx tsc --noEmit
+        run: pnpm typecheck
 
-      - name: Test
-        run: npx vitest run
+      - name: Test + coverage (economy / minigame)
+        run: pnpm test:coverage
 
-      # --write applies formatter + safe lint fixes + organizeImports (assist).
-      # Plain `biome format` would skip import sorting.
       - name: Lint / format
-        run: npx biome check --write src
+        run: pnpm lint
 
-      # Push autofixes on same-repo PRs. Forks and main still must ship clean.
+  # Same-repo PRs only: apply Biome and push. Forks / main stay read-only
+  # and must land already clean (check job fails on format drift).
+  autofix:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          # Needed so the bot can push to the PR branch.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Apply Biome
+        run: pnpm format
+
       - name: Commit Biome fixes
-        if: >-
-          github.event_name == 'pull_request' &&
-          github.event.pull_request.head.repo.full_name == github.repository
         run: |
           if git diff --quiet; then
             echo 'No Biome changes to commit'
@@ -55,16 +78,9 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add src
-          git commit -m 'style: apply biome format and import order'
-          git push
+          git commit -m "$(cat <<'EOF'
+          style: apply biome format and import order
 
-      - name: Require clean Biome tree
-        if: >-
-          github.event_name != 'pull_request' ||
-          github.event.pull_request.head.repo.full_name != github.repository
-        run: |
-          if ! git diff --quiet; then
-            echo 'Biome rewrote files — run `pnpm format` and commit the result.'
-            git --no-pager diff --stat
-            exit 1
-          fi
+          EOF
+          )"
+          git push

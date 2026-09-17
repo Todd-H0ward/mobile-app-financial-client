@@ -68,7 +68,7 @@
 | --- | --- | --- | --- |
 | 3.2 | Контент отделён от кода | `content/*.json`, см. [content.md](./content.md) | готово — goals, tasks, onboarding, hints, catalogue, glossary, traits; сейв хранит только id |
 | 3.3 | Подписанный релизный APK | `npm run build:apk` и `.github/workflows/build-apk.yml` (пуш ветки `release/*`), см. [android-release.md](./android-release.md#ci) | готово |
-| 3.4 | Разделение слоёв, автотесты | [architecture.md](./architecture.md), [AGENTS.md](../AGENTS.md) | готово — FSD слои; vitest на entities/features; lint = Biome (`pnpm lint`) |
+| 3.4 | Разделение слоёв, автотесты | [architecture.md](./architecture.md), [AGENTS.md](../AGENTS.md) | готово — FSD; vitest; CI: coverage economy/minigame + i18n en↔ru parity; lint = Biome |
 | 3.6 | Доступность: 48dp, 16sp, цвет не единственный носитель | `shared/ui` + [accessibility.md](./accessibility.md) | частично — кит + свитчи звука/анимаций на `/settings` (хаптики, Reduce Motion); прогон на устройстве ещё открыт |
 | 3.7 | Старт ≤5 с, отклик ≤1 с на устройстве от 3 ГБ | [performance.md](./performance.md) | не начато |
 | — | Основной цикл работает без интернета | Сетевых вызовов в игровом цикле нет | готово |

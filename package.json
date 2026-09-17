@@ -35,13 +35,14 @@
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.10.1",
     "sonner-native": "^0.27.0",
-    "vitest": "^5.0.0",
     "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.13",
     "@types/react": "~19.2.2",
-    "typescript": "~6.0.3"
+    "@vitest/coverage-v8": "5.0.0",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.0"
   },
   "scripts": {
     "start": "expo start",
@@ -54,6 +55,7 @@
     "build:apk": "./scripts/build-apk.sh",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "format": "biome check --write src",
     "lint": "biome check src"
   },

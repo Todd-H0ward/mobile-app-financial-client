@@ -22,6 +22,7 @@ npx expo start        # затем «a» — Android, «i» — iOS
 | `npm run lint` | `biome check src` |
 | `npm run format` | `biome check --write src` |
 | `npm run test` | vitest |
+| `npm run test:coverage` | vitest + coverage gates (economy / minigame) |
 | `npm run keystore` | одноразовая генерация ключа подписи |
 | `npm run build:apk` | подписанный релизный APK в `build/` |
 
