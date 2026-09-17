@@ -24,6 +24,7 @@ const HINT_SCREENS = [
   'glossary',
   'budget-plan',
   'pet-create',
+  'heating',
 ] as const;
 
 // ═══════════════════════════════════════════

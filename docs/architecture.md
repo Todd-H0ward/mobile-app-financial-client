@@ -57,7 +57,8 @@ src/
 │   ├── task/               # движок заданий из content/
 │   ├── glossary/           # справочник терминов из content/glossary.json (2.5.11)
 │   ├── pet/                # внешность, черты, состояния, рост
-│   ├── home/               # отопление, квитанция, утепление
+│   ├── home/               # комнаты, HUD, вход в отопление
+│   ├── heating/            # термостат, квитанция, утепление
 │   └── settings/           # что настраивает взрослый
 └── shared/
     ├── api/                # axios instance + react-query client

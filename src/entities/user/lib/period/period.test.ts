@@ -11,6 +11,7 @@ import { createInitialUser } from '../../model/initial-user';
 import type { UserSave } from '../../model/types';
 
 import { buildBill } from './build-bill';
+import { insulationPayback } from './insulation-payback';
 import {
   areNeedsMet,
   canFinishPeriod,
@@ -19,6 +20,7 @@ import {
   finishPeriod,
   startPeriod,
 } from './period';
+import { setTemperature } from './set-temperature';
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -296,5 +298,28 @@ describe('buildBill', () => {
     const plain = buildBill(0.5, []);
     const insulated = buildBill(0.5, ['window']);
     expect(plain.total).toBeGreaterThan(insulated.total);
+  });
+});
+
+describe('insulationPayback', () => {
+  it('says never when heat is free — nothing to save', () => {
+    expect(insulationPayback(8, 0.3, []).kind).toBe('never');
+  });
+
+  it('names periods at the current thermostat', () => {
+    const result = insulationPayback(8, 0.5, []);
+    expect(result).toEqual({
+      kind: 'periods',
+      savingPerPeriod: 4,
+      periods: 2,
+    });
+  });
+});
+
+describe('setTemperature', () => {
+  it('clamps into 0…1', () => {
+    const user = makeUser();
+    expect(setTemperature(user, 2).home.temperature).toBe(1);
+    expect(setTemperature(user, -1).home.temperature).toBe(0);
   });
 });

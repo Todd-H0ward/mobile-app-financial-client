@@ -13,7 +13,12 @@ export {
   listPeriodHistory,
   listWalletHistory,
 } from './history';
-export type { EndPeriodStatus, HeatingBill, HeatingBillLine } from './period';
+export type {
+  EndPeriodStatus,
+  HeatingBill,
+  HeatingBillLine,
+  InsulationPayback,
+} from './period';
 export {
   acknowledgeSummary,
   areNeedsMet,
@@ -23,6 +28,9 @@ export {
   endPeriodStatus,
   finishPeriod,
   growthFacts,
+  insulationPayback,
+  insulationSavingHint,
+  setTemperature,
   startPeriod,
 } from './period';
 export type { PlayerNameStatus } from './player-name';

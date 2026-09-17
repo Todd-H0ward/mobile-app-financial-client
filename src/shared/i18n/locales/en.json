@@ -98,6 +98,8 @@
     "toyShelf": "Toy shelf",
     "toyShelfTitle": "Toys on the shelf",
     "toyShelfHint": "Pick a toy you bought. Photos will appear here later.",
+    "heating": "Warmth",
+    "heatingHint": "Thermostat and bill — choose how much comfort costs",
     "toyPlay": "Play",
     "toySoon": "Coming soon",
     "furnitureSoon": "art soon",
@@ -583,7 +585,7 @@
       },
       "furniture": {
         "title": "Furniture",
-        "subtitle": "For the pet's room"
+        "subtitle": "For the room and insulation"
       },
       "toys": {
         "title": "Toys",
@@ -646,8 +648,43 @@
       "game-console": {
         "title": "Game console",
         "note": "Buy it — Spacewar and snake unlock from the living-room shelf."
+      },
+      "window-seal": {
+        "title": "Seal the window",
+        "note": "One-time spend — every later heating bill gets smaller."
+      },
+      "draft-stopper": {
+        "title": "Door draft stopper",
+        "note": "Keeps warmth in. Pays back over a few periods at the current heat."
       }
     }
+  },
+  "heating": {
+    "title": "Warmth at home",
+    "subtitle": "More comfort — more coins each period",
+    "thermostatTitle": "Temperature",
+    "chilly": "chilly",
+    "cozy": "cozy",
+    "warm": "warm",
+    "coinsPerPeriod": "{{count}} coins",
+    "nowCost": "Now {{comfort}} · {{count}} coins per period",
+    "billTitle": "Bill for period {{period}}",
+    "bill": {
+      "base": "Base heat",
+      "aboveBase": "Above base: {{count}} steps",
+      "insulation": "Insulation ({{count}})"
+    },
+    "billTotal": "Total",
+    "insulationTitle": "Insulation",
+    "insulationLead": "A one-time spend lowers every later bill. Payback is counted at the current heat.",
+    "insulationOwned": "Already in — lowers the bill",
+    "ownedBadge": "yours",
+    "paybackNever": "with heat off there is nothing to save",
+    "paybackPeriods": "pays back in about {{count}} periods (−{{saving}} each)",
+    "buyWhenActive": "after the plan",
+    "confirmTitle": "Buy «{{title}}»?",
+    "confirmBody": "{{price}} will be charged. The heat discount stays forever.",
+    "confirmBuy": "Buy"
   },
   "savings": {
     "title": "Savings jar",

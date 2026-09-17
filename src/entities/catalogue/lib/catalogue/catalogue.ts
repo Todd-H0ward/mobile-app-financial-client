@@ -29,5 +29,12 @@ export const listOwnedToys = (
       furnitureIds.includes(item.furnitureId),
   );
 
+/**
+ * One-off insulation upgrades — each carries an `insulationId` that lowers
+ * every later heating bill (docs/house.md).
+ */
+export const listInsulationItems = (): readonly CatalogueItem[] =>
+  ITEMS.filter((item) => item.insulationId != null);
+
 export const getCatalogueItem = (id: string): CatalogueItem | undefined =>
   ITEMS.find((item) => item.id === id);

@@ -17,6 +17,7 @@ export const STATIC_ROUTES = {
   GAMES_SNAKE: '/games/snake',
   HISTORY: '/history',
   GLOSSARY: '/glossary',
+  HEATING: '/heating',
   SETTINGS: '/settings',
   PARENTS: '/parents',
   UI_KIT: '/ui-kit',

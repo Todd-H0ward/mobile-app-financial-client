@@ -10,7 +10,7 @@ type CatalogueKind = 'need' | 'want';
 interface CatalogueItem {
   /** Stable id. Wallet history uses `purchase:<id>`. */
   id: string;
-    title: string;
+  title: string;
   /** Price in coins, positive integer. */
   price: number;
   /**
@@ -18,7 +18,7 @@ interface CatalogueItem {
    * not a shop aisle (docs/economy.md).
    */
   kind: CatalogueKind;
-    shop: ShopId;
+  shop: ShopId;
   /** Soft grouping inside a shop: food, warmth, toy, … */
   category: string;
   /** Optional bump to pet comfort, 0…1. */

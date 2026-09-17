@@ -98,6 +98,15 @@ describe('applyPurchase', () => {
     expect(result.user.home.furnitureIds).toContain('rug');
   });
 
+  it('writes insulationId into the home — later bills discount it', () => {
+    const time = makeDemoTimeSource();
+    const result = applyPurchase(makeActive(), 'window-seal', time);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.user.home.insulationIds).toContain('window');
+  });
+
   it('charges chilly less for food — trait shifts the till', () => {
     const time = makeDemoTimeSource();
     const active = makeActive();

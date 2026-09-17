@@ -24,6 +24,8 @@ interface LivingRoomProps {
    */
   isPetMet: boolean;
   onOpenBox: () => void;
+  /** Opens the thermostat / bill screen — docs/house.md. */
+  onOpenHeating: () => void;
   /** Toys already bought — drives the shelf hotspot and its menu. */
   ownedToys: readonly CatalogueItem[];
   onPlayToy: (furnitureId: string) => void;
@@ -54,6 +56,7 @@ const FLOOR_INSET = 190;
 export const LivingRoom = ({
   isPetMet,
   onOpenBox,
+  onOpenHeating,
   ownedToys,
   onPlayToy,
 }: LivingRoomProps) => {
@@ -68,6 +71,14 @@ export const LivingRoom = ({
 
   return (
     <View pointerEvents="box-none" style={styles.root}>
+      <RoomHotspot
+        label={t('home.heating')}
+        text={t('home.heatingHint')}
+        tone="coin"
+        onPress={onOpenHeating}
+        style={styles.radiator}
+      />
+
       {hasToyShelf && (
         <RoomHotspot
           label={t('home.toyShelf')}
@@ -111,6 +122,10 @@ const styles = StyleSheet.create({
   shelf: {
     left: '8%',
     top: '38%',
+  },
+  radiator: {
+    right: '10%',
+    top: '42%',
   },
   stage: {
     alignItems: 'center',

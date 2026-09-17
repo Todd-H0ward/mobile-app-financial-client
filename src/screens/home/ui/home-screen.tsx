@@ -160,6 +160,7 @@ export const HomeScreen = () => {
           <LivingRoom
             isPetMet={hud.pet !== null}
             onOpenBox={() => router.push(STATIC_ROUTES.PET_CREATE)}
+            onOpenHeating={() => router.push(STATIC_ROUTES.HEATING)}
             ownedToys={ownedToys}
             onPlayToy={playToy}
           />
