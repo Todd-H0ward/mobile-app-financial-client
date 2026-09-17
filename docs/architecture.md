@@ -66,7 +66,7 @@ src/
 │   ├── catalogue/ · goal/ · task/ · glossary/ · onboarding/ · hint/
 │   ├── room/                 # ROOM_IDS, слоты мебели
 │   ├── savings/              # прогресс копилки, explain withdraw
-│   ├── settings/             # арифметический барьер взрослых
+│   ├── settings/             # барьер взрослых (лист: только gate, без store)
 │   └── minigame/             # правила аркады
 └── shared/
     ├── constants/            # theme, routes, storage keys

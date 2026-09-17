@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { getHint, type HintScreenId } from '@/entities/hint';
-import { useIsMotionEnabled } from '@/entities/settings';
+import { useIsMotionEnabled } from '@/entities/user';
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';

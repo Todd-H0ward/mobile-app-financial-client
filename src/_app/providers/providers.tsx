@@ -6,8 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { FeedbackHost } from '@/features/feedback';
 
-import { useIsMotionEnabled } from '@/entities/settings';
-import { useUserStore } from '@/entities/user';
+import { useIsMotionEnabled, useUserStore } from '@/entities/user';
 
 import { useAppLanguage } from '@/shared/hooks';
 import {

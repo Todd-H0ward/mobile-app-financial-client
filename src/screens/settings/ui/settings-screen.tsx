@@ -3,8 +3,11 @@ import { StyleSheet, View } from 'react-native';
 
 import { useChangeLanguage } from '@/features/change-language';
 
-import { useIsAnimationEnabled, useIsSoundEnabled } from '@/entities/settings';
-import { useUpdateUser } from '@/entities/user';
+import {
+  useIsAnimationEnabled,
+  useIsSoundEnabled,
+  useUpdateUser,
+} from '@/entities/user';
 
 import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';

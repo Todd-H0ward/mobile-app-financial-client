@@ -5,11 +5,3 @@ export {
   isGateAnswerCorrect,
   makeGateChallenge,
 } from './lib';
-export {
-  useIsAnimationEnabled,
-  useIsDemoMode,
-  useIsMotionEnabled,
-  useIsParentGateEnabled,
-  useIsSoundEnabled,
-  useSettings,
-} from './model';

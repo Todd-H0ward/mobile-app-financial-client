@@ -17,7 +17,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { useIsMotionEnabled } from '@/entities/settings';
+import { useIsMotionEnabled } from '@/entities/user';
 
 import { SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';

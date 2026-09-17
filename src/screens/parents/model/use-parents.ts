@@ -6,14 +6,11 @@ import {
   explainSummary,
   type SummaryExplain,
 } from '@/entities/budget';
-import {
-  type GateChallenge,
-  makeGateChallenge,
-  useIsParentGateEnabled,
-} from '@/entities/settings';
+import { type GateChallenge, makeGateChallenge } from '@/entities/settings';
 import {
   buildParentsReport,
   type ParentsReport,
+  useIsParentGateEnabled,
   useUser,
 } from '@/entities/user';
 

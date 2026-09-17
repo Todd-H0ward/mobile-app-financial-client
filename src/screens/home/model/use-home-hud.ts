@@ -12,12 +12,12 @@ import {
   type PetStage,
 } from '@/entities/pet';
 import { progressFor } from '@/entities/savings';
-import { useIsMotionEnabled } from '@/entities/settings';
 import { getTaskById } from '@/entities/task';
 import {
   type PetSave,
   type UserSave,
   useHomeHudSource,
+  useIsMotionEnabled,
   type WalletEntry,
 } from '@/entities/user';
 

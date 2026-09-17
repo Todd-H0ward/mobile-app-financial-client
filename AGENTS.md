@@ -77,11 +77,13 @@ entities/budget/lib/compare/
    screens need the same block, it belongs in `widgets/` or `shared/ui`.
    The one carve-out is inside `entities/`: a slice may import another entity's
    public API when that entity is a **leaf** — no state, no store, no imports of
-   its own from the layer. `entities/economy` (the balance table) and
-   `entities/goal` / `entities/task` (validated content catalogues) are those
-   leaves. The rule that does not bend: a slice never **re-exports** another
-   slice's API. `STARTING_BALANCE` is imported from `@/entities/economy` by
-   everyone who needs it, never through `@/entities/user`.
+   its own from the layer. `entities/economy` (the balance table),
+   `entities/goal` / `entities/task` / `entities/catalogue` / `entities/glossary`
+   / `entities/hint` / `entities/onboarding` (validated content) and
+   `entities/settings` (parent-gate math only — `SettingsSave` switches live on
+   `entities/user`) are those leaves. The rule that does not bend: a slice never
+   **re-exports** another slice's API. `STARTING_BALANCE` is imported from
+   `@/entities/economy` by everyone who needs it, never through `@/entities/user`.
 7. `shared/` knows nothing about the domain. No entity types, no feature logic.
 
 ## Component file conventions
