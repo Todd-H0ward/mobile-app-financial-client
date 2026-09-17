@@ -5,6 +5,7 @@ export {
   exitDemoMode,
   runDemoPeriods,
 } from './demo';
+export { celebrateStage, hasPendingGrowth } from './growth';
 export type { WalletHistoryRow, WalletSourceRef } from './history';
 export {
   describeWalletSource,

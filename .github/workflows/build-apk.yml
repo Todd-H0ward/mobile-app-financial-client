@@ -1,0 +1,76 @@
+name: Build signed APK
+
+# 0.1 wants the release build itself automated, not just possible by hand.
+# Same script a developer runs locally (scripts/build-apk.sh) — CI only
+# supplies the SDKs and the signing credentials from secrets, see
+# docs/android-release.md#ci.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Missing secrets fail the credentials step with a clear message rather
+    # than falling back to a debug-signed APK (docs/android-release.md warns
+    # that a differently-signed build can't upgrade an installed one).
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Lets Gradle fetch whatever compileSdk / build-tools the project asks
+      # for on its own, instead of pinning a platform level here that would
+      # drift from android/app/build.gradle.
+      - uses: android-actions/setup-android@v3
+
+      - name: Restore signing credentials
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 secret is not set — see docs/android-release.md#ci" >&2
+            exit 1
+          fi
+          mkdir -p credentials
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > credentials/release.keystore
+          {
+            echo "ANDROID_KEYSTORE_PATH=$PWD/credentials/release.keystore"
+            echo "ANDROID_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD"
+            echo "ANDROID_KEY_ALIAS=$ANDROID_KEY_ALIAS"
+            echo "ANDROID_KEY_PASSWORD=$ANDROID_KEY_PASSWORD"
+          } > credentials/android-release.env
+
+      - name: Build
+        run: ./scripts/build-apk.sh --clean
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mobile-hackathon-apk
+          path: build/*.apk
+          if-no-files-found: error
+
+      - name: Attach to the release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/*.apk

@@ -2,6 +2,7 @@ export { HIT_SLOP_SIZE } from './a11y';
 export { APP_VERSION } from './app-version';
 export {
   goalPath,
+  petGrewPath,
   ROUTES,
   type RoutePath,
   shopPath,

@@ -9,7 +9,13 @@ import { RoomPager } from '@/widgets/room-pager';
 
 import { DEFAULT_ROOM, type RoomId } from '@/entities/room';
 
-import { CONTENT_PADDING, RADII, ROUTES, SPACING } from '@/shared/constants';
+import {
+  CONTENT_PADDING,
+  petGrewPath,
+  RADII,
+  ROUTES,
+  SPACING,
+} from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { SettingsIcon, ThemedView } from '@/shared/ui';
@@ -106,6 +112,14 @@ export const HomeScreen = () => {
 
   if (hud.isSummary) {
     return <Redirect href={ROUTES.PERIOD_SUMMARY} />;
+  }
+
+  // Usually caught right after settlement, in `useRecovery`. This is the
+  // fallback for whatever reaches home without going through it — a demo run
+  // that advanced several periods unattended chief among them; 1.6 requires
+  // the scene to be seen, not merely computable.
+  if (hud.isGrowthPending) {
+    return <Redirect href={petGrewPath(ROUTES.HOME)} />;
   }
 
   const handleRoomChange = (next: RoomId) => {
