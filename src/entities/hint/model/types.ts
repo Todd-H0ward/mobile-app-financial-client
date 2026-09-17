@@ -17,6 +17,7 @@ const HINT_SCREENS = [
   'period-summary',
   'shop',
   'savings',
+  'tasks',
 ] as const;
 
 // ═══════════════════════════════════════════

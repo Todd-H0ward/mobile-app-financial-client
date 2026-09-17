@@ -214,6 +214,14 @@
         "You can put coins in during any active period: they leave the wallet, fill the jar and update the savings fact.",
         "Taking coins out opens a confirm screen: I recalculate how much is left to the goal and roughly how many periods. Not a ban — just the price of the choice."
       ]
+    },
+    "tasks": {
+      "title": "Tasks",
+      "body": [
+        "Six chores across three themes: planning, savings and payments.",
+        "There are quizzes, a shopping basket, need-before-want order, change counting and a dialog — not only tests.",
+        "A miss does not wipe progress: the chore still pays part of the coins and names the rule."
+      ]
     }
   },
   "onboarding": {
@@ -505,6 +513,71 @@
       },
       "telescope": {
         "title": "Telescope"
+      }
+    }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "subtitle": "Six chores — plan, save, pay",
+    "done": "Done",
+    "submit": "Check",
+    "rewardHint": "Reward: up to {{count}} coins",
+    "alreadyDone": "You already finished this chore this period.",
+    "planFirstBanner": "First confirm a budget plan — then chores open for real.",
+    "planFirstTitle": "Plan first",
+    "planFirstBody": "Chores wait on a confirmed plan. Make one, then come back.",
+    "goPlan": "Make a plan",
+    "cancel": "Not now",
+    "resultOk": "Nice!",
+    "resultMiss": "Almost — here is the rule",
+    "resultReward": "+{{count}} coins for the chore",
+    "resultClose": "Back to the list",
+    "basket": {
+      "budget": "Budget: {{count}}",
+      "total": "In the basket: {{count}}",
+      "over": "over budget"
+    },
+    "priority": {
+      "hint": "Put needs above wants — use the arrows.",
+      "need": "Need",
+      "want": "Want",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
+    },
+    "change": {
+      "leadIn": "Price {{price}}, you paid {{paid}}.",
+      "question": "How much change do you get back?"
+    },
+    "items": {
+      "enough-for-all": {
+        "title": "Will it all fit?",
+        "brief": "Fill the basket without going over the budget.",
+        "explanation": "First look at how much you have, then pick what fits."
+      },
+      "buy-first": {
+        "title": "What to buy first",
+        "brief": "Put needs above wants.",
+        "explanation": "Food and warmth come first; a poster can wait."
+      },
+      "save-for-scooter": {
+        "title": "Save for a scooter",
+        "brief": "How many periods if you put a little aside each time?",
+        "explanation": "Save for one thing and watch how much is left."
+      },
+      "put-aside-now": {
+        "title": "Put aside now",
+        "brief": "What to do with coins at the start of the period.",
+        "explanation": "A little each time adds up faster."
+      },
+      "change-counting": {
+        "title": "Count the change",
+        "brief": "How much comes back if you pay more than the price?",
+        "explanation": "We count what you gave and what comes back."
+      },
+      "cheaper-pick": {
+        "title": "Which is cheaper",
+        "brief": "Compare two sets and pick the cheaper one.",
+        "explanation": "Compare prices, not only names."
       }
     }
   }

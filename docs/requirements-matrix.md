@@ -33,7 +33,8 @@
 | 2.5.6 | Запрет отрицательного баланса + объяснение вариантов | `screens/shop` | `entities/user/lib/wallet` + `lib/shortage` (`explainShortage`) | `wallet.test.ts`, `purchase.test.ts`, `shortage.test.ts` | готово — shortfall, задание с наградой, последствие копилки, ожидание |
 | 2.5.7 | Накопления, ≥3 цели, прогресс | `screens/savings` | `entities/savings` + `entities/user/lib/savings` + `content/goals.json` | `progress.test.ts`, `savings.test.ts` | готово — витрина, экран цели, депозит/снятие |
 | 2.5.7 | Снятие только по отдельному подтверждению с показом последствий | `screens/savings` (`WithdrawScreen`) | `entities/savings/lib/withdraw` (`explainWithdraw`) | `explain.test.ts`, `savings.test.ts` | готово — отдельный экран с пересчётом remaining/progress/периодов до и после |
-| 2.5.8 | ≥6 заданий по 3 темам, с последствиями, не только тесты | `screens/tasks` | `entities/task` + `entities/user/lib/tasks` + `content/tasks.json` | `queue.test.ts`, `tasks.test.ts`, `content.test.ts` | в работе — движок: выдача, награда `task:<id>`, очередь без гейта; экран механик — дальше |
+| 2.5.8 | ≥6 заданий по 3 темам, с последствиями, не только тесты | `screens/tasks` | `entities/task` + `entities/user/lib/tasks` + `content/tasks.json` | `queue.test.ts`, `score.test.ts`, `tasks.test.ts`, `content.test.ts` | готово — 6 заданий, 5 механик (quiz/change/basket/priority/dialog), витрина и экран прохождения |
+
 | 2.5.9 | Обратная связь после каждого действия: что изменилось и почему | все экраны | `features/feedback` | — | не начато |
 | 2.5.9 | Путь восстановления после ошибки без обнуления прогресса | `screens/period-summary` | `entities/budget/lib/explain` | `explain.test.ts` | готово — tips на экране итогов, `acknowledgeSummary` не обнуляет сейв |
 | 2.5.10 | ≥3 состояния питомца с объяснением причины | `screens/home` | `entities/pet/lib/mood` | `mood.test.ts` | не начато |
@@ -81,7 +82,7 @@
 | --- | --- | --- | --- |
 | Комбинации внешности питомца | 9 | 0 | не начато |
 | Игровые периоды в демо-режиме | 5 | 5 | готово — `runDemoPeriods` + `demo.test.ts` |
-| Задания | 6 по 3 темам | 6 | контент в `tasks.json`; движок/экран — волна 1 (2.5.8) |
+| Задания | 6 по 3 темам | 6 | готово — контент + экран с интерактивом |
 | Позиции каталога покупок | 8, двух типов | 11 | готово |
 | Цели накопления | 3 | 3 | готово — `content/goals.json` |
 | Стадии развития питомца | 3 | 0 | не начато |

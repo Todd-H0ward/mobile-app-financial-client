@@ -41,6 +41,8 @@ interface HomeHudBoardProps {
   taskHint: string;
   /** Opens the savings showcase from the goal row. */
   onOpenSavings?: () => void;
+  /** Opens the tasks showcase / active chore from the task row. */
+  onOpenTasks?: () => void;
 }
 
 interface HomeHudPlanBannerProps {
@@ -141,6 +143,7 @@ export const HomeHudBoard = ({
   taskTitle,
   taskHint,
   onOpenSavings,
+  onOpenTasks,
 }: HomeHudBoardProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -182,7 +185,13 @@ export const HomeHudBoard = ({
         )}
       </Pressable>
 
-      <View style={styles.boardRow}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={taskTitle}
+        disabled={!onOpenTasks}
+        onPress={onOpenTasks}
+        style={styles.boardRow}
+      >
         <TasksIcon size={20} color={theme.textSecondary} />
 
         <View style={styles.boardText}>
@@ -193,7 +202,7 @@ export const HomeHudBoard = ({
             {taskHint}
           </Text>
         </View>
-      </View>
+      </Pressable>
     </View>
   );
 };

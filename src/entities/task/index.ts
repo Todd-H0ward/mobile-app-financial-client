@@ -1,3 +1,4 @@
+export type { TaskScore } from './lib';
 export {
   assertTasksContent,
   getTaskById,
@@ -7,6 +8,12 @@ export {
   listTasksByTheme,
   nextTaskId,
   rewardForTask,
+  scoreBasket,
+  scoreChange,
+  scoreDialog,
+  scorePriority,
+  scoreQuiz,
+  TASK_WRONG_SHARE,
 } from './lib';
 export type {
   BasketItem,

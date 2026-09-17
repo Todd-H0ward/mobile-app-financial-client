@@ -14,6 +14,8 @@ export const ROUTES = {
   SHOP: '/shop',
   /** Savings showcase — every goal with progress. */
   SAVINGS: '/savings',
+  /** Chores showcase — all six tasks for the period. */
+  TASKS: '/tasks',
   SETTINGS: '/settings',
   UI_KIT: '/ui-kit',
 } as const;
@@ -35,4 +37,11 @@ export const withdrawPath = (goalId: string, amount: number) =>
   ({
     pathname: '/savings/withdraw' as const,
     params: { goalId, amount: String(amount) },
+  }) as const;
+
+/** Route into one chore's play screen. */
+export const taskPath = (taskId: string) =>
+  ({
+    pathname: '/tasks/[taskId]' as const,
+    params: { taskId },
   }) as const;

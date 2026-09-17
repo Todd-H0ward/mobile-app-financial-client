@@ -5,6 +5,7 @@ export {
   ROUTES,
   type RoutePath,
   shopPath,
+  taskPath,
   withdrawPath,
 } from './routes';
 export { STORAGE_KEYS } from './storage-keys';
