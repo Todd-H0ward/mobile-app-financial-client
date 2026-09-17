@@ -7,7 +7,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HintButton } from '@/widgets/hint-button';
 import { RoomPager } from '@/widgets/room-pager';
 
+import { listOwnedToys } from '@/entities/catalogue';
+import { puzzleById } from '@/entities/minigame/puzzle';
 import { DEFAULT_ROOM, type RoomId } from '@/entities/room';
+import { useUser } from '@/entities/user';
 
 import {
   CONTENT_PADDING,
@@ -99,6 +102,7 @@ export const HomeScreen = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const hud = useHomeHud();
+  const user = useUser();
   const { status: endStatus, openConfirm } = useEndPeriod();
 
   const [room, setRoom] = useState<RoomId>(DEFAULT_ROOM);
@@ -109,6 +113,14 @@ export const HomeScreen = () => {
    * button that keeps pulsing forever is a banner, not a hint.
    */
   const [hasWalked, setHasWalked] = useState(false);
+
+  const furnitureIds = user?.home.furnitureIds ?? [];
+  const ownedToys = listOwnedToys(furnitureIds);
+
+  const playToy = (furnitureId: string) => {
+    if (!puzzleById(furnitureId)) return;
+    router.push(DYNAMIC_ROUTES.puzzle(furnitureId));
+  };
 
   if (hud.isSummary) {
     return <Redirect href={STATIC_ROUTES.PERIOD_SUMMARY} />;
@@ -143,6 +155,8 @@ export const HomeScreen = () => {
           <LivingRoom
             isPetMet={hud.pet !== null}
             onOpenBox={() => router.push(STATIC_ROUTES.PET_CREATE)}
+            ownedToys={ownedToys}
+            onPlayToy={playToy}
           />
         </RoomPager.Room>
 

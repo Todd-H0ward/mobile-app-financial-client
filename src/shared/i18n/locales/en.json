@@ -94,7 +94,12 @@
       "comingSoon": "Tasks will show up here very soon",
       "allDone": "Every chore this period is done — well done"
     },
-    "parentsA11y": "Grown-ups"
+    "parentsA11y": "Grown-ups",
+    "toyShelf": "Toy shelf",
+    "toyShelfTitle": "Toys on the shelf",
+    "toyShelfHint": "Pick a toy you bought. Photos will appear here later.",
+    "toyPlay": "Play",
+    "toySoon": "Coming soon"
   },
   "parents": {
     "title": "Grown-ups",
@@ -178,7 +183,8 @@
       "purchase": "bought {{title}}",
       "savingsDeposit": "saved into «{{title}}»",
       "savingsWithdraw": "took from «{{title}}»",
-      "unknown": "credit"
+      "unknown": "credit",
+      "gamePuzzle": "puzzle sitting"
     }
   },
   "pet": {
@@ -543,8 +549,8 @@
       }
     },
     "toys": {
-      "gamesTitle": "Mini-games soon",
-      "gamesBody": "You can buy toys today. Playing with them in mini-games will arrive a little later."
+      "gamesTitle": "Puzzles for the shelf",
+      "gamesBody": "Buy a puzzle here — it appears on the shelf in the living room. Tap the shelf to play."
     },
     "items": {
       "bread": {
@@ -590,6 +596,10 @@
       "scarf": {
         "title": "Scarf",
         "note": "A warm scarf — nice to have, not required."
+      },
+      "puzzle-living": {
+        "title": "Living-room puzzle",
+        "note": "Buy it — the puzzle appears on the living-room shelf."
       }
     }
   },
@@ -700,7 +710,8 @@
         "brief": "Compare two sets and pick the cheaper one.",
         "explanation": "Compare prices, not only names."
       }
-    }
+    },
+    "openGames": "Arcade"
   },
   "history": {
     "title": "History",
@@ -808,7 +819,8 @@
       "deposit": "Put {{amount}} into {{goal}}",
       "withdraw": "Took {{amount}} from {{goal}}",
       "task": "Chore done — +{{reward}}",
-      "plan": "Plan locked in"
+      "plan": "Plan locked in",
+      "gamePuzzle": "Puzzle done — +{{reward}}"
     },
     "why": {
       "purchase": "The coins left the wallet and went into the spending fact for this item.",
@@ -816,7 +828,8 @@
       "deposit": "Coins left the wallet and filled the jar. The savings fact grew by the same amount.",
       "withdraw": "Coins came back to the wallet from the jar. The goal is a little farther now.",
       "task": "A finished chore pays coins and lifts the pet's spirit a little.",
-      "plan": "The three boxes are set. Spending opens only after this — the plan is the map for the period."
+      "plan": "The three boxes are set. Spending opens only after this — the plan is the map for the period.",
+      "gamePuzzle": "A finished arcade sitting pays coins. Games pay less than chores on purpose."
     },
     "metrics": {
       "balance": "Wallet",
@@ -838,5 +851,23 @@
     "reasonPlans": "plans kept — at least {{count}}",
     "confirm": "Great!",
     "a11y": "{{name}} bounces happily — grew to the \"{{stage}}\" stage"
+  },
+  "games": {
+    "title": "Arcade",
+    "subtitle": "Short sittings — coins under a chore",
+    "openFromTasks": "Play a puzzle",
+    "puzzle": {
+      "title": "Puzzles",
+      "trayCount": "{{count}} pieces left",
+      "reshuffle": "Shuffle",
+      "completeTitle": "Puzzle complete",
+      "completeBody": "You earned {{reward}} coins.",
+      "completeClose": "Back to the room",
+      "levels": {
+        "rooms-living": "Living room"
+      },
+      "empty": "No puzzles on the shelf yet. Buy one in the toys shop on the street.",
+      "goToys": "Go to toys"
+    }
   }
 }
