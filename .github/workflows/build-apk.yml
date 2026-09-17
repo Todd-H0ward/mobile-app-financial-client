@@ -4,11 +4,14 @@ name: Build signed APK
 # Same script a developer runs locally (scripts/build-apk.sh) — CI only
 # supplies the SDKs and the signing credentials from secrets, see
 # docs/android-release.md#ci.
+#
+# Triggered by pushing a `release/*` branch (e.g. `release/20.09.2026`), cut
+# from `develop` when a build is ready to ship — not by every push to `main`
+# or `develop`, which would burn CI minutes on commits nobody is releasing.
 on:
   push:
-    tags:
-      - 'v*'
-  workflow_dispatch: {}
+    branches:
+      - 'release/**'
 
 jobs:
   build:
@@ -69,8 +72,13 @@ jobs:
           path: build/*.apk
           if-no-files-found: error
 
-      - name: Attach to the release
-        if: startsWith(github.ref, 'refs/tags/')
+      # Artifacts age out after 90 days; a GitHub Release named after the
+      # branch (e.g. `release/20.09.2026`) is the durable place to hand the
+      # APK to a tester or reviewer. Re-pushing the same release branch
+      # updates that release in place rather than failing on a duplicate tag.
+      - name: Publish the release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
           files: build/*.apk
