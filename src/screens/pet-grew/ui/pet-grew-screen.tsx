@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { PetView } from '@/entities/pet/ui';
 
-import { SPACING, type RoutePath, STATIC_ROUTES } from '@/shared/constants';
+import { type RoutePath, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Card, Screen, Text } from '@/shared/ui';
 
