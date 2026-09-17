@@ -8,6 +8,7 @@ import { HintButton } from '@/widgets/hint-button';
 import { RoomPager } from '@/widgets/room-pager';
 
 import { listOwnedToys } from '@/entities/catalogue';
+import { CONSOLE_FURNITURE_ID } from '@/entities/minigame/console';
 import { puzzleById } from '@/entities/minigame/puzzle';
 import { DEFAULT_ROOM, type RoomId } from '@/entities/room';
 import { useUser } from '@/entities/user';
@@ -118,6 +119,10 @@ export const HomeScreen = () => {
   const ownedToys = listOwnedToys(furnitureIds);
 
   const playToy = (furnitureId: string) => {
+    if (furnitureId === CONSOLE_FURNITURE_ID) {
+      router.push(STATIC_ROUTES.GAMES_CONSOLE);
+      return;
+    }
     if (!puzzleById(furnitureId)) return;
     router.push(DYNAMIC_ROUTES.puzzle(furnitureId));
   };

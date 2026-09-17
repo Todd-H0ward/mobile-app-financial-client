@@ -184,7 +184,9 @@
       "savingsDeposit": "saved into «{{title}}»",
       "savingsWithdraw": "took from «{{title}}»",
       "unknown": "credit",
-      "gamePuzzle": "puzzle sitting"
+      "gamePuzzle": "puzzle sitting",
+      "gameSpacewar": "Spacewar sitting",
+      "gameSnake": "snake sitting"
     }
   },
   "pet": {
@@ -549,8 +551,8 @@
       }
     },
     "toys": {
-      "gamesTitle": "Puzzles for the shelf",
-      "gamesBody": "Buy a puzzle here — it appears on the shelf in the living room. Tap the shelf to play."
+      "gamesTitle": "Games for the shelf",
+      "gamesBody": "Buy a puzzle or the console here — they appear on the living-room shelf. Tap the shelf to play."
     },
     "items": {
       "bread": {
@@ -600,6 +602,10 @@
       "puzzle-living": {
         "title": "Living-room puzzle",
         "note": "Buy it — the puzzle appears on the living-room shelf."
+      },
+      "game-console": {
+        "title": "Game console",
+        "note": "Buy it — Spacewar and snake unlock from the living-room shelf."
       }
     }
   },
@@ -820,7 +826,9 @@
       "withdraw": "Took {{amount}} from {{goal}}",
       "task": "Chore done — +{{reward}}",
       "plan": "Plan locked in",
-      "gamePuzzle": "Puzzle done — +{{reward}}"
+      "gamePuzzle": "Puzzle done — +{{reward}}",
+      "gameSpacewar": "Spacewar done — +{{reward}}",
+      "gameSnake": "Snake done — +{{reward}}"
     },
     "why": {
       "purchase": "The coins left the wallet and went into the spending fact for this item.",
@@ -829,7 +837,9 @@
       "withdraw": "Coins came back to the wallet from the jar. The goal is a little farther now.",
       "task": "A finished chore pays coins and lifts the pet's spirit a little.",
       "plan": "The three boxes are set. Spending opens only after this — the plan is the map for the period.",
-      "gamePuzzle": "A finished arcade sitting pays coins. Games pay less than chores on purpose."
+      "gamePuzzle": "A finished arcade sitting pays coins. Games pay less than chores on purpose.",
+      "gameSpacewar": "A finished arcade sitting pays coins. Games pay less than chores on purpose.",
+      "gameSnake": "A finished arcade sitting pays coins. Games pay less than chores on purpose."
     },
     "metrics": {
       "balance": "Wallet",
@@ -856,6 +866,43 @@
     "title": "Arcade",
     "subtitle": "Short sittings — coins under a chore",
     "openFromTasks": "Play a puzzle",
+    "console": {
+      "title": "Game console",
+      "subtitle": "A little handheld — pick a game on the screen",
+      "menu": "SELECT GAME",
+      "records": "HIGH SCORES",
+      "recordsEmpty": "—",
+      "recordsHint": "Play to fill the board"
+    },
+    "spacewar": {
+      "title": "Spacewar",
+      "blurb": "Steer and shoot the targets",
+      "progress": "Hits {{hits}} of {{goal}}",
+      "fieldA11y": "Spacewar playfield",
+      "left": "Move left",
+      "right": "Move right",
+      "fire": "Fire",
+      "start": "Start",
+      "completeTitle": "Targets cleared",
+      "completeBody": "You earned {{reward}} coins.",
+      "completeClose": "Play again"
+    },
+    "snake": {
+      "title": "Snake",
+      "blurb": "Endless — swipe or use the D-pad",
+      "progress": "Apples {{eaten}} · claim from {{claim}}",
+      "fieldA11y": "Snake playfield",
+      "hint": "Swipe or tap the D-pad. Bumping a wall starts the snake over — score stays.",
+      "up": "Up",
+      "down": "Down",
+      "left": "Left",
+      "right": "Right",
+      "claim": "Claim",
+      "start": "Start",
+      "completeTitle": "Nice run",
+      "completeBody": "You earned {{reward}} coins.",
+      "completeClose": "Play again"
+    },
     "puzzle": {
       "title": "Puzzles",
       "trayCount": "{{count}} pieces left",

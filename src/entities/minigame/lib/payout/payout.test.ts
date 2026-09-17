@@ -7,6 +7,12 @@ describe('payoutFor', () => {
     expect(payoutFor({ gameId: 'puzzle', isCorrect: true })).toBe(
       GAME_REWARDS.puzzle,
     );
+    expect(payoutFor({ gameId: 'spacewar', isCorrect: true })).toBe(
+      GAME_REWARDS.spacewar,
+    );
+    expect(payoutFor({ gameId: 'snake', isCorrect: true })).toBe(
+      GAME_REWARDS.snake,
+    );
   });
 
   it('pays a share on a miss and never zero', () => {
@@ -15,5 +21,6 @@ describe('payoutFor', () => {
       Math.max(1, Math.round(GAME_REWARDS.puzzle * WRONG_ROUND_SHARE)),
     );
     expect(coins).toBeGreaterThan(0);
+    expect(payoutFor({ gameId: 'snake', isCorrect: false })).toBeGreaterThan(0);
   });
 });

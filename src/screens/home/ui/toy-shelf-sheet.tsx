@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import type { CatalogueItem } from '@/entities/catalogue';
+import { CONSOLE_FURNITURE_ID } from '@/entities/minigame/console';
 import { puzzleById } from '@/entities/minigame/puzzle';
 
 import { RADII, SPACING } from '@/shared/constants';
@@ -16,9 +17,19 @@ interface ToyShelfSheetProps {
   toys: readonly CatalogueItem[];
   isVisible: boolean;
   onClose: () => void;
-  /** Opens a playable toy (puzzle sitting today). */
+  /** Opens a playable toy (puzzle sitting or console lobby). */
   onPlayToy: (furnitureId: string) => void;
 }
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
+const isPlayableToy = (furnitureId: string | undefined): boolean => {
+  if (furnitureId == null) return false;
+  if (furnitureId === CONSOLE_FURNITURE_ID) return true;
+  return puzzleById(furnitureId) != null;
+};
 
 // ═══════════════════════════════════════════
 // COMPONENTS
@@ -45,8 +56,8 @@ const ToyPhotoPlaceholder = () => {
 };
 
 /**
- * Menu of toys already on the living-room shelf. Playable rows open a sitting;
- * the rest stay listed with a "soon" caption until their mini-game exists.
+ * Menu of toys already on the living-room shelf. Playable rows open a sitting
+ * or the console lobby; the rest stay listed with a "soon" caption.
  */
 export const ToyShelfSheet = ({
   toys,
@@ -69,8 +80,7 @@ export const ToyShelfSheet = ({
             defaultValue: toy.title,
           });
           const furnitureId = toy.furnitureId;
-          const canPlay =
-            furnitureId != null && puzzleById(furnitureId) != null;
+          const canPlay = isPlayableToy(furnitureId);
 
           return (
             <ListRow

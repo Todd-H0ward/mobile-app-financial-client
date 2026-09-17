@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════
 
 /** Arcade game ids — expand as scenes land. */
-type GameId = 'puzzle';
+type GameId = 'puzzle' | 'spacewar' | 'snake';
 
 interface PayoutInput {
   /** Which catalogue game paid out. */
@@ -25,6 +25,8 @@ interface PayoutInput {
  */
 export const GAME_REWARDS: Record<GameId, number> = {
   puzzle: 8,
+  spacewar: 7,
+  snake: 7,
 };
 
 /** Share of the reward kept on a wrong / incomplete-style miss. Never zero. */

@@ -62,9 +62,14 @@ describe('content/catalogue.json', () => {
 
   it('lists toys unlocked by furniture ids', () => {
     expect(listOwnedToys([])).toEqual([]);
-    const owned = listOwnedToys(['toy-car', 'rooms-living', 'rug']);
+    const owned = listOwnedToys([
+      'toy-car',
+      'rooms-living',
+      'rug',
+      'game-console',
+    ]);
     expect(owned.map((item) => item.id).sort()).toEqual(
-      ['puzzle-living', 'toy-car'].sort(),
+      ['game-console', 'puzzle-living', 'toy-car'].sort(),
     );
   });
 

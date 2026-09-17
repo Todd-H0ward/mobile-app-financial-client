@@ -59,6 +59,26 @@ export const COLORS = {
     overlay: 'rgba(63, 51, 44, 0.42)',
     inverseSurface: '#3F332C',
     inverseText: '#FBF3E7',
+
+    /** Handheld plastic body — toys-shop console chrome. */
+    arcadeShell: '#3A9AA8',
+    arcadeShellDeep: '#2A7884',
+    arcadeShellHighlight: '#6BC4D0',
+    /** LCD well behind the playfield. */
+    arcadeScreen: '#10241F',
+    arcadeScreenGlow: '#1C3F36',
+    /** On-LCD glyphs and score. */
+    arcadeLcd: '#7CFF9A',
+    arcadeLcdDim: '#3D8F5A',
+    /** Face buttons on the shell. */
+    arcadeButtonA: '#FF8F2A',
+    arcadeButtonB: '#E85D75',
+    arcadeDpad: '#2F3E42',
+    arcadeDpadFace: '#E8F2F4',
+    /** Snake palette on the LCD. */
+    snakeHead: '#7CFF9A',
+    snakeBody: '#3D8F5A',
+    snakeApple: '#FF8F2A',
   },
   dark: {
     background: '#241E1A',
@@ -114,6 +134,26 @@ export const COLORS = {
     overlay: 'rgba(20, 15, 12, 0.56)',
     inverseSurface: '#FBF3E7',
     inverseText: '#3F332C',
+
+    /** Handheld plastic body — toys-shop console chrome. */
+    arcadeShell: '#2F7A86',
+    arcadeShellDeep: '#1F5560',
+    arcadeShellHighlight: '#4FA8B6',
+    /** LCD well behind the playfield. */
+    arcadeScreen: '#0A1814',
+    arcadeScreenGlow: '#143028',
+    /** On-LCD glyphs and score. */
+    arcadeLcd: '#7CFF9A',
+    arcadeLcdDim: '#2F6B48',
+    /** Face buttons on the shell. */
+    arcadeButtonA: '#EE9A44',
+    arcadeButtonB: '#D4566C',
+    arcadeDpad: '#1C282C',
+    arcadeDpadFace: '#C5D4D8',
+    /** Snake palette on the LCD. */
+    snakeHead: '#7CFF9A',
+    snakeBody: '#2F6B48',
+    snakeApple: '#EE9A44',
   },
 } as const;
 

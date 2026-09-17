@@ -33,6 +33,10 @@ const sourceLabel = (
       return t('wallet.source.heatingBill');
     case 'gamePuzzle':
       return t('wallet.source.gamePuzzle');
+    case 'gameSpacewar':
+      return t('wallet.source.gameSpacewar');
+    case 'gameSnake':
+      return t('wallet.source.gameSnake');
     case 'task':
       return t('wallet.source.task', {
         title: t(`tasks.items.${source.taskId}.title`, {

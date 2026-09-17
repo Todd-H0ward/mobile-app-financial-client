@@ -121,6 +121,16 @@
       "category": "toy",
       "furnitureId": "rooms-living",
       "note": "Купи — пазл появится на полке в гостиной."
+    },
+    {
+      "id": "game-console",
+      "title": "Игровая консоль",
+      "price": 14,
+      "kind": "want",
+      "shop": "toys",
+      "category": "toy",
+      "furnitureId": "game-console",
+      "note": "Купи — на полке откроются Spacewar и змейка."
     }
   ]
 }
