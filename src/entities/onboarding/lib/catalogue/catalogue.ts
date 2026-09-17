@@ -17,7 +17,6 @@ import ONBOARDING_CONTENT from '@/content/onboarding.json';
 /** Validated once at module load — bad JSON fails in tests, not mid-session. */
 const CONTENT = assertOnboardingContent(ONBOARDING_CONTENT);
 
-/** Every step, in file order. */
 export const listOnboardingSteps = (): readonly OnboardingStepContent[] =>
   CONTENT.steps;
 
@@ -30,9 +29,7 @@ export const getOnboardingStep = (
 export const listDecisions = (): readonly DecisionContent[] =>
   CONTENT.decisions;
 
-/** One direction by id. */
 export const getDecision = (id: BudgetDirection): DecisionContent | undefined =>
   CONTENT.decisions.find((decision) => decision.id === id);
 
-/** Cards of the sorting step, in file order. */
 export const listSortItems = (): readonly SortItemContent[] => CONTENT.items;

@@ -29,9 +29,6 @@ import { formatMoney } from '@/shared/utils';
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Snake sitting: records + Start on the LCD, then endless play.
- */
 export const SnakeScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();

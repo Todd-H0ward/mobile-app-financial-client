@@ -15,8 +15,7 @@ import { STATIC_ROUTES } from '@/shared/constants';
 // ═══════════════════════════════════════════
 
 interface EndPeriodConfirmController {
-  /** Period number shown in the title. */
-  periodIndex: number;
+    periodIndex: number;
   /** Soft warn when planned needs are not covered — never a block. */
   isNeedsShort: boolean;
   /** How many need-coins are still missing from the plan (0 when covered). */

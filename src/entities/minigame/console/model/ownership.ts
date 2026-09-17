@@ -13,6 +13,5 @@ export const CONSOLE_FURNITURE_ID = 'game-console';
 // HELPERS
 // ═══════════════════════════════════════════
 
-/** Whether the living-room shelf may open the console lobby. */
 export const isConsoleOwned = (furnitureIds: readonly string[]): boolean =>
   furnitureIds.includes(CONSOLE_FURNITURE_ID);

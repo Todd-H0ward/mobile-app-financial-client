@@ -12,14 +12,12 @@ interface Vec2 {
 interface Bullet {
   /** Stable id for React keys — position alone remounts every frame. */
   id: number;
-  /** Bullet centre in playfield units. */
   position: Vec2;
 }
 
 interface Target {
   /** Stable id for React keys — position alone remounts every frame. */
   id: number;
-  /** Target centre in playfield units. */
   position: Vec2;
   /** Horizontal speed in playfield units per second. */
   vx: number;
@@ -28,13 +26,9 @@ interface Target {
 interface SpacewarSession {
   /** Ship centre x, 0…1. Y is fixed near the bottom. */
   shipX: number;
-  /** Active shots travelling upward. */
   bullets: readonly Bullet[];
-  /** Moving targets still on screen. */
   targets: readonly Target[];
-  /** Targets destroyed this sitting. */
   hits: number;
-  /** True once WIN_HITS is reached. */
   isWon: boolean;
   /** Monotonic id source for bullets / targets. */
   nextId: number;
@@ -47,7 +41,6 @@ interface SpacewarSession {
 /** Ship vertical position — near the bottom of the field. */
 export const SHIP_Y = 0.88;
 
-/** How many targets to destroy to finish the sitting. */
 export const WIN_HITS = 3;
 
 /** Horizontal ship speed in playfield units per second. */
@@ -56,7 +49,6 @@ export const SHIP_SPEED = 0.55;
 /** Bullet speed upward in playfield units per second. */
 export const BULLET_SPEED = 0.9;
 
-/** Max bullets on screen at once. */
 export const MAX_BULLETS = 3;
 
 /** Hit radius for ship-bullet vs target (playfield units). */
@@ -80,7 +72,6 @@ const distance = (a: Vec2, b: Vec2): number => {
   return Math.sqrt(dx * dx + dy * dy);
 };
 
-/** Fresh sitting with two targets drifting in opposite directions. */
 export const createSpacewarSession = (): SpacewarSession => ({
   shipX: 0.5,
   bullets: [],

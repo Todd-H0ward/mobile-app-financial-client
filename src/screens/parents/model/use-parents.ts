@@ -21,13 +21,10 @@ import {
 // TYPES
 // ═══════════════════════════════════════════
 
-/** Everything the grown-up's screen reads and calls. */
 interface ParentsController {
-  /** Whether the barrier still stands in front of the section. */
   isLocked: boolean;
   /** The question on the barrier. Replaced after every wrong answer. */
   challenge: GateChallenge;
-  /** Opens the section. */
   unlock: () => void;
   /** Hands out a fresh question — a wrong answer never locks anything. */
   refreshChallenge: () => void;

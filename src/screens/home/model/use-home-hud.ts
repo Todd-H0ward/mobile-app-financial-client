@@ -23,7 +23,6 @@ import {
 import { useTranslation } from '@/shared/i18n';
 import { formatMoney } from '@/shared/utils';
 
-/** The translator, exactly as `useTranslation()` hands it out. */
 type Translate = ReturnType<typeof useTranslation>['t'];
 
 // ═══════════════════════════════════════════
@@ -33,7 +32,6 @@ type Translate = ReturnType<typeof useTranslation>['t'];
 /** Whether the state row reaches for a warm color or a calm one. Never red. */
 type MoodTone = 'calm' | 'attention';
 
-/** Everything the pet card needs — `null` while the box is still closed. */
 interface HomeHudPet {
   appearance: PetAppearance;
   emotion: EmotionKey;
@@ -42,7 +40,6 @@ interface HomeHudPet {
   accessibilityLabel: string;
   /** The mood, already translated — "доволен собой". */
   moodLabel: string;
-  /** Which tone the state row reads in. */
   moodTone: MoodTone;
 }
 
@@ -63,7 +60,6 @@ interface HomeHudCredit {
   reasonLabel: string;
 }
 
-/** Everything the home screen's HUD lays out, computed from one save read. */
 interface HomeHud {
   /** Header subtitle: the pet's name once met, an onboarding line before. */
   subtitle: string;
@@ -71,7 +67,6 @@ interface HomeHud {
   pet: HomeHudPet | null;
   /** The grown-up's switch — the pet card passes it straight to the rig. */
   isAnimationEnabled: boolean;
-  /** Coins on hand, ready for `CoinBadge`. */
   balance: number;
   /** Coins across every goal, not only the active one. */
   savingsTotal: number;

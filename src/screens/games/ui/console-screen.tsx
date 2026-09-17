@@ -17,9 +17,6 @@ import { formatMoney } from '@/shared/utils';
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Console lobby — pick Spacewar or snake; records live on each game screen.
- */
 export const ConsoleScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();

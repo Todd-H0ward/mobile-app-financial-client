@@ -37,8 +37,7 @@ type HintScreenId = (typeof HINT_SCREENS)[number];
 interface HintContent {
   /** Screen this hint opens on. */
   id: HintScreenId;
-  /** Heading of the sheet. */
-  title: string;
+    title: string;
   /** Paragraphs, in reading order. First one answers "what do I do here". */
   body: string[];
   /**
@@ -49,7 +48,6 @@ interface HintContent {
   termIds?: string[];
 }
 
-/** The whole of `content/hints.json`. */
 interface HintsFile {
   /** One row per screen from `HINT_SCREENS`. */
   hints: HintContent[];

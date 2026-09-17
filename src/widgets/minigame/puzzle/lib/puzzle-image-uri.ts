@@ -8,7 +8,6 @@ const PUZZLE_IMAGE_MODULES: Record<string, number> = {
   living: require('@/assets/images/rooms/living.webp'),
 };
 
-/** Resolve a level's image key to a URI `PuzzlePiece` can feed into SVG Image. */
 export const puzzleImageUri = (imageKey: string): string => {
   const imageModule = PUZZLE_IMAGE_MODULES[imageKey];
   if (imageModule === undefined) return '';

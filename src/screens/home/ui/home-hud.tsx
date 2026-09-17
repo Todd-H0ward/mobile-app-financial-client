@@ -21,7 +21,6 @@ import type { HomeHudCredit, HomeHudGoal, MoodTone } from '../model';
 interface HomeHudStatsProps {
   balance: number;
   savingsTotal: number;
-  /** Opens the savings showcase when the piggy badge is tapped. */
   onOpenSavings?: () => void;
 }
 
@@ -39,9 +38,7 @@ interface HomeHudBoardProps {
   goal: HomeHudGoal | null;
   taskTitle: string;
   taskHint: string;
-  /** Opens the savings showcase from the goal row. */
   onOpenSavings?: () => void;
-  /** Opens the tasks showcase / active chore from the task row. */
   onOpenTasks?: () => void;
 }
 
@@ -64,7 +61,6 @@ interface HomeHudEndBannerProps {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** Coins on hand and coins saved — two of the six things 2.5.3 asks for. */
 export const HomeHudStats = ({
   balance,
   savingsTotal,

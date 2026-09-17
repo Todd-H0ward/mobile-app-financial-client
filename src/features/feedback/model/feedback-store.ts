@@ -25,15 +25,10 @@ interface ShowFeedbackInput {
 }
 
 interface FeedbackStore {
-  /** Open report, or null when the sheet is closed. */
-  report: FeedbackReport | null;
-  /** Diffs two saves and opens the sheet. */
+    report: FeedbackReport | null;
   show: (input: ShowFeedbackInput) => void;
-  /** Opens from a pre-built describeChange input (tests). */
   showDescribed: (input: DescribeChangeInput) => void;
-  /** Opens a pre-built report. */
   showReport: (report: FeedbackReport) => void;
-  /** Closes the sheet without changing the save. */
   dismiss: () => void;
 }
 
@@ -64,14 +59,11 @@ export const useFeedbackStore = create<FeedbackStore>((set) => ({
   dismiss: () => set({ report: null }),
 }));
 
-/** Opens feedback after a successful action. */
 export const useShowFeedback = () => useFeedbackStore((state) => state.show);
 
-/** Closes the feedback sheet. */
 export const useDismissFeedback = () =>
   useFeedbackStore((state) => state.dismiss);
 
-/** Current report for the host sheet. */
 export const useFeedbackReport = () =>
   useFeedbackStore((state) => state.report);
 

@@ -17,25 +17,17 @@ import { hapticSuccess } from '@/shared/lib';
 // TYPES
 // ═══════════════════════════════════════════
 
-/** Everything the meeting screen reads and calls. */
 interface PetCreateController {
-  /** Species being previewed. */
   species: PetSpecies;
-  /** Coat being previewed. */
   color: PetColor;
-  /** Pattern being previewed. */
   pattern: PetPattern;
   /** What the child typed, unnormalized — the field shows it back verbatim. */
   name: string;
-  /** Whether the bottom button is live. */
   canFinish: boolean;
-  /** Picks a species. Nothing is written to the save until `finish`. */
+  /** Nothing is written to the save until `finish`. */
   setSpecies: (species: PetSpecies) => void;
-  /** Picks a coat. */
   setColor: (color: PetColor) => void;
-  /** Picks a pattern. */
   setPattern: (pattern: PetPattern) => void;
-  /** Types into the name field. */
   setName: (name: string) => void;
   /** Writes the look and the name into the save and goes back to the room. */
   finish: () => void;

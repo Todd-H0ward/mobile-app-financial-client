@@ -6,7 +6,6 @@ import { ICON_SIZE, ICON_STROKE, type IconProps, useIconColor } from './icon';
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** Closes a sheet or a dialogue. */
 export const CloseIcon = ({ size = ICON_SIZE, color }: IconProps) => {
   const stroke = useIconColor(color);
 

@@ -29,8 +29,7 @@ type PuzzlePieceVariant =
   | 'filled'
   | 'slot'
   | 'slotDark'
-  /** Slot that will receive the piece if it is released now. */
-  | 'slotActive'
+    | 'slotActive'
   | 'loose';
 
 interface PuzzlePhotoProps {

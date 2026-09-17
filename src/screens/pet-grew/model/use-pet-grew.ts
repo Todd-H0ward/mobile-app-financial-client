@@ -27,7 +27,6 @@ interface PetGrewController {
    * child actually cleared.
    */
   reason: { periods: number; goalsReached: number; plansKept: number };
-  /** Marks the stage celebrated and continues to wherever it was heading. */
   confirm: () => void;
 }
 

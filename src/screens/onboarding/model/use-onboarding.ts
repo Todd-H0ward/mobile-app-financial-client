@@ -37,7 +37,6 @@ import { hapticSuccess, useTimeSource } from '@/shared/lib';
  */
 const MINI_PLAN_COINS = 10;
 
-/** An empty plan: nothing laid out yet. */
 const EMPTY_PLAN: Record<BudgetDirection, number> = {
   needs: 0,
   wants: 0,
@@ -56,17 +55,12 @@ const ACTION_LABEL: Record<OnboardingStepId, string> = {
 // TYPES
 // ═══════════════════════════════════════════
 
-/** Everything the onboarding screen and its steps read and call. */
 interface OnboardingController {
-  /** Step being shown. */
   stepId: OnboardingStepId;
-  /** Heading of the step, from the content file. */
-  title: string;
-  /** The pet's line for this step. */
-  line: string;
+    title: string;
+    line: string;
   /** Position in the walk, from 1. For the paw trail and the screen reader. */
   stepNumber: number;
-  /** How many steps there are in total. */
   stepCount: number;
   /** Card in hand on the sorting step, `null` once the deck is out. */
   sortItem: SortItemContent | null;
@@ -74,21 +68,15 @@ interface OnboardingController {
   lastOutcome: SortOutcome | null;
   /** Cards placed and cards in total: "3 из 6", never a countdown. */
   sortProgress: { done: number; total: number };
-  /** The rehearsal plan, coins per direction. */
-  plan: Record<BudgetDirection, number>;
+    plan: Record<BudgetDirection, number>;
   /** Coins not laid out yet. Leaving some is allowed — docs/budget.md. */
   planLeft: number;
-  /** Coins the rehearsal plan hands out. */
-  planTotal: number;
+    planTotal: number;
   /** What the child typed, unnormalized — the field shows it back verbatim. */
   playerName: string;
-  /** Whether the greeting boop happened. */
-  hasMetPet: boolean;
-  /** Whether the scratch ticket is open. */
-  isCoinsRevealed: boolean;
-  /** Whether the bottom button is live on this step. */
-  canContinue: boolean;
-  /** Label of the bottom button on this step. */
+    hasMetPet: boolean;
+    isCoinsRevealed: boolean;
+    canContinue: boolean;
   actionLabel: string;
   /** Puts the card in hand into a basket. A miss costs nothing. */
   placeItem: (direction: BudgetDirection) => void;
@@ -96,11 +84,8 @@ interface OnboardingController {
   addCoin: (direction: BudgetDirection) => void;
   /** Takes one coin back. Ignored when that direction is empty. */
   removeCoin: (direction: BudgetDirection) => void;
-  /** Types into the name field. */
   setPlayerName: (value: string) => void;
-  /** Marks the greeting boop as done. */
   markPetMet: () => void;
-  /** Marks the scratch ticket as revealed. */
   markCoinsRevealed: () => void;
   /** Moves on; on the last step it creates the profile and leaves onboarding. */
   goNext: () => void;

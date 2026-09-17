@@ -15,8 +15,7 @@ import { CoinBadge, ListRow, Shape, Text } from '@/shared/ui';
 
 interface ProductRowProps {
   item: CatalogueItem;
-  /** Whether the wallet can pay for it right now. */
-  canAfford: boolean;
+    canAfford: boolean;
   onPress: () => void;
 }
 

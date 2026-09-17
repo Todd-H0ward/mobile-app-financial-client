@@ -28,7 +28,6 @@ import { Text } from '@/shared/ui';
 // ═══════════════════════════════════════════
 
 interface PetBoxProps {
-  /** Opens whatever comes next — the meeting screen. */
   onPress: () => void;
   /** Side of the box art, in design points. */
   size?: number;
@@ -57,7 +56,6 @@ const DEFAULT_SIZE = 196;
 /** How far the carton rocks, in degrees. Small: something stirs, nothing bangs. */
 const ROCK_ANGLE = 2.2;
 
-/** One way of the rock. */
 const ROCK_DURATION = 900;
 
 /** Quiet between two rocks, so the box is not shaking non-stop. */

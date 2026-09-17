@@ -12,13 +12,10 @@ type ChangeFormat = 'money' | 'percent' | 'count';
  * The UI maps `labelKey` through i18n.
  */
 interface ChangeLine {
-  /** Stable id for keys and tests. */
-  id: string;
+    id: string;
   /** i18n key, usually `feedback.metrics.*`. */
   labelKey: string;
-  /** Value before the action. */
   before: number;
-  /** Value after the action. */
   after: number;
   format: ChangeFormat;
 }
@@ -31,22 +28,16 @@ type FeedbackAction = 'purchase' | 'deposit' | 'withdraw' | 'task' | 'plan';
  * so the helper stays free of the full profile shape.
  */
 interface FeedbackSnapshot {
-  /** Wallet balance in coins. */
-  balance: number;
-  /** Sum of every goal's `saved`. */
-  savingsTotal: number;
-  /** Period fact — needs. */
+    balance: number;
+    savingsTotal: number;
   factNeeds: number;
-  /** Period fact — wants. */
   factWants: number;
-  /** Period fact — savings. */
   factSavings: number;
   /** Pet comfort 0…1. */
   comfort: number;
   /** Pet spirit 0…1. */
   spirit: number;
-  /** Furniture pieces in the room. */
-  furnitureCount: number;
+    furnitureCount: number;
 }
 
 interface DescribeChangeInput {
@@ -75,14 +66,12 @@ interface DescribeChangeInput {
  */
 interface FeedbackReport {
   action: FeedbackAction;
-  /** i18n key for the sheet title. */
-  titleKey: string;
+    titleKey: string;
   /** i18n key for the why paragraph, or null when `whyText` is used. */
   whyKey: string | null;
   /** Content-authored why, when the catalogue / task already wrote it. */
   whyText: string | null;
-  /** Interpolation bag for title and why. */
-  params: Record<string, string | number>;
+    params: Record<string, string | number>;
   /** Only lines that actually moved. */
   changes: ChangeLine[];
 }
@@ -113,7 +102,6 @@ const defaultWhyKey = (action: FeedbackAction, overPlanBy: number): string => {
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/** Picks the measurable fields out of a full save. */
 export const snapshotUser = (user: UserSave): FeedbackSnapshot => ({
   balance: user.wallet.balance,
   savingsTotal: user.savings.goals.reduce((sum, row) => sum + row.saved, 0),

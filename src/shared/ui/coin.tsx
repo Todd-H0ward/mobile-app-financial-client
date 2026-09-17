@@ -153,7 +153,6 @@ export const Coin = ({
           </LinearGradient>
         </Defs>
 
-        {/* Soft under-disc for depth */}
         <Circle
           cx={cx}
           cy={cy + 1.2}
@@ -162,7 +161,6 @@ export const Coin = ({
           opacity={0.35}
         />
 
-        {/* Face */}
         <Circle cx={cx} cy={cy} r={21} fill="url(#coinFace)" />
         <Circle
           cx={cx}
@@ -173,7 +171,6 @@ export const Coin = ({
           strokeWidth={1.6}
         />
 
-        {/* Reeded edge */}
         <G
           stroke={theme.coinBorder}
           strokeWidth={1.1}
@@ -191,7 +188,6 @@ export const Coin = ({
           ))}
         </G>
 
-        {/* Inner ring */}
         <Circle
           cx={cx}
           cy={cy}
@@ -202,10 +198,8 @@ export const Coin = ({
           opacity={0.7}
         />
 
-        {/* Static catch-light */}
         <Circle cx={16} cy={15} r={5.5} fill="#FFFFFF" opacity={0.35} />
 
-        {/* Animated shimmer blob */}
         <AnimatedCircle
           cx={28}
           cy={18}

@@ -17,7 +17,6 @@ interface ToyShelfSheetProps {
   toys: readonly CatalogueItem[];
   isVisible: boolean;
   onClose: () => void;
-  /** Opens a playable toy (puzzle sitting or console lobby). */
   onPlayToy: (furnitureId: string) => void;
 }
 

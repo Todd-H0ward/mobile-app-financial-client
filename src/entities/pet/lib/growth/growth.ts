@@ -24,7 +24,6 @@ type GrowthRule = GrowthFacts;
 
 /** What is still missing before the next stage, as numbers to show. */
 interface GrowthProgress {
-  /** The stage being worked towards. */
   next: PetStage;
   /** Periods still to finish. 0 means this condition is already met. */
   periods: number;

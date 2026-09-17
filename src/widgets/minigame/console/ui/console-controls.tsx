@@ -110,7 +110,6 @@ const VolumeButton = ConsoleVolumeButton;
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** Cross D-pad for snake / shared console sittings. */
 export const ConsoleDpad = ({
   onPress,
   upLabel,
@@ -165,7 +164,6 @@ export const ConsoleDpad = ({
   );
 };
 
-/** Round A / B face buttons on the shell. */
 export const ConsoleFaceButtons = ({
   primaryLabel,
   onPrimary,

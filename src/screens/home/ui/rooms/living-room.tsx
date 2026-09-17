@@ -23,11 +23,9 @@ interface LivingRoomProps {
    * child as `HomePetCompanion` — this room only keeps the closed box.
    */
   isPetMet: boolean;
-  /** Opens the meeting screen. Only reachable while the box is closed. */
   onOpenBox: () => void;
   /** Toys already bought — drives the shelf hotspot and its menu. */
   ownedToys: readonly CatalogueItem[];
-  /** Opens a playable toy from the shelf menu. */
   onPlayToy: (furnitureId: string) => void;
 }
 

@@ -22,7 +22,6 @@ export const IN_TRAY: Placement = { kind: 'tray' };
 // HELPERS
 // ═══════════════════════════════════════════
 
-/** Drop placements whose ids fall outside the board. */
 export const restorePlacements = (
   placements: Record<number, Placement> | undefined,
   count: number,
@@ -37,7 +36,6 @@ export const restorePlacements = (
   );
 };
 
-/** Build board pieces from tabs + current placements. */
 export const buildPieces = (
   count: number,
   cols: number,
@@ -62,7 +60,6 @@ export const trayOrderOf = (
   shuffleNonce: number,
 ): number[] => shuffleIndices(count, seed + shuffleNonce);
 
-/** Pieces still in the tray, in tray order. */
 export const trayPiecesOf = (
   pieces: readonly BoardPiece[],
   trayOrder: readonly number[],
@@ -236,7 +233,6 @@ export const loosePlacementOf = ({
   };
 };
 
-/** Apply a drop outcome to placements. */
 export const applyDrop = ({
   placements,
   id,

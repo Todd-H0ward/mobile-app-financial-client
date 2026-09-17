@@ -2,11 +2,9 @@
 // TYPES
 // ═══════════════════════════════════════════
 
-/** Arcade game ids — expand as scenes land. */
 type GameId = 'puzzle' | 'spacewar' | 'snake';
 
 interface PayoutInput {
-  /** Which catalogue game paid out. */
   gameId: GameId;
   /**
    * Whether the sitting was answered / finished correctly.

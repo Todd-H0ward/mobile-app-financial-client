@@ -27,10 +27,8 @@ const DEFAULT_ROOM = 'living';
 // TYPES
 // ═══════════════════════════════════════════
 
-/** One room of the map. */
 type RoomId = (typeof ROOM_IDS)[number];
 
-/** Which way the child is walking. */
 type RoomDirection = 'left' | 'right';
 
 export type { RoomDirection, RoomId };

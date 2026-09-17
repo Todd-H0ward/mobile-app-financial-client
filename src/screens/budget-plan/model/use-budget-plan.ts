@@ -23,33 +23,23 @@ import { hapticSuccess } from '@/shared/lib';
 // TYPES
 // ═══════════════════════════════════════════
 
-/** Everything the budget-plan screen reads and calls. */
 interface BudgetPlanController {
   /** Wallet balance at planning time — the ceiling for the plan. */
   available: number;
-  /** Draft plan, coins per direction. */
   plan: BudgetPlan;
   /** Coins not laid out yet. Leaving some is allowed. */
   planLeft: number;
-  /** Whether the confirm button is live. */
   canConfirm: boolean;
   /** True when needs is still zero — confirmation asks before starting. */
   isNeedsEmpty: boolean;
-  /** Whether the needs-zero warning sheet is open. */
   isNeedsWarningVisible: boolean;
   /** True when the wallet is empty — confirm opens the day to earn. */
   isBroke: boolean;
-  /** Sets one direction via the slider. */
   setDirection: (direction: BudgetDirection, value: number) => void;
-  /** Lays one coin into a direction. */
   addCoin: (direction: BudgetDirection) => void;
-  /** Takes one coin back. */
   removeCoin: (direction: BudgetDirection) => void;
-  /** Opens the needs warning when needed, otherwise starts the period. */
   requestConfirm: () => void;
-  /** Closes the needs warning without starting. */
   dismissNeedsWarning: () => void;
-  /** Starts the period despite needs being zero. */
   confirmDespiteNeeds: () => void;
 }
 

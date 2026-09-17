@@ -30,8 +30,7 @@ type OnboardingStepId = (typeof ONBOARDING_STEPS)[number];
 interface OnboardingStepContent {
   /** Which step this is. Exactly one row per `ONBOARDING_STEPS` entry. */
   id: OnboardingStepId;
-  /** Heading of the step, shown in the screen header. */
-  title: string;
+    title: string;
   /** The pet's line. The pet is the only voice in the app, see docs/pet.md. */
   line: string;
 }
@@ -52,10 +51,8 @@ interface DecisionContent {
 interface SortItemContent {
   /** Stable id. The screen keeps progress by id, never by index. */
   id: string;
-  /** What the child reads on the card. */
-  title: string;
-  /** The basket this card belongs to. */
-  direction: BudgetDirection;
+    title: string;
+    direction: BudgetDirection;
   /**
    * What the pet says when the card lands in the wrong basket. A rule, never
    * a verdict: nothing in this app tells a child they were wrong — 2.2, 3.5.
@@ -63,7 +60,6 @@ interface SortItemContent {
   explanation: string;
 }
 
-/** The whole of `content/onboarding.json`. */
 interface OnboardingFile {
   /** Every step, one row per id from `ONBOARDING_STEPS`. */
   steps: OnboardingStepContent[];
