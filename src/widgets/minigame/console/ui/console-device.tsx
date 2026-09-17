@@ -10,9 +10,7 @@ import { useTheme } from '@/shared/hooks';
 // ═══════════════════════════════════════════
 
 interface ConsoleDeviceProps {
-  /** Content drawn inside the LCD well (lobby list or a game field). */
   children: ReactNode;
-  /** Optional row under the screen (D-pad / face buttons). */
   controls?: ReactNode;
   style?: StyleProp<ViewStyle>;
 }
@@ -39,7 +37,6 @@ export const ConsoleDevice = ({
         {
           backgroundColor: theme.arcadeShell,
           borderColor: theme.arcadeShellDeep,
-          // Soft plastic lip under the shell.
           shadowColor: theme.arcadeShellDeep,
         },
         style,

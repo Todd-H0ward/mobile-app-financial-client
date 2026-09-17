@@ -21,7 +21,6 @@ import type { HomeHudCredit, HomeHudGoal, MoodTone } from '../model';
 interface HomeHudStatsProps {
   balance: number;
   savingsTotal: number;
-  /** Opens the savings showcase when the piggy badge is tapped. */
   onOpenSavings?: () => void;
 }
 
@@ -31,7 +30,10 @@ interface HomeHudLastCreditProps {
 }
 
 interface HomeHudMoodProps {
+  /** Mood label — "скучает". */
   label: string;
+  /** Spoken cause — "нечего делать". 2.5.10. */
+  reason: string;
   tone: MoodTone;
 }
 
@@ -39,9 +41,7 @@ interface HomeHudBoardProps {
   goal: HomeHudGoal | null;
   taskTitle: string;
   taskHint: string;
-  /** Opens the savings showcase from the goal row. */
   onOpenSavings?: () => void;
-  /** Opens the tasks showcase / active chore from the task row. */
   onOpenTasks?: () => void;
 }
 
@@ -64,7 +64,6 @@ interface HomeHudEndBannerProps {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** Coins on hand and coins saved — two of the six things 2.5.3 asks for. */
 export const HomeHudStats = ({
   balance,
   savingsTotal,
@@ -110,15 +109,16 @@ export const HomeHudLastCredit = ({ credit }: HomeHudLastCreditProps) => {
 };
 
 /**
- * The pet's state, under the pet: an icon and a line, never a colour alone.
+ * The pet's state under the pet: mood label plus the spoken cause (2.5.10).
  *
  * `tone` only ever picks between the muted reading colour and `warning` —
  * amber, not the red docs/accessibility.md rules out for a low meter — so a
  * pet that is bored or uncomfortable draws the eye without alarming anyone.
  */
-export const HomeHudMood = ({ label, tone }: HomeHudMoodProps) => {
+export const HomeHudMood = ({ label, reason, tone }: HomeHudMoodProps) => {
   const theme = useTheme();
   const isAttention = tone === 'attention';
+  const labelColor = isAttention ? 'warningStrong' : 'textSecondary';
 
   return (
     <View
@@ -128,12 +128,14 @@ export const HomeHudMood = ({ label, tone }: HomeHudMoodProps) => {
       ]}
     >
       <PawIcon size={16} color={isAttention ? theme.warning : undefined} />
-      <Text
-        variant="small"
-        themeColor={isAttention ? 'warningStrong' : 'textSecondary'}
-      >
-        {label}
-      </Text>
+      <View style={styles.moodText}>
+        <Text variant="small" themeColor={labelColor}>
+          {label}
+        </Text>
+        <Text variant="label" themeColor="textSecondary">
+          {reason}
+        </Text>
+      </View>
     </View>
   );
 };
@@ -364,7 +366,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: SPACING.half,
     paddingHorizontal: SPACING.two,
-    paddingVertical: 3,
+    paddingVertical: SPACING.half,
+  },
+  moodText: {
+    gap: 1,
   },
   planBanner: {
     alignItems: 'center',

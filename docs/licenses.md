@@ -29,15 +29,10 @@
 | --- | --- | --- | --- | --- |
 | `assets/images/expo-logo.png` | шаблон Expo | — | **под вопросом** — логотип Expo в продукте не нужен | заменить |
 | `assets/images/logo-glow.png` | шаблон Expo | — | **под вопросом** | заменить |
-| Арт питомца | avatar lab *(кандидат)* | **не проверена** | **не проверено** | 🔴 блокер |
+| Арт питомца | свой код (`entities/pet` — SVG-риг) | своё | да | готово |
 | `assets/images/rooms/*.webp` | сгенерировано командой | своё | да | готово |
 | `assets/images/props/pet-box.png` | сгенерировано командой (мультяшная коробка с дырочками) | своё | да | готово |
 | Иконка приложения 512×512 | не создан | — | — | не начато |
-
-> 🔴 **Проверить лицензию avatar lab до того, как строить на нём арт-пайплайн.**
-> Если лицензия не допускает использование в составе прототипа, весь арт
-> питомца придётся переделывать. Узнать это нужно сейчас, а не на волне 2,
-> когда на источнике будут завязаны девять комбинаций внешности.
 
 Два оставшихся от шаблона PNG — логотипы Expo. В приложении «Лапка» им не место
 независимо от лицензии; они удаляются вместе с `AnimatedIcon` и `SplashOverlay`
@@ -67,8 +62,6 @@ npx license-checker --production --summary
 | react-native-reanimated, gesture-handler, screens, safe-area-context | MIT |
 | zustand | MIT |
 | i18next, react-i18next | MIT |
-| @tanstack/react-query | MIT |
-| axios | MIT |
 | sonner-native | MIT |
 | biome, typescript, vitest | MIT / Apache-2.0 |
 

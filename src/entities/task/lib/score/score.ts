@@ -20,7 +20,6 @@ export const TASK_WRONG_SHARE = 0.5;
 // ═══════════════════════════════════════════
 
 interface TaskScore {
-  /** Whether the child's answer matches the expected one. */
   isCorrect: boolean;
   /** 0…1 passed to `applyCompleteTask`. */
   rewardShare: number;

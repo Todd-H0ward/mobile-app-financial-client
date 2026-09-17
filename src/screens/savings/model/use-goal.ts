@@ -49,7 +49,6 @@ interface GoalController {
   setMaxWithdraw: () => void;
   makeActive: () => void;
   deposit: () => void;
-  /** Opens the dedicated withdraw confirm screen (1.15). */
   requestWithdraw: () => void;
   dismissSheet: () => void;
 }

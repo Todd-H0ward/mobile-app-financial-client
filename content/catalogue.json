@@ -93,6 +93,26 @@
       "note": "Украсят стену. Можно и в следующий период."
     },
     {
+      "id": "window-seal",
+      "title": "Уплотнить окно",
+      "price": 8,
+      "kind": "want",
+      "shop": "furniture",
+      "category": "insulation",
+      "insulationId": "window",
+      "note": "Разовая трата — каждая следующая квитанция за тепло станет меньше."
+    },
+    {
+      "id": "draft-stopper",
+      "title": "Заслон у двери",
+      "price": 12,
+      "kind": "want",
+      "shop": "furniture",
+      "category": "insulation",
+      "insulationId": "draft",
+      "note": "Держит тепло дома. Окупается за несколько периодов при текущем тепле."
+    },
+    {
       "id": "toy-car",
       "title": "Машинка",
       "price": 12,

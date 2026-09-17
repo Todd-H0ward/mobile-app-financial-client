@@ -9,7 +9,6 @@ import { RADII } from '@/shared/constants';
 type ShapeVariant = 'circle' | 'square' | 'diamond' | 'pill' | 'leaf' | 'dome';
 
 interface ShapeProps extends ViewProps {
-  /** Geometry of the placeholder. */
   variant?: ShapeVariant;
   /** Side of the bounding box, in design points. */
   size?: number;

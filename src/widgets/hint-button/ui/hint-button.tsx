@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { getHint, type HintScreenId } from '@/entities/hint';
-import { useIsAnimationEnabled } from '@/entities/settings';
+import { useIsMotionEnabled } from '@/entities/user';
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
@@ -71,12 +71,12 @@ export const HintButton = ({ screen, isPulsing = false }: HintButtonProps) => {
 
   // There is no profile yet during onboarding, and the grown-up's switch is
   // still the authority once there is one — 3.6, weak devices.
-  const isAnimationEnabled = useIsAnimationEnabled();
+  const isMotionEnabled = useIsMotionEnabled();
 
   const scale = useSharedValue(1);
 
   useEffect(() => {
-    if (!isPulsing || !isAnimationEnabled) return;
+    if (!isPulsing || !isMotionEnabled) return;
 
     // Started from the JS thread, as every animation in this app is.
     scale.value = withRepeat(
@@ -92,7 +92,7 @@ export const HintButton = ({ screen, isPulsing = false }: HintButtonProps) => {
       ),
       PULSE_COUNT,
     );
-  }, [isPulsing, isAnimationEnabled, scale]);
+  }, [isPulsing, isMotionEnabled, scale]);
 
   const pulseStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -125,7 +125,7 @@ export const HintButton = ({ screen, isPulsing = false }: HintButtonProps) => {
       <Sheet.Modal
         isVisible={isOpen}
         onClose={() => setIsOpen(false)}
-        isAnimated={isAnimationEnabled}
+        isAnimated={isMotionEnabled}
       >
         <Sheet.Title>{title}</Sheet.Title>
 

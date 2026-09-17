@@ -19,7 +19,10 @@ npx expo start        # затем «a» — Android, «i» — iOS
 | `npm run android` / `npm run ios` | открыть на эмуляторе/симуляторе |
 | `npm run run:android` | нативная отладочная сборка на устройство |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run format` | `biome check --write src` |
+| `npm run lint` | `biome check` (`src` + `plugins`) |
+| `npm run format` | `biome check --write` |
+| `npm run test` | vitest |
+| `npm run test:coverage` | vitest + coverage gates (economy / minigame) |
 | `npm run keystore` | одноразовая генерация ключа подписи |
 | `npm run build:apk` | подписанный релизный APK в `build/` |
 

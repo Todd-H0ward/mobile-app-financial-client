@@ -1,95 +1,108 @@
 # Architecture
 
-The template follows [Feature-Sliced Design](https://feature-sliced.design) adapted
+The app follows [Feature-Sliced Design](https://feature-sliced.design) adapted
 to expo-router: `src/app` is reserved by the router, so the FSD *app* layer lives
 in `src/_app`, and FSD *pages* are called `screens`.
+
+Working rules for agents and contributors live in [AGENTS.md](../AGENTS.md).
+This file is the map of what is actually in the tree.
 
 ## Layers
 
 ```
 src/
-├── app/                    # expo-router routes (thin re-exports)
-│   ├── _layout.tsx         # providers + navigation
-│   ├── index.tsx           # → screens/home
-│   └── explore.tsx         # → screens/explore
+├── app/                      # expo-router routes ONLY — thin re-exports
+│   ├── _layout.tsx           # Providers + root Stack
+│   ├── index.tsx             # → screens/entry
+│   ├── home.tsx
+│   ├── heating.tsx
+│   ├── onboarding.tsx
+│   ├── pet-create.tsx
+│   ├── pet-grew.tsx
+│   ├── budget-plan.tsx
+│   ├── end-period.tsx
+│   ├── period-summary.tsx
+│   ├── recovery.tsx
+│   ├── shop/ · savings/ · tasks/ · games/
+│   ├── history.tsx · glossary.tsx
+│   ├── settings.tsx · parents.tsx · ui-kit.tsx
+│   └── …
 ├── _app/
-│   └── providers/          # ThemeProvider, QueryProvider, global init
+│   └── providers/            # Theme, Query, i18n, feedback, time, …
 ├── screens/
-│   ├── entry/              # куда пускать на старте: /home или /onboarding
-│   ├── onboarding/         # знакомство, три типа решений, профиль (2.5.1)
-│   │   ├── model/          # шаги, сортировка, репетиция плана, имя
-│   │   ├── lib/            # вид трёх направлений (цвет + фигура)
-│   │   └── ui/steps/       # greeting / sorting / coins / plan / name
-│   ├── budget-plan/        # план по трём направлениям (2.5.5)
-│   ├── period-summary/     # план vs факт (2.5.5)
-│   ├── recovery/           # путь восстановления после периода (2.5.9)
-│   ├── shop/               # каталог покупок (2.5.6)
-│   ├── savings/            # цели и копилка (2.5.7)
-│   ├── tasks/              # задания (2.5.8)
-│   ├── history/            # история и итоги (2.5.11)
-│   ├── glossary/           # справочник терминов (2.5.11)
-│   ├── parents/            # раздел для взрослого (2.5.12)
-│   ├── ui-kit/             # витрина дизайн-системы
-│   ├── home/
-│   │   ├── index.ts        # public API
-│   │   ├── ui/home-screen.tsx
-│   │   └── lib/get-dev-menu-hint.tsx
-│   └── explore/
-│       ├── index.ts
-│       └── ui/explore-screen.tsx
+│   ├── entry/                # / → /home or /onboarding
+│   ├── home/                 # три комнаты + HUD (2.5.3)
+│   ├── heating/              # термостат, квитанция, утепление (house.md)
+│   ├── onboarding/           # знакомство, три типа решений (2.5.1)
+│   ├── pet-create/           # встреча с питомцем (2.5.2)
+│   ├── pet-grew/             # разовая сцена роста (2.5.10)
+│   ├── budget-plan/          # план по трём направлениям (2.5.5)
+│   ├── end-period/           # мягкое подтверждение конца дня
+│   ├── period-summary/       # план vs факт (2.5.5)
+│   ├── recovery/             # путь после периода (2.5.9)
+│   ├── shop/                 # каталог покупок (2.5.6)
+│   ├── savings/              # цели и копилка (2.5.7)
+│   ├── tasks/                # задания (2.5.8)
+│   ├── games/                # аркада за chores
+│   ├── history/ · glossary/  # 2.5.11
+│   ├── settings/ · parents/  # ребёнок / взрослый (2.5.12)
+│   └── ui-kit/               # витрина дизайн-системы
 ├── widgets/
-│   ├── app-tabs.tsx        # native bottom tabs
-│   └── hint-button/        # «?» в шапке любого экрана (2.5.1)
+│   ├── room-pager/           # street ↔ living ↔ kitchen
+│   ├── hint-button/          # «?» в шапке (2.5.1)
+│   ├── pet-box/ · plan-fact-bars/ · direction-look/
+│   └── minigame/             # сцены аркады
 ├── features/
-│   ├── demo-mode/          # тестовый профиль + 5 периодов подряд (2.5.13)
-│   ├── profile-restart/    # удаление профиля и знакомство заново (2.5.12)
-│   └── feedback/           # «что изменилось и почему» после действия (2.5.9)
+│   ├── demo-mode/            # тестовый профиль + 5 периодов (2.5.13)
+│   ├── profile-restart/      # удаление профиля (2.5.12)
+│   ├── feedback/             # «что изменилось и почему» (2.5.9)
+│   ├── change-language/
+│   └── games/                # вход в аркаду / лимиты сидений
 ├── entities/
-│   ├── user/               # сейв целиком, миграции, сброс и удаление
-│   ├── onboarding/         # контент знакомства + правила сортировки (2.5.1)
-│   ├── hint/               # подсказки по экранам из content/hints.json
-│   ├── economy/            # числа экономики и три направления бюджета
-│   ├── period/             # конечный автомат периода + TimeSource
-│   ├── budget/             # план, факт, сравнение
-│   ├── wallet/             # баланс, история, запрет минуса
-│   ├── savings/            # цели и копилка
-│   ├── catalogue/          # каталог покупок из content/
-│   ├── task/               # движок заданий из content/
-│   ├── glossary/           # справочник терминов из content/glossary.json (2.5.11)
-│   ├── pet/                # внешность, черты, состояния, рост
-│   ├── home/               # отопление, квитанция, утепление
-│   └── settings/           # что настраивает взрослый
+│   ├── user/                 # сейв целиком, кошелёк, период, покупки, демо
+│   ├── pet/                  # внешность, mood, рост, traits, ui/
+│   ├── economy/              # таблица баланса (лист)
+│   ├── budget/               # план, факт, compare, recovery tips
+│   ├── catalogue/ · goal/ · task/ · glossary/ · onboarding/ · hint/
+│   ├── room/                 # ROOM_IDS, слоты мебели
+│   ├── savings/              # прогресс копилки, explain withdraw
+│   ├── settings/             # барьер взрослых (лист: только gate, без store)
+│   └── minigame/             # правила аркады
 └── shared/
-    ├── api/                # axios instance + react-query client
-    ├── constants/          # theme tokens, storage keys, app version
-    ├── hooks/              # useTheme, useColorScheme, useAppLanguage, …
-    ├── utils/              # чистые хелперы (clamp, formatMoney)
-    ├── i18n/               # i18next config + locales
-    ├── model/              # device preferences (theme, language)
-    ├── types/              # cross-cutting types
-    └── ui/                 # design-system components
+    ├── constants/            # theme, routes, storage keys
+    ├── hooks/ · utils/ · lib/
+    ├── i18n/ · model/ · types/
+    └── ui/                   # design-system components
 ```
 
 Import direction is strictly downwards:
 `app → _app → screens → widgets → features → entities → shared`.
-Biome's `organizeImports` groups imports in exactly that order, so a misplaced
-import is visible in the diff.
+Biome's `organizeImports` groups imports in that order (`biome.json`), so a
+misplaced import is visible in the diff.
+
+Wallet, period machine and heating bill live under `entities/user/lib/`
+(`wallet`, `period`, `purchase`, …) — there is no separate `entities/wallet` or
+`entities/heating`. Heating *UI* is `screens/heating`.
 
 ## Adding a screen
 
 1. `src/screens/<name>/ui/<name>-screen.tsx` — the component.
 2. `src/screens/<name>/index.ts` — `export { <Name>Screen } from './ui/<name>-screen';`
 3. `src/app/<name>.tsx` — `import { <Name>Screen } from '@/screens/<name>'; export default <Name>Screen;`
-4. Register the tab in [`src/widgets/app-tabs.tsx`](../src/widgets/app-tabs.tsx) if
-   it belongs to the tab bar (`name` must match the route file name).
+4. Add a row to `STATIC_ROUTES` / `DYNAMIC_ROUTES` when the screen is reached by
+   name, and a hint id in `HINT_SCREENS` + `content/hints.json` (2.5.1).
+
+There is **no tab bar**. Navigation is a root `Stack`: `/home` holds the three
+rooms (`widgets/room-pager`); everything else is pushed over the world. See
+[AGENTS.md](../AGENTS.md#navigation-three-rooms-everything-else-on-the-stack).
 
 A module that has a test is a folder: `rules.ts` and `rules.test.ts` live in
 `rules/` beside an `index.ts` that re-exports the public API, and callers import
 the folder. Adding a test then never touches a single call site.
 
-Screen-local state goes to `model/` (a zustand store or hooks), screen-local pure
-helpers to `lib/`, screen-local requests to `api/`. Anything a second screen needs
-moves down a layer.
+Screen-local state goes to `model/` (hooks or a zustand store), screen-local
+pure helpers to `lib/`, screen-local requests to `api/`. Anything a second
+screen needs moves down a layer.
 
 ## Adding a shared UI component
 
@@ -116,8 +129,8 @@ falls back to the device. Both device preferences — `themePreference` and
 code that obeys them (`useColorScheme`, `useAppLanguage`), and not in an entity:
 `shared` cannot import upwards, so a preference stored above it could only be
 read by copying it, which is how two sources of truth start.
-`entities/settings` holds what the grown-ups control — pin, difficulty,
-confirmation, chat, notifications.
+`entities/settings` holds what the grown-ups control (arithmetic gate, …).
+Child-facing sound / motion switches live on `/settings` and on the user save.
 
 ## Вёрстка под разные размеры
 
@@ -134,41 +147,33 @@ confirmation, chat, notifications.
   единственное место, где носитель выбирается, — `shared/model/persist-storage`.
 - Учебный контент лежит в `content/*.json` и отделён от кода — требование
   2.5.14, см. [content.md](./content.md). Импортируется по алиасу
-  `@/content/*` (`tsconfig.json`), сейв хранит только id позиций
-  (прогресс заданий появится позже; тексты остаются в JSON).
+  `@/content/*` (`tsconfig.json`); сейв хранит только id позиций.
 - Числа экономики — в `entities/economy` (`balance.ts`): стартовый кошелёк,
-  награды за задания, бонус регулярности, лимит истории. Экраны числа не
-  правят. Там же `directions.ts` — три направления бюджета: они нужны и
-  онбордингу, и экрану плана, и каталогу, то есть всем, кому сейв не нужен,
-  поэтому лежат в листовой сущности, а не рядом с сейвом.
-- Онбординг и подсказки читают свой контент так же, как цели и задания:
-  `entities/onboarding` валидирует `content/onboarding.json`,
-  `entities/hint` — `content/hints.json`. Битая строка падает в тестах, а не
-  на первом экране ребёнка.
-- Каталог заданий читает `entities/task` из `content/tasks.json` по типу
-  механики; седьмое задание того же типа — строка в JSON без правки `.tsx`.
-- `shared/api/api-client.ts` — axios instance, base URL from
-  `EXPO_PUBLIC_API_URL`, 40s timeout.
-- `shared/api/query-client.ts` — TanStack Query defaults (60s `staleTime`,
-  one retry, no refetch on focus).
-- Requests belong to the slice that owns the data: `entities/<entity>/api/*` for
-  entity CRUD, `screens/<screen>/api/*` for screen-specific queries.
-- `_app/providers` mounts `QueryClientProvider`; add new providers there.
+  награды за задания, бонус регулярности, отопление (`HEATING`), лимит
+  истории. Экраны числа не правят. Там же `directions.ts` — три направления
+  бюджета (листовая сущность).
+- Контентные сущности валидируют JSON при загрузке модуля:
+  `onboarding`, `hint`, `task`, `goal`, `catalogue`, `glossary`. Битая строка
+  падает в тестах, а не на первом экране ребёнка.
+- Сетевого слоя нет: игровой цикл офлайн ([privacy.md](./privacy.md)).
+  `shared/api`, axios и TanStack Query удалены — не заготовка, а сознательный
+  отказ. Если появится синхронизация, слой поднимают заново вместе с бумагами
+  по 152-ФЗ.
+- `_app/providers` монтирует жесты, safe area, TimeSource, feedback и a11y.
 
 ## i18n
 
 `shared/i18n` initializes i18next with `en` / `ru` bundles and resolves the
 language from the device locale unless the user picked one
-(`entities/settings` → `languagePreference`, persisted under
-`STORAGE_KEYS.LANGUAGE`). Use `useTranslation()` in components; keep keys in
-`shared/i18n/locales/*.json`.
+(`shared/model/preferences` → `languagePreference`). Use `useTranslation()` in
+components; keep keys in `shared/i18n/locales/*.json`.
 
 ## Navigation
 
-The tabs live in `src/app/(tabs)/` behind a `Stack` in the root layout, so the
-parents' section can be pushed over them. `widgets/app-tabs.tsx` uses the stable
-`Tabs` navigator — the native one crashes the app on iOS, see
-[AGENTS.md](../AGENTS.md#native-tabs-are-off--the-stable-navigator-is-used-instead).
+Root layout is a `Stack` (`src/app/_layout.tsx`). There is no `(tabs)` group and
+no `app-tabs` widget: the world is `/home` + `widgets/room-pager`. Native tabs
+were tried and abandoned — they abort iOS in Expo Go; details in
+[AGENTS.md](../AGENTS.md#native-tabs-are-off--do-not-bring-them-back).
 
 ## React Compiler
 
@@ -179,11 +184,23 @@ Reanimated worklets in this project — the details and the symptom are in
 ## Checks
 
 ```bash
-npx tsc --noEmit          # types
-npx biome check --write src   # lint + format + import order
-pnpm test                 # vitest, чистая логика и сторы
+pnpm lint                 # biome check (src + plugins)
+pnpm format               # biome check --write
+pnpm typecheck            # tsc --noEmit
+pnpm test                 # vitest
+pnpm test:coverage        # vitest + thresholds on economy / minigame
 npx expo start            # run
 ```
+
+Lint **is** Biome — `package.json` → `"lint": "biome check"`, scope in
+`biome.json` → `files.includes` (`src/**`, `plugins/**`). Import groups follow
+FSD: `app` → `_app` → `screens` → `widgets` → `features` → `entities` →
+`shared` (no `@/pages`). There is no ESLint / `expo lint` / `reset-project`.
+
+CI (`.github/workflows/ci.yml`) runs typecheck, `pnpm test:coverage` (economy +
+minigame thresholds and i18n en↔ru key parity), and `pnpm lint` with
+`contents: read`. A separate `autofix` job has `contents: write` only on
+same-repo PRs to push Biome fixes.
 
 Тесты бегут в node, без React Native: `vitest.config.mts` повторяет алиасы
 `tsconfig.json` и больше ничего не делает. Всё, что тянет RN, подменяется

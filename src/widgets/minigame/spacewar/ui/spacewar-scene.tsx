@@ -47,9 +47,6 @@ const SHELL_INSET = SPACING.five * 2 + SPACING.three * 2;
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Spacewar on the handheld LCD — textured ship / targets, raised face buttons.
- */
 export const SpacewarScene = ({ onComplete }: SpacewarSceneProps) => {
   const theme = useTheme();
   const { t } = useTranslation();

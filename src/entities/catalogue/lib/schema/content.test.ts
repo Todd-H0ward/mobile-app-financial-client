@@ -60,6 +60,14 @@ describe('content/catalogue.json', () => {
     }
   });
 
+  it('stocks at least one insulation upgrade — house.md payback needs it', () => {
+    const insulation = listCatalogue().filter((item) => item.insulationId);
+    expect(insulation.length).toBeGreaterThan(0);
+    for (const item of insulation) {
+      expect(item.insulationId).toBeTruthy();
+    }
+  });
+
   it('lists toys unlocked by furniture ids', () => {
     expect(listOwnedToys([])).toEqual([]);
     const owned = listOwnedToys([

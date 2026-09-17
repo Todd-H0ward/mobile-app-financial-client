@@ -27,7 +27,6 @@ interface OverlayOrigin {
 interface UsePieceDragOptions {
   cols: number;
   getLayout: () => BoardLayout | null;
-  /** Latest measured body for a piece id (tray or loose/slot). */
   getBody: (id: number) => PieceBody | null;
   /**
    * Window origin of the ghost overlay. Hit-testing stays in window space;

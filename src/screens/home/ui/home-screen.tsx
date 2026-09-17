@@ -160,6 +160,7 @@ export const HomeScreen = () => {
           <LivingRoom
             isPetMet={hud.pet !== null}
             onOpenBox={() => router.push(STATIC_ROUTES.PET_CREATE)}
+            onOpenHeating={() => router.push(STATIC_ROUTES.HEATING)}
             ownedToys={ownedToys}
             onPlayToy={playToy}
           />
@@ -197,9 +198,7 @@ export const HomeScreen = () => {
           </View>
         </View>
         <View pointerEvents="none">
-          {!hud.isPlanning && !hud.isActive ? (
-            <HomeHudLastCredit credit={hud.lastCredit} />
-          ) : null}
+          <HomeHudLastCredit credit={hud.lastCredit} />
         </View>
         {hud.isPlanning && (
           <HomeHudPlanBanner

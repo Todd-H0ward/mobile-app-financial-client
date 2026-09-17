@@ -1,11 +1,10 @@
 import {
   BUDGET_DIRECTIONS,
   PERIOD_HISTORY_LIMIT,
-  PERIOD_NEED_DECAY,
   REGULARITY_BONUS,
   WALLET_SOURCES,
 } from '@/entities/economy';
-import { type GrowthFacts, growPet } from '@/entities/pet';
+import { type GrowthFacts, growPet, needDecayFor } from '@/entities/pet';
 import { nextTaskId } from '@/entities/task';
 
 import { clamp } from '@/shared/utils';
@@ -214,8 +213,9 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
         })
       : working.wallet;
 
-  const comfort = clamp(working.pet.comfort - PERIOD_NEED_DECAY.comfort, 0, 1);
-  const spirit = clamp(working.pet.spirit - PERIOD_NEED_DECAY.spirit, 0, 1);
+  const decay = needDecayFor(working.pet.traitIds);
+  const comfort = clamp(working.pet.comfort - decay.comfort, 0, 1);
+  const spirit = clamp(working.pet.spirit - decay.spirit, 0, 1);
 
   return {
     ...working,

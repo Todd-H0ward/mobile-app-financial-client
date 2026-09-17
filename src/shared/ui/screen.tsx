@@ -65,7 +65,6 @@ interface ScreenHeaderProps {
   style?: StyleProp<ViewStyle>;
 }
 
-/** The title and subtitle together — the part that takes the free width. */
 interface ScreenHeadingProps {
   children?: ReactNode;
   style?: StyleProp<ViewStyle>;

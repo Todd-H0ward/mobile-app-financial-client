@@ -25,7 +25,6 @@ export const useProfileRestart = () => {
   const deleteUser = useDeleteUser();
 
   return {
-    /** Whether there is anything to delete. */
     hasProfile: user !== null,
     /** Name shown in the confirmation, so it is clear whose profile goes. */
     playerName: user?.playerName ?? '',

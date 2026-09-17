@@ -29,9 +29,6 @@ import { formatMoney } from '@/shared/utils';
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Spacewar sitting: records + Start on the LCD, then the shoot-out.
- */
 export const SpacewarScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();

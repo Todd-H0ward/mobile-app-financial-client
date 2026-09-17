@@ -41,6 +41,7 @@ export {
 } from './look';
 export type { PetCoatPalette } from './palette';
 export { PET_INK, PET_PALETTE } from './palette';
+export type { TraitContent, TraitsFile } from './trait';
 export type {
   PetAnchor,
   PetAnchors,

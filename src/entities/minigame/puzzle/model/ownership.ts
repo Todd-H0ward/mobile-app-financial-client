@@ -19,6 +19,5 @@ export const isPuzzleOwned = (
   puzzleId: string,
 ): boolean => furnitureIds.includes(puzzleId);
 
-/** Whether the living-room shelf should show a hotspot. */
 export const hasOwnedPuzzles = (furnitureIds: readonly string[]): boolean =>
   ownedPuzzles(furnitureIds).length > 0;

@@ -8,7 +8,6 @@ import { VIEW_BOX } from '../rig';
 
 /** Which color each part of the skeleton is painted with. */
 interface PetFills {
-  /** The body. */
   body: string;
   /** The belly patch over it. */
   belly: string;

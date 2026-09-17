@@ -17,7 +17,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { useIsAnimationEnabled } from '@/entities/settings';
+import { useIsMotionEnabled } from '@/entities/user';
 
 import { SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
@@ -28,7 +28,6 @@ import { Text } from '@/shared/ui';
 // ═══════════════════════════════════════════
 
 interface PetBoxProps {
-  /** Opens whatever comes next — the meeting screen. */
   onPress: () => void;
   /** Side of the box art, in design points. */
   size?: number;
@@ -57,7 +56,6 @@ const DEFAULT_SIZE = 196;
 /** How far the carton rocks, in degrees. Small: something stirs, nothing bangs. */
 const ROCK_ANGLE = 2.2;
 
-/** One way of the rock. */
 const ROCK_DURATION = 900;
 
 /** Quiet between two rocks, so the box is not shaking non-stop. */
@@ -94,21 +92,18 @@ export const PetBox = ({
   const { t } = useTranslation();
   const boxLabel = label ?? t('home.petBoxLabel');
 
-  // There is no profile during onboarding, and the grown-up's switch is the
-  // authority once there is one — 3.6, weak devices.
-  const isAnimationEnabled = useIsAnimationEnabled();
+  const isMotionEnabled = useIsMotionEnabled();
 
   const rock = useSharedValue(0);
   const press = useSharedValue(1);
   const pulse = useSharedValue(1);
 
   useEffect(() => {
-    if (!isAnimationEnabled) {
+    if (!isMotionEnabled) {
       rock.value = 0;
       return;
     }
 
-    // Started from the JS thread, as every animation in this app is.
     rock.value = withRepeat(
       withSequence(
         withTiming(-1, {
@@ -127,10 +122,10 @@ export const PetBox = ({
       ),
       -1,
     );
-  }, [isAnimationEnabled, rock]);
+  }, [isMotionEnabled, rock]);
 
   useEffect(() => {
-    if (!isPulsing || !isAnimationEnabled) {
+    if (!isPulsing || !isMotionEnabled) {
       pulse.value = 1;
       return;
     }
@@ -148,7 +143,7 @@ export const PetBox = ({
       ),
       PULSE_COUNT,
     );
-  }, [isAnimationEnabled, isPulsing, pulse]);
+  }, [isMotionEnabled, isPulsing, pulse]);
 
   const boxStyle = useAnimatedStyle(() => ({
     transform: [

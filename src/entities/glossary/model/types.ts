@@ -6,7 +6,6 @@
 interface GlossaryTerm {
   /** Stable id. Hints may point here via `termIds` — 3.2. */
   id: string;
-  /** Short name in the list. */
   title: string;
   /** Explanation the child reads. Plain language, no jargon. */
   definition: string;

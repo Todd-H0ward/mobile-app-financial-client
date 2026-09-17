@@ -25,6 +25,7 @@ import Animated, {
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useMotionEnabled } from '@/shared/model';
 
 import { Text, type TextProps } from './text';
 
@@ -133,13 +134,15 @@ const SheetModal = ({
   style,
 }: SheetModalProps) => {
   const theme = useTheme();
+  const isMotionEnabled = useMotionEnabled();
   const { height: windowHeight } = useWindowDimensions();
   const offset = useSharedValue(windowHeight);
   const sheetHeight = useSharedValue(windowHeight);
   const screenHeight = useSharedValue(windowHeight);
 
-  const openMs = isAnimated ? OPEN_DURATION : 0;
-  const closeMs = isAnimated ? CLOSE_DURATION : 0;
+  const shouldAnimate = isAnimated && isMotionEnabled;
+  const openMs = shouldAnimate ? OPEN_DURATION : 0;
+  const closeMs = shouldAnimate ? CLOSE_DURATION : 0;
 
   useEffect(() => {
     screenHeight.value = windowHeight;

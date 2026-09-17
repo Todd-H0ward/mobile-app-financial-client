@@ -6,14 +6,11 @@ import {
   explainSummary,
   type SummaryExplain,
 } from '@/entities/budget';
-import {
-  type GateChallenge,
-  makeGateChallenge,
-  useIsParentGateEnabled,
-} from '@/entities/settings';
+import { type GateChallenge, makeGateChallenge } from '@/entities/settings';
 import {
   buildParentsReport,
   type ParentsReport,
+  useIsParentGateEnabled,
   useUser,
 } from '@/entities/user';
 
@@ -21,13 +18,10 @@ import {
 // TYPES
 // ═══════════════════════════════════════════
 
-/** Everything the grown-up's screen reads and calls. */
 interface ParentsController {
-  /** Whether the barrier still stands in front of the section. */
   isLocked: boolean;
   /** The question on the barrier. Replaced after every wrong answer. */
   challenge: GateChallenge;
-  /** Opens the section. */
   unlock: () => void;
   /** Hands out a fresh question — a wrong answer never locks anything. */
   refreshChallenge: () => void;

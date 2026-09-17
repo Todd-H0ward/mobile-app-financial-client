@@ -1,8 +1,8 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 
-import { STATIC_ROUTES } from '@/shared/constants';
-
 import { ShopRouteScreen } from '@/screens/shop';
+
+import { STATIC_ROUTES } from '@/shared/constants';
 
 const ShopRoute = () => {
   const { shopId } = useLocalSearchParams<{ shopId: string }>();

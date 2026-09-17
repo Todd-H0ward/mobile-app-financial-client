@@ -1,8 +1,8 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 
-import { STATIC_ROUTES } from '@/shared/constants';
-
 import { WithdrawRouteScreen } from '@/screens/savings';
+
+import { STATIC_ROUTES } from '@/shared/constants';
 
 /** First value when expo-router hands an array for a query / segment. */
 const asString = (value: string | string[] | undefined): string | null => {

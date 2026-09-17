@@ -7,8 +7,9 @@ exactly — it describes how this template is structured and why.
 
 Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before
 writing any code. Do not rely on memory for Expo / expo-router APIs: this project
-runs Expo SDK 57, React 19, React Native 0.86 and expo-router 57 (native tabs,
-`Keyframe` animations from `react-native-reanimated` 4, `react-native-worklets`).
+runs Expo SDK 57, React 19, React Native 0.86 and expo-router 57
+(`Keyframe` animations from `react-native-reanimated` 4,
+`react-native-worklets`). Native tabs are **not** used — see below.
 
 ## Stack
 
@@ -16,11 +17,11 @@ runs Expo SDK 57, React 19, React Native 0.86 and expo-router 57 (native tabs,
 | --- | --- |
 | Runtime | Expo SDK 57, React Native 0.86, React 19 |
 | Routing | expo-router (file-based, `src/app`) |
-| Server state | TanStack Query + axios (`@/shared/api`) |
+| Server state | **нет** — офлайн-игра, сейв локальный; axios / TanStack Query убраны |
 | Client state | zustand + `persist` поверх `expo-sqlite/kv-store`, синхронно (`@/entities/*/model`) |
 | Game loop | game periods, not real time — [docs/game-period.md](docs/game-period.md) |
 | i18n | i18next + react-i18next (`@/shared/i18n`) |
-| Lint / format | Biome (`npx biome check --write src`) |
+| Lint / format | Biome (`pnpm lint` / `pnpm format`) |
 | Types | TypeScript strict (`npx tsc --noEmit`) |
 
 ## Architecture: Feature-Sliced Design
@@ -33,7 +34,7 @@ src/
 ├── _app/       # FSD "app" layer: providers, global init
 ├── screens/    # screen slices (FSD "pages")
 ├── widgets/    # composite blocks reused by several screens
-├── features/   # user actions that cross slices (purchase, savings-jar, …)
+├── features/   # user actions that cross slices (feedback, demo-mode, …)
 ├── entities/   # business entities: model + api + ui
 └── shared/     # framework-agnostic reusable code
 ```
@@ -65,9 +66,9 @@ Rules:
    folder makes the tested surface obvious.
 
 ```
-entities/wallet/lib/rules/
-├── rules.ts
-├── rules.test.ts
+entities/budget/lib/compare/
+├── compare.ts
+├── compare.test.ts
 └── index.ts
 ```
 5. **Inside a slice** import relatively (`../lib`, `./text`); **across slices and
@@ -76,11 +77,13 @@ entities/wallet/lib/rules/
    screens need the same block, it belongs in `widgets/` or `shared/ui`.
    The one carve-out is inside `entities/`: a slice may import another entity's
    public API when that entity is a **leaf** — no state, no store, no imports of
-   its own from the layer. `entities/economy` (the balance table) and
-   `entities/goal` / `entities/task` (validated content catalogues) are those
-   leaves. The rule that does not bend: a slice never **re-exports** another
-   slice's API. `STARTING_BALANCE` is imported from `@/entities/economy` by
-   everyone who needs it, never through `@/entities/user`.
+   its own from the layer. `entities/economy` (the balance table),
+   `entities/goal` / `entities/task` / `entities/catalogue` / `entities/glossary`
+   / `entities/hint` / `entities/onboarding` (validated content) and
+   `entities/settings` (parent-gate math only — `SettingsSave` switches live on
+   `entities/user`) are those leaves. The rule that does not bend: a slice never
+   **re-exports** another slice's API. `STARTING_BALANCE` is imported from
+   `@/entities/economy` by everyone who needs it, never through `@/entities/user`.
 7. `shared/` knows nothing about the domain. No entity types, no feature logic.
 
 ## Component file conventions
@@ -271,20 +274,22 @@ greyed-out button.
 Adding a room is a row in `ROOM_IDS`, an image in `assets/images/rooms/` and a
 `<RoomPager.Room>` in the screen — in that tuple's order, which is the map.
 
-## Native tabs are off — the stable navigator is used instead
+## Native tabs are off — do not bring them back
 
-`widgets/app-tabs.tsx` uses expo-router's **stable** `Tabs`, not
-`expo-router/unstable-native-tabs`.
+There is **no tab bar and no `app-tabs` widget**. Navigation is a root `Stack`
+plus the room pager on `/home` (see above).
 
-The native one aborted the process on iOS in Expo Go: a throw inside the
-worklets runtime (`AnimationFrameBatchinator::flush` → `WorkletRuntime::runSync`)
-with no red screen and no JS stack. From the outside it looks like a hung
-simulator — `simctl openurl … exited with non-zero code: 60` — which is what
-made it expensive to find. It was isolated by bisecting the tree: `Providers` +
-`<Slot />` was stable, `Providers` + `<AppTabs />` crashed every launch.
+`expo-router/unstable-native-tabs` was tried earlier and aborted the process on
+iOS in Expo Go: a throw inside the worklets runtime
+(`AnimationFrameBatchinator::flush` → `WorkletRuntime::runSync`) with no red
+screen and no JS stack. From the outside it looks like a hung simulator —
+`simctl openurl … exited with non-zero code: 60`. It was isolated by bisecting
+the tree: `Providers` + `<Slot />` was stable, `Providers` + native tabs
+crashed every launch.
 
-Revisit when native tabs leave "unstable". If you try them again, watch
-`~/Library/Logs/DiagnosticReports` rather than the Metro output.
+Revisit only when native tabs leave "unstable". If you try them again, watch
+`~/Library/Logs/DiagnosticReports` rather than the Metro output — and do not
+reintroduce a tab bar as the child's main map; rooms stay the map.
 
 ## React Compiler is off — and must stay off
 
@@ -369,9 +374,10 @@ Full rationale: [docs/layout.md](docs/layout.md).
 2. Put the code in the lowest layer that can own it (`shared` → `entities` →
    `features` → `widgets` → `screens`).
 3. Export it through the slice `index.ts`.
-4. Run `npx tsc --noEmit`, `pnpm test` and `npx biome check --write src` before
-   finishing.
+4. Run `pnpm typecheck`, `pnpm test` and `pnpm format` before finishing.
 5. Never edit `src/app/*` to add UI — add a screen and re-export it.
+6. Do not resurrect `reset-project` or switch lint back to `expo lint` / ESLint
+   — lint is Biome (`pnpm lint`), scoped to `src/**` and `plugins/**`.
 
 ## Do not
 

@@ -1,12 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
-import {
-  AccessibilityInfo,
-  type StyleProp,
-  StyleSheet,
-  View,
-  type ViewStyle,
-} from 'react-native';
+import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedProps,
@@ -24,6 +18,7 @@ import Svg, {
 } from 'react-native-svg';
 
 import { useTheme } from '@/shared/hooks';
+import { useMotionEnabled } from '@/shared/model';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -32,10 +27,7 @@ import { useTheme } from '@/shared/hooks';
 interface CoinProps {
   /** Diameter in design points. */
   size?: number;
-  /**
-   * Runs a soft shimmer across the face. Off when the system asks for
-   * reduced motion.
-   */
+  /** Soft shimmer when active; respects motion settings. */
   isActive?: boolean;
   style?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
@@ -47,7 +39,6 @@ interface CoinProps {
 
 const DEFAULT_SIZE = 28;
 
-/** How many reed marks around the rim — enough to read as a milled edge. */
 const REED_COUNT = 28;
 
 const SHIMMER_MS = 1600;
@@ -77,11 +68,7 @@ const reedLines = (cx: number, cy: number, outer: number, inner: number) => {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * A tactile coin: milled rim, soft shadow, optional shimmer when active.
- *
- * Money is always shown as coins, never as roubles — see design-system.md.
- */
+/** Money is always coins, never roubles — design-system.md. */
 export const Coin = ({
   size = DEFAULT_SIZE,
   isActive = false,
@@ -89,7 +76,7 @@ export const Coin = ({
   accessibilityLabel,
 }: CoinProps) => {
   const theme = useTheme();
-  const [isReduceMotion, setIsReduceMotion] = useState(false);
+  const isMotionEnabled = useMotionEnabled();
   const shimmer = useSharedValue(0.15);
 
   const vb = 48;
@@ -98,22 +85,7 @@ export const Coin = ({
   const reeds = useMemo(() => reedLines(cx, cy, 22.2, 19.4), []);
 
   useEffect(() => {
-    let mounted = true;
-    AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
-      if (mounted) setIsReduceMotion(enabled);
-    });
-    const sub = AccessibilityInfo.addEventListener(
-      'reduceMotionChanged',
-      setIsReduceMotion,
-    );
-    return () => {
-      mounted = false;
-      sub.remove();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isActive || isReduceMotion) {
+    if (!isActive || !isMotionEnabled) {
       shimmer.value = 0.2;
       return;
     }
@@ -125,7 +97,7 @@ export const Coin = ({
       -1,
       true,
     );
-  }, [isActive, isReduceMotion, shimmer]);
+  }, [isActive, isMotionEnabled, shimmer]);
 
   const highlightProps = useAnimatedProps(() => ({
     opacity: shimmer.value,
@@ -153,7 +125,6 @@ export const Coin = ({
           </LinearGradient>
         </Defs>
 
-        {/* Soft under-disc for depth */}
         <Circle
           cx={cx}
           cy={cy + 1.2}
@@ -162,7 +133,6 @@ export const Coin = ({
           opacity={0.35}
         />
 
-        {/* Face */}
         <Circle cx={cx} cy={cy} r={21} fill="url(#coinFace)" />
         <Circle
           cx={cx}
@@ -173,7 +143,6 @@ export const Coin = ({
           strokeWidth={1.6}
         />
 
-        {/* Reeded edge */}
         <G
           stroke={theme.coinBorder}
           strokeWidth={1.1}
@@ -191,7 +160,6 @@ export const Coin = ({
           ))}
         </G>
 
-        {/* Inner ring */}
         <Circle
           cx={cx}
           cy={cy}
@@ -202,10 +170,8 @@ export const Coin = ({
           opacity={0.7}
         />
 
-        {/* Static catch-light */}
         <Circle cx={16} cy={15} r={5.5} fill="#FFFFFF" opacity={0.35} />
 
-        {/* Animated shimmer blob */}
         <AnimatedCircle
           cx={28}
           cy={18}

@@ -19,7 +19,6 @@ interface ArcadeScoresSave {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** How many rows the LCD table keeps per game. */
 export const ARCADE_SCORE_LIMIT = 5;
 
 export const EMPTY_ARCADE_SCORES: ArcadeScoresSave = {
@@ -40,10 +39,10 @@ export const recordSnakeScore = (
   apples: number,
 ): number[] => {
   if (!Number.isFinite(apples) || apples <= 0) return [...scores];
-  const next = [...scores, Math.floor(apples)]
+
+  return [...scores, Math.floor(apples)]
     .sort((a, b) => b - a)
     .slice(0, ARCADE_SCORE_LIMIT);
-  return next;
 };
 
 /**
@@ -55,13 +54,12 @@ export const recordSpacewarTime = (
   elapsedMs: number,
 ): number[] => {
   if (!Number.isFinite(elapsedMs) || elapsedMs <= 0) return [...timesMs];
-  const next = [...timesMs, Math.floor(elapsedMs)]
+
+  return [...timesMs, Math.floor(elapsedMs)]
     .sort((a, b) => a - b)
     .slice(0, ARCADE_SCORE_LIMIT);
-  return next;
 };
 
-/** Format ms as `12с` / `1:05` for the LCD table. */
 export const formatArcadeTime = (ms: number): string => {
   const totalSec = Math.max(0, Math.round(ms / 1000));
   const minutes = Math.floor(totalSec / 60);

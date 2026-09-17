@@ -9,9 +9,7 @@ import { listSortItems } from '../catalogue';
 
 /** One card after it has been put away. */
 interface SortPlacement {
-  /** Card that was placed. */
   itemId: string;
-  /** Basket the child tapped. */
   chosen: BudgetDirection;
   /** Basket the card belongs to — where it ends up either way. */
   direction: BudgetDirection;
@@ -31,7 +29,6 @@ interface SortingState {
 interface SortOutcome {
   /** State after the card left the table. Never the same object. */
   state: SortingState;
-  /** The placement that just happened. */
   placement: SortPlacement;
   /**
    * The rule, in the pet's words. Shown on a miss and on a hit alike: the step

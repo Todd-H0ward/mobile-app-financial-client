@@ -3,6 +3,7 @@ import {
   directionForKind,
   getCatalogueItem,
 } from '@/entities/catalogue';
+import { priceFor } from '@/entities/pet';
 
 import type { TimeSource } from '@/shared/lib/time-source';
 import { clamp } from '@/shared/utils';
@@ -18,6 +19,8 @@ interface PurchaseOk {
   ok: true;
   user: UserSave;
   item: CatalogueItem;
+  /** Coins actually charged after trait multipliers. */
+  price: number;
   /** How far this purchase pushed fact over plan for its direction (≥ 0). */
   overPlanBy: number;
 }
@@ -43,7 +46,8 @@ type PurchaseResult = PurchaseOk | PurchaseFail;
  *
  * Only legal in the `active` phase — docs/game-period.md. Shortfalls come back
  * as a result so the shop can name the gap and the three recovery options
- * (2.5.6 / docs/economy.md).
+ * (2.5.6 / docs/economy.md). Price follows `priceFor` so traits shift the till,
+ * not only the label on the shelf.
  */
 export const applyPurchase = (
   user: UserSave,
@@ -59,10 +63,11 @@ export const applyPurchase = (
     return { ok: false, reason: 'unknown_item' };
   }
 
+  const price = priceFor(item.price, item.category, user.pet.traitIds);
   const direction = directionForKind(item.kind);
   const debit = debitWallet(user.wallet, {
     source: `purchase:${item.id}`,
-    amount: item.price,
+    amount: price,
     direction,
     periodIndex: user.period.index,
     at: time.now(),
@@ -79,7 +84,7 @@ export const applyPurchase = (
     };
   }
 
-  const factNext = user.period.fact[direction] + item.price;
+  const factNext = user.period.fact[direction] + price;
   const overPlanBy = Math.max(0, factNext - user.period.plan[direction]);
 
   let comfort = user.pet.comfort;
@@ -101,6 +106,7 @@ export const applyPurchase = (
     ok: true,
     overPlanBy,
     item,
+    price,
     user: {
       ...user,
       wallet: debit.wallet,

@@ -20,7 +20,6 @@ const TOE_RADIUS = 2.1;
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** The pet tab. */
 export const PawIcon = ({ size = ICON_SIZE, color }: IconProps) => {
   const stroke = useIconColor(color);
 

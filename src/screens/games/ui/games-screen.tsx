@@ -14,10 +14,6 @@ import { formatMoney } from '@/shared/utils';
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Arcade lobby — only puzzles unlocked via toys on the living-room shelf.
- * Empty until something is bought in the toys shop.
- */
 export const GamesScreen = () => {
   const { t } = useTranslation();
   const router = useRouter();

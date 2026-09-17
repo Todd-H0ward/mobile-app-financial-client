@@ -23,11 +23,11 @@ interface LivingRoomProps {
    * child as `HomePetCompanion` — this room only keeps the closed box.
    */
   isPetMet: boolean;
-  /** Opens the meeting screen. Only reachable while the box is closed. */
   onOpenBox: () => void;
+  /** Opens the thermostat / bill screen — docs/house.md. */
+  onOpenHeating: () => void;
   /** Toys already bought — drives the shelf hotspot and its menu. */
   ownedToys: readonly CatalogueItem[];
-  /** Opens a playable toy from the shelf menu. */
   onPlayToy: (furnitureId: string) => void;
 }
 
@@ -50,11 +50,13 @@ const FLOOR_INSET = 190;
  *
  * After the box opens, the pet leaves with the child — see
  * `HomePetCompanion`. Bought toys land on a shelf hotspot; tapping it opens
- * a pick-a-toy menu.
+ * a pick-a-toy menu. Décor slot overlays are parked until sprites match the
+ * room art (`ownedSlotsInRoom`).
  */
 export const LivingRoom = ({
   isPetMet,
   onOpenBox,
+  onOpenHeating,
   ownedToys,
   onPlayToy,
 }: LivingRoomProps) => {
@@ -69,6 +71,14 @@ export const LivingRoom = ({
 
   return (
     <View pointerEvents="box-none" style={styles.root}>
+      <RoomHotspot
+        label={t('home.heating')}
+        text={t('home.heatingHint')}
+        tone="coin"
+        onPress={onOpenHeating}
+        style={styles.radiator}
+      />
+
       {hasToyShelf && (
         <RoomHotspot
           label={t('home.toyShelf')}
@@ -112,6 +122,10 @@ const styles = StyleSheet.create({
   shelf: {
     left: '8%',
     top: '38%',
+  },
+  radiator: {
+    right: '10%',
+    top: '42%',
   },
   stage: {
     alignItems: 'center',

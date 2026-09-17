@@ -1,12 +1,13 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.13/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": false
+    "ignoreUnknown": false,
+    "includes": ["src/**", "plugins/**", "biome.json"]
   },
   "formatter": {
     "enabled": true,
@@ -16,7 +17,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "nursery": {
         "useSortedClasses": "warn"
       },
@@ -56,13 +57,13 @@
             "groups": [
               ["react", "react-dom"],
               ":BLANK_LINE:",
-              ["**", "!@/**", "!./**", "!../**", "!**/*.css", "!**/*.scss"],
+              [":PACKAGE:", "!@/**"],
               ":BLANK_LINE:",
               ["@/app/**"],
               ":BLANK_LINE:",
-              ["@/processes/**"],
+              ["@/_app/**"],
               ":BLANK_LINE:",
-              ["@/pages/**"],
+              ["@/screens/**"],
               ":BLANK_LINE:",
               ["@/widgets/**"],
               ":BLANK_LINE:",
@@ -76,7 +77,7 @@
               ":BLANK_LINE:",
               ["./**", "!**/*.css", "!**/*.scss"],
               ":BLANK_LINE:",
-              ["**/*.css", "**/*.scss"]
+              ":STYLE:"
             ]
           },
           "level": "on"

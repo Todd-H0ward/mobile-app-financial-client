@@ -5,9 +5,7 @@ import { periodsEstimateFor, progressFor, remainingFor } from '../progress';
 // ═══════════════════════════════════════════
 
 interface WithdrawExplainInput {
-  /** Coins the child wants to take out. */
   amount: number;
-  /** Coins already in the jar for this goal. */
   saved: number;
   /** Goal price from content. */
   price: number;

@@ -100,8 +100,10 @@ Actions:
 на отладочный ключ.
 
 Второй workflow, [`ci.yml`](../.github/workflows/ci.yml), проверяет каждый PR
-без Android SDK и без секретов: `tsc --noEmit`, `vitest run`, `biome check` —
-то же самое, что перечислено в разделе Workflow в AGENTS.md.
+без Android SDK и без секретов: `tsc --noEmit`, `vitest run --coverage`
+(пороги на `economy` / `minigame`, parity ключей en↔ru), `biome check`.
+`contents: write` только у job `autofix` на same-repo PR — то же разделение
+прав, что и локальный цикл в [AGENTS.md](../AGENTS.md#workflow).
 
 ## Почему подпись живёт в конфиг-плагине
 

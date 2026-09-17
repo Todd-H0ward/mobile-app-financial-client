@@ -30,3 +30,11 @@ export type {
   WalletSave,
 } from './types';
 export { PERIOD_PHASES } from './types';
+export {
+  useIsAnimationEnabled,
+  useIsDemoMode,
+  useIsMotionEnabled,
+  useIsParentGateEnabled,
+  useIsSoundEnabled,
+  useSettings,
+} from './use-settings';

@@ -8,7 +8,6 @@ import type { ThemeColor } from '@/shared/constants';
 interface ChartSeries {
   /** Values, oldest first. An empty series draws nothing and never throws. */
   values: number[];
-  /** Theme colour of the line or the bars. */
   color: ThemeColor;
   /** Name for the legend. Omit it and the series has no legend entry. */
   label?: string;

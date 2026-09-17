@@ -66,14 +66,12 @@ const styles = StyleSheet.create({
     fontWeight: 900,
     lineHeight: 36,
   },
-  /** Screen title. */
   title: {
     fontFamily: FONTS.rounded,
     fontSize: 26,
     fontWeight: 900,
     lineHeight: 30,
   },
-  /** Card and section heading. */
   subtitle: {
     fontFamily: FONTS.rounded,
     fontSize: 20,
@@ -93,14 +91,12 @@ const styles = StyleSheet.create({
     fontWeight: 800,
     lineHeight: 23,
   },
-  /** Secondary description. */
   small: {
     fontFamily: FONTS.sans,
     fontSize: 13,
     fontWeight: 400,
     lineHeight: 18,
   },
-  /** Caption / list row subtitle. */
   smallBold: {
     fontFamily: FONTS.sans,
     fontSize: 13,

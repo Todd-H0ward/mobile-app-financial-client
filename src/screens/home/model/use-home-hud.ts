@@ -17,13 +17,13 @@ import {
   type PetSave,
   type UserSave,
   useHomeHudSource,
+  useIsMotionEnabled,
   type WalletEntry,
 } from '@/entities/user';
 
 import { useTranslation } from '@/shared/i18n';
 import { formatMoney } from '@/shared/utils';
 
-/** The translator, exactly as `useTranslation()` hands it out. */
 type Translate = ReturnType<typeof useTranslation>['t'];
 
 // ═══════════════════════════════════════════
@@ -33,16 +33,16 @@ type Translate = ReturnType<typeof useTranslation>['t'];
 /** Whether the state row reaches for a warm color or a calm one. Never red. */
 type MoodTone = 'calm' | 'attention';
 
-/** Everything the pet card needs — `null` while the box is still closed. */
 interface HomeHudPet {
   appearance: PetAppearance;
   emotion: EmotionKey;
   stage: PetStage;
-  /** What a screen reader says. Built from the name and the mood. */
+  /** What a screen reader says — name, mood and why (2.5.10). */
   accessibilityLabel: string;
-  /** The mood, already translated — "доволен собой". */
+  /** The mood, already translated — "скучает". */
   moodLabel: string;
-  /** Which tone the state row reads in. */
+  /** Why, already translated — "нечего делать". Never empty. */
+  moodReasonLabel: string;
   moodTone: MoodTone;
 }
 
@@ -63,15 +63,13 @@ interface HomeHudCredit {
   reasonLabel: string;
 }
 
-/** Everything the home screen's HUD lays out, computed from one save read. */
 interface HomeHud {
   /** Header subtitle: the pet's name once met, an onboarding line before. */
   subtitle: string;
   /** `null` while the box on the room screen is still closed. */
   pet: HomeHudPet | null;
-  /** The grown-up's switch — the pet card passes it straight to the rig. */
+  /** User switch + system Reduce Motion. */
   isAnimationEnabled: boolean;
-  /** Coins on hand, ready for `CoinBadge`. */
   balance: number;
   /** Coins across every goal, not only the active one. */
   savingsTotal: number;
@@ -151,13 +149,15 @@ const isPetMet = (pet: PetSave): boolean => pet.name !== '';
 const buildPet = (pet: PetSave, t: Translate): HomeHudPet => {
   const mood = moodFor(pet.comfort, pet.spirit);
   const moodLabel = t(`pet.mood.${mood.name}`);
+  const moodReasonLabel = t(`pet.reason.${mood.reason}`);
 
   return {
     appearance: appearanceFor(pet.species, pet.color, pet.pattern),
     emotion: emotionFor(mood),
     stage: pet.stage,
-    accessibilityLabel: `${pet.name}, ${moodLabel}`,
+    accessibilityLabel: `${pet.name}, ${moodLabel}, ${moodReasonLabel}`,
     moodLabel,
+    moodReasonLabel,
     moodTone: MOOD_TONE[mood.name],
   };
 };
@@ -261,13 +261,14 @@ const buildTaskTitle = (tasks: UserSave['tasks'], t: Translate): string => {
 export const useHomeHud = (): HomeHud => {
   const { t } = useTranslation();
   const source = useHomeHudSource();
+  const isMotionEnabled = useIsMotionEnabled();
 
   return useMemo(() => {
     if (!source) {
       return {
         subtitle: t('home.roomComingSoon'),
         pet: null,
-        isAnimationEnabled: true,
+        isAnimationEnabled: isMotionEnabled,
         balance: 0,
         savingsTotal: 0,
         goal: null,
@@ -288,7 +289,7 @@ export const useHomeHud = (): HomeHud => {
         ? t('home.atHome', { name: source.pet.name })
         : t('home.roomComingSoon'),
       pet: isPetMet(source.pet) ? buildPet(source.pet, t) : null,
-      isAnimationEnabled: source.isAnimationEnabled,
+      isAnimationEnabled: isMotionEnabled,
       balance: source.balance,
       savingsTotal: source.savings.goals.reduce(
         (total: number, entry: { saved: number }) => total + entry.saved,
@@ -297,9 +298,7 @@ export const useHomeHud = (): HomeHud => {
       goal: activeGoal
         ? buildGoal(activeGoal.content, activeGoal.saved, t)
         : null,
-      lastCredit: source.lastEntry
-        ? buildLastCredit(source.lastEntry, t)
-        : null,
+      lastCredit: source.lastEarn ? buildLastCredit(source.lastEarn, t) : null,
       taskTitle: buildTaskTitle(source.tasks, t),
       taskHint: buildTaskHint(source.tasks, t),
       isPlanning: source.phase === 'planning',
@@ -307,7 +306,7 @@ export const useHomeHud = (): HomeHud => {
       isSummary: source.phase === 'summary',
       isGrowthPending: source.pet.stage !== source.pet.celebratedStage,
     };
-  }, [source, t]);
+  }, [source, t, isMotionEnabled]);
 };
 
 export type { HomeHud, HomeHudCredit, HomeHudGoal, HomeHudPet, MoodTone };

@@ -19,7 +19,6 @@ type BudgetFact = BudgetPlan;
 
 /** One comparison row — always present, even when plan and fact are zero. */
 interface BudgetComparison {
-  /** Which of the three this row is about. */
   direction: BudgetDirection;
   /** What the child set aside for the period. */
   planned: number;

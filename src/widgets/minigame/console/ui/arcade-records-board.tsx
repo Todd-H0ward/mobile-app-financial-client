@@ -23,7 +23,6 @@ interface ArcadeRecordsBoardProps {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/** LCD high-score list for one console game. */
 export const ArcadeRecordsBoard = ({
   kind,
   scores,

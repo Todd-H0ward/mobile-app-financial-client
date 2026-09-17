@@ -1,8 +1,8 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 
-import { STATIC_ROUTES } from '@/shared/constants';
-
 import { PuzzleRouteScreen } from '@/screens/games';
+
+import { STATIC_ROUTES } from '@/shared/constants';
 
 const asString = (value: string | string[] | undefined): string | null => {
   if (typeof value === 'string' && value.length > 0) return value;

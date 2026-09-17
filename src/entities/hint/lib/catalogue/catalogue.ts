@@ -10,7 +10,6 @@ import HINTS_CONTENT from '@/content/hints.json';
 /** Validated once at module load — bad JSON fails in tests, not mid-session. */
 const HINTS = assertHintsContent(HINTS_CONTENT).hints;
 
-/** Every hint, in file order. */
 export const listHints = (): readonly HintContent[] => HINTS;
 
 /**

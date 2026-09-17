@@ -23,6 +23,12 @@ interface SliderProps {
   max: number;
   step?: number;
   onChange: (value: number) => void;
+  /**
+   * Fires once when the finger lifts (or a screen-reader step lands).
+   * Use this to persist — calling a store write from `onChange` while
+   * dragging freezes the thumb behind SQLite.
+   */
+  onChangeEnd?: (value: number) => void;
   /** Colours of the track, from the low end to the high end. */
   track?: [string, string, string];
   color?: ThemeColor;
@@ -59,6 +65,7 @@ export const Slider = ({
   max,
   step = 1,
   onChange,
+  onChangeEnd,
   track,
   color = 'primary',
   isThumbFilled = false,
@@ -76,18 +83,30 @@ export const Slider = ({
 
   const usable = Math.max(width - THUMB_SIZE, 1);
 
-  const commit = (x: number) => {
+  const snap = (x: number) => {
     const next = min + (span * x) / usable;
     // Snapped relative to `min`, not to absolute multiples of `step`: with
     // `min = 5, step = 10` the reachable values are 5, 15, 25 — and `min`
     // itself stays reachable.
-    const snapped = clamp(
-      min + Math.round((next - min) / step) * step,
-      min,
-      max,
-    );
+    return clamp(min + Math.round((next - min) / step) * step, min, max);
+  };
 
+  const commit = (x: number) => {
+    const snapped = snap(x);
     if (snapped !== value) onChange(snapped);
+  };
+
+  const finish = (x: number) => {
+    const snapped = snap(x);
+    if (snapped !== value) onChange(snapped);
+    onChangeEnd?.(snapped);
+  };
+
+  const stepBy = (delta: number) => {
+    const snapped = clamp(value + delta, min, max);
+    if (snapped === value) return;
+    onChange(snapped);
+    onChangeEnd?.(snapped);
   };
 
   const gesture = Gesture.Pan()
@@ -107,6 +126,9 @@ export const Slider = ({
     })
     .onFinalize(() => {
       dragging.value = 0;
+      if (onChangeEnd) {
+        runOnJS(finish)(offset.value);
+      }
     });
 
   const thumbStyle = useAnimatedStyle(() => ({
@@ -127,11 +149,11 @@ export const Slider = ({
         onAccessibilityAction={(event) => {
           // Screen-reader users step the slider instead of dragging it.
           if (event.nativeEvent.actionName === 'increment') {
-            onChange(Math.min(value + step, max));
+            stepBy(step);
           }
 
           if (event.nativeEvent.actionName === 'decrement') {
-            onChange(Math.max(value - step, min));
+            stepBy(-step);
           }
         }}
         style={[styles.root, style]}

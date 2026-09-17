@@ -9,7 +9,6 @@ import { formatMoney } from '@/shared/utils';
 // ═══════════════════════════════════════════
 
 interface SavingsGoalRow {
-  /** Content id. */
   id: string;
   /** Catalogue title (i18n overlays in the UI). */
   title: string;
@@ -25,7 +24,6 @@ interface SavingsGoalRow {
 }
 
 interface SavingsController {
-  /** Coins on hand. */
   balance: number;
   /** Sum across every goal jar. */
   totalSaved: number;

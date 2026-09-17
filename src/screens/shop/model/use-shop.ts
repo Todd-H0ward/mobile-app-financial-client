@@ -8,6 +8,7 @@ import {
   listCatalogueByShop,
   type ShopId,
 } from '@/entities/catalogue';
+import { priceFor } from '@/entities/pet';
 import {
   applyPurchase,
   canAfford,
@@ -34,17 +35,13 @@ interface ShopShortage {
 }
 
 interface ShopController {
-  /** Which street shopfront this screen is. */
   shopId: ShopId;
-  /** Balance on hand. */
   balance: number;
-  /** Catalogue rows for this shop only. */
   items: readonly CatalogueItem[];
   /** True only while the period is `active`. */
   canShop: boolean;
   /** Item waiting for confirm or shortage explanation. */
   selected: CatalogueItem | null;
-  /** Which sheet is open. */
   sheet: ShopSheet;
   /** Last shortfall details, when the wallet refused. */
   shortage: ShopShortage | null;
@@ -82,6 +79,16 @@ export const useShop = (shopId: ShopId): ShopController => {
 
   const canShop = user?.period.phase === 'active';
   const balance = user?.wallet.balance ?? 0;
+  const traitIds = user?.pet.traitIds;
+
+  const items = useMemo(
+    () =>
+      listCatalogueByShop(shopId).map((item) => ({
+        ...item,
+        price: priceFor(item.price, item.category, traitIds ?? []),
+      })),
+    [shopId, traitIds],
+  );
 
   const overPlanBy =
     user && selected
@@ -106,7 +113,7 @@ export const useShop = (shopId: ShopId): ShopController => {
   return {
     shopId,
     balance,
-    items: listCatalogueByShop(shopId),
+    items,
     canShop: Boolean(canShop),
     selected,
     sheet,

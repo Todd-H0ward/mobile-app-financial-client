@@ -88,4 +88,39 @@ describe('applyPurchase', () => {
     if (!result.ok) return;
     expect(result.user.pet.comfort).toBeGreaterThan(0.4);
   });
+
+  it('writes furnitureId into the home — the room slot reads it', () => {
+    const time = makeDemoTimeSource();
+    const result = applyPurchase(makeActive(), 'rug', time);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.user.home.furnitureIds).toContain('rug');
+  });
+
+  it('writes insulationId into the home — later bills discount it', () => {
+    const time = makeDemoTimeSource();
+    const result = applyPurchase(makeActive(), 'window-seal', time);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.user.home.insulationIds).toContain('window');
+  });
+
+  it('charges chilly less for food — trait shifts the till', () => {
+    const time = makeDemoTimeSource();
+    const active = makeActive();
+    const chilly: UserSave = {
+      ...active,
+      pet: { ...active.pet, traitIds: ['chilly'] },
+    };
+    const result = applyPurchase(chilly, 'bread', time);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Catalogue bread is 8; chilly food ×0.8 → 6.
+    expect(result.price).toBe(6);
+    expect(result.user.wallet.balance).toBe(50 - 6);
+    expect(result.user.period.fact.needs).toBe(6);
+  });
 });

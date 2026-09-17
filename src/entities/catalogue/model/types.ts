@@ -1,4 +1,3 @@
-/** Which street shopfront an item belongs to. */
 const SHOP_IDS = ['grocery', 'clothes', 'furniture', 'toys'] as const;
 
 /** Id of one of the four street shops. */
@@ -11,7 +10,6 @@ type CatalogueKind = 'need' | 'want';
 interface CatalogueItem {
   /** Stable id. Wallet history uses `purchase:<id>`. */
   id: string;
-  /** Title shown on the card. */
   title: string;
   /** Price in coins, positive integer. */
   price: number;
@@ -20,7 +18,6 @@ interface CatalogueItem {
    * not a shop aisle (docs/economy.md).
    */
   kind: CatalogueKind;
-  /** Which street shop sells this item. */
   shop: ShopId;
   /** Soft grouping inside a shop: food, warmth, toy, … */
   category: string;
@@ -34,7 +31,6 @@ interface CatalogueItem {
   note?: string;
 }
 
-/** The whole of `content/catalogue.json`. */
 interface CatalogueFile {
   items: CatalogueItem[];
 }

@@ -14,11 +14,9 @@ interface Cell {
 interface SnakeSession {
   /** Head-first body cells. */
   snake: readonly Cell[];
-  /** Current travel direction. */
   direction: Direction;
   /** Queued turn applied on the next tick (never a reverse). */
   pendingDirection: Direction;
-  /** Apple the head must reach. */
   apple: Cell;
   /**
    * Apples eaten this sitting. Endless — never auto-ends.
@@ -31,7 +29,6 @@ interface SnakeSession {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** Square grid width/height in cells. */
 export const GRID_SIZE = 12;
 
 /**
@@ -90,13 +87,9 @@ const stepCell = (cell: Cell, direction: Direction): Cell => {
 const isInBounds = (cell: Cell): boolean =>
   cell.x >= 0 && cell.x < GRID_SIZE && cell.y >= 0 && cell.y < GRID_SIZE;
 
-/** Whether the cash-out button may appear for this score. */
 export const canClaimSnake = (session: SnakeSession): boolean =>
   session.applesEaten >= CLAIM_APPLES;
 
-/**
- * Fresh sitting: short snake mid-board, facing right, one apple elsewhere.
- */
 export const createSnakeSession = (
   rng: () => number = Math.random,
 ): SnakeSession => {

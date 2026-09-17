@@ -2,32 +2,35 @@ import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 
 // ═══════════════════════════════════════════
+// SOUND GATE
+// ═══════════════════════════════════════════
+
+/** Bound from Providers — shared must not import the user store. */
+let isSoundAllowed = (): boolean => true;
+
+export const bindHapticsSoundGate = (gate: () => boolean): void => {
+  isSoundAllowed = gate;
+};
+
+// ═══════════════════════════════════════════
 // HAPTICS
 // ═══════════════════════════════════════════
 
-/**
- * Light success buzz for kid-facing wins — purchase, chore done, plan
- * confirmed, pet met. Failures stay silent: no buzz for a soft warning.
- *
- * Rejections are swallowed on purpose: `notificationAsync` is async, so a
- * bare `try/catch` around `void …` never sees `UnavailabilityError` and the
- * red screen lands on the purchase / plan confirm instead.
- */
+/** Success buzz; silent when sound is off (haptics share that switch for now). */
 export const hapticSuccess = (): void => {
-  if (Platform.OS === 'web') return;
+  if (Platform.OS === 'web' || !isSoundAllowed()) return;
 
   void Haptics.notificationAsync(
     Haptics.NotificationFeedbackType.Success,
   ).catch(() => {
-    // Native module missing (simulator edge, mismatched SDK) — ignore.
+    // Native module missing — ignore.
   });
 };
 
-/** Softer tap for selects / steppers — optional, never required. */
 export const hapticLight = (): void => {
-  if (Platform.OS === 'web') return;
+  if (Platform.OS === 'web' || !isSoundAllowed()) return;
 
   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {
-    // Same as success: feedback is optional.
+    // Native module missing — ignore.
   });
 };

@@ -30,22 +30,17 @@ interface Playground {
   /** Text of the `Input` section, so the counter has something to count. */
   inputValue: string;
   setInputValue: (inputValue: string) => void;
-  /** Index of the selected chip, or `null` when nothing is chosen. */
   selectedChip: number | null;
   setSelectedChip: (selectedChip: number | null) => void;
-  /** Whether the example list row is struck through. */
   isRowDone: boolean;
   setIsRowDone: (isRowDone: boolean) => void;
-  /** Whether the example list row carries the selected border. */
   isRowSelected: boolean;
   setIsRowSelected: (isRowSelected: boolean) => void;
-  /** Open state of `Sheet.Modal`. */
   isSheetVisible: boolean;
   setIsSheetVisible: (isSheetVisible: boolean) => void;
   /** Whether that sheet can be dragged or tapped away. */
   isSheetDismissible: boolean;
   setIsSheetDismissible: (isSheetDismissible: boolean) => void;
-  /** Open state of the controlled `Collapsible` example. */
   isCollapsibleOpen: boolean;
   setIsCollapsibleOpen: (isCollapsibleOpen: boolean) => void;
   /**
@@ -54,13 +49,10 @@ interface Playground {
    */
   splashRun: number;
   replaySplash: () => void;
-  /** Species of the one live pet on the screen. */
   petSpecies: PetSpecies;
   setPetSpecies: (petSpecies: PetSpecies) => void;
-  /** Its coat. */
   petColor: PetColor;
   setPetColor: (petColor: PetColor) => void;
-  /** Its pattern. */
   petPattern: PetPattern;
   setPetPattern: (petPattern: PetPattern) => void;
   /** Its growth stage — scale, liveliness and the anchor table. */

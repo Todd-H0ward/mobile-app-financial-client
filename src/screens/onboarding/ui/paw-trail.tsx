@@ -12,7 +12,6 @@ import { Shape } from '@/shared/ui';
 interface PawTrailProps {
   /** Step being walked, from 1. */
   current: number;
-  /** Steps in total. */
   total: number;
 }
 

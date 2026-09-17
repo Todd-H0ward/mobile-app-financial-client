@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 
 import {
+  getTraitById,
   isPetNameValid,
   normalizePetName,
   type PetColor,
@@ -17,27 +18,22 @@ import { hapticSuccess } from '@/shared/lib';
 // TYPES
 // ═══════════════════════════════════════════
 
-/** Everything the meeting screen reads and calls. */
 interface PetCreateController {
-  /** Species being previewed. */
   species: PetSpecies;
-  /** Coat being previewed. */
   color: PetColor;
-  /** Pattern being previewed. */
   pattern: PetPattern;
+  /** Chosen trait id, or `null` until the child picks one. */
+  traitId: string | null;
   /** What the child typed, unnormalized — the field shows it back verbatim. */
   name: string;
-  /** Whether the bottom button is live. */
   canFinish: boolean;
-  /** Picks a species. Nothing is written to the save until `finish`. */
+  /** Nothing is written to the save until `finish`. */
   setSpecies: (species: PetSpecies) => void;
-  /** Picks a coat. */
   setColor: (color: PetColor) => void;
-  /** Picks a pattern. */
   setPattern: (pattern: PetPattern) => void;
-  /** Types into the name field. */
+  setTraitId: (traitId: string) => void;
   setName: (name: string) => void;
-  /** Writes the look and the name into the save and goes back to the room. */
+  /** Writes the look, trait and name into the save and goes back to the room. */
   finish: () => void;
 }
 
@@ -46,7 +42,7 @@ interface PetCreateController {
 // ═══════════════════════════════════════════
 
 /**
- * Choosing the pet: three axes and a name.
+ * Choosing the pet: three axes, one trait and a name.
  *
  * Nothing reaches the save until the last button. The look the child is
  * turning over is preview state, and a child who backs out of the screen finds
@@ -54,7 +50,8 @@ interface PetCreateController {
  *
  * The appearance axes never change again afterwards (`PetSave`), which is why
  * the pet's name is what marks the meeting as done: an unnamed pet is a pet
- * still in its box.
+ * still in its box. The trait is fixed here too — it shifts prices and need
+ * speeds for the whole run (docs/pet.md).
  */
 export const usePetCreate = (): PetCreateController => {
   const router = useRouter();
@@ -64,21 +61,28 @@ export const usePetCreate = (): PetCreateController => {
   const [species, setSpecies] = useState<PetSpecies>(pet?.species ?? 'cat');
   const [color, setColor] = useState<PetColor>(pet?.color ?? 'sand');
   const [pattern, setPattern] = useState<PetPattern>(pet?.pattern ?? 'solid');
+  const [traitId, setTraitId] = useState<string | null>(
+    pet?.traitIds[0] ?? null,
+  );
   const [name, setName] = useState(pet?.name ?? '');
+
+  const hasTrait = traitId != null && getTraitById(traitId) != null;
 
   return {
     species,
     color,
     pattern,
+    traitId,
     name,
-    canFinish: isPetNameValid(name),
+    canFinish: isPetNameValid(name) && hasTrait,
     setSpecies,
     setColor,
     setPattern,
+    setTraitId,
     setName,
 
     finish: () => {
-      if (!isPetNameValid(name)) return;
+      if (!isPetNameValid(name) || !hasTrait || traitId == null) return;
 
       updateUser((user) => ({
         ...user,
@@ -87,6 +91,7 @@ export const usePetCreate = (): PetCreateController => {
           species,
           color,
           pattern,
+          traitIds: [traitId],
           name: normalizePetName(name),
         },
       }));
