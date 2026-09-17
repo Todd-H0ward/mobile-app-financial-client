@@ -99,7 +99,19 @@
     "toyShelfTitle": "Игрушки на полке",
     "toyShelfHint": "Выбери игрушку, которую купил. Фото появятся чуть позже.",
     "toyPlay": "Играть",
-    "toySoon": "Скоро"
+    "toySoon": "Скоро",
+    "furnitureSoon": "скоро картинка",
+    "furniture": {
+      "rug": "Коврик",
+      "lamp": "Ночник",
+      "stickers": "Наклейки",
+      "sweater": "Свитер",
+      "scarf": "Шарф",
+      "toy-car": "Машинка",
+      "ball": "Мячик",
+      "rooms-living": "Пазл",
+      "game-console": "Консоль"
+    }
   },
   "parents": {
     "title": "Взрослым",

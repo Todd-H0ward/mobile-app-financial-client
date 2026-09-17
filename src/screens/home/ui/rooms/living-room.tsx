@@ -48,7 +48,8 @@ const FLOOR_INSET = 190;
  *
  * After the box opens, the pet leaves with the child — see
  * `HomePetCompanion`. Bought toys land on a shelf hotspot; tapping it opens
- * a pick-a-toy menu.
+ * a pick-a-toy menu. Décor slot overlays are parked until sprites match the
+ * room art (`ownedSlotsInRoom`).
  */
 export const LivingRoom = ({
   isPetMet,

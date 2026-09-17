@@ -89,6 +89,15 @@ describe('applyPurchase', () => {
     expect(result.user.pet.comfort).toBeGreaterThan(0.4);
   });
 
+  it('writes furnitureId into the home — the room slot reads it', () => {
+    const time = makeDemoTimeSource();
+    const result = applyPurchase(makeActive(), 'rug', time);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.user.home.furnitureIds).toContain('rug');
+  });
+
   it('charges chilly less for food — trait shifts the till', () => {
     const time = makeDemoTimeSource();
     const active = makeActive();

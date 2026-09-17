@@ -99,7 +99,19 @@
     "toyShelfTitle": "Toys on the shelf",
     "toyShelfHint": "Pick a toy you bought. Photos will appear here later.",
     "toyPlay": "Play",
-    "toySoon": "Coming soon"
+    "toySoon": "Coming soon",
+    "furnitureSoon": "art soon",
+    "furniture": {
+      "rug": "Rug",
+      "lamp": "Night lamp",
+      "stickers": "Stickers",
+      "sweater": "Sweater",
+      "scarf": "Scarf",
+      "toy-car": "Toy car",
+      "ball": "Ball",
+      "rooms-living": "Puzzle",
+      "game-console": "Console"
+    }
   },
   "parents": {
     "title": "Grown-ups",
