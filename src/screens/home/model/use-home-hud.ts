@@ -10,6 +10,7 @@ import {
   type PetStage,
 } from '@/entities/pet';
 import { progressFor } from '@/entities/savings';
+import { getTaskById } from '@/entities/task';
 import {
   type PetSave,
   type UserSave,
@@ -75,7 +76,9 @@ interface HomeHud {
   goal: HomeHudGoal | null;
   /** The coins that landed most recently — 2.5.4's "источник и сумма", shown. */
   lastCredit: HomeHudCredit | null;
-  /** The task slot's placeholder line — the engine is a later wave. */
+  /** Active chore title on the board — catalogue name once issued. */
+  taskTitle: string;
+  /** Active chore brief, or an all-done / soon line. */
   taskHint: string;
   /**
    * True while the period is still in `planning` — the banner that opens the
@@ -181,10 +184,54 @@ const buildGoal = (
  * bare "+50". `entry.source` outside the static table still resolves: it
  * falls back to a generic line rather than showing nothing.
  */
-const buildLastCredit = (entry: WalletEntry, t: Translate): HomeHudCredit => ({
-  amount: entry.amount,
-  reasonLabel: t(CREDIT_REASON_KEY[entry.source] ?? 'wallet.source.unknown'),
-});
+const buildLastCredit = (entry: WalletEntry, t: Translate): HomeHudCredit => {
+  if (entry.source.startsWith('task:')) {
+    const task = getTaskById(entry.source.slice('task:'.length));
+    return {
+      amount: entry.amount,
+      reasonLabel: task
+        ? t('wallet.source.task', {
+            title: t(`tasks.items.${task.id}.title`, {
+              defaultValue: task.title,
+            }),
+          })
+        : t('wallet.source.unknown'),
+    };
+  }
+
+  return {
+    amount: entry.amount,
+    reasonLabel: t(CREDIT_REASON_KEY[entry.source] ?? 'wallet.source.unknown'),
+  };
+};
+
+/** Active chore line for the HUD — title and brief, or an all-done / soon line. */
+const buildTaskHint = (tasks: UserSave['tasks'], t: Translate): string => {
+  if (tasks.activeTaskId) {
+    const task = getTaskById(tasks.activeTaskId);
+    if (task) {
+      return t(`tasks.items.${task.id}.brief`, { defaultValue: task.brief });
+    }
+  }
+
+  if (tasks.completedThisPeriod.length > 0) {
+    return t('home.task.allDone');
+  }
+
+  return t('home.task.comingSoon');
+};
+
+/** Active chore title for the board row. */
+const buildTaskTitle = (tasks: UserSave['tasks'], t: Translate): string => {
+  if (tasks.activeTaskId) {
+    const task = getTaskById(tasks.activeTaskId);
+    if (task) {
+      return t(`tasks.items.${task.id}.title`, { defaultValue: task.title });
+    }
+  }
+
+  return t('home.task.title');
+};
 
 // ═══════════════════════════════════════════
 // HOOK
@@ -221,7 +268,8 @@ export const useHomeHud = (): HomeHud => {
       ? buildGoal(activeGoal.content, activeGoal.saved, t)
       : null,
     lastCredit: lastEntry ? buildLastCredit(lastEntry, t) : null,
-    taskHint: t('home.task.comingSoon'),
+    taskTitle: user ? buildTaskTitle(user.tasks, t) : t('home.task.title'),
+    taskHint: user ? buildTaskHint(user.tasks, t) : t('home.task.comingSoon'),
     isPlanning: user?.period.phase === 'planning',
     isActive: user?.period.phase === 'active',
     isSummary: user?.period.phase === 'summary',

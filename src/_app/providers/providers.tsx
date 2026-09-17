@@ -6,6 +6,8 @@ import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { FeedbackHost } from '@/features/feedback';
+
 import { useUser } from '@/entities/user';
 
 import { queryClient } from '@/shared/api';
@@ -49,6 +51,7 @@ export const Providers = ({ children }: ProvidersProps) => {
           <TimeSourceContext.Provider value={timeSource}>
             {children}
 
+            <FeedbackHost />
             <Toaster />
           </TimeSourceContext.Provider>
         </QueryClientProvider>

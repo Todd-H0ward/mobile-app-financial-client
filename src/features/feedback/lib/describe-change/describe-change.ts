@@ -1,0 +1,228 @@
+import type { UserSave } from '@/entities/user';
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
+/** How the display formats before/after numbers. */
+type ChangeFormat = 'money' | 'percent' | 'count';
+
+/**
+ * One measurable thing that moved — numbers only, never copy.
+ * The UI maps `labelKey` through i18n.
+ */
+interface ChangeLine {
+  /** Stable id for keys and tests. */
+  id: string;
+  /** i18n key, usually `feedback.metrics.*`. */
+  labelKey: string;
+  /** Value before the action. */
+  before: number;
+  /** Value after the action. */
+  after: number;
+  format: ChangeFormat;
+}
+
+/** What the child just did — picks the title / default why keys. */
+type FeedbackAction = 'purchase' | 'deposit' | 'withdraw' | 'task' | 'plan';
+
+/**
+ * Numbers `describeChange` cares about. Built from a save via `snapshotUser`
+ * so the helper stays free of the full profile shape.
+ */
+interface FeedbackSnapshot {
+  /** Wallet balance in coins. */
+  balance: number;
+  /** Sum of every goal's `saved`. */
+  savingsTotal: number;
+  /** Period fact — needs. */
+  factNeeds: number;
+  /** Period fact — wants. */
+  factWants: number;
+  /** Period fact — savings. */
+  factSavings: number;
+  /** Pet comfort 0…1. */
+  comfort: number;
+  /** Pet spirit 0…1. */
+  spirit: number;
+  /** Furniture pieces in the room. */
+  furnitureCount: number;
+}
+
+interface DescribeChangeInput {
+  before: FeedbackSnapshot;
+  after: FeedbackSnapshot;
+  action: FeedbackAction;
+  /**
+   * Ready-made why text from content (task explanation, item influence).
+   * Wins over `whyKey` when set.
+   */
+  whyText?: string;
+  /** Override the default `feedback.why.<action>` key. */
+  whyKey?: string;
+  /** Params for title / why interpolation (item name, reward, …). */
+  params?: Record<string, string | number>;
+  /**
+   * Purchase pushed fact over plan by this many coins — switches the why
+   * key to `purchaseOverPlan` when > 0.
+   */
+  overPlanBy?: number;
+}
+
+/**
+ * Structured «что изменилось и почему» — 2.5.9 / roadmap 1.18.
+ * Pure: no i18n, no UI.
+ */
+interface FeedbackReport {
+  action: FeedbackAction;
+  /** i18n key for the sheet title. */
+  titleKey: string;
+  /** i18n key for the why paragraph, or null when `whyText` is used. */
+  whyKey: string | null;
+  /** Content-authored why, when the catalogue / task already wrote it. */
+  whyText: string | null;
+  /** Interpolation bag for title and why. */
+  params: Record<string, string | number>;
+  /** Only lines that actually moved. */
+  changes: ChangeLine[];
+}
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
+const pushIfChanged = (
+  lines: ChangeLine[],
+  line: Omit<ChangeLine, 'before' | 'after'> & {
+    before: number;
+    after: number;
+  },
+): void => {
+  if (line.before === line.after) return;
+  lines.push(line);
+};
+
+const defaultWhyKey = (action: FeedbackAction, overPlanBy: number): string => {
+  if (action === 'purchase' && overPlanBy > 0) {
+    return 'feedback.why.purchaseOverPlan';
+  }
+  return `feedback.why.${action}`;
+};
+
+// ═══════════════════════════════════════════
+// PUBLIC API
+// ═══════════════════════════════════════════
+
+/** Picks the measurable fields out of a full save. */
+export const snapshotUser = (user: UserSave): FeedbackSnapshot => ({
+  balance: user.wallet.balance,
+  savingsTotal: user.savings.goals.reduce((sum, row) => sum + row.saved, 0),
+  factNeeds: user.period.fact.needs,
+  factWants: user.period.fact.wants,
+  factSavings: user.period.fact.savings,
+  comfort: user.pet.comfort,
+  spirit: user.pet.spirit,
+  furnitureCount: user.home.furnitureIds.length,
+});
+
+/**
+ * Diffs two snapshots into the lines a child can read: balance, jar, fact,
+ * comfort, spirit, furniture. The why comes from the action context —
+ * never invented here.
+ */
+export const describeChange = (input: DescribeChangeInput): FeedbackReport => {
+  const { before, after, action } = input;
+  const params = { ...(input.params ?? {}) };
+  if (input.overPlanBy != null && input.overPlanBy > 0) {
+    params.over = input.overPlanBy;
+  }
+
+  const changes: ChangeLine[] = [];
+
+  pushIfChanged(changes, {
+    id: 'balance',
+    labelKey: 'feedback.metrics.balance',
+    before: before.balance,
+    after: after.balance,
+    format: 'money',
+  });
+
+  pushIfChanged(changes, {
+    id: 'savings',
+    labelKey: 'feedback.metrics.savings',
+    before: before.savingsTotal,
+    after: after.savingsTotal,
+    format: 'money',
+  });
+
+  pushIfChanged(changes, {
+    id: 'factNeeds',
+    labelKey: 'feedback.metrics.factNeeds',
+    before: before.factNeeds,
+    after: after.factNeeds,
+    format: 'money',
+  });
+
+  pushIfChanged(changes, {
+    id: 'factWants',
+    labelKey: 'feedback.metrics.factWants',
+    before: before.factWants,
+    after: after.factWants,
+    format: 'money',
+  });
+
+  pushIfChanged(changes, {
+    id: 'factSavings',
+    labelKey: 'feedback.metrics.factSavings',
+    before: before.factSavings,
+    after: after.factSavings,
+    format: 'money',
+  });
+
+  pushIfChanged(changes, {
+    id: 'comfort',
+    labelKey: 'feedback.metrics.comfort',
+    before: before.comfort,
+    after: after.comfort,
+    format: 'percent',
+  });
+
+  pushIfChanged(changes, {
+    id: 'spirit',
+    labelKey: 'feedback.metrics.spirit',
+    before: before.spirit,
+    after: after.spirit,
+    format: 'percent',
+  });
+
+  pushIfChanged(changes, {
+    id: 'furniture',
+    labelKey: 'feedback.metrics.furniture',
+    before: before.furnitureCount,
+    after: after.furnitureCount,
+    format: 'count',
+  });
+
+  const whyText = input.whyText?.trim() ? input.whyText.trim() : null;
+  const whyKey = whyText
+    ? null
+    : (input.whyKey ?? defaultWhyKey(action, input.overPlanBy ?? 0));
+
+  return {
+    action,
+    titleKey: `feedback.title.${action}`,
+    whyKey,
+    whyText,
+    params,
+    changes,
+  };
+};
+
+export type {
+  ChangeFormat,
+  ChangeLine,
+  DescribeChangeInput,
+  FeedbackAction,
+  FeedbackReport,
+  FeedbackSnapshot,
+};

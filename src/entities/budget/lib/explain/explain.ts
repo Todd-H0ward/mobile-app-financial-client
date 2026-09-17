@@ -2,6 +2,7 @@ import type { BudgetDirection } from '@/entities/economy';
 
 import type { BudgetComparison } from '../../model';
 import { isOnPlan } from '../compare';
+import { pickRecoveryOptions, type RecoveryTipId } from '../recovery';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -26,10 +27,9 @@ interface SummaryExplain {
   /**
    * Concrete next-period tips (2.5.9). Never empty: even a perfect period gets
    * a gentle habit tip so the screen never ends on a shrug.
+   * Chosen by `pickRecoveryOptions` — the recovery screen owns the actions.
    */
-  tipKeys: Array<
-    'saveFirst' | 'waitOnWant' | 'protectNeeds' | 'keepHabit' | 'checkPlan'
-  >;
+  tipKeys: RecoveryTipId[];
 }
 
 // ═══════════════════════════════════════════
@@ -56,7 +56,7 @@ export const explainSummary = (rows: BudgetComparison[]): SummaryExplain => {
       storyKey: 'allOnPlan',
       overspent,
       underspent,
-      tipKeys: ['keepHabit', 'checkPlan'],
+      tipKeys: pickRecoveryOptions(rows).map((row) => row.id),
     };
   }
 
@@ -71,14 +71,12 @@ export const explainSummary = (rows: BudgetComparison[]): SummaryExplain => {
     storyKey = 'underspent';
   }
 
-  const tipKeys: SummaryExplain['tipKeys'] = [];
-  if (savingsUnder || wantsOver) tipKeys.push('saveFirst');
-  if (wantsOver) tipKeys.push('waitOnWant');
-  if (needsOver) tipKeys.push('protectNeeds');
-  if (tipKeys.length === 0) tipKeys.push('checkPlan');
-  if (tipKeys.length < 2) tipKeys.push('keepHabit');
-
-  return { storyKey, overspent, underspent, tipKeys: tipKeys.slice(0, 2) };
+  return {
+    storyKey,
+    overspent,
+    underspent,
+    tipKeys: pickRecoveryOptions(rows).map((row) => row.id),
+  };
 };
 
 export type { SummaryExplain };

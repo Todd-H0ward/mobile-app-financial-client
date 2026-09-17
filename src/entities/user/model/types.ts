@@ -179,6 +179,20 @@ interface HomeSave {
   lastBilledPeriod: number;
 }
 
+/** Progress on chores for the current period — 2.5.8 / roadmap 1.16. */
+interface TasksSave {
+  /**
+   * Task shown on the home HUD. `null` when every chore of the period is done
+   * or none has been issued yet.
+   */
+  activeTaskId: string | null;
+  /**
+   * Task ids completed during the current period. Cleared on settlement so
+   * the same catalogue opens again next period — docs/game-period.md.
+   */
+  completedThisPeriod: string[];
+}
+
 /** What the grown-up configured in their section, 2.5.12. */
 interface SettingsSave {
   /** Arithmetic gate in front of the grown-up's section. */
@@ -209,6 +223,8 @@ interface UserSave {
   wallet: WalletSave;
   /** The savings jar: goals and what is put away in each. */
   savings: SavingsSave;
+  /** Chores for the period: active focus and what is already done. */
+  tasks: TasksSave;
   /** The current period: phase, plan, fact. See docs/game-period.md. */
   period: PeriodSave;
   /** Finished periods: plan, fact and outcome of each. For history, 2.5.11. */
@@ -230,6 +246,7 @@ export type {
   SavingsGoalSave,
   SavingsSave,
   SettingsSave,
+  TasksSave,
   UserSave,
   WalletEntry,
   WalletSave,

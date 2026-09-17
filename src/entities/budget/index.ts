@@ -1,4 +1,9 @@
-export type { SummaryExplain } from './lib';
+export type {
+  RecoveryDestination,
+  RecoveryOption,
+  RecoveryTipId,
+  SummaryExplain,
+} from './lib';
 export {
   addCoin,
   allocate,
@@ -7,7 +12,10 @@ export {
   explainSummary,
   isOnPlan,
   isValidPlan,
+  pickRecoveryOptions,
   planSum,
+  RECOVERY_DESTINATION,
+  RECOVERY_TIP_IDS,
   remainder,
   removeCoin,
   zeroDirections,

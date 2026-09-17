@@ -170,8 +170,10 @@ export const HomeScreen = () => {
       >
         <HomeHudBoard
           goal={hud.goal}
+          taskTitle={hud.taskTitle}
           taskHint={hud.taskHint}
           onOpenSavings={() => router.push(ROUTES.SAVINGS)}
+          onOpenTasks={() => router.push(ROUTES.TASKS)}
         />
       </View>
     </ThemedView>

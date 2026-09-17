@@ -22,6 +22,7 @@ src/
 │   │   └── ui/steps/       # greeting / sorting / coins / plan / name
 │   ├── budget-plan/        # план по трём направлениям (2.5.5)
 │   ├── period-summary/     # план vs факт (2.5.5)
+│   ├── recovery/           # путь восстановления после периода (2.5.9)
 │   ├── shop/               # каталог покупок (2.5.6)
 │   ├── savings/            # цели и копилка (2.5.7)
 │   ├── tasks/              # задания (2.5.8)

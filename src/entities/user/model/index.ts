@@ -23,6 +23,7 @@ export type {
   SavingsGoalSave,
   SavingsSave,
   SettingsSave,
+  TasksSave,
   UserSave,
   WalletEntry,
   WalletSave,
