@@ -7,11 +7,18 @@ on:
   push:
     branches: [main]
 
+# Autofix may push a format commit back onto the PR branch.
+permissions:
+  contents: write
+
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # PR head ref so a format commit lands on the branch, not a detached SHA.
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - uses: pnpm/action-setup@v4
         with:
@@ -30,5 +37,34 @@ jobs:
       - name: Test
         run: npx vitest run
 
+      # --write applies formatter + safe lint fixes + organizeImports (assist).
+      # Plain `biome format` would skip import sorting.
       - name: Lint / format
-        run: npx biome check src
+        run: npx biome check --write src
+
+      # Push autofixes on same-repo PRs. Forks and main still must ship clean.
+      - name: Commit Biome fixes
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          if git diff --quiet; then
+            echo 'No Biome changes to commit'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src
+          git commit -m 'style: apply biome format and import order'
+          git push
+
+      - name: Require clean Biome tree
+        if: >-
+          github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          if ! git diff --quiet; then
+            echo 'Biome rewrote files — run `pnpm format` and commit the result.'
+            git --no-pager diff --stat
+            exit 1
+          fi
