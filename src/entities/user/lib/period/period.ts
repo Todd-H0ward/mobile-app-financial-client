@@ -1,5 +1,6 @@
 import {
   BUDGET_DIRECTIONS,
+  PERIOD_HISTORY_LIMIT,
   PERIOD_NEED_DECAY,
   REGULARITY_BONUS,
   WALLET_SOURCES,
@@ -179,6 +180,9 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
     .filter((g) => g.reachedInPeriod === period.index)
     .map((g) => g.goalId);
 
+  // Facts are counted on the full append first: trimming must not shrink the
+  // counters that just earned a stage (goals that aged out of the window stay
+  // reflected in `pet.stage`, which never goes backwards).
   const history: PeriodRecord[] = [
     ...working.history,
     {
@@ -190,6 +194,11 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
       endedAt,
     },
   ];
+  const stage = growPet(working.pet.stage, growthFacts(history));
+  const trimmedHistory =
+    history.length > PERIOD_HISTORY_LIMIT
+      ? history.slice(-PERIOD_HISTORY_LIMIT)
+      : history;
 
   const wallet =
     savings.depositsThisPeriod > 0
@@ -211,7 +220,7 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
       ...working.pet,
       comfort,
       spirit,
-      stage: growPet(working.pet.stage, growthFacts(history)),
+      stage,
     },
     wallet,
     period: {
@@ -229,7 +238,7 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
       completedThisPeriod: [],
       activeTaskId: nextTaskId([]),
     },
-    history,
+    history: trimmedHistory,
   };
 };
 

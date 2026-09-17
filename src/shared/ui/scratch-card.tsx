@@ -57,6 +57,9 @@ const TILE_TOTAL = COLS * ROWS;
  *
  * Implemented as a tile grid (no Skia) so it stays Expo-Go friendly. Clearing
  * enough tiles fires `onReveal` once; the rest of the foil then fades away.
+ *
+ * Pan samples are batched to one React update per animation frame — every
+ * `onUpdate` used to call `setState`, which janked mid-tier Android.
  */
 export const ScratchCard = ({
   children,
@@ -75,44 +78,66 @@ export const ScratchCard = ({
   const didReveal = useRef(false);
   const foilOpacity = useSharedValue(1);
 
+  // Mutable scratch buffer — gesture writes here; a single rAF flushes to React.
+  const clearedRef = useRef(cleared);
+  const clearedCountRef = useRef(0);
+  const sizeRef = useRef(size);
+  const rafId = useRef<number | null>(null);
+  const isDirty = useRef(false);
+
+  sizeRef.current = size;
+
+  const flushCleared = useCallback(() => {
+    rafId.current = null;
+    if (!isDirty.current) return;
+    isDirty.current = false;
+    setCleared(clearedRef.current.slice());
+    setClearedCount(clearedCountRef.current);
+  }, []);
+
   const clearAt = useCallback(
     (x: number, y: number) => {
-      if (size.width <= 0 || size.height <= 0 || didReveal.current) return;
+      const { width, height } = sizeRef.current;
+      if (width <= 0 || height <= 0 || didReveal.current) return;
 
-      const col = Math.floor((x / size.width) * COLS);
-      const row = Math.floor((y / size.height) * ROWS);
+      const col = Math.floor((x / width) * COLS);
+      const row = Math.floor((y / height) * ROWS);
       if (col < 0 || row < 0 || col >= COLS || row >= ROWS) return;
 
-      const brushCols = Math.max(
-        1,
-        Math.round((BRUSH_RADIUS / size.width) * COLS),
-      );
-      const brushRows = Math.max(
-        1,
-        Math.round((BRUSH_RADIUS / size.height) * ROWS),
-      );
+      const brushCols = Math.max(1, Math.round((BRUSH_RADIUS / width) * COLS));
+      const brushRows = Math.max(1, Math.round((BRUSH_RADIUS / height) * ROWS));
 
-      setCleared((prev) => {
-        let added = 0;
-        const next = prev.slice();
-        for (let r = row - brushRows; r <= row + brushRows; r += 1) {
-          for (let c = col - brushCols; c <= col + brushCols; c += 1) {
-            if (c < 0 || r < 0 || c >= COLS || r >= ROWS) continue;
-            const i = r * COLS + c;
-            if (!next[i]) {
-              next[i] = true;
-              added += 1;
-            }
+      const next = clearedRef.current.slice();
+      let added = 0;
+      for (let r = row - brushRows; r <= row + brushRows; r += 1) {
+        for (let c = col - brushCols; c <= col + brushCols; c += 1) {
+          if (c < 0 || r < 0 || c >= COLS || r >= ROWS) continue;
+          const i = r * COLS + c;
+          if (!next[i]) {
+            next[i] = true;
+            added += 1;
           }
         }
-        if (added > 0) {
-          setClearedCount((count) => count + added);
-          return next;
-        }
-        return prev;
-      });
+      }
+
+      if (added === 0) return;
+
+      clearedRef.current = next;
+      clearedCountRef.current += added;
+      isDirty.current = true;
+
+      if (rafId.current == null) {
+        rafId.current = requestAnimationFrame(flushCleared);
+      }
     },
-    [size.height, size.width],
+    [flushCleared],
+  );
+
+  useEffect(
+    () => () => {
+      if (rafId.current != null) cancelAnimationFrame(rafId.current);
+    },
+    [],
   );
 
   useEffect(() => {

@@ -2,6 +2,7 @@ export type { TaskDifficulty } from './balance';
 export {
   BUDGET_TOLERANCE,
   HEATING,
+  PERIOD_HISTORY_LIMIT,
   PERIOD_NEED_DECAY,
   REGULARITY_BONUS,
   STARTING_BALANCE,

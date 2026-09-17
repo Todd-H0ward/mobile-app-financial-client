@@ -1,4 +1,7 @@
-export { createPersistStorage } from './persist-storage';
+export {
+  createPersistStorage,
+  flushPersistWrites,
+} from './persist-storage';
 export type {
   PreferencesPersistedState,
   PreferencesStore,

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 
 import { STORAGE_KEYS } from '@/shared/constants';
 import { createPersistStorage } from '@/shared/model';
@@ -58,11 +59,13 @@ interface UserStore extends UserPersistedState {
 /**
  * One save for the whole app, see docs/game-state.md.
  *
- * There is no explicit "save": `persist` writes on every `set`, so a crash
- * loses nothing but the current animation frame.
+ * There is no explicit "save": `persist` queues a write on every `set`. Disk
+ * I/O is debounced and async so a burst of updates does not block input
+ * (`docs/performance.md`); a crash can still lose only the last debounce
+ * window.
  *
- * The storage is synchronous (`createPersistStorage`), so the save is already
- * read by the first render: `user === null` always means "no profile", never
+ * Reads stay synchronous (`createPersistStorage`), so the save is already
+ * there on the first render: `user === null` always means "no profile", never
  * "not loaded yet". The absence of a `hasHydrated` flag and of any waiting at
  * startup is deliberate.
  */
@@ -156,6 +159,28 @@ export const useUser = () => useUserStore((state) => state.user);
 
 /** The pet slice of the save, or `undefined` before there is a profile. */
 export const useUserPet = () => useUserStore((state) => state.user?.pet);
+
+/**
+ * Home HUD fields only — wallet balance ticks must not rebuild pet appearance
+ * when comfort / spirit did not change, and vice versa.
+ */
+export const useHomeHudSource = () =>
+  useUserStore(
+    useShallow((state) => {
+      const user = state.user;
+      if (!user) return null;
+
+      return {
+        pet: user.pet,
+        balance: user.wallet.balance,
+        lastEntry: user.wallet.history[0] ?? null,
+        savings: user.savings,
+        tasks: user.tasks,
+        phase: user.period.phase,
+        isAnimationEnabled: user.settings.isAnimationEnabled,
+      };
+    }),
+  );
 
 /** Creates the profile during onboarding. Overwrites an existing one. */
 export const useCreateUser = () => useUserStore((state) => state.createUser);

@@ -41,6 +41,11 @@ interface ScreenRootProps {
   gap?: Spacing;
   /** Leaves room for the tab bar. Off for pushed screens. */
   isTabBarVisible?: boolean;
+  /**
+   * When false, the screen does not wrap children in a `ScrollView` — use this
+   * when a child owns scrolling (`FlatList`), so lists stay virtualized.
+   */
+  isScrollable?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -164,15 +169,25 @@ const ScreenRoot = ({
   variant = 'background',
   gap = 'two',
   isTabBarVisible = true,
+  isScrollable = true,
   style,
 }: ScreenRootProps) => {
   // The bottom edge stays off `SafeAreaView` on purpose: padding it there would
   // clip the scroll view instead of letting content scroll past the indicator.
   // It goes on the scroll content, together with the tab-bar inset.
   const insets = useSafeAreaInsets();
+  const bottomPad =
+    (isTabBarVisible ? BOTTOM_TAB_INSET : insets.bottom) + SPACING.four;
 
   const column = (
-    <View style={[styles.column, { gap: SPACING[gap] }, style]}>
+    <View
+      style={[
+        styles.column,
+        !isScrollable && styles.columnFill,
+        { gap: SPACING[gap] },
+        style,
+      ]}
+    >
       {children}
     </View>
   );
@@ -180,18 +195,26 @@ const ScreenRoot = ({
   return (
     <ThemedView variant={variant} style={styles.root}>
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-        <ScrollView
-          contentContainerStyle={[
-            styles.content,
-            {
-              paddingBottom:
-                (isTabBarVisible ? BOTTOM_TAB_INSET : insets.bottom) +
-                SPACING.four,
-            },
-          ]}
-        >
-          {column}
-        </ScrollView>
+        {isScrollable ? (
+          <ScrollView
+            contentContainerStyle={[
+              styles.content,
+              { paddingBottom: bottomPad },
+            ]}
+          >
+            {column}
+          </ScrollView>
+        ) : (
+          <View
+            style={[
+              styles.content,
+              styles.static,
+              { paddingBottom: bottomPad },
+            ]}
+          >
+            {column}
+          </View>
+        )}
       </SafeAreaView>
     </ThemedView>
   );
@@ -230,11 +253,17 @@ const styles = StyleSheet.create({
     width: '100%',
     flexGrow: 1,
   },
+  columnFill: {
+    flex: 1,
+  },
   content: {
     alignItems: 'center',
     paddingHorizontal: CONTENT_PADDING,
     paddingTop: SPACING.three,
     flexGrow: 1,
+  },
+  static: {
+    flex: 1,
   },
   header: {
     alignItems: 'center',
