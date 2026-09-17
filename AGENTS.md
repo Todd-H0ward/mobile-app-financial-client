@@ -17,7 +17,7 @@ runs Expo SDK 57, React 19, React Native 0.86 and expo-router 57
 | --- | --- |
 | Runtime | Expo SDK 57, React Native 0.86, React 19 |
 | Routing | expo-router (file-based, `src/app`) |
-| Server state | TanStack Query + axios (`@/shared/api`) |
+| Server state | **нет** — офлайн-игра, сейв локальный; axios / TanStack Query убраны |
 | Client state | zustand + `persist` поверх `expo-sqlite/kv-store`, синхронно (`@/entities/*/model`) |
 | Game loop | game periods, not real time — [docs/game-period.md](docs/game-period.md) |
 | i18n | i18next + react-i18next (`@/shared/i18n`) |

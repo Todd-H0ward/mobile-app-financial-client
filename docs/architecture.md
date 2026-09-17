@@ -69,7 +69,6 @@ src/
 │   ├── settings/             # арифметический барьер взрослых
 │   └── minigame/             # правила аркады
 └── shared/
-    ├── api/                  # axios + react-query client
     ├── constants/            # theme, routes, storage keys
     ├── hooks/ · utils/ · lib/
     ├── i18n/ · model/ · types/
@@ -156,13 +155,11 @@ Child-facing sound / motion switches live on `/settings` and on the user save.
 - Контентные сущности валидируют JSON при загрузке модуля:
   `onboarding`, `hint`, `task`, `goal`, `catalogue`, `glossary`. Битая строка
   падает в тестах, а не на первом экране ребёнка.
-- `shared/api/api-client.ts` — axios instance, base URL from
-  `EXPO_PUBLIC_API_URL`, 40s timeout.
-- `shared/api/query-client.ts` — TanStack Query defaults (60s `staleTime`,
-  one retry, no refetch on focus).
-- Requests belong to the slice that owns the data: `entities/<entity>/api/*` for
-  entity CRUD, `screens/<screen>/api/*` for screen-specific queries.
-- `_app/providers` mounts `QueryClientProvider`; add new providers there.
+- Сетевого слоя нет: игровой цикл офлайн ([privacy.md](./privacy.md)).
+  `shared/api`, axios и TanStack Query удалены — не заготовка, а сознательный
+  отказ. Если появится синхронизация, слой поднимают заново вместе с бумагами
+  по 152-ФЗ.
+- `_app/providers` монтирует жесты, safe area, TimeSource, feedback и a11y.
 
 ## i18n
 

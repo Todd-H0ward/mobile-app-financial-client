@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 
-import { QueryClientProvider } from '@tanstack/react-query';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -10,7 +9,6 @@ import { FeedbackHost } from '@/features/feedback';
 import { useIsMotionEnabled } from '@/entities/settings';
 import { useUserStore } from '@/entities/user';
 
-import { queryClient } from '@/shared/api';
 import { useAppLanguage } from '@/shared/hooks';
 import {
   bindHapticsSoundGate,
@@ -51,7 +49,7 @@ const AccessibilityBridge = ({ children }: { children: ReactNode }) => {
 
 /**
  * App shell. TimeSource is only for wallet / content stamps — the period
- * engine never reads it (0.3-R).
+ * engine never reads it (0.3-R). Offline by design: no QueryClient / axios.
  */
 export const Providers = ({ children }: ProvidersProps) => {
   useAppLanguage();
@@ -59,16 +57,14 @@ export const Providers = ({ children }: ProvidersProps) => {
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
-        <QueryClientProvider client={queryClient}>
-          <TimeSourceContext.Provider value={realTimeSource}>
-            <AccessibilityBridge>
-              {children}
+        <TimeSourceContext.Provider value={realTimeSource}>
+          <AccessibilityBridge>
+            {children}
 
-              <FeedbackHost />
-              <Toaster />
-            </AccessibilityBridge>
-          </TimeSourceContext.Provider>
-        </QueryClientProvider>
+            <FeedbackHost />
+            <Toaster />
+          </AccessibilityBridge>
+        </TimeSourceContext.Provider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

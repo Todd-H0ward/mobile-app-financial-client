@@ -1,18 +1,13 @@
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+
+import en from './en.json';
+import ru from './ru.json';
 
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
 
 type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
-
-const localesDir = dirname(fileURLToPath(import.meta.url));
-
-const loadLocale = (name: 'en' | 'ru'): Json =>
-  JSON.parse(readFileSync(join(localesDir, `${name}.json`), 'utf8')) as Json;
 
 /** Dot-path keys for every leaf — objects only, arrays stay as one leaf. */
 const leafKeys = (value: Json, prefix = ''): string[] => {
@@ -22,7 +17,7 @@ const leafKeys = (value: Json, prefix = ''): string[] => {
 
   return Object.entries(value).flatMap(([key, child]) => {
     const path = prefix ? `${prefix}.${key}` : key;
-    return leafKeys(child, path);
+    return leafKeys(child as Json, path);
   });
 };
 
@@ -31,10 +26,8 @@ const leafKeys = (value: Json, prefix = ''): string[] => {
 // ═══════════════════════════════════════════
 
 describe('i18n en ↔ ru key parity', () => {
-  const en = loadLocale('en');
-  const ru = loadLocale('ru');
-  const enKeys = new Set(leafKeys(en));
-  const ruKeys = new Set(leafKeys(ru));
+  const enKeys = new Set(leafKeys(en as Json));
+  const ruKeys = new Set(leafKeys(ru as Json));
 
   it('has the same leaf keys in both locales', () => {
     const missingInRu = [...enKeys].filter((key) => !ruKeys.has(key)).sort();
@@ -59,11 +52,11 @@ describe('i18n en ↔ ru key parity', () => {
         return [];
       }
       return Object.entries(value).flatMap(([key, child]) =>
-        walk(child, path ? `${path}.${key}` : key),
+        walk(child as Json, path ? `${path}.${key}` : key),
       );
     };
 
-    expect(walk(en, '')).toEqual([]);
-    expect(walk(ru, '')).toEqual([]);
+    expect(walk(en as Json, '')).toEqual([]);
+    expect(walk(ru as Json, '')).toEqual([]);
   });
 });
