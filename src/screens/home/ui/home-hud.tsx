@@ -50,6 +50,8 @@ interface HomeHudPlanBannerProps {
 }
 
 interface HomeHudEndBannerProps {
+  /** `disabled` | `ready` | `warn` — three HUD states from 0.3-R. */
+  status: 'disabled' | 'ready' | 'warn';
   onPress: () => void;
 }
 
@@ -247,38 +249,64 @@ export const HomeHudPlanBanner = ({ onPress }: HomeHudPlanBannerProps) => {
 };
 
 /**
- * Closes the active period and opens plan-vs-fact (1.11 / 2.5.5).
+ * Opens the End day confirm screen (0.3-R / 2.5.5).
  *
- * Soft colours on purpose — ending a period is not an alarm, it is the door
- * into the totals the child is meant to read.
+ * Three states: unavailable without a live plan, ready when needs are covered,
+ * warn when they are not — soft amber, never a red alarm or a hard block.
  */
-export const HomeHudEndBanner = ({ onPress }: HomeHudEndBannerProps) => {
+export const HomeHudEndBanner = ({
+  status,
+  onPress,
+}: HomeHudEndBannerProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
+
+  const isDisabled = status === 'disabled';
+  const isWarn = status === 'warn';
+  const titleKey = isWarn ? 'home.endBannerWarnTitle' : 'home.endBannerTitle';
+  const bodyKey = isWarn ? 'home.endBannerWarnBody' : 'home.endBannerBody';
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={t('home.endBannerAction')}
+      accessibilityState={{ disabled: isDisabled }}
+      disabled={isDisabled}
       onPress={onPress}
       style={({ pressed }) => [
         styles.planBanner,
         {
-          backgroundColor: theme.accentSoft,
-          borderColor: theme.accent,
-          opacity: pressed ? 0.85 : 1,
+          backgroundColor: isDisabled
+            ? theme.surface
+            : isWarn
+              ? theme.warningSoft
+              : theme.accentSoft,
+          borderColor: isDisabled
+            ? theme.border
+            : isWarn
+              ? theme.warning
+              : theme.accent,
+          opacity: isDisabled ? 0.55 : pressed ? 0.85 : 1,
         },
       ]}
     >
       <View style={styles.planBannerText}>
-        <Text variant="bodyBold" themeColor="accentStrong">
-          {t('home.endBannerTitle')}
+        <Text
+          variant="bodyBold"
+          themeColor={
+            isDisabled ? 'textMuted' : isWarn ? 'warningStrong' : 'accentStrong'
+          }
+        >
+          {t(titleKey)}
         </Text>
         <Text variant="small" themeColor="textSecondary">
-          {t('home.endBannerBody')}
+          {t(bodyKey)}
         </Text>
       </View>
-      <Text variant="smallBold" themeColor="accent">
+      <Text
+        variant="smallBold"
+        themeColor={isDisabled ? 'textMuted' : isWarn ? 'warning' : 'accent'}
+      >
         {t('home.endBannerAction')}
       </Text>
     </Pressable>

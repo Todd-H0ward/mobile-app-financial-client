@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { useMemo } from 'react';
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import { StyleSheet } from 'react-native';
@@ -8,15 +7,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { FeedbackHost } from '@/features/feedback';
 
-import { useUser } from '@/entities/user';
-
 import { queryClient } from '@/shared/api';
 import { useAppLanguage } from '@/shared/hooks';
-import {
-  demoTimeSource,
-  realTimeSource,
-  TimeSourceContext,
-} from '@/shared/lib';
+import { realTimeSource, TimeSourceContext } from '@/shared/lib';
 import { Toaster } from '@/shared/ui';
 
 import '@/shared/i18n';
@@ -33,22 +26,18 @@ interface ProvidersProps {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
+/**
+ * App shell. TimeSource is only for wallet / content stamps — the period
+ * engine never reads it (0.3-R).
+ */
 export const Providers = ({ children }: ProvidersProps) => {
   useAppLanguage();
-
-  const user = useUser();
-  const isDemoMode = user?.settings.isDemoMode ?? false;
-
-  const timeSource = useMemo(
-    () => (isDemoMode ? demoTimeSource : realTimeSource),
-    [isDemoMode],
-  );
 
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <TimeSourceContext.Provider value={timeSource}>
+          <TimeSourceContext.Provider value={realTimeSource}>
             {children}
 
             <FeedbackHost />

@@ -17,7 +17,6 @@ import type { BudgetDirection } from '@/entities/economy';
 import { startPeriod, useUpdateUser, useUser } from '@/entities/user';
 
 import { ROUTES } from '@/shared/constants';
-import { useTimeSource } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -64,7 +63,6 @@ interface BudgetPlanController {
  */
 export const useBudgetPlan = (): BudgetPlanController => {
   const router = useRouter();
-  const time = useTimeSource();
   const user = useUser();
   const updateUser = useUpdateUser();
   const showFeedback = useShowFeedback();
@@ -84,7 +82,7 @@ export const useBudgetPlan = (): BudgetPlanController => {
       ...user,
       period: { ...user.period, plan: next },
     };
-    const after = startPeriod(drafted, time);
+    const after = startPeriod(drafted);
 
     showFeedback({
       before: user,

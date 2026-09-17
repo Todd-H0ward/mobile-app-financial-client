@@ -99,7 +99,7 @@ export const HomeScreen = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const hud = useHomeHud();
-  const { canEnd, endPeriod } = useEndPeriod();
+  const { status: endStatus, openConfirm } = useEndPeriod();
 
   const [room, setRoom] = useState<RoomId>(DEFAULT_ROOM);
   /**
@@ -183,7 +183,9 @@ export const HomeScreen = () => {
           <HomeHudPlanBanner onPress={() => router.push(ROUTES.BUDGET_PLAN)} />
         )}
 
-        {hud.isActive && canEnd && <HomeHudEndBanner onPress={endPeriod} />}
+        {hud.isActive && (
+          <HomeHudEndBanner status={endStatus} onPress={openConfirm} />
+        )}
       </View>
 
       <View

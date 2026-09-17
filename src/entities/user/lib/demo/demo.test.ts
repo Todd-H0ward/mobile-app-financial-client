@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vitest';
 
-import { makeDemoTimeSource } from '@/shared/lib/time-source';
-
 import { createInitialUser } from '../../model/initial-user';
 import { finishPeriod, startPeriod } from '../period';
 
@@ -186,10 +184,8 @@ describe('exitDemoMode', () => {
 
 describe('demo mode — five periods back-to-back', () => {
   it('runs five full periods and leaves a valid profile', () => {
-    const time = makeDemoTimeSource(0);
-    const user = runDemoPeriods(createDemoProfile(), time);
+    const user = runDemoPeriods(createDemoProfile());
 
-    // Five periods completed: index advanced 1→6.
     expect(user.period.index).toBe(1 + DEMO_RUN_PERIODS);
     expect(user.period.phase).toBe('planning');
     expect(user.history).toHaveLength(DEMO_RUN_PERIODS);
@@ -197,19 +193,17 @@ describe('demo mode — five periods back-to-back', () => {
   });
 
   it('starts from active and still finishes exactly five periods', () => {
-    const time = makeDemoTimeSource(0);
     let user = createDemoProfile();
 
     user = {
       ...user,
       period: { ...user.period, plan: { needs: 10, wants: 5, savings: 5 } },
     };
-    user = startPeriod(user, time);
-    time.tick();
+    user = startPeriod(user);
 
     expect(user.period.phase).toBe('active');
 
-    user = runDemoPeriods(user, time);
+    user = runDemoPeriods(user);
 
     expect(user.period.index).toBe(1 + DEMO_RUN_PERIODS);
     expect(user.period.phase).toBe('planning');
@@ -217,54 +211,44 @@ describe('demo mode — five periods back-to-back', () => {
   });
 
   it('starts from summary and still finishes exactly five periods', () => {
-    const time = makeDemoTimeSource(0);
     let user = createDemoProfile();
 
     user = {
       ...user,
       period: { ...user.period, plan: { needs: 10, wants: 5, savings: 5 } },
     };
-    user = startPeriod(user, time);
-    time.tick();
-    user = finishPeriod(user, time);
-    time.tick();
+    user = startPeriod(user);
+    user = finishPeriod(user);
 
     expect(user.period.phase).toBe('summary');
 
-    user = runDemoPeriods(user, time);
+    user = runDemoPeriods(user);
 
     expect(user.period.index).toBe(1 + DEMO_RUN_PERIODS);
     expect(user.period.phase).toBe('planning');
     expect(user.history).toHaveLength(DEMO_RUN_PERIODS);
   });
 
-  it('does not depend on real time — same financial outcome with any clock seed', () => {
-    const runFivePeriods = (seed: number) => {
-      const time = makeDemoTimeSource(seed);
-      const user = runDemoPeriods(createDemoProfile(), time);
-
-      return user.history.map((r) => ({
+  it('does not depend on real time — same financial outcome every run', () => {
+    const runFivePeriods = () =>
+      runDemoPeriods(createDemoProfile()).history.map((r) => ({
         plan: r.plan,
         fact: r.fact,
         isPlanKept: r.isPlanKept,
       }));
-    };
 
-    // 30 days apart — financial outcome must be identical.
-    const historyA = runFivePeriods(0);
-    const historyB = runFivePeriods(30 * 24 * 60 * 60 * 1000);
-
-    expect(historyA).toEqual(historyB);
+    expect(runFivePeriods()).toEqual(runFivePeriods());
   });
 
   it('keeps endedAt strictly ascending across history', () => {
-    const time = makeDemoTimeSource(1000);
-    const user = runDemoPeriods(createDemoProfile(), time);
+    const user = runDemoPeriods(createDemoProfile());
 
     for (let i = 1; i < user.history.length; i++) {
-      expect(user.history[i].endedAt).toBeGreaterThan(
-        user.history[i - 1].endedAt,
-      );
+      const current = user.history[i];
+      const previous = user.history[i - 1];
+      expect(current && previous).toBeTruthy();
+      if (!current || !previous) return;
+      expect(current.endedAt).toBeGreaterThan(previous.endedAt);
     }
   });
 });

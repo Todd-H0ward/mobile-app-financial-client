@@ -14,6 +14,7 @@ const HINT_SCREENS = [
   'onboarding',
   'home',
   'ui-kit',
+  'end-period',
   'period-summary',
   'recovery',
   'shop',

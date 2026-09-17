@@ -10,17 +10,17 @@ import { realTimeSource } from './time-source';
 /**
  * Carries the active `TimeSource` through the React tree.
  *
- * `realTimeSource` is the default so that any component or test that does not
- * render inside a provider still gets a working implementation.
- * The only case where the context holds something else is demo mode, where
- * `Providers` swaps it for `makeDemoTimeSource`.
+ * `realTimeSource` is the default and the only production value (0.3-R): the
+ * period engine never reads the clock. Wallet and content stamps still go
+ * through this context so tests can inject `makeDemoTimeSource(seed)`.
  */
 export const TimeSourceContext = createContext<TimeSource>(realTimeSource);
 
 /**
  * Returns the `TimeSource` that is currently active.
  *
- * Use this anywhere a timestamp is needed in a React component — never call
- * `Date.now()` outside `realTimeSource`. See docs/game-period.md §TimeSource.
+ * Use this anywhere a **wallet / content** timestamp is needed — never call
+ * `Date.now()` outside `realTimeSource`. Period transitions do not use this
+ * hook; see docs/game-period.md.
  */
 export const useTimeSource = (): TimeSource => useContext(TimeSourceContext);

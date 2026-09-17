@@ -7,14 +7,13 @@ import {
   type RecoveryOption,
 } from '@/entities/budget';
 import {
-  acknowledgeSummary,
+  endPeriod,
   hasPendingGrowth,
   useUpdateUser,
   useUser,
 } from '@/entities/user';
 
 import { petGrewPath, ROUTES } from '@/shared/constants';
-import { useTimeSource } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -50,7 +49,6 @@ const routeFor = (destination: RecoveryDestination) => {
  */
 export const useRecovery = (): RecoveryController | null => {
   const router = useRouter();
-  const time = useTimeSource();
   const user = useUser();
   const updateUser = useUpdateUser();
 
@@ -62,7 +60,7 @@ export const useRecovery = (): RecoveryController | null => {
   const settleAndGo = (destination: RecoveryDestination) => {
     // Computed once, outside `updateUser`: the route decision needs the
     // settled save, and `updateUser`'s producer has no return value to read.
-    const settled = acknowledgeSummary(user, time);
+    const settled = endPeriod(user);
     updateUser(() => settled);
 
     // Growth is the loudest reward in the game (docs/pet.md) — it interrupts

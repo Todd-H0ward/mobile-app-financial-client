@@ -7,7 +7,6 @@ import {
   useUser,
 } from '@/entities/user';
 
-import { isDemoTimeSource, useTimeSource } from '@/shared/lib';
 import { toast } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
@@ -15,17 +14,12 @@ import { toast } from '@/shared/ui';
 // ═══════════════════════════════════════════
 
 /**
- * Demo-mode controls for the grown-up (2.5.13).
+ * Demo-mode controls for the grown-up (2.5.13 / 0.3-R).
  *
- * Pure transitions live in `entities/user/lib/demo`, parking the child's save
- * is the store's job; this hook only wires the two together and names each
- * change with a toast (2.5.9).
+ * Demo is a test profile + reset + FSM run — no accelerated clock.
  */
 export const useDemoMode = () => {
   const user = useUser();
-  // The clock comes from the provider, never from the module: in demo mode it
-  // is the demo clock, and `runPeriods` refuses to run against any other.
-  const time = useTimeSource();
   const updateUser = useUpdateUser();
   const setDemoMode = useSetDemoMode();
   const resetUser = useResetUser();
@@ -45,17 +39,15 @@ export const useDemoMode = () => {
   };
 
   const runPeriods = () => {
-    if (!isDemoTimeSource(time)) {
+    if (!isDemoMode) {
       toast('Прогон периодов доступен только в демо-режиме');
       return;
     }
 
     try {
-      updateUser((current) => runDemoPeriods(current, time));
+      updateUser((current) => runDemoPeriods(current));
       toast(`Прогнано ${DEMO_RUN_PERIODS} периодов`);
     } catch {
-      // The run guards itself against a runaway state machine. A grown-up
-      // pressing a button deserves a message, not a red screen.
       toast('Не удалось прогнать периоды', { variant: 'warning' });
     }
   };

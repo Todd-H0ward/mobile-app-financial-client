@@ -66,9 +66,11 @@
     "planBannerTitle": "Make a budget plan",
     "planBannerBody": "Decide where the coins go first — then you can spend.",
     "planBannerAction": "Make a plan",
-    "endBannerTitle": "Period is over",
+    "endBannerTitle": "End the day",
     "endBannerBody": "See where the coins went — plan next to fact.",
-    "endBannerAction": "See totals",
+    "endBannerWarnTitle": "End the day?",
+    "endBannerWarnBody": "Needs are still under plan — you can finish anyway; the totals will show the gap.",
+    "endBannerAction": "End day",
     "goal": {
       "none": "No goal chosen",
       "noneHint": "Open the savings jar and pick what to save for",
@@ -158,6 +160,7 @@
     "source": {
       "startingWallet": "starting wallet",
       "regularityBonus": "regularity bonus",
+      "heatingBill": "heating",
       "task": "chore «{{title}}»",
       "purchase": "bought {{title}}",
       "savingsDeposit": "saved into «{{title}}»",
@@ -235,6 +238,14 @@
       "body": [
         "This is a component showcase: buttons, cards, meters, and sheets in all states.",
         "It helps the team test the UI, and is not part of the game storyline."
+      ]
+    },
+    "end-period": {
+      "title": "End the day",
+      "body": [
+        "The day ends only when you press the button — the clock never closes it for you.",
+        "If needs are under plan, I give a soft warning. You can still finish.",
+        "After you confirm, the totals open: plan next to fact."
       ]
     },
     "period-summary": {
@@ -443,6 +454,15 @@
       "keepHabit": "Keep checking the plan before you spend",
       "checkPlan": "Look at the three boxes again when you make the next plan"
     }
+  },
+  "endPeriod": {
+    "title": "Period {{period}} — end the day",
+    "subtitle": "Confirm first, then see the totals",
+    "lead": "After this, plan and fact freeze so you can see where the coins went.",
+    "warnTitle": "Needs are still under plan",
+    "warnBody": "{{count}} still missing. You can finish anyway — the totals will just show the gap. That is not a failure.",
+    "confirm": "End the day",
+    "cancel": "Not yet"
   },
   "shop": {
     "title": "Shop",
