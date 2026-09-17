@@ -2,6 +2,8 @@ import { useState } from 'react';
 
 import { useRouter } from 'expo-router';
 
+import { useShowFeedback } from '@/features/feedback';
+
 import {
   addCoin,
   allocate,
@@ -65,6 +67,7 @@ export const useBudgetPlan = (): BudgetPlanController => {
   const time = useTimeSource();
   const user = useUser();
   const updateUser = useUpdateUser();
+  const showFeedback = useShowFeedback();
 
   const available = user?.wallet.balance ?? 0;
   const savedPlan = user?.period.plan ?? EMPTY_PLAN;
@@ -75,15 +78,26 @@ export const useBudgetPlan = (): BudgetPlanController => {
   const planLeft = remainder(available, plan);
 
   const commit = (next: BudgetPlan) => {
-    updateUser((current) =>
-      startPeriod(
-        {
-          ...current,
-          period: { ...current.period, plan: next },
-        },
-        time,
-      ),
-    );
+    if (!user) return;
+
+    const drafted = {
+      ...user,
+      period: { ...user.period, plan: next },
+    };
+    const after = startPeriod(drafted, time);
+
+    showFeedback({
+      before: user,
+      after,
+      action: 'plan',
+      params: {
+        needs: next.needs,
+        wants: next.wants,
+        savings: next.savings,
+      },
+    });
+
+    updateUser(() => after);
     setIsNeedsWarningVisible(false);
     router.replace(ROUTES.HOME);
   };

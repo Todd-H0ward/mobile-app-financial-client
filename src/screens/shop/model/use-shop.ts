@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 
+import { useShowFeedback } from '@/features/feedback';
+
 import {
   type CatalogueItem,
   directionForKind,
@@ -72,6 +74,7 @@ export const useShop = (shopId: ShopId): ShopController => {
   const user = useUser();
   const updateUser = useUpdateUser();
   const time = useTimeSource();
+  const showFeedback = useShowFeedback();
 
   const [selected, setSelected] = useState<CatalogueItem | null>(null);
   const [sheet, setSheet] = useState<ShopSheet>(null);
@@ -168,6 +171,13 @@ export const useShop = (shopId: ShopId): ShopController => {
       }
 
       updateUser(() => result.user);
+      showFeedback({
+        before: user,
+        after: result.user,
+        action: 'purchase',
+        overPlanBy: result.overPlanBy,
+        params: { item: result.item.title },
+      });
       setSheet(null);
       setSelected(null);
       setShortage(null);

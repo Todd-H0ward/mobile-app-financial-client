@@ -1,6 +1,5 @@
 export type {
   TaskPlayController,
-  TaskResultView,
   TaskSheet,
   TasksListController,
   TasksListRow,

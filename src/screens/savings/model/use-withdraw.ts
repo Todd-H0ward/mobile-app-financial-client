@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 
+import { useShowFeedback } from '@/features/feedback';
+
 import { getGoalById } from '@/entities/goal';
 import { explainWithdraw, type WithdrawExplain } from '@/entities/savings';
 import { applyWithdraw, useUpdateUser, useUser } from '@/entities/user';
@@ -36,6 +38,7 @@ export const useWithdraw = (
   const user = useUser();
   const updateUser = useUpdateUser();
   const time = useTimeSource();
+  const showFeedback = useShowFeedback();
 
   const goal = getGoalById(goalId);
   const row = user?.savings.goals.find((entry) => entry.goalId === goalId);
@@ -71,6 +74,12 @@ export const useWithdraw = (
       if (!canConfirm) return false;
       const result = applyWithdraw(user, goalId, amount, time);
       if (!result.ok) return false;
+      showFeedback({
+        before: user,
+        after: result.user,
+        action: 'withdraw',
+        params: { goal: goal.title, amount },
+      });
       updateUser(() => result.user);
       return true;
     },

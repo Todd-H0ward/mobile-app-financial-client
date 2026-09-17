@@ -110,32 +110,30 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
   const submit = () => {
     if (!canSubmit) return;
 
+    let didComplete = false;
+
     if (task.mechanic === 'quiz' && optionId != null) {
       const score = scoreQuiz(task.payload as QuizPayload, optionId);
-      play.complete(score.rewardShare, score.isCorrect);
-      return;
-    }
-    if (task.mechanic === 'change' && optionId != null) {
+      didComplete = play.complete(score.rewardShare, score.isCorrect);
+    } else if (task.mechanic === 'change' && optionId != null) {
       const score = scoreChange(task.payload as ChangePayload, optionId);
-      play.complete(score.rewardShare, score.isCorrect);
-      return;
-    }
-    if (task.mechanic === 'basket') {
+      didComplete = play.complete(score.rewardShare, score.isCorrect);
+    } else if (task.mechanic === 'basket') {
       const score = scoreBasket(task.payload as BasketPayload, basketIds);
-      play.complete(score.rewardShare, score.isCorrect);
-      return;
-    }
-    if (task.mechanic === 'priority') {
+      didComplete = play.complete(score.rewardShare, score.isCorrect);
+    } else if (task.mechanic === 'priority') {
       const score = scorePriority(
         task.payload as PriorityPayload,
         priorityOrder,
       );
-      play.complete(score.rewardShare, score.isCorrect);
-      return;
-    }
-    if (task.mechanic === 'dialog') {
+      didComplete = play.complete(score.rewardShare, score.isCorrect);
+    } else if (task.mechanic === 'dialog') {
       const score = scoreDialog();
-      play.complete(score.rewardShare, score.isCorrect);
+      didComplete = play.complete(score.rewardShare, score.isCorrect);
+    }
+
+    if (didComplete) {
+      router.replace(ROUTES.TASKS);
     }
   };
 
@@ -216,38 +214,6 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
       >
         {t('tasks.submit')}
       </Button>
-
-      <Sheet.Modal
-        isVisible={play.sheet === 'result' && play.result != null}
-        onClose={() => {
-          play.dismissSheet();
-          router.replace(ROUTES.TASKS);
-        }}
-      >
-        <Sheet.Title>
-          {play.result?.isCorrect ? t('tasks.resultOk') : t('tasks.resultMiss')}
-        </Sheet.Title>
-        <Sheet.Description>
-          {t(`tasks.items.${task.id}.explanation`, {
-            defaultValue: play.result?.explanation ?? '',
-          })}
-          {`\n\n${t('tasks.resultReward', {
-            count: formatMoney(play.result?.reward ?? 0),
-          })}`}
-        </Sheet.Description>
-        <Sheet.Actions>
-          <Button
-            variant="primary"
-            isFullWidth
-            onPress={() => {
-              play.dismissSheet();
-              router.replace(ROUTES.TASKS);
-            }}
-          >
-            {t('tasks.resultClose')}
-          </Button>
-        </Sheet.Actions>
-      </Sheet.Modal>
 
       <Sheet.Modal
         isVisible={play.sheet === 'planning'}

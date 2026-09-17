@@ -2,6 +2,8 @@ import { useState } from 'react';
 
 import { useRouter } from 'expo-router';
 
+import { useShowFeedback } from '@/features/feedback';
+
 import { getGoalById } from '@/entities/goal';
 import { progressFor, remainingFor } from '@/entities/savings';
 import {
@@ -64,6 +66,7 @@ export const useGoal = (goalId: string): GoalController | null => {
   const updateUser = useUpdateUser();
   const time = useTimeSource();
   const router = useRouter();
+  const showFeedback = useShowFeedback();
 
   const goal = getGoalById(goalId);
   const row = user?.savings.goals.find((entry) => entry.goalId === goalId);
@@ -123,6 +126,12 @@ export const useGoal = (goalId: string): GoalController | null => {
       if (amount <= 0 || amount > maxDeposit) return;
       const result = applyDeposit(user, goalId, amount, time);
       if (result.ok) {
+        showFeedback({
+          before: user,
+          after: result.user,
+          action: 'deposit',
+          params: { goal: goal.title, amount },
+        });
         updateUser(() => result.user);
         setAmount(0);
       }

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { useShowFeedback } from '@/features/feedback';
+
 import {
   getTaskById,
   listTasks,
@@ -19,13 +21,7 @@ import { useTimeSource } from '@/shared/lib';
 // TYPES
 // ═══════════════════════════════════════════
 
-type TaskSheet = 'result' | 'planning' | null;
-
-interface TaskResultView {
-  isCorrect: boolean;
-  reward: number;
-  explanation: string;
-}
+type TaskSheet = 'planning' | null;
 
 interface TaskPlayController {
   task: TaskContent;
@@ -33,8 +29,8 @@ interface TaskPlayController {
   canPlay: boolean;
   isDone: boolean;
   sheet: TaskSheet;
-  result: TaskResultView | null;
-  complete: (rewardShare: number, isCorrect: boolean) => void;
+  /** Returns true when the chore was credited and feedback opened. */
+  complete: (rewardShare: number, isCorrect: boolean) => boolean;
   dismissSheet: () => void;
 }
 
@@ -89,10 +85,10 @@ export const useTaskPlay = (taskId: string): TaskPlayController | null => {
   const user = useUser();
   const updateUser = useUpdateUser();
   const time = useTimeSource();
+  const showFeedback = useShowFeedback();
   const task = getTaskById(taskId);
 
   const [sheet, setSheet] = useState<TaskSheet>(null);
-  const [result, setResult] = useState<TaskResultView | null>(null);
 
   if (!task || !user) return null;
 
@@ -105,25 +101,26 @@ export const useTaskPlay = (taskId: string): TaskPlayController | null => {
     canPlay,
     isDone,
     sheet,
-    result,
 
-    complete: (rewardShare, isCorrect) => {
+    complete: (rewardShare, _isCorrect) => {
       if (user.period.phase === 'planning') {
         setSheet('planning');
-        return;
+        return false;
       }
-      if (!canPlay) return;
+      if (!canPlay) return false;
 
       const outcome = applyCompleteTask(user, task.id, time, rewardShare);
-      if (!outcome.ok) return;
+      if (!outcome.ok) return false;
 
-      updateUser(() => outcome.user);
-      setResult({
-        isCorrect,
-        reward: outcome.reward,
-        explanation: task.explanation,
+      showFeedback({
+        before: user,
+        after: outcome.user,
+        action: 'task',
+        whyText: task.explanation,
+        params: { reward: outcome.reward },
       });
-      setSheet('result');
+      updateUser(() => outcome.user);
+      return true;
     },
 
     dismissSheet: () => setSheet(null),
@@ -132,7 +129,6 @@ export const useTaskPlay = (taskId: string): TaskPlayController | null => {
 
 export type {
   TaskPlayController,
-  TaskResultView,
   TaskSheet,
   TasksListController,
   TasksListRow,

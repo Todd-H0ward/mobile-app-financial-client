@@ -580,5 +580,35 @@
         "explanation": "Compare prices, not only names."
       }
     }
+  },
+  "feedback": {
+    "whatChanged": "What changed",
+    "whyHeading": "Why",
+    "close": "Got it",
+    "title": {
+      "purchase": "Bought: {{item}}",
+      "deposit": "Put {{amount}} into {{goal}}",
+      "withdraw": "Took {{amount}} from {{goal}}",
+      "task": "Chore done — +{{reward}}",
+      "plan": "Plan locked in"
+    },
+    "why": {
+      "purchase": "The coins left the wallet and went into the spending fact for this item.",
+      "purchaseOverPlan": "The coins left the wallet. This purchase went {{over}} over the plan for that box — the money moved, it did not vanish.",
+      "deposit": "Coins left the wallet and filled the jar. The savings fact grew by the same amount.",
+      "withdraw": "Coins came back to the wallet from the jar. The goal is a little farther now.",
+      "task": "A finished chore pays coins and lifts the pet's spirit a little.",
+      "plan": "The three boxes are set. Spending opens only after this — the plan is the map for the period."
+    },
+    "metrics": {
+      "balance": "Wallet",
+      "savings": "Savings jar",
+      "factNeeds": "Needs fact",
+      "factWants": "Wants fact",
+      "factSavings": "Savings fact",
+      "comfort": "Comfort",
+      "spirit": "Spirit",
+      "furniture": "Furniture in the room"
+    }
   }
 }
