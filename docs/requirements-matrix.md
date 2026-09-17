@@ -36,7 +36,7 @@
 | 2.5.8 | ≥6 заданий по 3 темам, с последствиями, не только тесты | `screens/tasks` | `entities/task` + `entities/user/lib/tasks` + `content/tasks.json` | `queue.test.ts`, `score.test.ts`, `tasks.test.ts`, `content.test.ts` | готово — 6 заданий, 5 механик (quiz/change/basket/priority/dialog), витрина и экран прохождения |
 
 | 2.5.9 | Обратная связь после каждого действия: что изменилось и почему | все экраны | `features/feedback` (`describeChange`, `FeedbackSheet`) | `describe-change.test.ts` | готово — дифф сейва + шит «что / почему»; покупка, депозит, снятие, задание, план |
-| 2.5.9 | Путь восстановления после ошибки без обнуления прогресса | `screens/period-summary` | `entities/budget/lib/explain` | `explain.test.ts` | готово — tips на экране итогов, `acknowledgeSummary` не обнуляет сейв |
+| 2.5.9 | Путь восстановления после ошибки без обнуления прогресса | `screens/recovery` | `entities/budget/lib/recovery` (`pickRecoveryOptions`) | `recovery.test.ts`, `explain.test.ts` | готово — правила выбора 1–2 вариантов + экран; `acknowledgeSummary` не обнуляет сейв |
 | 2.5.10 | ≥3 состояния питомца с объяснением причины | `screens/home` | `entities/pet/lib/mood` | `mood.test.ts` | не начато |
 | 2.5.10 | ≥3 стадии развития по совокупности решений за несколько периодов | `screens/home` | `entities/pet/lib/growth` | `growth.test.ts` | не начато |
 | 2.5.11 | История, итоги последнего периода, справочник терминов | `screens/history`, `screens/glossary` | `entities/period/model` | — | не начато |

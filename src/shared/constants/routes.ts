@@ -10,6 +10,8 @@ export const ROUTES = {
   PET_CREATE: '/pet-create',
   BUDGET_PLAN: '/budget-plan',
   PERIOD_SUMMARY: '/period-summary',
+  /** Choosable recovery steps after the period totals — 2.5.9. */
+  RECOVERY: '/recovery',
   /** Dynamic shopfront — append `/${shopId}`. Prefer `shopPath`. */
   SHOP: '/shop',
   /** Savings showcase — every goal with progress. */

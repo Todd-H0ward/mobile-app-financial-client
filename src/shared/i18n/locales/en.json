@@ -196,7 +196,15 @@
       "body": [
         "We compare plan and fact across three directions: needs, wants, savings.",
         "If more went somewhere — those coins did not vanish, they went somewhere else.",
-        "At the bottom are one or two steps for the next period. Progress is never wiped."
+        "Next comes a recovery screen: pick one gentle step for the next period. Progress is never wiped."
+      ]
+    },
+    "recovery": {
+      "title": "Recovery path",
+      "body": [
+        "After the totals you pick one or two concrete steps for the next period.",
+        "The options depend on what went off plan — save first, wait on a want, protect needs.",
+        "You can skip. Nothing is wiped and nothing is graded."
       ]
     },
     "shop": {
@@ -358,8 +366,7 @@
     "over": "+{{count}} over plan",
     "under": "−{{count}} under plan",
     "whatHappened": "What happened",
-    "nextPeriod": "What you can do next period",
-    "continue": "Next period",
+    "continue": "What you can do next",
     "story": {
       "allOnPlan": "Every direction landed on the plan. Nice work keeping the three boxes in balance.",
       "wantsAteSavings": "Wants took more than planned, and those coins did not reach the savings jar. The money moved — it did not vanish.",
@@ -578,6 +585,34 @@
         "title": "Which is cheaper",
         "brief": "Compare two sets and pick the cheaper one.",
         "explanation": "Compare prices, not only names."
+      }
+    }
+  },
+  "recovery": {
+    "title": "Period {{period}} — next steps",
+    "subtitle": "Pick one thing for the next period",
+    "lead": "Progress stays. These are gentle next steps — not a grade and not a wipe.",
+    "skip": "Continue without picking",
+    "options": {
+      "saveFirst": {
+        "title": "Put coins in the jar first",
+        "body": "Open the plan and set aside savings before wants."
+      },
+      "waitOnWant": {
+        "title": "Move one want to later",
+        "body": "Leave one want for the next period so the jar can grow."
+      },
+      "protectNeeds": {
+        "title": "Protect needs in the plan",
+        "body": "Give needs enough coins before spending on wants."
+      },
+      "keepHabit": {
+        "title": "Keep checking the plan",
+        "body": "Look at the three boxes before you spend again."
+      },
+      "checkPlan": {
+        "title": "Make the next plan carefully",
+        "body": "Open planning and lay out needs, wants and the jar again."
       }
     }
   },

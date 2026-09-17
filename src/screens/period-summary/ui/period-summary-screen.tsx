@@ -18,8 +18,8 @@ import { ComparisonRow } from './comparison-row';
 /**
  * Plan vs fact for the period that just ended — 2.5.5 / roadmap 1.11.
  *
- * Three parts from docs/budget.md: the comparison, a story that ties the
- * deltas together, and a recovery path (2.5.9) with no shame and no wipe.
+ * Comparison + story here; the recovery path (2.5.9) is its own screen so the
+ * child can pick a concrete next step without wiping progress.
  */
 export const PeriodSummaryScreen = () => {
   const { t } = useTranslation();
@@ -65,17 +65,6 @@ export const PeriodSummaryScreen = () => {
               under: underList,
             })}
           </Text>
-        </Card.Content>
-      </Card>
-
-      <Card>
-        <Card.Content>
-          <Text variant="bodyBold">{t('periodSummary.nextPeriod')}</Text>
-          {summary.explain.tipKeys.map((tip) => (
-            <Text key={tip} themeColor="textSecondary">
-              · {t(`periodSummary.tips.${tip}`)}
-            </Text>
-          ))}
         </Card.Content>
       </Card>
 

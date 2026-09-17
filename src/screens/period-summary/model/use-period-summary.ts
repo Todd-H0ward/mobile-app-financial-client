@@ -6,10 +6,9 @@ import {
   explainSummary,
   type SummaryExplain,
 } from '@/entities/budget';
-import { acknowledgeSummary, useUpdateUser, useUser } from '@/entities/user';
+import { useUser } from '@/entities/user';
 
 import { ROUTES } from '@/shared/constants';
-import { useTimeSource } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -20,11 +19,11 @@ interface PeriodSummaryController {
   periodIndex: number;
   /** Three comparison rows, always. */
   rows: BudgetComparison[];
-  /** Story + recovery tips for the copy layer. */
+  /** Story for the copy layer — tips live on the recovery screen. */
   explain: SummaryExplain;
   /** Largest of plan/fact across rows — shared scale for the bars. */
   barMax: number;
-  /** Settles the period and returns home. */
+  /** Opens the recovery path (choose a next step). */
   continueNext: () => void;
 }
 
@@ -33,14 +32,12 @@ interface PeriodSummaryController {
 // ═══════════════════════════════════════════
 
 /**
- * Reads the frozen plan/fact of the `summary` phase and dismisses into the
- * next planning period via `acknowledgeSummary`.
+ * Reads the frozen plan/fact of the `summary` phase. Settlement happens on
+ * the recovery screen after the child picks a next step (or skips).
  */
 export const usePeriodSummary = (): PeriodSummaryController | null => {
   const router = useRouter();
-  const time = useTimeSource();
   const user = useUser();
-  const updateUser = useUpdateUser();
 
   if (user?.period.phase !== 'summary') return null;
 
@@ -57,8 +54,7 @@ export const usePeriodSummary = (): PeriodSummaryController | null => {
     explain,
     barMax,
     continueNext: () => {
-      updateUser((current) => acknowledgeSummary(current, time));
-      router.replace(ROUTES.HOME);
+      router.push(ROUTES.RECOVERY);
     },
   };
 };
