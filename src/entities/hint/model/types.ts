@@ -19,6 +19,8 @@ const HINT_SCREENS = [
   'shop',
   'savings',
   'tasks',
+  'history',
+  'glossary',
 ] as const;
 
 // ═══════════════════════════════════════════

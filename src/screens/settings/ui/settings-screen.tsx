@@ -106,6 +106,33 @@ export const SettingsScreen = () => {
       <DemoModeCard />
 
       <Card tone="surfaceSoft">
+        <Card.Title>{t('settings.handbook')}</Card.Title>
+        <Card.Content style={styles.handbook}>
+          <Text variant="small" themeColor="textSecondary">
+            {t('settings.historyDescription')}
+          </Text>
+          <Button
+            size="m"
+            isFullWidth
+            onPress={() => router.push(ROUTES.HISTORY)}
+          >
+            {t('settings.openHistory')}
+          </Button>
+          <Text variant="small" themeColor="textSecondary">
+            {t('settings.glossaryDescription')}
+          </Text>
+          <Button
+            size="m"
+            variant="secondary"
+            isFullWidth
+            onPress={() => router.push(ROUTES.GLOSSARY)}
+          >
+            {t('settings.openGlossary')}
+          </Button>
+        </Card.Content>
+      </Card>
+
+      <Card tone="surfaceSoft">
         <Card.Title>{t('settings.development')}</Card.Title>
         <Card.Content>
           <Text variant="small" themeColor="textSecondary">
@@ -143,6 +170,9 @@ export const SettingsScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
+  handbook: {
+    gap: SPACING.two,
+  },
   langButtons: {
     gap: SPACING.two,
   },

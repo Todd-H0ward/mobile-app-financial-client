@@ -23,7 +23,12 @@
     "uiKitDescription": "Design system showcase: all components and states on one screen.",
     "openUiKit": "Open UI kit",
     "profile": "Profile",
-    "profileDescription": "Deletes profile and restarts onboarding. Coins, savings jar, and period history will be permanently lost."
+    "profileDescription": "Deletes profile and restarts onboarding. Coins, savings jar, and period history will be permanently lost.",
+    "handbook": "History and glossary",
+    "openHistory": "History",
+    "openGlossary": "Glossary",
+    "historyDescription": "Finished periods and every coin move with a named source.",
+    "glossaryDescription": "Short explanations of the game words."
   },
   "demoMode": {
     "title": "Demo mode",
@@ -116,6 +121,9 @@
       "startingWallet": "starting wallet",
       "regularityBonus": "regularity bonus",
       "task": "chore «{{title}}»",
+      "purchase": "bought {{title}}",
+      "savingsDeposit": "saved into «{{title}}»",
+      "savingsWithdraw": "took from «{{title}}»",
       "unknown": "credit"
     }
   },
@@ -229,6 +237,22 @@
         "Six chores across three themes: planning, savings and payments.",
         "There are quizzes, a shopping basket, need-before-want order, change counting and a dialog — not only tests.",
         "A miss does not wipe progress: the chore still pays part of the coins and names the rule."
+      ]
+    },
+    "history": {
+      "title": "History",
+      "body": [
+        "Finished periods and every coin move with a named source live here.",
+        "The last period shows plan next to fact — money did not vanish, it moved.",
+        "An empty history is fine at the start; rows appear after the first settlement."
+      ]
+    },
+    "glossary": {
+      "title": "Glossary",
+      "body": [
+        "Short explanations of the game words: plan, fact, needs, wants, savings and more.",
+        "Open a term to read a plain-language definition.",
+        "The same words show up in hints and on screens so the story stays one piece."
       ]
     }
   },
@@ -585,6 +609,75 @@
         "title": "Which is cheaper",
         "brief": "Compare two sets and pick the cheaper one.",
         "explanation": "Compare prices, not only names."
+      }
+    }
+  },
+  "history": {
+    "title": "History",
+    "subtitle": "Periods and every named coin move",
+    "lastPeriod": "Last period",
+    "allPeriods": "All finished periods",
+    "wallet": "Coin moves",
+    "emptyPeriods": "No finished periods yet — end one to see plan next to fact.",
+    "emptyWallet": "No coin moves yet.",
+    "periodLabel": "Period {{period}}",
+    "planFact": "plan {{plan}} · fact {{fact}}",
+    "planKept": "Stayed on plan",
+    "planMissed": "Plan and fact differed",
+    "goalsReached": "{{count}} goal(s) reached",
+    "walletPeriod": "Period {{period}}"
+  },
+  "glossary": {
+    "title": "Glossary",
+    "subtitle": "Words of the game, in plain language",
+    "terms": {
+      "plan": {
+        "title": "Plan",
+        "definition": "First decide where the coins will go, then spend. The plan is three boxes: needs, wants and the jar."
+      },
+      "fact": {
+        "title": "Fact",
+        "definition": "Where the money really went. At the end of a period we compare plan and fact — coins do not vanish, they move."
+      },
+      "needs": {
+        "title": "Needs",
+        "definition": "What you cannot skip: food, warmth, soap. Leave coins for needs first."
+      },
+      "wants": {
+        "title": "Wants",
+        "definition": "Nice-to-haves — a toy, a decoration, extras. Fine to buy after needs and the jar."
+      },
+      "savings": {
+        "title": "Savings jar",
+        "definition": "Coins put aside for a goal. A little each time adds up faster."
+      },
+      "goal": {
+        "title": "Goal",
+        "definition": "One thing you are saving for. You can see how much is in the jar and how much is left."
+      },
+      "balance": {
+        "title": "Wallet",
+        "definition": "How many coins you have now. You cannot go below zero — if short, earn, take from the jar, or wait."
+      },
+      "shortfall": {
+        "title": "Shortfall",
+        "definition": "How many coins are missing for a purchase. Not a ban — three ways out: a chore, the jar, or wait."
+      },
+      "regularity": {
+        "title": "Regularity",
+        "definition": "If you put something in the jar at least once in a period, settlement pays a small bonus — “for putting aside”."
+      },
+      "period": {
+        "title": "Period",
+        "definition": "One game loop: make a plan, spend and save, then see the totals. Not a calendar day — a game step."
+      },
+      "source": {
+        "title": "Coin source",
+        "definition": "Every credit has a name: starter wallet, chore, bonus. A bare “+18” without a reason never appears."
+      },
+      "withdrawal": {
+        "title": "Jar withdrawal",
+        "definition": "You can take coins back from the jar, but first you see the consequence: the goal moves farther away."
       }
     }
   },
