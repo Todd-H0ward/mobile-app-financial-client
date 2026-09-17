@@ -27,6 +27,8 @@ const sourceLabel = (
       return t('wallet.source.startingWallet');
     case 'regularityBonus':
       return t('wallet.source.regularityBonus');
+    case 'heatingBill':
+      return t('wallet.source.heatingBill');
     case 'task':
       return t('wallet.source.task', {
         title: t(`tasks.items.${source.taskId}.title`, {

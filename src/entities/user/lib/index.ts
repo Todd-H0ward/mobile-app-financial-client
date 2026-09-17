@@ -13,9 +13,14 @@ export {
   listPeriodHistory,
   listWalletHistory,
 } from './history';
+export type { EndPeriodStatus, HeatingBill, HeatingBillLine } from './period';
 export {
   acknowledgeSummary,
+  areNeedsMet,
+  buildBill,
   canFinishPeriod,
+  endPeriod,
+  endPeriodStatus,
   finishPeriod,
   growthFacts,
   startPeriod,

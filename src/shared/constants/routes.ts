@@ -11,6 +11,8 @@ export const ROUTES = {
   /** The growth ceremony, pushed once `hasPendingGrowth` is true. */
   PET_GREW: '/pet-grew',
   BUDGET_PLAN: '/budget-plan',
+  /** Soft confirm before freezing the active period — 0.3-R. */
+  END_PERIOD: '/end-period',
   PERIOD_SUMMARY: '/period-summary',
   /** Choosable recovery steps after the period totals — 2.5.9. */
   RECOVERY: '/recovery',

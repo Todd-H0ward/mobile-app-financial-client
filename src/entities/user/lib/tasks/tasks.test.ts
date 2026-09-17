@@ -24,8 +24,7 @@ const makeUser = (overrides: Partial<UserSave> = {}): UserSave => ({
   },
 });
 
-const makeActive = (time = makeDemoTimeSource()): UserSave =>
-  startPeriod(makeUser(), time);
+const makeActive = (): UserSave => startPeriod(makeUser());
 
 // ═══════════════════════════════════════════
 describe('issueNextTask', () => {
@@ -73,8 +72,8 @@ describe('applyCompleteTask', () => {
     expect(task).toBeDefined();
     if (!task) return;
 
-    const before = makeActive(time).wallet.balance;
-    const result = applyCompleteTask(makeActive(time), task.id, time);
+    const before = makeActive().wallet.balance;
+    const result = applyCompleteTask(makeActive(), task.id, time);
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -96,7 +95,7 @@ describe('applyCompleteTask', () => {
     expect(task).toBeDefined();
     if (!task) return;
 
-    const first = applyCompleteTask(makeActive(time), task.id, time);
+    const first = applyCompleteTask(makeActive(), task.id, time);
     expect(first.ok).toBe(true);
     if (!first.ok) return;
 
@@ -124,7 +123,7 @@ describe('applyCompleteTask', () => {
     expect(task).toBeDefined();
     if (!task) return;
 
-    const result = applyCompleteTask(makeActive(time), task.id, time, 0.01);
+    const result = applyCompleteTask(makeActive(), task.id, time, 0.01);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.reward).toBeGreaterThanOrEqual(1);

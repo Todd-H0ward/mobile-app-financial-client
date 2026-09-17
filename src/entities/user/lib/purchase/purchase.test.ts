@@ -22,14 +22,13 @@ const makeUser = (overrides: Partial<UserSave> = {}): UserSave => ({
   },
 });
 
-const makeActive = (time = makeDemoTimeSource()): UserSave =>
-  startPeriod(makeUser(), time);
+const makeActive = (): UserSave => startPeriod(makeUser());
 
 // ═══════════════════════════════════════════
 describe('applyPurchase', () => {
   it('debits the wallet and bumps fact for the item direction', () => {
     const time = makeDemoTimeSource();
-    const result = applyPurchase(makeActive(time), 'bread', time);
+    const result = applyPurchase(makeActive(), 'bread', time);
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -46,7 +45,7 @@ describe('applyPurchase', () => {
 
   it('refuses when the balance is short — never goes negative', () => {
     const time = makeDemoTimeSource();
-    const active = makeActive(time);
+    const active = makeActive();
     const poor: UserSave = {
       ...active,
       wallet: { ...active.wallet, balance: 3 },
@@ -69,7 +68,7 @@ describe('applyPurchase', () => {
 
   it('reports how far fact went over plan', () => {
     const time = makeDemoTimeSource();
-    const active = makeActive(time);
+    const active = makeActive();
     // Plan wants = 15; lamp = 18 → over by 3.
     const result = applyPurchase(active, 'lamp', time);
     expect(result.ok).toBe(true);
@@ -79,7 +78,7 @@ describe('applyPurchase', () => {
 
   it('can bump comfort when the item carries a delta', () => {
     const time = makeDemoTimeSource();
-    const active = makeActive(time);
+    const active = makeActive();
     const chilly: UserSave = {
       ...active,
       pet: { ...active.pet, comfort: 0.4 },

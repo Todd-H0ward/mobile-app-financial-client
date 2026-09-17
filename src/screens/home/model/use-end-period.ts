@@ -2,36 +2,34 @@ import { useRouter } from 'expo-router';
 
 import {
   canFinishPeriod,
-  finishPeriod,
-  useUpdateUser,
+  type EndPeriodStatus,
+  endPeriodStatus,
   useUser,
 } from '@/entities/user';
 
 import { ROUTES } from '@/shared/constants';
-import { useTimeSource } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
 // HOOK
 // ═══════════════════════════════════════════
 
 /**
- * Ends the active period from home and opens the summary screen.
+ * Opens the End day confirm screen from home.
  *
- * Lives here — not in `period-summary` — so home never imports a sibling
- * screen slice sideways.
+ * Freeze (`finishPeriod`) runs on that screen — home only navigates, so the
+ * child always sees the soft warning before the phase changes (0.3-R).
  */
 export const useEndPeriod = () => {
   const router = useRouter();
-  const time = useTimeSource();
   const user = useUser();
-  const updateUser = useUpdateUser();
+
+  const status: EndPeriodStatus = user ? endPeriodStatus(user) : 'disabled';
 
   return {
-    canEnd: user ? canFinishPeriod(user) : false,
-    endPeriod: () => {
+    status,
+    openConfirm: () => {
       if (!user || !canFinishPeriod(user)) return;
-      updateUser((current) => finishPeriod(current, time));
-      router.replace(ROUTES.PERIOD_SUMMARY);
+      router.push(ROUTES.END_PERIOD);
     },
   };
 };

@@ -46,6 +46,33 @@ export const WALLET_SOURCES = {
   startingWallet: 'wallet:starting',
   /** Credited at settlement when the child deposited at least once. */
   regularityBonus: 'bonus:regularity',
+  /** Heating bill charged once per period at settlement — docs/house.md. */
+  heatingBill: 'bill:heating',
+} as const;
+
+/**
+ * How much comfort / spirit fall when a period ends — one step, not a tick.
+ *
+ * Replaces realtime need decay (0.3-R): closing the app never changes the pet;
+ * only pressing "End day" does.
+ */
+export const PERIOD_NEED_DECAY = {
+  /** Body: fed and warm. 0…1 subtracted once per settled period. */
+  comfort: 0.12,
+  /** Spirit: mood axis. 0…1 subtracted once per settled period. */
+  spirit: 0.08,
+} as const;
+
+/**
+ * Heating bill knobs — docs/house.md. Thermostat is 0…1; free below the base.
+ */
+export const HEATING = {
+  /** Thermostat at or below this is free heat. */
+  freeTemperature: 0.3,
+  /** Coins per 0.1 of thermostat above the free base. */
+  coinsPerTenth: 4,
+  /** Flat discount per installed insulation id. */
+  insulationDiscount: 4,
 } as const;
 
 // ═══════════════════════════════════════════
