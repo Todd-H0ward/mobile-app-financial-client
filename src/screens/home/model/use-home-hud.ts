@@ -136,6 +136,8 @@ const CREDIT_REASON_KEY: Record<string, string> = {
   [WALLET_SOURCES.regularityBonus]: 'wallet.source.regularityBonus',
   [WALLET_SOURCES.heatingBill]: 'wallet.source.heatingBill',
   [WALLET_SOURCES.gamePuzzle]: 'wallet.source.gamePuzzle',
+  [WALLET_SOURCES.gameSpacewar]: 'wallet.source.gameSpacewar',
+  [WALLET_SOURCES.gameSnake]: 'wallet.source.gameSnake',
 };
 
 // ═══════════════════════════════════════════

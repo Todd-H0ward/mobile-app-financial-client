@@ -5,8 +5,11 @@
  * drag every mechanic in:
  *
  * - `@/entities/minigame/puzzle` — jigsaw geometry, board session, levels
+ * - `@/entities/minigame/console` — console furniture ownership
+ * - `@/entities/minigame/snake` — snake grid session
+ * - `@/entities/minigame/spacewar` — short space shoot-out
  *
- * Scenes and shells sit in `@/widgets/minigame` / `@/widgets/minigame/puzzle`.
+ * Scenes sit in `@/widgets/minigame/<game>`.
  */
 
 export type { GameId, PayoutInput } from './lib/payout';

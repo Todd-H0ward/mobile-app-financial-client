@@ -89,6 +89,12 @@ describe('describeWalletSource', () => {
     expect(describeWalletSource(WALLET_SOURCES.gamePuzzle)).toEqual({
       kind: 'gamePuzzle',
     });
+    expect(describeWalletSource(WALLET_SOURCES.gameSpacewar)).toEqual({
+      kind: 'gameSpacewar',
+    });
+    expect(describeWalletSource(WALLET_SOURCES.gameSnake)).toEqual({
+      kind: 'gameSnake',
+    });
     expect(describeWalletSource('purchase:bread').kind).toBe('purchase');
     expect(describeWalletSource('task:change-counting').kind).toBe('task');
     expect(describeWalletSource('savings:deposit:paints').kind).toBe(

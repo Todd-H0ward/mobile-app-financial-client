@@ -18,6 +18,8 @@ type WalletSourceRef =
   | { kind: 'regularityBonus' }
   | { kind: 'heatingBill' }
   | { kind: 'gamePuzzle' }
+  | { kind: 'gameSpacewar' }
+  | { kind: 'gameSnake' }
   | { kind: 'task'; taskId: string; title: string }
   | { kind: 'purchase'; itemId: string; title: string }
   | { kind: 'savingsDeposit'; goalId: string; title: string }
@@ -64,6 +66,12 @@ export const describeWalletSource = (source: string): WalletSourceRef => {
   }
   if (source === WALLET_SOURCES.gamePuzzle) {
     return { kind: 'gamePuzzle' };
+  }
+  if (source === WALLET_SOURCES.gameSpacewar) {
+    return { kind: 'gameSpacewar' };
+  }
+  if (source === WALLET_SOURCES.gameSnake) {
+    return { kind: 'gameSnake' };
   }
 
   if (source.startsWith('task:')) {

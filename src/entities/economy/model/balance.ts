@@ -57,6 +57,10 @@ export const WALLET_SOURCES = {
   heatingBill: 'bill:heating',
   /** Arcade puzzle sitting payout — under a medium chore on purpose. */
   gamePuzzle: 'game:puzzle',
+  /** Console Spacewar sitting payout — under a medium chore on purpose. */
+  gameSpacewar: 'game:spacewar',
+  /** Console snake sitting payout — under a medium chore on purpose. */
+  gameSnake: 'game:snake',
 } as const;
 
 /**
