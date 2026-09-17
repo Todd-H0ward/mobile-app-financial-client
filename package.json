@@ -55,8 +55,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "format": "biome check --write src",
-    "lint": "expo lint",
-    "reset-project": "node ./scripts/reset-project.js"
+    "lint": "biome check src"
   },
   "private": true,
   "pnpm": {

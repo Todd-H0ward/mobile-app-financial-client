@@ -15,7 +15,7 @@ import { CoinBadge, ListRow, Shape, Text } from '@/shared/ui';
 
 interface ProductRowProps {
   item: CatalogueItem;
-    canAfford: boolean;
+  canAfford: boolean;
   onPress: () => void;
 }
 

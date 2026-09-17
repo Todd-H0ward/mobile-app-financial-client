@@ -5,8 +5,8 @@ import { periodsEstimateFor, progressFor, remainingFor } from '../progress';
 // ═══════════════════════════════════════════
 
 interface WithdrawExplainInput {
-    amount: number;
-    saved: number;
+  amount: number;
+  saved: number;
   /** Goal price from content. */
   price: number;
   /** Goal title — for the confirm screen, already chosen language. */

@@ -9,8 +9,8 @@ import type { ShapeVariant } from '@/shared/ui';
 
 /** How one direction looks wherever the three of them stand together. */
 interface DirectionLook {
-    surface: ThemeColor;
-    accent: ThemeColor;
+  surface: ThemeColor;
+  accent: ThemeColor;
   /** Readable-on-`surface` color for the basket's title. */
   label: ThemeColor;
   /**

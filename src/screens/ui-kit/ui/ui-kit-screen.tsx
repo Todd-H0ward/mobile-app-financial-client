@@ -173,7 +173,7 @@ export const UiKitScreen = () => {
           <HintButton screen="ui-kit" />
         </Screen.Header>
 
-                <KitSection
+        <KitSection
           title="Playground"
           caption="Переключатели действуют на все секции сразу"
         >

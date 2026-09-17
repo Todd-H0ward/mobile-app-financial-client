@@ -29,7 +29,7 @@ type PuzzlePieceVariant =
   | 'filled'
   | 'slot'
   | 'slotDark'
-    | 'slotActive'
+  | 'slotActive'
   | 'loose';
 
 interface PuzzlePhotoProps {

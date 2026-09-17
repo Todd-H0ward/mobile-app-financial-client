@@ -12,7 +12,7 @@ type ChangeFormat = 'money' | 'percent' | 'count';
  * The UI maps `labelKey` through i18n.
  */
 interface ChangeLine {
-    id: string;
+  id: string;
   /** i18n key, usually `feedback.metrics.*`. */
   labelKey: string;
   before: number;
@@ -28,8 +28,8 @@ type FeedbackAction = 'purchase' | 'deposit' | 'withdraw' | 'task' | 'plan';
  * so the helper stays free of the full profile shape.
  */
 interface FeedbackSnapshot {
-    balance: number;
-    savingsTotal: number;
+  balance: number;
+  savingsTotal: number;
   factNeeds: number;
   factWants: number;
   factSavings: number;
@@ -37,7 +37,7 @@ interface FeedbackSnapshot {
   comfort: number;
   /** Pet spirit 0…1. */
   spirit: number;
-    furnitureCount: number;
+  furnitureCount: number;
 }
 
 interface DescribeChangeInput {
@@ -66,12 +66,12 @@ interface DescribeChangeInput {
  */
 interface FeedbackReport {
   action: FeedbackAction;
-    titleKey: string;
+  titleKey: string;
   /** i18n key for the why paragraph, or null when `whyText` is used. */
   whyKey: string | null;
   /** Content-authored why, when the catalogue / task already wrote it. */
   whyText: string | null;
-    params: Record<string, string | number>;
+  params: Record<string, string | number>;
   /** Only lines that actually moved. */
   changes: ChangeLine[];
 }

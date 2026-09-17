@@ -1,8 +1,8 @@
 import { useLocalSearchParams } from 'expo-router';
 
-import { type RoutePath, STATIC_ROUTES } from '@/shared/constants';
-
 import { PetGrewScreen } from '@/screens/pet-grew';
+
+import { type RoutePath, STATIC_ROUTES } from '@/shared/constants';
 
 /** First value when expo-router hands an array for a query / segment. */
 const asRoute = (value: string | string[] | undefined): RoutePath => {

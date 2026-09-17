@@ -20,9 +20,9 @@ import { DYNAMIC_ROUTES, STATIC_ROUTES } from '@/shared/constants';
 // ═══════════════════════════════════════════
 
 interface RecoveryController {
-    periodIndex: number;
-    options: RecoveryOption[];
-    choose: (option: RecoveryOption) => void;
+  periodIndex: number;
+  options: RecoveryOption[];
+  choose: (option: RecoveryOption) => void;
   /** Soft exit — settle and go home without picking a tip. */
   skip: () => void;
 }

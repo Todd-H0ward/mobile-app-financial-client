@@ -9,7 +9,7 @@ import { RADII } from '@/shared/constants';
 type ShapeVariant = 'circle' | 'square' | 'diamond' | 'pill' | 'leaf' | 'dome';
 
 interface ShapeProps extends ViewProps {
-    variant?: ShapeVariant;
+  variant?: ShapeVariant;
   /** Side of the bounding box, in design points. */
   size?: number;
   color: string;

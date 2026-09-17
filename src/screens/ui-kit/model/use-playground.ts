@@ -30,18 +30,18 @@ interface Playground {
   /** Text of the `Input` section, so the counter has something to count. */
   inputValue: string;
   setInputValue: (inputValue: string) => void;
-    selectedChip: number | null;
+  selectedChip: number | null;
   setSelectedChip: (selectedChip: number | null) => void;
-    isRowDone: boolean;
+  isRowDone: boolean;
   setIsRowDone: (isRowDone: boolean) => void;
-    isRowSelected: boolean;
+  isRowSelected: boolean;
   setIsRowSelected: (isRowSelected: boolean) => void;
   isSheetVisible: boolean;
   setIsSheetVisible: (isSheetVisible: boolean) => void;
   /** Whether that sheet can be dragged or tapped away. */
   isSheetDismissible: boolean;
   setIsSheetDismissible: (isSheetDismissible: boolean) => void;
-    isCollapsibleOpen: boolean;
+  isCollapsibleOpen: boolean;
   setIsCollapsibleOpen: (isCollapsibleOpen: boolean) => void;
   /**
    * Bumped to remount `SplashOverlay`, which plays once and then unmounts
@@ -49,7 +49,7 @@ interface Playground {
    */
   splashRun: number;
   replaySplash: () => void;
-    petSpecies: PetSpecies;
+  petSpecies: PetSpecies;
   setPetSpecies: (petSpecies: PetSpecies) => void;
   petColor: PetColor;
   setPetColor: (petColor: PetColor) => void;

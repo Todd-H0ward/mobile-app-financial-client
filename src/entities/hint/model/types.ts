@@ -38,7 +38,7 @@ type HintScreenId = (typeof HINT_SCREENS)[number];
 interface HintContent {
   /** Screen this hint opens on. */
   id: HintScreenId;
-    title: string;
+  title: string;
   /** Paragraphs, in reading order. First one answers "what do I do here". */
   body: string[];
   /**

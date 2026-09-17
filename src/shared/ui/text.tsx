@@ -66,13 +66,13 @@ const styles = StyleSheet.create({
     fontWeight: 900,
     lineHeight: 36,
   },
-    title: {
+  title: {
     fontFamily: FONTS.rounded,
     fontSize: 26,
     fontWeight: 900,
     lineHeight: 30,
   },
-    subtitle: {
+  subtitle: {
     fontFamily: FONTS.rounded,
     fontSize: 20,
     fontWeight: 800,
@@ -91,13 +91,13 @@ const styles = StyleSheet.create({
     fontWeight: 800,
     lineHeight: 23,
   },
-    small: {
+  small: {
     fontFamily: FONTS.sans,
     fontSize: 13,
     fontWeight: 400,
     lineHeight: 18,
   },
-    smallBold: {
+  smallBold: {
     fontFamily: FONTS.sans,
     fontSize: 13,
     fontWeight: 700,

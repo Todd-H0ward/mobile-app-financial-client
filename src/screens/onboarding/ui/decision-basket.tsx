@@ -16,7 +16,7 @@ import { Shape, Text } from '@/shared/ui';
 // ═══════════════════════════════════════════
 
 interface DecisionBasketProps {
-    direction: BudgetDirection;
+  direction: BudgetDirection;
   /** Its name: «Нужное», «Хочется», «Копилка». */
   title: string;
   /** Two or three things that belong here. */

@@ -37,7 +37,7 @@ import { RoomDoor } from './room-door';
 // ═══════════════════════════════════════════
 
 interface RoomPagerProps {
-    room: RoomId;
+  room: RoomId;
   /** Raised by a swipe and by a door alike. */
   onRoomChange: (room: RoomId) => void;
   /**
@@ -56,7 +56,7 @@ interface RoomPagerProps {
 
 interface RoomPageProps {
   room: RoomId;
-    children?: ReactNode;
+  children?: ReactNode;
 }
 
 // ═══════════════════════════════════════════

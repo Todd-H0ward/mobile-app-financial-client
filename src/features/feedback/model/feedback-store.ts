@@ -25,7 +25,7 @@ interface ShowFeedbackInput {
 }
 
 interface FeedbackStore {
-    report: FeedbackReport | null;
+  report: FeedbackReport | null;
   show: (input: ShowFeedbackInput) => void;
   showDescribed: (input: DescribeChangeInput) => void;
   showReport: (report: FeedbackReport) => void;

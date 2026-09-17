@@ -27,7 +27,7 @@ interface OverlayOrigin {
 interface UsePieceDragOptions {
   cols: number;
   getLayout: () => BoardLayout | null;
-    getBody: (id: number) => PieceBody | null;
+  getBody: (id: number) => PieceBody | null;
   /**
    * Window origin of the ghost overlay. Hit-testing stays in window space;
    * shared values for the ghost view are converted to overlay-local coords.

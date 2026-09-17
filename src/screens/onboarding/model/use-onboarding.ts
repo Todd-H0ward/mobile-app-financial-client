@@ -57,8 +57,8 @@ const ACTION_LABEL: Record<OnboardingStepId, string> = {
 
 interface OnboardingController {
   stepId: OnboardingStepId;
-    title: string;
-    line: string;
+  title: string;
+  line: string;
   /** Position in the walk, from 1. For the paw trail and the screen reader. */
   stepNumber: number;
   stepCount: number;
@@ -68,15 +68,15 @@ interface OnboardingController {
   lastOutcome: SortOutcome | null;
   /** Cards placed and cards in total: "3 из 6", never a countdown. */
   sortProgress: { done: number; total: number };
-    plan: Record<BudgetDirection, number>;
+  plan: Record<BudgetDirection, number>;
   /** Coins not laid out yet. Leaving some is allowed — docs/budget.md. */
   planLeft: number;
-    planTotal: number;
+  planTotal: number;
   /** What the child typed, unnormalized — the field shows it back verbatim. */
   playerName: string;
-    hasMetPet: boolean;
-    isCoinsRevealed: boolean;
-    canContinue: boolean;
+  hasMetPet: boolean;
+  isCoinsRevealed: boolean;
+  canContinue: boolean;
   actionLabel: string;
   /** Puts the card in hand into a basket. A miss costs nothing. */
   placeItem: (direction: BudgetDirection) => void;

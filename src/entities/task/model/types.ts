@@ -30,8 +30,8 @@ type TaskDifficulty = (typeof TASK_DIFFICULTIES)[number];
 interface TaskOption {
   /** Option id within the task payload. */
   id: string;
-    label: string;
-    isCorrect: boolean;
+  label: string;
+  isCorrect: boolean;
 }
 
 interface BasketItem {
@@ -92,10 +92,10 @@ interface TaskContent {
   theme: TaskTheme;
   /** Which mechanic component renders this task. */
   mechanic: MechanicType;
-    title: string;
+  title: string;
   /** Maps to `TASK_REWARD` in economy — never a raw coin amount in JSON. */
   difficulty: TaskDifficulty;
-    brief: string;
+  brief: string;
   /** Explanation after the action — «что изменилось и почему». */
   explanation: string;
   /** Mechanic-specific data. Shape depends on `mechanic`. */

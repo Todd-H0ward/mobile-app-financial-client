@@ -8,7 +8,7 @@ import { VIEW_BOX } from '../rig';
 
 /** Which color each part of the skeleton is painted with. */
 interface PetFills {
-    body: string;
+  body: string;
   /** The belly patch over it. */
   belly: string;
   /** The head. The same coat as the body — a two-tone head reads as a mask. */

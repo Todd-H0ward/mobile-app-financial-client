@@ -15,14 +15,14 @@ import { STATIC_ROUTES } from '@/shared/constants';
 // ═══════════════════════════════════════════
 
 interface PeriodSummaryController {
-    periodIndex: number;
+  periodIndex: number;
   /** Three comparison rows, always. */
   rows: BudgetComparison[];
   /** Story for the copy layer — tips live on the recovery screen. */
   explain: SummaryExplain;
   /** Largest of plan/fact across rows — shared scale for the bars. */
   barMax: number;
-    continueNext: () => void;
+  continueNext: () => void;
 }
 
 // ═══════════════════════════════════════════
