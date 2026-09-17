@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect } from 'react';
 
 import {
   Modal,
@@ -15,6 +15,7 @@ import {
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
 import Animated, {
+  cancelAnimation,
   Easing,
   runOnJS,
   useAnimatedStyle,
@@ -54,8 +55,8 @@ interface SheetModalProps {
   /** Disables the drag handle and the tap-outside dismissal. */
   isDismissible?: boolean;
   /**
-   * When false, the sheet appears and disappears without slide timing —
-   * for the grown-up's "animations off" switch. Defaults to true.
+   * When false, the sheet appears without slide timing — for the grown-up's
+   * "animations off" switch. Defaults to true.
    */
   isAnimated?: boolean;
   style?: StyleProp<ViewStyle>;
@@ -116,6 +117,13 @@ const SheetRoot = ({
   );
 };
 
+/**
+ * Bottom sheet in a native Modal.
+ *
+ * Unmounts as soon as `isVisible` is false — keeping the Modal mounted through
+ * a close animation stacked under FeedbackHost (another Modal) freezes native
+ * touch handling after a shop purchase.
+ */
 const SheetModal = ({
   children,
   isVisible,
@@ -126,32 +134,27 @@ const SheetModal = ({
 }: SheetModalProps) => {
   const theme = useTheme();
   const { height: windowHeight } = useWindowDimensions();
-  const [isMounted, setIsMounted] = useState(isVisible);
   const offset = useSharedValue(windowHeight);
-  const height = useSharedValue(windowHeight);
+  const sheetHeight = useSharedValue(windowHeight);
+  const screenHeight = useSharedValue(windowHeight);
 
   const openMs = isAnimated ? OPEN_DURATION : 0;
   const closeMs = isAnimated ? CLOSE_DURATION : 0;
 
   useEffect(() => {
-    if (isVisible) {
-      setIsMounted(true);
-      offset.value = windowHeight;
-      offset.value = withTiming(0, {
-        duration: openMs,
-        easing: Easing.out(Easing.cubic),
-      });
-      return;
-    }
+    screenHeight.value = windowHeight;
+  }, [screenHeight, windowHeight]);
 
-    offset.value = withTiming(
-      windowHeight,
-      { duration: closeMs, easing: Easing.in(Easing.cubic) },
-      (finished) => {
-        if (finished) runOnJS(setIsMounted)(false);
-      },
-    );
-  }, [closeMs, isVisible, offset, openMs, windowHeight]);
+  useEffect(() => {
+    if (!isVisible) return;
+
+    cancelAnimation(offset);
+    offset.value = screenHeight.value;
+    offset.value = withTiming(0, {
+      duration: openMs,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [isVisible, offset, openMs, screenHeight]);
 
   const close = () => {
     if (isDismissible) onClose();
@@ -170,7 +173,7 @@ const SheetModal = ({
 
       if (isDismissed) {
         offset.value = withTiming(
-          windowHeight,
+          screenHeight.value,
           { duration: closeMs, easing: Easing.in(Easing.cubic) },
           (finished) => {
             if (finished) runOnJS(onClose)();
@@ -186,14 +189,14 @@ const SheetModal = ({
     });
 
   const overlayStyle = useAnimatedStyle(() => ({
-    opacity: 1 - Math.min(offset.value / height.value, 1),
+    opacity: 1 - Math.min(offset.value / Math.max(sheetHeight.value, 1), 1),
   }));
 
   const sheetStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: offset.value }],
   }));
 
-  if (!isMounted) return null;
+  if (!isVisible) return null;
 
   return (
     <Modal
@@ -217,7 +220,7 @@ const SheetModal = ({
 
         <Animated.View
           onLayout={(event) => {
-            height.value = event.nativeEvent.layout.height;
+            sheetHeight.value = event.nativeEvent.layout.height;
           }}
           style={[styles.sheetSlot, sheetStyle]}
         >

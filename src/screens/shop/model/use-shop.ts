@@ -170,18 +170,26 @@ export const useShop = (shopId: ShopId): ShopController => {
         return;
       }
 
-      updateUser(() => result.user);
-      hapticSuccess();
-      showFeedback({
-        before: user,
-        after: result.user,
-        action: 'purchase',
-        overPlanBy: result.overPlanBy,
-        params: { item: result.item.title },
-      });
+      // Close the confirm Modal before feedback — two stacked RN Modals
+      // freeze touch handling after purchase.
       setSheet(null);
       setSelected(null);
       setShortage(null);
+      updateUser(() => result.user);
+      hapticSuccess();
+
+      const feedback = {
+        before: user,
+        after: result.user,
+        action: 'purchase' as const,
+        overPlanBy: result.overPlanBy,
+        params: { item: result.item.title },
+      };
+      // After React commits the confirm unmount — rAF can still race
+      // concurrent render and remount two Modals in one frame.
+      setTimeout(() => {
+        showFeedback(feedback);
+      }, 0);
     },
   };
 };
