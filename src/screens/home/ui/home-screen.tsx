@@ -40,7 +40,15 @@ const GEAR_SIZE = 40;
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-const GearButton = ({ onPress }: { onPress: () => void }) => {
+/**
+ * Settings: the child's own switches — sound, animations, language.
+ *
+ * Reachable without the barrier on purpose. Turning the sound off on a bus is
+ * an accessibility need (3.6), and an accessibility switch a child cannot
+ * reach without solving 7 × 8 is not an accessible switch. The grown-up's
+ * section sits behind its own quiet door further down this screen.
+ */
+const SettingsButton = ({ onPress }: { onPress: () => void }) => {
   const { t } = useTranslation();
   const theme = useTheme();
 
@@ -148,7 +156,7 @@ export const HomeScreen = () => {
           </View>
 
           <View style={styles.actions}>
-            <GearButton onPress={() => router.push(ROUTES.SETTINGS)} />
+            <SettingsButton onPress={() => router.push(ROUTES.SETTINGS)} />
             <HintButton screen="home" />
           </View>
         </View>

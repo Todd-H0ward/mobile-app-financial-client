@@ -37,6 +37,7 @@ import {
   HintRow,
   HomeIcon,
   Input,
+  LineChart,
   ListRow,
   MeterCard,
   MinusIcon,
@@ -583,6 +584,58 @@ export const UiKitScreen = () => {
             >
               <HomeIcon color={theme.textMuted} />
             </View>
+          </KitSection.Row>
+        </KitSection>
+
+        <KitSection
+          title="LineChart"
+          caption="Одна и две серии, один замер, ровная линия и пусто"
+        >
+          <KitSection.Row label="две серии с легендой">
+            <LineChart
+              series={[
+                {
+                  values: [12, 30, 24, 41, 38, 52],
+                  color: 'success',
+                  label: 'Пришло',
+                },
+                {
+                  values: [8, 22, 31, 19, 40, 27],
+                  color: 'accent',
+                  label: 'Ушло',
+                },
+              ]}
+              labels={['1', '2', '3', '4', '5', '6']}
+              style={styles.fullWidth}
+            />
+          </KitSection.Row>
+
+          <KitSection.Row label="одна серия">
+            <LineChart
+              series={[{ values: [5, 18, 9, 27], color: 'primary' }]}
+              labels={['1', '2', '3', '4']}
+              style={styles.fullWidth}
+            />
+          </KitSection.Row>
+
+          <KitSection.Row label="один замер — точка по центру, не у края">
+            <LineChart
+              series={[{ values: [14], color: 'primary' }]}
+              labels={['1']}
+              style={styles.fullWidth}
+            />
+          </KitSection.Row>
+
+          <KitSection.Row label="всё по нулям — линия по низу, а не пустота">
+            <LineChart
+              series={[{ values: [0, 0, 0, 0], color: 'primary' }]}
+              labels={['1', '2', '3', '4']}
+              style={styles.fullWidth}
+            />
+          </KitSection.Row>
+
+          <KitSection.Row label="без данных">
+            <LineChart series={[]} style={styles.fullWidth} />
           </KitSection.Row>
         </KitSection>
 

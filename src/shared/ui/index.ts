@@ -13,6 +13,17 @@ export type {
   CardTitleProps,
 } from './card';
 export { Card } from './card';
+export type { ChartPoint, ChartSeries, LineChartProps } from './charts';
+export {
+  CHART_HEIGHT,
+  CHART_WIDTH,
+  chartArea,
+  chartCeiling,
+  chartLength,
+  chartLine,
+  chartPoint,
+  LineChart,
+} from './charts';
 export type { ChipProps, ChipVariant } from './chip';
 export { Chip } from './chip';
 export type { CoinProps } from './coin';

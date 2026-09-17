@@ -36,7 +36,7 @@ const hasPlanEntry = (user: UserSave): boolean =>
  * Goals are counted as distinct ids — reaching one goal twice, which a
  * withdrawal and a re-save make possible, is still one goal.
  */
-const growthFacts = (history: PeriodRecord[]): GrowthFacts => ({
+export const growthFacts = (history: PeriodRecord[]): GrowthFacts => ({
   periods: history.length,
   goalsReached: new Set(history.flatMap((record) => record.reachedGoalIds))
     .size,

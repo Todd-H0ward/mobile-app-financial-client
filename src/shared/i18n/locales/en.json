@@ -28,7 +28,10 @@
     "openHistory": "History",
     "openGlossary": "Glossary",
     "historyDescription": "Finished periods and every coin move with a named source.",
-    "glossaryDescription": "Short explanations of the game words."
+    "glossaryDescription": "Short explanations of the game words.",
+    "parents": "Grown-ups",
+    "parentsDescription": "A report on the child's decisions, demo mode and profile management. Entry through a multiplication.",
+    "openParents": "Open the section"
   },
   "demoMode": {
     "title": "Demo mode",
@@ -76,6 +79,41 @@
       "title": "Task",
       "comingSoon": "Tasks will show up here very soon",
       "allDone": "Every chore this period is done — well done"
+    },
+    "parentsA11y": "Grown-ups"
+  },
+  "parents": {
+    "title": "Grown-ups",
+    "subtitle": "The numbers about your child — here and nowhere else",
+    "gate": {
+      "title": "Grown-ups' section",
+      "question": "What is {{left}} × {{right}}?",
+      "hint": "Answer to open the section",
+      "note": "A barrier against wandering in, not account security: there is no data about the child here and nothing is ever sent anywhere."
+    },
+    "report": {
+      "earningsTitle": "Coins by period",
+      "earningsNote": "Left to right, from the first period to the current one. Green came in, orange went out.",
+      "earned": "In",
+      "spent": "Out",
+      "periodA11y": "Period {{period}}: {{earned}} in, {{spent}} out",
+      "planFactTitle": "Plan and fact of the last period",
+      "planFactEmpty": "The first period has not finished yet — there is nothing to compare.",
+      "tasksTitle": "Chores by theme",
+      "tasksNote": "Chores done in total: {{count}}. The themes show what the child keeps choosing.",
+      "themes": {
+        "planning": "Planning",
+        "savings": "Saving",
+        "payments": "Payments"
+      },
+      "growthTitle": "The pet",
+      "growthNext": "To reach “{{stage}}”: {{periods}} more periods, {{goals}} more goals, {{plans}} more kept plans.",
+      "growthDone": "The pet is fully grown — there is nowhere further to go.",
+      "stages": {
+        "baby": "Baby",
+        "teen": "Teen",
+        "adult": "Adult"
+      }
     }
   },
   "rooms": {

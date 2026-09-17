@@ -2,8 +2,6 @@ import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { useChangeLanguage } from '@/features/change-language';
-import { DemoModeCard } from '@/features/demo-mode';
-import { RestartOnboardingButton } from '@/features/profile-restart';
 
 import { useIsAnimationEnabled, useIsSoundEnabled } from '@/entities/settings';
 import { useUpdateUser } from '@/entities/user';
@@ -103,8 +101,6 @@ export const SettingsScreen = () => {
         </Card.Content>
       </Card>
 
-      <DemoModeCard />
-
       <Card tone="surfaceSoft">
         <Card.Title>{t('settings.handbook')}</Card.Title>
         <Card.Content style={styles.handbook}>
@@ -150,15 +146,24 @@ export const SettingsScreen = () => {
         </Card.Footer>
       </Card>
 
+      {/* Last and quiet — docs/parents.md: the panel a child sees every day
+          must not advertise the room they are not allowed into. */}
       <Card tone="surfaceSoft">
-        <Card.Title>{t('settings.profile')}</Card.Title>
+        <Card.Title>{t('settings.parents')}</Card.Title>
         <Card.Content>
           <Text variant="small" themeColor="textSecondary">
-            {t('settings.profileDescription')}
+            {t('settings.parentsDescription')}
           </Text>
         </Card.Content>
         <Card.Footer>
-          <RestartOnboardingButton />
+          <Button
+            size="m"
+            variant="secondary"
+            isFullWidth
+            onPress={() => router.push(ROUTES.PARENTS)}
+          >
+            {t('settings.openParents')}
+          </Button>
         </Card.Footer>
       </Card>
     </Screen>
