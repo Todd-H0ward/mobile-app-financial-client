@@ -131,6 +131,22 @@ describe('endPeriod — next period shape', () => {
       clampDecay(before.pet.spirit, PERIOD_NEED_DECAY.spirit),
     );
   });
+
+  it('decays comfort faster for chilly — trait shifts need speed', () => {
+    const before = createInitialUser({ playerName: 'Аня' });
+    const chillyPet = { ...before.pet, traitIds: ['chilly'] };
+    const settled = endPeriod(
+      finishPeriod(startPeriod(makeUser({ pet: chillyPet }))),
+    );
+    const expectedComfort = clampDecay(
+      before.pet.comfort,
+      PERIOD_NEED_DECAY.comfort * 1.25,
+    );
+    expect(settled.pet.comfort).toBeCloseTo(expectedComfort);
+    expect(settled.pet.comfort).toBeLessThan(
+      clampDecay(before.pet.comfort, PERIOD_NEED_DECAY.comfort),
+    );
+  });
 });
 
 const clampDecay = (value: number, decay: number) =>

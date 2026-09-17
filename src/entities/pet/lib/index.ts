@@ -50,3 +50,10 @@ export { anchorPoint, rigFor, VIEW_BOX } from './rig';
 export { silhouetteFor, skinFor } from './skin';
 export type { PetFills, PetSkinLayer } from './skin-layer';
 export { skinLayerFor } from './skin-layer';
+export {
+  assertTraitsContent,
+  getTraitById,
+  listTraits,
+  needDecayFor,
+  priceFor,
+} from './traits';

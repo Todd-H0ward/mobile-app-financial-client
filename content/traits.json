@@ -1,0 +1,37 @@
+{
+  "traits": [
+    {
+      "id": "chilly",
+      "title": "Мерзляк",
+      "blurb": "Еда дешевле, но быстрее мёрзнет.",
+      "priceByCategory": {
+        "food": 0.8
+      },
+      "decay": {
+        "comfort": 1.25
+      }
+    },
+    {
+      "id": "sweet-tooth",
+      "title": "Лакомка",
+      "blurb": "Дольше сыт, но еда дороже.",
+      "priceByCategory": {
+        "food": 1.2
+      },
+      "decay": {
+        "comfort": 0.85
+      }
+    },
+    {
+      "id": "fidget",
+      "title": "Непоседа",
+      "blurb": "Игрушки дешевле, но скучает быстрее.",
+      "priceByCategory": {
+        "toy": 0.75
+      },
+      "decay": {
+        "spirit": 1.3
+      }
+    }
+  ]
+}

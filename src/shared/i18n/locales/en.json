@@ -215,6 +215,20 @@
     "play": {
       "a11y": "You can stroke, tap and lift",
       "hint": "Swipe to stroke. Tap to boop. Hold and pull up to lift"
+    },
+    "traits": {
+      "chilly": {
+        "title": "Chilly",
+        "blurb": "Food costs less, but gets cold faster."
+      },
+      "sweet-tooth": {
+        "title": "Sweet tooth",
+        "blurb": "Stays full longer, but food costs more."
+      },
+      "fidget": {
+        "title": "Fidget",
+        "blurb": "Toys cost less, but gets bored faster."
+      }
     }
   },
   "petCreate": {
@@ -223,6 +237,8 @@
     "whoIsThis": "WHO IS THIS",
     "color": "COLOR",
     "pattern": "PATTERN",
+    "trait": "TRAIT",
+    "traitHint": "Every trait has a plus and a minus — that keeps it fair.",
     "namePlaceholder": "Pet name",
     "nameHint": "Pick any name — you can change it later",
     "takeHome": "Take home"

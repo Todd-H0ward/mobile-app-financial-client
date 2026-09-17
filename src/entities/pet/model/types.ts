@@ -139,7 +139,7 @@ interface PetMoodCauses {
 
 /** A state with its cause attached — the pair requirement 2.5.10 asks for. */
 interface PetMood {
-    name: PetMoodName;
+  name: PetMoodName;
   /** The named cause, the thing that is spoken aloud. Never absent. */
   reason: PetReason;
   /** Which axis produced it — the screen highlights that meter. */

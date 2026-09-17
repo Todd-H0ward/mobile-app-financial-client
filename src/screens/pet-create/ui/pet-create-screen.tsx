@@ -4,6 +4,7 @@ import { HintButton } from '@/widgets/hint-button';
 
 import {
   appearanceFor,
+  listTraits,
   PET_COLORS,
   PET_NAME_MAX_LENGTH,
   PET_PATTERNS,
@@ -13,7 +14,7 @@ import { PetView } from '@/entities/pet/ui';
 
 import { SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { Button, Chip, Input, Screen, Text } from '@/shared/ui';
+import { Button, Chip, Input, ListRow, Screen, Text } from '@/shared/ui';
 
 import { usePetCreate } from '../model/use-pet-create';
 
@@ -32,15 +33,18 @@ const PREVIEW_EMOTION = 'happy';
 // ═══════════════════════════════════════════
 
 /**
- * Meeting the pet: three axes and a name.
+ * Meeting the pet: three axes, one trait and a name.
  *
  * The three rows make twenty-seven looks and nine silhouettes without the
  * pattern — requirement 2.5.2 — and every one of them is on screen before it
  * is chosen: the child picks a pet they can see, not a word from a list.
+ * The trait is the economy half of the same meeting: prices and need speeds
+ * shift for real, not only the blurb (docs/pet.md).
  */
 export const PetCreateScreen = () => {
   const { t } = useTranslation();
   const petCreate = usePetCreate();
+  const traits = listTraits();
 
   return (
     <Screen gap="three" isTabBarVisible={false}>
@@ -115,6 +119,26 @@ export const PetCreateScreen = () => {
             </Chip>
           ))}
         </View>
+      </View>
+
+      <View style={styles.row}>
+        <Text variant="small" themeColor="textMuted">
+          {t('petCreate.trait')}
+        </Text>
+        <Text themeColor="textSecondary">{t('petCreate.traitHint')}</Text>
+        {traits.map((trait) => (
+          <ListRow
+            key={trait.id}
+            title={t(`pet.traits.${trait.id}.title`, {
+              defaultValue: trait.title,
+            })}
+            subtitle={t(`pet.traits.${trait.id}.blurb`, {
+              defaultValue: trait.blurb,
+            })}
+            isSelected={petCreate.traitId === trait.id}
+            onPress={() => petCreate.setTraitId(trait.id)}
+          />
+        ))}
       </View>
 
       <Input

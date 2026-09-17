@@ -50,7 +50,7 @@ interface PetSave {
   pattern: PetPattern;
   /** Name the child gave it. The only free-text field in the app, see privacy.md. */
   name: string;
-  /** Character traits (wave 2). They shift prices and rates; ids from content. */
+  /** Character traits. They shift prices and rates; ids from `content/traits.json`. */
   traitIds: string[];
   /** Growth stage. Recomputed by the settlement step, and only upwards. */
   stage: PetStage;
