@@ -776,5 +776,15 @@
       "spirit": "Spirit",
       "furniture": "Furniture in the room"
     }
+  },
+  "petGrew": {
+    "title": "The pet grew up!",
+    "body": "Now {{name}} is a {{stage}}.",
+    "reasonIntro": "It did not just happen:",
+    "reasonPeriods": "periods finished — at least {{count}}",
+    "reasonGoals": "goals reached — at least {{count}}",
+    "reasonPlans": "plans kept — at least {{count}}",
+    "confirm": "Great!",
+    "a11y": "{{name}} bounces happily — grew to the \"{{stage}}\" stage"
   }
 }

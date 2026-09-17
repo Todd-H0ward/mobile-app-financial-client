@@ -19,7 +19,7 @@ export const TASK_REWARD = {
 } as const;
 
 /** Coins added by the settlement step when the child deposited at least once. */
-export const REGULARITY_BONUS = 5;
+export const REGULARITY_BONUS = 8;
 
 /**
  * How many wallet operations the save keeps. History is a report for the

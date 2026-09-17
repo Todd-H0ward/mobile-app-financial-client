@@ -8,6 +8,8 @@ export const ROUTES = {
   HOME: '/home',
   ONBOARDING: '/onboarding',
   PET_CREATE: '/pet-create',
+  /** The growth ceremony, pushed once `hasPendingGrowth` is true. */
+  PET_GREW: '/pet-grew',
   BUDGET_PLAN: '/budget-plan',
   PERIOD_SUMMARY: '/period-summary',
   /** Choosable recovery steps after the period totals — 2.5.9. */
@@ -29,6 +31,17 @@ export const ROUTES = {
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
+
+/**
+ * The growth ceremony's route, carrying where it hands the child back to —
+ * home in the common case, the budget screen when growth interrupted the
+ * recovery flow right after a period's plan was meant to continue.
+ */
+export const petGrewPath = (destination: RoutePath = ROUTES.HOME) =>
+  ({
+    pathname: '/pet-grew' as const,
+    params: { destination },
+  }) as const;
 
 /** Route into one of the four street shops. */
 export const shopPath = (shopId: string) => `${ROUTES.SHOP}/${shopId}` as const;

@@ -5,6 +5,7 @@ export {
   exitDemoMode,
   runDemoPeriods,
 } from './demo';
+export { celebrateStage, hasPendingGrowth } from './growth';
 export type { WalletHistoryRow, WalletSourceRef } from './history';
 export {
   describeWalletSource,
@@ -47,6 +48,8 @@ export type {
   ShortageWaitOption,
 } from './shortage';
 export { explainShortage } from './shortage';
+export type { SimOptions, SimPeriod, SimProfile, SimRun } from './simulate';
+export { simulate } from './simulate';
 export type { TaskFail, TaskOk, TaskResult } from './tasks';
 export {
   applyCompleteTask,

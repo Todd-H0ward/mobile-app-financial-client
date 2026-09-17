@@ -72,6 +72,34 @@ adb install -r build/mobile-hackathon-1.0.0.apk
 сборка `npm run run:android`. Если релиз всё же нужен под x86, соберите с
 `ANDROID_RELEASE_ABIS_ALL=1 npm run build:apk`.
 
+## CI
+
+[`.github/workflows/build-apk.yml`](../.github/workflows/build-apk.yml) гоняет
+тот же `scripts/build-apk.sh`, только берёт ключ не с диска разработчика, а из
+секретов репозитория. Запускается по тегу `v*` (кладёт APK в GitHub Release) и
+вручную (`workflow_dispatch`, вкладка Actions) — например, чтобы получить сборку
+без публикации релиза.
+
+Одноразовая настройка, репозиторий → Settings → Secrets and variables →
+Actions:
+
+| Секрет | Значение |
+| --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | `base64 -i credentials/release.keystore \| pbcopy` (macOS) |
+| `ANDROID_KEYSTORE_PASSWORD` | из `credentials/android-release.env` |
+| `ANDROID_KEY_ALIAS` | `mobile-hackathon`, если ключ не переименовывали |
+| `ANDROID_KEY_PASSWORD` | тот же пароль, что и у стораджа (скрипт задаёт оба одинаковыми) |
+
+Ключ для CI — тот же самый `credentials/release.keystore`, что и для локальной
+сборки, просто закодированный: два разных ключа означают, что сборка из CI не
+встанет поверх сборки, собранной руками, и наоборот (см. «Ключ подписи» выше).
+Без `ANDROID_KEYSTORE_BASE64` шаг сборки падает явной ошибкой, а не откатывается
+на отладочный ключ.
+
+Второй workflow, [`ci.yml`](../.github/workflows/ci.yml), проверяет каждый PR
+без Android SDK и без секретов: `tsc --noEmit`, `vitest run`, `biome check` —
+то же самое, что перечислено в разделе Workflow в AGENTS.md.
+
 ## Почему подпись живёт в конфиг-плагине
 
 `android/` генерируется `expo prebuild` и не коммитится — правка

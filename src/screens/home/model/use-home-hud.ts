@@ -12,6 +12,7 @@ import {
 import { progressFor } from '@/entities/savings';
 import { getTaskById } from '@/entities/task';
 import {
+  hasPendingGrowth,
   type PetSave,
   type UserSave,
   useUser,
@@ -95,6 +96,13 @@ interface HomeHud {
    * screen; the child cannot walk the rooms until they have seen the totals.
    */
   isSummary: boolean;
+  /**
+   * True once the pet's stage has outrun `celebratedStage` — home must
+   * redirect to the growth ceremony before the child walks the rooms. A
+   * demo run can raise the stage several periods before anyone was there to
+   * see it happen; this is what still catches it.
+   */
+  isGrowthPending: boolean;
 }
 
 // ═══════════════════════════════════════════
@@ -273,6 +281,7 @@ export const useHomeHud = (): HomeHud => {
     isPlanning: user?.period.phase === 'planning',
     isActive: user?.period.phase === 'active',
     isSummary: user?.period.phase === 'summary',
+    isGrowthPending: user ? hasPendingGrowth(user) : false,
   };
 };
 

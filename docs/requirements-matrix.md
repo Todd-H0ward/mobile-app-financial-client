@@ -38,7 +38,7 @@
 | 2.5.9 | Обратная связь после каждого действия: что изменилось и почему | все экраны | `features/feedback` (`describeChange`, `FeedbackSheet`) | `describe-change.test.ts` | готово — дифф сейва + шит «что / почему»; покупка, депозит, снятие, задание, план |
 | 2.5.9 | Путь восстановления после ошибки без обнуления прогресса | `screens/recovery` | `entities/budget/lib/recovery` (`pickRecoveryOptions`) | `recovery.test.ts`, `explain.test.ts` | готово — правила выбора 1–2 вариантов + экран; `acknowledgeSummary` не обнуляет сейв |
 | 2.5.10 | ≥3 состояния питомца с объяснением причины | `screens/home` | `entities/pet/lib/mood` | `mood.test.ts` | не начато |
-| 2.5.10 | ≥3 стадии развития по совокупности решений за несколько периодов | `screens/home` | `entities/pet/lib/growth` | `growth.test.ts` | не начато |
+| 2.5.10 | ≥3 стадии развития по совокупности решений за несколько периодов | `screens/pet-grew` | `entities/pet/lib/growth` (правило), `entities/user/lib/growth` (`celebrateStage`) | `growth.test.ts` (оба файла) | готово — `growPet` считает стадию, `/pet-grew` поднимает разовую сцену с причиной в числах, `celebratedStage` не даёт эффекту потеряться в демо-прогоне |
 | 2.5.11 | История, итоги последнего периода, справочник терминов | `screens/history`, `screens/glossary` | `entities/user/lib/history` + `entities/glossary` + `content/glossary.json` | `history.test.ts`, `content.test.ts` | готово — выборки периодов/кошелька, 12 терминов, экраны из настроек |
 | 2.5.12 | Раздел для взрослого за арифметическим барьером | `screens/parents` | `entities/settings/lib/gate` + `entities/user/lib/report` | `gate.test.ts`, `report.test.ts` | готово — барьер 6–9 из настроек, отчёт из четырёх ответов, линейный график монет и задания по темам |
 | 2.5.12 | Сброс и удаление профиля | `screens/parents` | `entities/user/lib/reset` + `features/profile-restart` | `reset.test.ts` | готово — за барьером: сброс в демо-карточке, удаление с подтверждением и возвратом в онбординг |
@@ -67,7 +67,7 @@
 | Пункт | Требование | Где | Статус |
 | --- | --- | --- | --- |
 | 3.2 | Контент отделён от кода | `content/*.json`, см. [content.md](./content.md) | частично — `goals.json`, `tasks.json`, `onboarding.json`, `hints.json`; сейв хранит только id |
-| 3.3 | Подписанный релизный APK | `npm run build:apk`, см. [android-release.md](./android-release.md) | готово |
+| 3.3 | Подписанный релизный APK | `npm run build:apk` и `.github/workflows/build-apk.yml` (тег `v*` или вручную), см. [android-release.md](./android-release.md#ci) | готово |
 | 3.4 | Разделение слоёв, автотесты | [architecture.md](./architecture.md) | частично — economy / content JSON / user storage разделены; UI заданий и кошелёк — волна 1 |
 | 3.6 | Доступность: 48dp, 16sp, цвет не единственный носитель | `shared/ui` + [accessibility.md](./accessibility.md) | частично — кит соблюдает 48dp/16sp и не-цветные состояния; звук/анимации и прогон на устройстве — с экраном родителей |
 | 3.7 | Старт ≤5 с, отклик ≤1 с на устройстве от 3 ГБ | [performance.md](./performance.md) | не начато |

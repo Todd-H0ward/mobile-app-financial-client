@@ -6,9 +6,14 @@ import {
   type RecoveryDestination,
   type RecoveryOption,
 } from '@/entities/budget';
-import { acknowledgeSummary, useUpdateUser, useUser } from '@/entities/user';
+import {
+  acknowledgeSummary,
+  hasPendingGrowth,
+  useUpdateUser,
+  useUser,
+} from '@/entities/user';
 
-import { ROUTES } from '@/shared/constants';
+import { petGrewPath, ROUTES } from '@/shared/constants';
 import { useTimeSource } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
@@ -55,8 +60,19 @@ export const useRecovery = (): RecoveryController | null => {
   const options = pickRecoveryOptions(rows);
 
   const settleAndGo = (destination: RecoveryDestination) => {
-    updateUser((current) => acknowledgeSummary(current, time));
-    router.replace(routeFor(destination));
+    // Computed once, outside `updateUser`: the route decision needs the
+    // settled save, and `updateUser`'s producer has no return value to read.
+    const settled = acknowledgeSummary(user, time);
+    updateUser(() => settled);
+
+    // Growth is the loudest reward in the game (docs/pet.md) — it interrupts
+    // the child's own next step rather than sliding past unseen. The scene
+    // hands them back to `destination` once it is dismissed.
+    router.replace(
+      hasPendingGrowth(settled)
+        ? petGrewPath(routeFor(destination))
+        : routeFor(destination),
+    );
   };
 
   return {
