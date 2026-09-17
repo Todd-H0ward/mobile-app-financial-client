@@ -40,10 +40,10 @@
 | 2.5.10 | ≥3 состояния питомца с объяснением причины | `screens/home` | `entities/pet/lib/mood` | `mood.test.ts` | не начато |
 | 2.5.10 | ≥3 стадии развития по совокупности решений за несколько периодов | `screens/home` | `entities/pet/lib/growth` | `growth.test.ts` | не начато |
 | 2.5.11 | История, итоги последнего периода, справочник терминов | `screens/history`, `screens/glossary` | `entities/user/lib/history` + `entities/glossary` + `content/glossary.json` | `history.test.ts`, `content.test.ts` | готово — выборки периодов/кошелька, 12 терминов, экраны из настроек |
-| 2.5.12 | Раздел для взрослого за арифметическим барьером | `screens/parents` | `entities/settings/lib/gate` | `gate.test.ts` | не начато |
-| 2.5.12 | Сброс и удаление профиля | `screens/home` (временно; позже `screens/parents`) | `entities/user/lib/reset` + `features/profile-restart` | `reset.test.ts` | в работе — сброс в демо-карточке, удаление с подтверждением и возвратом в онбординг; экрана взрослого нет |
+| 2.5.12 | Раздел для взрослого за арифметическим барьером | `screens/parents` | `entities/settings/lib/gate` + `entities/user/lib/report` | `gate.test.ts`, `report.test.ts` | готово — барьер 6–9 из настроек, отчёт из четырёх ответов, линейный график монет и задания по темам |
+| 2.5.12 | Сброс и удаление профиля | `screens/parents` | `entities/user/lib/reset` + `features/profile-restart` | `reset.test.ts` | готово — за барьером: сброс в демо-карточке, удаление с подтверждением и возвратом в онбординг |
 | 2.5.13 | Сохранение состояния между запусками | — | `entities/user` | `store.test.ts`, `migrations.test.ts` | готово |
-| 2.5.13 | Демо-режим: тестовый профиль, сброс, 5 периодов подряд | `screens/home` (временно; позже `screens/parents`) | `entities/user/lib/demo` + `features/demo-mode` | `demo.test.ts` | готово |
+| 2.5.13 | Демо-режим: тестовый профиль, сброс, 5 периодов подряд | `screens/parents` | `entities/user/lib/demo` + `features/demo-mode` | `demo.test.ts` | готово — за барьером |
 | 2.5.14 | Новое задание добавляется без переработки логики | — | `content/tasks.json` + `entities/task` | `content.test.ts` | готово |
 
 ## 2.8 Дополнительные возможности (корзина B)

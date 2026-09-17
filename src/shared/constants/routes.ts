@@ -23,6 +23,8 @@ export const ROUTES = {
   /** Child-facing glossary of money words — 2.5.11. */
   GLOSSARY: '/glossary',
   SETTINGS: '/settings',
+  /** The grown-up's section, behind the arithmetic barrier — 2.5.12. */
+  PARENTS: '/parents',
   UI_KIT: '/ui-kit',
 } as const;
 

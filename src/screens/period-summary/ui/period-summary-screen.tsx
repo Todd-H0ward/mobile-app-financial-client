@@ -2,14 +2,13 @@ import { Redirect } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
+import { ComparisonRow } from '@/widgets/plan-fact-bars';
 
 import { ROUTES, SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Card, Screen, Text } from '@/shared/ui';
 
 import { usePeriodSummary } from '../model';
-
-import { ComparisonRow } from './comparison-row';
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
