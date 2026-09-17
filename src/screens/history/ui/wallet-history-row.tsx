@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import { StyleSheet } from 'react-native';
 
 import type { WalletHistoryRow, WalletSourceRef } from '@/entities/user';
@@ -63,23 +65,27 @@ const sourceLabel = (
 // ═══════════════════════════════════════════
 
 /** One named coin movement — source and amount, never a bare number. */
-export const WalletHistoryRowView = ({ row }: WalletHistoryRowViewProps) => {
-  const { t } = useTranslation();
-  const sign = row.entry.kind === 'earn' ? '+' : '−';
-  const amount = `${sign}${formatMoney(row.entry.amount)}`;
+export const WalletHistoryRowView = memo(
+  ({ row }: WalletHistoryRowViewProps) => {
+    const { t } = useTranslation();
+    const sign = row.entry.kind === 'earn' ? '+' : '−';
+    const amount = `${sign}${formatMoney(row.entry.amount)}`;
 
-  return (
-    <ListRow
-      title={sourceLabel(row.source, t)}
-      subtitle={t('history.walletPeriod', { period: row.entry.periodIndex })}
-      trailing={
-        <Text variant="smallBold" style={styles.amount}>
-          {amount}
-        </Text>
-      }
-    />
-  );
-};
+    return (
+      <ListRow
+        title={sourceLabel(row.source, t)}
+        subtitle={t('history.walletPeriod', { period: row.entry.periodIndex })}
+        trailing={
+          <Text variant="smallBold" style={styles.amount}>
+            {amount}
+          </Text>
+        }
+      />
+    );
+  },
+);
+
+WalletHistoryRowView.displayName = 'WalletHistoryRowView';
 
 // ═══════════════════════════════════════════
 // STYLES

@@ -28,6 +28,13 @@ export const REGULARITY_BONUS = 8;
 export const WALLET_HISTORY_LIMIT = 100;
 
 /**
+ * How many finished periods the save keeps. Same rule as the wallet: a report
+ * window, not an archive. Growth only needs four periods to reach adult, so a
+ * fifty-row cap is plenty for the pet and the parents chart.
+ */
+export const PERIOD_HISTORY_LIMIT = 50;
+
+/**
  * How close fact may sit to plan before the summary calls a direction "on
  * plan". Zero means exact coins — see docs/budget.md. Named so a playtest
  * can widen it without hunting through screens.

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
+import { Image } from 'expo-image';
 import {
-  Image,
   Pressable,
   type StyleProp,
   StyleSheet,
@@ -150,7 +150,8 @@ export const PetBox = ({
           <Image
             source={BOX_SOURCE}
             style={styles.image}
-            resizeMode="contain"
+            contentFit="contain"
+            cachePolicy="memory-disk"
             accessibilityIgnoresInvertColors
           />
         </Animated.View>

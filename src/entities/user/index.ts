@@ -100,6 +100,7 @@ export {
   USER_SAVE_VERSION,
   useCreateUser,
   useDeleteUser,
+  useHomeHudSource,
   useResetUser,
   useSetDemoMode,
   useUpdateUser,

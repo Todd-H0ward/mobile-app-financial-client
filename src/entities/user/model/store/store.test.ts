@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { STORAGE_KEYS } from '@/shared/constants';
+import { flushPersistWrites } from '@/shared/model';
 
 import { createInitialUser, USER_SAVE_VERSION } from '../initial-user';
 
@@ -22,13 +23,16 @@ vi.mock(
   async () => await import('@/shared/constants/storage-keys'),
 );
 
-/** In-memory storage instead of the native module — and, crucially, sync. */
+/** In-memory storage instead of the native module — reads sync, writes async. */
 const storage = new Map<string, string>();
 
 vi.mock('expo-sqlite/kv-store', () => ({
   default: {
     getItemSync: (key: string) => storage.get(key) ?? null,
     setItemSync: (key: string, value: string) => {
+      storage.set(key, value);
+    },
+    setItemAsync: async (key: string, value: string) => {
       storage.set(key, value);
     },
     removeItemSync: (key: string) => {
@@ -57,17 +61,24 @@ const readStorage = () => {
   return raw === undefined ? undefined : JSON.parse(raw);
 };
 
+/** Waits for the debounced persist queue to hit the mock disk. */
+const settlePersist = async () => {
+  await flushPersistWrites();
+};
+
 // ═══════════════════════════════════════════
 // TESTS
 // ═══════════════════════════════════════════
 
 describe('useUserStore', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     storage.clear();
     useUserStore.setState({ user: null, demoBackup: null });
+    await settlePersist();
+    storage.clear();
   });
 
-  it('survives a restart: the whole save comes back from storage', () => {
+  it('survives a restart: the whole save comes back from storage', async () => {
     useUserStore.getState().createUser({ playerName: 'Аня' });
     useUserStore.getState().updateUser((user) => ({
       ...user,
@@ -78,6 +89,7 @@ describe('useUserStore', () => {
       },
       period: { ...user.period, index: 3 },
     }));
+    await settlePersist();
 
     // A restart: in-memory state is gone, what is on disk is not.
     const written = readStorage();
@@ -111,8 +123,9 @@ describe('useUserStore', () => {
     expect(freshStore.getState().user?.playerName).toBe('Аня');
   });
 
-  it('writes on every change — there is no explicit save', () => {
+  it('queues a write on every change — there is no explicit save', async () => {
     useUserStore.getState().createUser({ playerName: 'Аня' });
+    await settlePersist();
 
     expect(readStorage().state.user.playerName).toBe('Аня');
 
@@ -120,12 +133,14 @@ describe('useUserStore', () => {
       ...user,
       wallet: { ...user.wallet, balance: 7 },
     }));
+    await settlePersist();
 
     expect(readStorage().state.user.wallet.balance).toBe(7);
   });
 
-  it('keeps the actions out of the file', () => {
+  it('keeps the actions out of the file', async () => {
     useUserStore.getState().createUser({ playerName: 'Аня' });
+    await settlePersist();
 
     expect(Object.keys(readStorage().state)).toEqual(['user', 'demoBackup']);
   });
@@ -153,15 +168,17 @@ describe('useUserStore', () => {
     expect(useUserStore.getState().user?.playerName).toBe('Аня');
   });
 
-  it('resets to the starting state, keeping the name and the settings', () => {
+  it('resets to the starting state, keeping the name and the settings', async () => {
     useUserStore.getState().createUser({ playerName: 'Аня' });
     useUserStore.getState().updateUser((user) => ({
       ...user,
       wallet: { ...user.wallet, balance: 137 },
       settings: { ...user.settings, isSoundEnabled: false },
     }));
+    await settlePersist();
 
     useUserStore.getState().resetUser();
+    await settlePersist();
 
     const { user } = useUserStore.getState();
 
@@ -174,6 +191,7 @@ describe('useUserStore', () => {
 
   it('leaves no key behind when the profile is deleted', async () => {
     useUserStore.getState().createUser({ playerName: 'Аня' });
+    await settlePersist();
 
     useUserStore.getState().deleteUser();
     await vi.waitFor(() => expect(storage.has(STORAGE_KEYS.USER)).toBe(false));
@@ -181,20 +199,23 @@ describe('useUserStore', () => {
     expect(useUserStore.getState().user).toBeNull();
   });
 
-  it('gives the child their profile back when demo mode is switched off', () => {
+  it('gives the child their profile back when demo mode is switched off', async () => {
     useUserStore.getState().createUser({ playerName: 'Аня' });
     useUserStore.getState().updateUser((user) => ({
       ...user,
       wallet: { ...user.wallet, balance: 137 },
     }));
+    await settlePersist();
 
     useUserStore.getState().setDemoMode(true);
+    await settlePersist();
 
     // The demo plays under its own name; the child's save waits on disk.
     expect(useUserStore.getState().user?.playerName).not.toBe('Аня');
     expect(readStorage().state.demoBackup.playerName).toBe('Аня');
 
     useUserStore.getState().setDemoMode(false);
+    await settlePersist();
 
     const { user, demoBackup } = useUserStore.getState();
 
@@ -204,9 +225,10 @@ describe('useUserStore', () => {
     expect(demoBackup).toBeNull();
   });
 
-  it('a demo survives a restart and still gives the profile back', () => {
+  it('a demo survives a restart and still gives the profile back', async () => {
     useUserStore.getState().createUser({ playerName: 'Аня' });
     useUserStore.getState().setDemoMode(true);
+    await settlePersist();
 
     // A restart in the middle of a demonstration.
     const written = readStorage();

@@ -1,6 +1,10 @@
-import { StyleSheet, View } from 'react-native';
+import { useCallback } from 'react';
+
+import { FlatList, type ListRenderItem, StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
+
+import type { PeriodRecord, WalletHistoryRow } from '@/entities/user';
 
 import { SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
@@ -12,6 +16,25 @@ import { useHistory } from '../model';
 import { WalletHistoryRowView } from './wallet-history-row';
 
 // ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/** Approximate `ListRow` height — enough for virtualization windows. */
+const WALLET_ROW_HEIGHT = 72;
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
+const keyExtractor = (row: WalletHistoryRow): string => row.entry.id;
+
+const getItemLayout = (_: unknown, index: number) => ({
+  length: WALLET_ROW_HEIGHT,
+  offset: WALLET_ROW_HEIGHT * index,
+  index,
+});
+
+// ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
@@ -20,13 +43,22 @@ import { WalletHistoryRowView } from './wallet-history-row';
  *
  * Last finished period gets plan/fact totals; every credit and spend shows
  * its source. Empty history is honest, not a blank screen.
+ *
+ * Wallet lines use `FlatList` (docs/performance.md) — up to
+ * `WALLET_HISTORY_LIMIT` rows must not mount at once inside `Screen`'s
+ * `ScrollView`.
  */
 export const HistoryScreen = () => {
   const { t } = useTranslation();
   const history = useHistory();
 
-  return (
-    <Screen gap="three" isTabBarVisible={false}>
+  const renderItem: ListRenderItem<WalletHistoryRow> = useCallback(
+    ({ item }) => <WalletHistoryRowView row={item} />,
+    [],
+  );
+
+  const listHeader = (
+    <View style={styles.headerBlock}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -78,7 +110,7 @@ export const HistoryScreen = () => {
       {history.periods.length > 0 ? (
         <View style={styles.section}>
           <Text variant="bodyBold">{t('history.allPeriods')}</Text>
-          {history.periods.map((period) => (
+          {history.periods.map((period: PeriodRecord) => (
             <ListRow
               key={period.index}
               title={t('history.periodLabel', { period: period.index })}
@@ -101,16 +133,30 @@ export const HistoryScreen = () => {
         </View>
       ) : null}
 
-      <View style={styles.section}>
+      <View style={styles.walletHeading}>
         <Text variant="bodyBold">{t('history.wallet')}</Text>
         {history.walletRows.length === 0 ? (
           <Text themeColor="textSecondary">{t('history.emptyWallet')}</Text>
-        ) : (
-          history.walletRows.map((row) => (
-            <WalletHistoryRowView key={row.entry.id} row={row} />
-          ))
-        )}
+        ) : null}
       </View>
+    </View>
+  );
+
+  return (
+    <Screen gap="three" isTabBarVisible={false} isScrollable={false}>
+      <FlatList
+        data={history.walletRows}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        ListHeaderComponent={listHeader}
+        getItemLayout={getItemLayout}
+        initialNumToRender={12}
+        maxToRenderPerBatch={16}
+        windowSize={7}
+        removeClippedSubviews
+        contentContainerStyle={styles.listContent}
+        style={styles.list}
+      />
     </Screen>
   );
 };
@@ -120,10 +166,26 @@ export const HistoryScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
+  headerBlock: {
+    gap: SPACING.three,
+    marginBottom: SPACING.two,
+  },
   lastPeriod: {
     gap: SPACING.one,
   },
+  list: {
+    flex: 1,
+    width: '100%',
+  },
+  listContent: {
+    flexGrow: 1,
+    gap: SPACING.two,
+    paddingBottom: SPACING.two,
+  },
   section: {
+    gap: SPACING.two,
+  },
+  walletHeading: {
     gap: SPACING.two,
   },
 });

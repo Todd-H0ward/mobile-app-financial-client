@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { WALLET_SOURCES } from '@/entities/economy';
 import { type GoalContent, getGoalById } from '@/entities/goal';
 import {
@@ -12,10 +14,9 @@ import {
 import { progressFor } from '@/entities/savings';
 import { getTaskById } from '@/entities/task';
 import {
-  hasPendingGrowth,
   type PetSave,
   type UserSave,
-  useUser,
+  useHomeHudSource,
   type WalletEntry,
 } from '@/entities/user';
 
@@ -249,41 +250,61 @@ const buildTaskTitle = (tasks: UserSave['tasks'], t: Translate): string => {
 /**
  * The home screen's state, as one object.
  *
- * One save read, one place that decides what the numbers mean — the screen
- * only lays the result out. Requirement 2.5.3 asks for the pet, the balance,
- * the savings, the active goal, the pet's state and the active task all on
- * screen together; this is where "together" is assembled.
+ * One shallow save slice, memoized layout — balance ticks do not rebuild pet
+ * appearance when the pet fields did not change. Requirement 2.5.3 asks for
+ * the pet, the balance, the savings, the active goal, the pet's state and the
+ * active task all on screen together; this is where "together" is assembled.
  */
 export const useHomeHud = (): HomeHud => {
   const { t } = useTranslation();
-  const user = useUser();
+  const source = useHomeHudSource();
 
-  const activeGoal = user ? findActiveGoal(user.savings) : null;
-  // Newest first — `history[0]` is the most recent operation, and every
-  // operation credited so far is an `earn`: `spend` has no caller yet.
-  const lastEntry = user?.wallet.history[0];
+  return useMemo(() => {
+    if (!source) {
+      return {
+        subtitle: t('home.roomComingSoon'),
+        pet: null,
+        isAnimationEnabled: true,
+        balance: 0,
+        savingsTotal: 0,
+        goal: null,
+        lastCredit: null,
+        taskTitle: t('home.task.title'),
+        taskHint: t('home.task.comingSoon'),
+        isPlanning: false,
+        isActive: false,
+        isSummary: false,
+        isGrowthPending: false,
+      };
+    }
 
-  return {
-    subtitle:
-      user && isPetMet(user.pet)
-        ? t('home.atHome', { name: user.pet.name })
+    const activeGoal = findActiveGoal(source.savings);
+
+    return {
+      subtitle: isPetMet(source.pet)
+        ? t('home.atHome', { name: source.pet.name })
         : t('home.roomComingSoon'),
-    pet: user && isPetMet(user.pet) ? buildPet(user.pet, t) : null,
-    isAnimationEnabled: user?.settings.isAnimationEnabled ?? true,
-    balance: user?.wallet.balance ?? 0,
-    savingsTotal:
-      user?.savings.goals.reduce((total, entry) => total + entry.saved, 0) ?? 0,
-    goal: activeGoal
-      ? buildGoal(activeGoal.content, activeGoal.saved, t)
-      : null,
-    lastCredit: lastEntry ? buildLastCredit(lastEntry, t) : null,
-    taskTitle: user ? buildTaskTitle(user.tasks, t) : t('home.task.title'),
-    taskHint: user ? buildTaskHint(user.tasks, t) : t('home.task.comingSoon'),
-    isPlanning: user?.period.phase === 'planning',
-    isActive: user?.period.phase === 'active',
-    isSummary: user?.period.phase === 'summary',
-    isGrowthPending: user ? hasPendingGrowth(user) : false,
-  };
+      pet: isPetMet(source.pet) ? buildPet(source.pet, t) : null,
+      isAnimationEnabled: source.isAnimationEnabled,
+      balance: source.balance,
+      savingsTotal: source.savings.goals.reduce(
+        (total: number, entry: { saved: number }) => total + entry.saved,
+        0,
+      ),
+      goal: activeGoal
+        ? buildGoal(activeGoal.content, activeGoal.saved, t)
+        : null,
+      lastCredit: source.lastEntry
+        ? buildLastCredit(source.lastEntry, t)
+        : null,
+      taskTitle: buildTaskTitle(source.tasks, t),
+      taskHint: buildTaskHint(source.tasks, t),
+      isPlanning: source.phase === 'planning',
+      isActive: source.phase === 'active',
+      isSummary: source.phase === 'summary',
+      isGrowthPending: source.pet.stage !== source.pet.celebratedStage,
+    };
+  }, [source, t]);
 };
 
 export type { HomeHud, HomeHudCredit, HomeHudGoal, HomeHudPet, MoodTone };

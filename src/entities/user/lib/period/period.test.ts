@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  PERIOD_HISTORY_LIMIT,
   PERIOD_NEED_DECAY,
   REGULARITY_BONUS,
   WALLET_SOURCES,
@@ -230,6 +231,20 @@ describe('five periods without a wall clock', () => {
     }
     expect(user.period.index).toBe(6);
     expect(user.history).toHaveLength(5);
+  });
+});
+
+describe('period history cap', () => {
+  it('trims oldest rows once the report window is full', () => {
+    let user = makeUser();
+    const total = PERIOD_HISTORY_LIMIT + 3;
+    for (let i = 0; i < total; i += 1) {
+      user = runOnePeriod(user, i * 10);
+    }
+
+    expect(user.history).toHaveLength(PERIOD_HISTORY_LIMIT);
+    expect(user.history[0]?.index).toBe(total - PERIOD_HISTORY_LIMIT + 1);
+    expect(user.history[PERIOD_HISTORY_LIMIT - 1]?.index).toBe(total);
   });
 });
 
