@@ -11,6 +11,7 @@ export const STATIC_ROUTES = {
   SHOP: '/shop',
   SAVINGS: '/savings',
   TASKS: '/tasks',
+  GAMES: '/games',
   HISTORY: '/history',
   GLOSSARY: '/glossary',
   SETTINGS: '/settings',
@@ -41,5 +42,10 @@ export const DYNAMIC_ROUTES = {
     ({
       pathname: '/tasks/[taskId]' as const,
       params: { taskId },
+    }) as const,
+  puzzle: (puzzleId: string) =>
+    ({
+      pathname: '/games/puzzle/[puzzleId]' as const,
+      params: { puzzleId },
     }) as const,
 };

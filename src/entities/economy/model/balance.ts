@@ -55,6 +55,8 @@ export const WALLET_SOURCES = {
   regularityBonus: 'bonus:regularity',
   /** Heating bill charged once per period at settlement — docs/house.md. */
   heatingBill: 'bill:heating',
+  /** Arcade puzzle sitting payout — under a medium chore on purpose. */
+  gamePuzzle: 'game:puzzle',
 } as const;
 
 /**

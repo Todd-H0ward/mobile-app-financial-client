@@ -86,6 +86,9 @@ describe('describeWalletSource', () => {
     expect(describeWalletSource(WALLET_SOURCES.heatingBill)).toEqual({
       kind: 'heatingBill',
     });
+    expect(describeWalletSource(WALLET_SOURCES.gamePuzzle)).toEqual({
+      kind: 'gamePuzzle',
+    });
     expect(describeWalletSource('purchase:bread').kind).toBe('purchase');
     expect(describeWalletSource('task:change-counting').kind).toBe('task');
     expect(describeWalletSource('savings:deposit:paints').kind).toBe(
