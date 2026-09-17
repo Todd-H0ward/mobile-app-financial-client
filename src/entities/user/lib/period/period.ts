@@ -72,7 +72,10 @@ export const startPeriod = (user: UserSave, at?: number): UserSave => {
     );
   }
 
-  if (!hasPlanEntry(user)) {
+  // Empty plan is only legal when there is nothing to allocate — the child
+  // enters `active` to earn on chores. A non-empty wallet still requires a
+  // real plan (docs/budget.md).
+  if (!hasPlanEntry(user) && user.wallet.balance > 0) {
     throw new Error(
       'startPeriod: plan must have at least one non-zero direction',
     );
@@ -255,10 +258,13 @@ export const acknowledgeSummary = endPeriod;
 /**
  * Whether the "End day" button can start the confirm flow.
  *
- * Active phase only, and only when at least one plan direction is non-zero.
+ * Active phase only. An empty plan is legal when the wallet was empty at
+ * `startPeriod` (earn-first softlock escape), so we no longer require a
+ * non-zero plan here — docs/game-period.md still gates spending behind
+ * planning when there was something to allocate.
  */
 export const canFinishPeriod = (user: UserSave): boolean =>
-  user.period.phase === 'active' && hasPlanEntry(user);
+  user.period.phase === 'active';
 
 /**
  * Whether planned needs are covered by fact — drives the warn state on the

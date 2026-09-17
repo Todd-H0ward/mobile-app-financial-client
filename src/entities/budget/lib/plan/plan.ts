@@ -61,10 +61,15 @@ export const zeroDirections = (plan: BudgetPlan): BudgetDirection[] =>
 
 /**
  * Whether the plan can start a period. Matches the guard on `startPeriod`:
- * at least one direction must hold something, or there is nothing to track.
+ * at least one direction must hold something — unless the wallet is empty,
+ * in which case an empty plan is the only way into `active` to earn on chores
+ * (otherwise period 2 softlocks after a spent-down day).
  */
-export const canConfirm = (plan: BudgetPlan): boolean =>
-  BUDGET_DIRECTIONS.some((direction) => plan[direction] > 0);
+export const canConfirm = (
+  plan: BudgetPlan,
+  available = Number.POSITIVE_INFINITY,
+): boolean =>
+  BUDGET_DIRECTIONS.some((direction) => plan[direction] > 0) || available === 0;
 
 /**
  * Shape and remainder check. Screens use `allocate` so this should always

@@ -80,7 +80,7 @@ describe('phase transitions — illegal paths throw', () => {
     expect(() => endPeriod(user)).toThrow('summary');
   });
 
-  it('startPeriod throws when the plan is all-zero', () => {
+  it('startPeriod throws when the plan is all-zero and the wallet is not', () => {
     const emptyPlan = makeUser({
       period: {
         ...createInitialUser().period,
@@ -88,6 +88,17 @@ describe('phase transitions — illegal paths throw', () => {
       },
     });
     expect(() => startPeriod(emptyPlan)).toThrow();
+  });
+
+  it('startPeriod allows an empty plan when the wallet is empty', () => {
+    const broke = makeUser({
+      wallet: { balance: 0, history: [], entryCount: 0 },
+      period: {
+        ...createInitialUser().period,
+        plan: { needs: 0, wants: 0, savings: 0 },
+      },
+    });
+    expect(startPeriod(broke).period.phase).toBe('active');
   });
 });
 
@@ -200,11 +211,22 @@ describe('isPlanKept', () => {
 });
 
 describe('guards', () => {
-  it('canFinishPeriod is true only in active with a plan', () => {
+  it('canFinishPeriod is true only in the active phase', () => {
     const user = makeUser();
     expect(canFinishPeriod(user)).toBe(false);
     const active = startPeriod(user);
     expect(canFinishPeriod(active)).toBe(true);
+  });
+
+  it('canFinishPeriod stays true after an earn-first empty plan', () => {
+    const broke = makeUser({
+      wallet: { balance: 0, history: [], entryCount: 0 },
+      period: {
+        ...createInitialUser().period,
+        plan: { needs: 0, wants: 0, savings: 0 },
+      },
+    });
+    expect(canFinishPeriod(startPeriod(broke))).toBe(true);
   });
 
   it('endPeriodStatus warns when needs are under plan', () => {

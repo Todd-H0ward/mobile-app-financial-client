@@ -37,6 +37,8 @@ interface BudgetPlanController {
   isNeedsEmpty: boolean;
   /** Whether the needs-zero warning sheet is open. */
   isNeedsWarningVisible: boolean;
+  /** True when the wallet is empty — confirm opens the day to earn. */
+  isBroke: boolean;
   /** Sets one direction via the slider. */
   setDirection: (direction: BudgetDirection, value: number) => void;
   /** Lays one coin into a direction. */
@@ -106,9 +108,11 @@ export const useBudgetPlan = (): BudgetPlanController => {
     available,
     plan,
     planLeft,
-    canConfirm: canConfirm(plan),
+    canConfirm: canConfirm(plan, available),
     isNeedsEmpty: plan.needs === 0,
     isNeedsWarningVisible,
+    /** Wallet is empty — confirm starts the day so chores can pay. */
+    isBroke: available === 0,
 
     setDirection: (direction, value) => {
       setPlan((current) => allocate(current, direction, value, available));
@@ -123,7 +127,14 @@ export const useBudgetPlan = (): BudgetPlanController => {
     },
 
     requestConfirm: () => {
-      if (!canConfirm(plan)) return;
+      if (!canConfirm(plan, available)) return;
+
+      // Nothing to allocate — skip the needs warning and open the day so
+      // the child can earn on chores (period-2 softlock otherwise).
+      if (available === 0) {
+        commit(plan);
+        return;
+      }
 
       if (plan.needs === 0) {
         setIsNeedsWarningVisible(true);
@@ -136,7 +147,7 @@ export const useBudgetPlan = (): BudgetPlanController => {
     dismissNeedsWarning: () => setIsNeedsWarningVisible(false),
 
     confirmDespiteNeeds: () => {
-      if (!canConfirm(plan)) return;
+      if (!canConfirm(plan, available)) return;
       commit(plan);
     },
   };

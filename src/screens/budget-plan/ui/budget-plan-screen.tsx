@@ -52,7 +52,9 @@ export const BudgetPlanScreen = () => {
           })}
         />
         <Text variant="small" themeColor="textSecondary">
-          {t('budgetPlan.remainderHint')}
+          {plan.isBroke
+            ? t('budgetPlan.brokeHint')
+            : t('budgetPlan.remainderHint')}
         </Text>
       </View>
 
@@ -77,7 +79,7 @@ export const BudgetPlanScreen = () => {
         disabled={!plan.canConfirm}
         onPress={plan.requestConfirm}
       >
-        {t('budgetPlan.confirm')}
+        {plan.isBroke ? t('budgetPlan.confirmBroke') : t('budgetPlan.confirm')}
       </Button>
 
       <Sheet.Modal

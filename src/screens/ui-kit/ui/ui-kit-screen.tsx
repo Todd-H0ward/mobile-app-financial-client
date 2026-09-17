@@ -735,6 +735,19 @@ export const UiKitScreen = () => {
               onChange={playground.setMeterValue}
             />
           </KitSection.Row>
+
+          <KitSection.Row label="isThumbFilled — как на плане бюджета">
+            <Slider
+              value={playground.sliderValue}
+              min={0}
+              max={100}
+              step={5}
+              color="accent"
+              isThumbFilled
+              track={[theme.surface, theme.surfaceDeep, theme.accent]}
+              onChange={playground.setSliderValue}
+            />
+          </KitSection.Row>
         </KitSection>
 
         <KitSection title="Switch" caption="Настоящее переключение и disabled">

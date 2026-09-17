@@ -5,7 +5,7 @@ import { DIRECTION_LOOK } from '@/widgets/direction-look';
 import type { BudgetDirection } from '@/entities/economy';
 import { listDecisions } from '@/entities/onboarding';
 
-import { RADII, SPACING } from '@/shared/constants';
+import { RADII, SPACING, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { Shape, Slider, Text } from '@/shared/ui';
@@ -42,12 +42,15 @@ const CoinStepper = ({
   value,
   isAddDisabled,
   label,
+  accent,
   onAdd,
   onRemove,
 }: {
   value: number;
   isAddDisabled: boolean;
   label: string;
+  /** Direction accent — keys sit on a soft tint and need this to stay readable. */
+  accent: ThemeColor;
   onAdd: () => void;
   onRemove: () => void;
 }) => {
@@ -70,13 +73,18 @@ const CoinStepper = ({
       style={({ pressed }) => [
         styles.key,
         {
-          backgroundColor: disabled ? theme.disabled : theme.surface,
-          borderColor: theme.borderStrong,
-          opacity: pressed ? 0.7 : 1,
+          // Filled accent on the soft row tint — white + hairline border used
+          // to dissolve into primarySoft / accentSoft / successSoft.
+          backgroundColor: disabled ? theme.disabled : theme[accent],
+          borderColor: disabled ? theme.borderStrong : theme[accent],
+          opacity: pressed && !disabled ? 0.85 : 1,
         },
       ]}
     >
-      <Text variant="bodyBold" themeColor={disabled ? 'onDisabled' : 'text'}>
+      <Text
+        variant="bodyBold"
+        themeColor={disabled ? 'onDisabled' : 'inverseText'}
+      >
         {sign}
       </Text>
     </Pressable>
@@ -90,7 +98,7 @@ const CoinStepper = ({
         value === 0,
         t('budgetPlan.stepperMinusA11y', { label }),
       )}
-      <Text variant="bodyBold" style={styles.count}>
+      <Text variant="bodyBold" themeColor="text" style={styles.count}>
         {value}
       </Text>
       {key(
@@ -159,6 +167,7 @@ export const DirectionRow = ({
           value={value}
           isAddDisabled={remainder === 0}
           label={title}
+          accent={look.accent}
           onAdd={onAdd}
           onRemove={onRemove}
         />
@@ -170,6 +179,10 @@ export const DirectionRow = ({
         max={Math.max(max, 0)}
         step={1}
         color={look.accent}
+        isThumbFilled
+        // White → deep → direction accent: readable on the soft row tint,
+        // same accent family as the steppers above.
+        track={[theme.surface, theme.surfaceDeep, theme[look.accent]]}
         onChange={onChange}
       />
     </View>
@@ -197,7 +210,7 @@ const styles = StyleSheet.create({
   key: {
     alignItems: 'center',
     borderRadius: RADII.s,
-    borderWidth: 1.5,
+    borderWidth: 2,
     height: KEY_SIZE,
     justifyContent: 'center',
     width: KEY_SIZE,

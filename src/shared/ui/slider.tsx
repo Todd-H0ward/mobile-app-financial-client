@@ -26,6 +26,11 @@ interface SliderProps {
   /** Colours of the track, from the low end to the high end. */
   track?: [string, string, string];
   color?: ThemeColor;
+  /**
+   * Fills the thumb with `color` instead of a white disc — use on soft
+   * tinted surfaces where a hairline border disappears.
+   */
+  isThumbFilled?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -56,6 +61,7 @@ export const Slider = ({
   onChange,
   track,
   color = 'primary',
+  isThumbFilled = false,
   style,
 }: SliderProps) => {
   const theme = useTheme();
@@ -146,7 +152,7 @@ export const Slider = ({
           style={[
             styles.thumb,
             {
-              backgroundColor: theme.surface,
+              backgroundColor: isThumbFilled ? theme[color] : theme.surface,
               borderColor: theme[color],
             },
             thumbStyle,
