@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { PetView } from '@/entities/pet/ui';
 
-import { ROUTES, type RoutePath, SPACING } from '@/shared/constants';
+import { SPACING, type RoutePath, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Card, Screen, Text } from '@/shared/ui';
 
@@ -46,7 +46,7 @@ export const PetGrewScreen = ({ destination }: PetGrewScreenProps) => {
   const grew = usePetGrew(destination);
 
   if (!grew) {
-    return <Redirect href={ROUTES.HOME} />;
+    return <Redirect href={STATIC_ROUTES.HOME} />;
   }
 
   const stageLabel = t(`parents.report.stages.${grew.stage}`);

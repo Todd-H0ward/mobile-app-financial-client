@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { ROUTES, SPACING } from '@/shared/constants';
+import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Card, Screen, Text } from '@/shared/ui';
@@ -28,7 +28,7 @@ export const EndPeriodScreen = () => {
   const confirm = useEndPeriodConfirm();
 
   if (!confirm) {
-    return <Redirect href={ROUTES.HOME} />;
+    return <Redirect href={STATIC_ROUTES.HOME} />;
   }
 
   return (

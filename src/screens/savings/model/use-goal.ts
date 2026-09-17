@@ -13,7 +13,7 @@ import {
   useUser,
 } from '@/entities/user';
 
-import { withdrawPath } from '@/shared/constants';
+import { DYNAMIC_ROUTES } from '@/shared/constants';
 import { useTimeSource } from '@/shared/lib';
 import { formatMoney } from '@/shared/utils';
 
@@ -143,7 +143,7 @@ export const useGoal = (goalId: string): GoalController | null => {
         return;
       }
       if (amount <= 0 || amount > maxWithdraw) return;
-      router.push(withdrawPath(goalId, amount));
+      router.push(DYNAMIC_ROUTES.withdraw(goalId, amount));
     },
 
     dismissSheet: () => setSheet(null),

@@ -1,13 +1,15 @@
 import { useLocalSearchParams } from 'expo-router';
 
-import { ROUTES, type RoutePath } from '@/shared/constants';
+import { type RoutePath, STATIC_ROUTES } from '@/shared/constants';
 
 import { PetGrewScreen } from '@/screens/pet-grew';
 
 /** First value when expo-router hands an array for a query / segment. */
 const asRoute = (value: string | string[] | undefined): RoutePath => {
   const raw = Array.isArray(value) ? value[0] : value;
-  return raw === ROUTES.BUDGET_PLAN ? ROUTES.BUDGET_PLAN : ROUTES.HOME;
+  return raw === STATIC_ROUTES.BUDGET_PLAN
+    ? STATIC_ROUTES.BUDGET_PLAN
+    : STATIC_ROUTES.HOME;
 };
 
 export default function PetGrewRoute() {

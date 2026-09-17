@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { HintButton } from '@/widgets/hint-button';
 import { ComparisonRow } from '@/widgets/plan-fact-bars';
 
-import { ROUTES, SPACING } from '@/shared/constants';
+import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Card, Screen, Text } from '@/shared/ui';
 
@@ -25,7 +25,7 @@ export const PeriodSummaryScreen = () => {
   const summary = usePeriodSummary();
 
   if (!summary) {
-    return <Redirect href={ROUTES.HOME} />;
+    return <Redirect href={STATIC_ROUTES.HOME} />;
   }
 
   const directionName = (id: string) => t(`budgetPlan.directions.${id}.title`);

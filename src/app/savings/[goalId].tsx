@@ -1,6 +1,6 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 
-import { ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES } from '@/shared/constants';
 
 import { GoalRouteScreen } from '@/screens/savings';
 
@@ -19,7 +19,7 @@ export default function GoalRoute() {
   );
 
   if (!goalId) {
-    return <Redirect href={ROUTES.SAVINGS} />;
+    return <Redirect href={STATIC_ROUTES.SAVINGS} />;
   }
 
   return <GoalRouteScreen goalId={goalId} />;

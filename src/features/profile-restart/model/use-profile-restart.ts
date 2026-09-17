@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 
 import { useDeleteUser, useUser } from '@/entities/user';
 
-import { ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { toast } from '@/shared/ui';
 
@@ -36,7 +36,7 @@ export const useProfileRestart = () => {
       deleteUser();
       // `EntryScreen` would send us there anyway, but replacing right here
       // keeps the empty home screen from flashing between the two.
-      router.replace(ROUTES.ONBOARDING);
+      router.replace(STATIC_ROUTES.ONBOARDING);
       toast(t('profileRestart.toastDeleted'));
     },
   };

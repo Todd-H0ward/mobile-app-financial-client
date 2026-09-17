@@ -6,7 +6,7 @@ import { useChangeLanguage } from '@/features/change-language';
 import { useIsAnimationEnabled } from '@/entities/settings';
 import { useUpdateUser } from '@/entities/user';
 
-import { ROUTES, SPACING } from '@/shared/constants';
+import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import type { LanguagePreference } from '@/shared/types';
 import { Button, Card, ListRow, Screen, Switch, Text } from '@/shared/ui';
@@ -92,7 +92,7 @@ export const SettingsScreen = () => {
           <Button
             size="m"
             isFullWidth
-            onPress={() => router.push(ROUTES.HISTORY)}
+            onPress={() => router.push(STATIC_ROUTES.HISTORY)}
           >
             {t('settings.openHistory')}
           </Button>
@@ -103,7 +103,7 @@ export const SettingsScreen = () => {
             size="m"
             variant="secondary"
             isFullWidth
-            onPress={() => router.push(ROUTES.GLOSSARY)}
+            onPress={() => router.push(STATIC_ROUTES.GLOSSARY)}
           >
             {t('settings.openGlossary')}
           </Button>
@@ -122,7 +122,7 @@ export const SettingsScreen = () => {
             <Button
               size="m"
               isFullWidth
-              onPress={() => router.push(ROUTES.UI_KIT)}
+              onPress={() => router.push(STATIC_ROUTES.UI_KIT)}
             >
               {t('settings.openUiKit')}
             </Button>
@@ -144,7 +144,7 @@ export const SettingsScreen = () => {
             size="m"
             variant="secondary"
             isFullWidth
-            onPress={() => router.push(ROUTES.PARENTS)}
+            onPress={() => router.push(STATIC_ROUTES.PARENTS)}
           >
             {t('settings.openParents')}
           </Button>

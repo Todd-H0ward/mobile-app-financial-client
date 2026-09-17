@@ -16,7 +16,7 @@ import {
 import type { BudgetDirection } from '@/entities/economy';
 import { startPeriod, useUpdateUser, useUser } from '@/entities/user';
 
-import { ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES } from '@/shared/constants';
 import { hapticSuccess } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
@@ -99,7 +99,7 @@ export const useBudgetPlan = (): BudgetPlanController => {
 
     updateUser(() => after);
     setIsNeedsWarningVisible(false);
-    router.replace(ROUTES.HOME);
+    router.replace(STATIC_ROUTES.HOME);
   };
 
   return {

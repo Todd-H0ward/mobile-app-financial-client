@@ -1,6 +1,6 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 
-import { ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES } from '@/shared/constants';
 
 import { WithdrawRouteScreen } from '@/screens/savings';
 
@@ -22,7 +22,7 @@ export default function WithdrawRoute() {
   const amount = asString(params.amount);
 
   if (!goalId) {
-    return <Redirect href={ROUTES.SAVINGS} />;
+    return <Redirect href={STATIC_ROUTES.SAVINGS} />;
   }
 
   return (

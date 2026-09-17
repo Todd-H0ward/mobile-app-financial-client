@@ -5,7 +5,7 @@ import { HintButton } from '@/widgets/hint-button';
 
 import { directionForKind, isShopId, type ShopId } from '@/entities/catalogue';
 
-import { ROUTES, SPACING } from '@/shared/constants';
+import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Card, CoinBadge, Screen, Sheet, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
@@ -73,7 +73,7 @@ export const ShopScreen = ({ shopId }: ShopScreenProps) => {
         <Button
           variant="secondary"
           isFullWidth
-          onPress={() => router.push(ROUTES.BUDGET_PLAN)}
+          onPress={() => router.push(STATIC_ROUTES.BUDGET_PLAN)}
         >
           {t('shop.goPlan')}
         </Button>
@@ -212,7 +212,7 @@ export const ShopScreen = ({ shopId }: ShopScreenProps) => {
             disabled={!shop.shortageExplain?.jar.isAvailable}
             onPress={() => {
               shop.dismissSheet();
-              router.push(ROUTES.SAVINGS);
+              router.push(STATIC_ROUTES.SAVINGS);
             }}
           >
             {t('shop.shortageJar')}
@@ -222,7 +222,7 @@ export const ShopScreen = ({ shopId }: ShopScreenProps) => {
             isFullWidth
             onPress={() => {
               shop.dismissSheet();
-              router.push(ROUTES.TASKS);
+              router.push(STATIC_ROUTES.TASKS);
             }}
           >
             {t('shop.shortageTask')}
@@ -245,7 +245,7 @@ export const ShopScreen = ({ shopId }: ShopScreenProps) => {
             isFullWidth
             onPress={() => {
               shop.dismissSheet();
-              router.push(ROUTES.BUDGET_PLAN);
+              router.push(STATIC_ROUTES.BUDGET_PLAN);
             }}
           >
             {t('shop.goPlan')}
@@ -262,7 +262,7 @@ export const ShopScreen = ({ shopId }: ShopScreenProps) => {
  */
 export const ShopRouteScreen = ({ shopId }: { shopId: string }) => {
   if (!isShopId(shopId)) {
-    return <Redirect href={ROUTES.HOME} />;
+    return <Redirect href={STATIC_ROUTES.HOME} />;
   }
 
   return <ShopScreen shopId={shopId} />;

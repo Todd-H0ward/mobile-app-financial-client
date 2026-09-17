@@ -13,7 +13,7 @@ import {
   useUser,
 } from '@/entities/user';
 
-import { petGrewPath, ROUTES } from '@/shared/constants';
+import { DYNAMIC_ROUTES, STATIC_ROUTES } from '@/shared/constants';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -35,8 +35,8 @@ interface RecoveryController {
 // ═══════════════════════════════════════════
 
 const routeFor = (destination: RecoveryDestination) => {
-  if (destination === 'budgetPlan') return ROUTES.BUDGET_PLAN;
-  return ROUTES.HOME;
+  if (destination === 'budgetPlan') return STATIC_ROUTES.BUDGET_PLAN;
+  return STATIC_ROUTES.HOME;
 };
 
 // ═══════════════════════════════════════════
@@ -68,7 +68,7 @@ export const useRecovery = (): RecoveryController | null => {
     // hands them back to `destination` once it is dismissed.
     router.replace(
       hasPendingGrowth(settled)
-        ? petGrewPath(routeFor(destination))
+        ? DYNAMIC_ROUTES.petGrew(routeFor(destination))
         : routeFor(destination),
     );
   };

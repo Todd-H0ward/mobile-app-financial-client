@@ -11,10 +11,10 @@ import { DEFAULT_ROOM, type RoomId } from '@/entities/room';
 
 import {
   CONTENT_PADDING,
-  petGrewPath,
+  DYNAMIC_ROUTES,
   RADII,
-  ROUTES,
   SPACING,
+  STATIC_ROUTES,
 } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
@@ -111,7 +111,7 @@ export const HomeScreen = () => {
   const [hasWalked, setHasWalked] = useState(false);
 
   if (hud.isSummary) {
-    return <Redirect href={ROUTES.PERIOD_SUMMARY} />;
+    return <Redirect href={STATIC_ROUTES.PERIOD_SUMMARY} />;
   }
 
   // Usually caught right after settlement, in `useRecovery`. This is the
@@ -119,7 +119,7 @@ export const HomeScreen = () => {
   // that advanced several periods unattended chief among them; 1.6 requires
   // the scene to be seen, not merely computable.
   if (hud.isGrowthPending) {
-    return <Redirect href={petGrewPath(ROUTES.HOME)} />;
+    return <Redirect href={DYNAMIC_ROUTES.petGrew(STATIC_ROUTES.HOME)} />;
   }
 
   const handleRoomChange = (next: RoomId) => {
@@ -141,7 +141,7 @@ export const HomeScreen = () => {
         <RoomPager.Room room="living">
           <LivingRoom
             isPetMet={hud.pet !== null}
-            onOpenBox={() => router.push(ROUTES.PET_CREATE)}
+            onOpenBox={() => router.push(STATIC_ROUTES.PET_CREATE)}
           />
         </RoomPager.Room>
 
@@ -165,12 +165,14 @@ export const HomeScreen = () => {
             <HomeHudStats
               balance={hud.balance}
               savingsTotal={hud.savingsTotal}
-              onOpenSavings={() => router.push(ROUTES.SAVINGS)}
+              onOpenSavings={() => router.push(STATIC_ROUTES.SAVINGS)}
             />
           </View>
 
           <View style={styles.actions}>
-            <SettingsButton onPress={() => router.push(ROUTES.SETTINGS)} />
+            <SettingsButton
+              onPress={() => router.push(STATIC_ROUTES.SETTINGS)}
+            />
             <HintButton screen="home" />
           </View>
         </View>
@@ -180,13 +182,15 @@ export const HomeScreen = () => {
           ) : null}
         </View>
         {hud.isPlanning && (
-          <HomeHudPlanBanner onPress={() => router.push(ROUTES.BUDGET_PLAN)} />
+          <HomeHudPlanBanner
+            onPress={() => router.push(STATIC_ROUTES.BUDGET_PLAN)}
+          />
         )}
         {hud.isActive && (
           <HomeHudEndBanner
             status={endStatus}
             onPress={openConfirm}
-            onDisabledPress={() => router.push(ROUTES.BUDGET_PLAN)}
+            onDisabledPress={() => router.push(STATIC_ROUTES.BUDGET_PLAN)}
           />
         )}
       </View>
@@ -199,8 +203,8 @@ export const HomeScreen = () => {
           goal={hud.goal}
           taskTitle={hud.taskTitle}
           taskHint={hud.taskHint}
-          onOpenSavings={() => router.push(ROUTES.SAVINGS)}
-          onOpenTasks={() => router.push(ROUTES.TASKS)}
+          onOpenSavings={() => router.push(STATIC_ROUTES.SAVINGS)}
+          onOpenTasks={() => router.push(STATIC_ROUTES.TASKS)}
         />
       </View>
     </ThemedView>

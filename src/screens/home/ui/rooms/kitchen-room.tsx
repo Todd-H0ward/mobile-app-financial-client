@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
-import { shopPath } from '@/shared/constants';
+import { DYNAMIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 
 import { RoomHotspot } from './room-hotspot';
@@ -32,7 +32,7 @@ export const KitchenRoom = () => {
         label={t('rooms.soon.fridgeTitle')}
         text={t('rooms.soon.fridgeText')}
         tone="success"
-        onPress={() => router.push(shopPath('grocery'))}
+        onPress={() => router.push(DYNAMIC_ROUTES.shop('grocery'))}
         style={styles.fridge}
       />
     </View>

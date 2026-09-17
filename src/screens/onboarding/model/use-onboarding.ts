@@ -22,7 +22,7 @@ import {
   useCreateUser,
 } from '@/entities/user';
 
-import { ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { hapticSuccess, useTimeSource } from '@/shared/lib';
 
@@ -160,7 +160,7 @@ export const useOnboarding = (): OnboardingController => {
     });
 
     hapticSuccess();
-    router.replace(ROUTES.HOME);
+    router.replace(STATIC_ROUTES.HOME);
   };
 
   return {

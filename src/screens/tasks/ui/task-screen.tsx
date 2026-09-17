@@ -17,7 +17,7 @@ import {
   scoreQuiz,
 } from '@/entities/task';
 
-import { ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Screen, Sheet, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
@@ -77,7 +77,7 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
   const [choiceId, setChoiceId] = useState<string | null>(null);
 
   if (!play) {
-    return <Redirect href={ROUTES.TASKS} />;
+    return <Redirect href={STATIC_ROUTES.TASKS} />;
   }
 
   const { task } = play;
@@ -133,7 +133,7 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
     }
 
     if (didComplete) {
-      router.replace(ROUTES.TASKS);
+      router.replace(STATIC_ROUTES.TASKS);
     }
   };
 
@@ -230,7 +230,7 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
             isFullWidth
             onPress={() => {
               play.dismissSheet();
-              router.push(ROUTES.BUDGET_PLAN);
+              router.push(STATIC_ROUTES.BUDGET_PLAN);
             }}
           >
             {t('tasks.goPlan')}
@@ -243,7 +243,7 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
 
 export const TaskRouteScreen = ({ taskId }: { taskId: string }) => {
   if (!taskId) {
-    return <Redirect href={ROUTES.TASKS} />;
+    return <Redirect href={STATIC_ROUTES.TASKS} />;
   }
 
   return <TaskScreen taskId={taskId} />;

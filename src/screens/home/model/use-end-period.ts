@@ -7,7 +7,7 @@ import {
   useUserStore,
 } from '@/entities/user';
 
-import { ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES } from '@/shared/constants';
 
 // ═══════════════════════════════════════════
 // HOOK
@@ -35,7 +35,7 @@ export const useEndPeriod = () => {
     openConfirm: () => {
       const user = useUserStore.getState().user;
       if (!user || !canFinishPeriod(user)) return;
-      router.push(ROUTES.END_PERIOD);
+      router.push(STATIC_ROUTES.END_PERIOD);
     },
   };
 };

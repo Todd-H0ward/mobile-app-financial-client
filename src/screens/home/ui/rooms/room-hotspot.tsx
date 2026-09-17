@@ -7,12 +7,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import {
-  HIT_SLOP_SIZE,
-  RADII,
-  SPACING,
-  type ThemeColor,
-} from '@/shared/constants';
+import { HIT_SLOP_SIZE, RADII, SPACING, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Sheet, Text } from '@/shared/ui';
