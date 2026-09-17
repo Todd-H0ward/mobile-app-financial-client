@@ -19,6 +19,10 @@ export type {
   ShortageJarOption,
   ShortageTaskOption,
   ShortageWaitOption,
+  SimOptions,
+  SimPeriod,
+  SimProfile,
+  SimRun,
   TaskFail,
   TaskOk,
   TaskResult,
@@ -56,6 +60,7 @@ export {
   runDemoPeriods,
   selectTask,
   setActiveGoal,
+  simulate,
   startPeriod,
   validatePlayerName,
 } from './lib';
