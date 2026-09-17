@@ -106,8 +106,13 @@ describe('addCoin / removeCoin', () => {
 // ═══════════════════════════════════════════
 
 describe('canConfirm / zeroDirections', () => {
-  it('rejects an all-zero plan', () => {
+  it('rejects an all-zero plan when there is money to allocate', () => {
     expect(canConfirm(EMPTY_PLAN)).toBe(false);
+    expect(canConfirm(EMPTY_PLAN, 50)).toBe(false);
+  });
+
+  it('accepts an empty plan when the wallet is empty', () => {
+    expect(canConfirm(EMPTY_PLAN, 0)).toBe(true);
   });
 
   it('accepts a plan with a single non-zero direction', () => {

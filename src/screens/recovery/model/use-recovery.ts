@@ -13,7 +13,7 @@ import {
   useUser,
 } from '@/entities/user';
 
-import { petGrewPath, ROUTES } from '@/shared/constants';
+import { DYNAMIC_ROUTES, STATIC_ROUTES } from '@/shared/constants';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -35,8 +35,8 @@ interface RecoveryController {
 // ═══════════════════════════════════════════
 
 const routeFor = (destination: RecoveryDestination) => {
-  if (destination === 'budgetPlan') return ROUTES.BUDGET_PLAN;
-  return ROUTES.HOME;
+  if (destination === 'budgetPlan') return STATIC_ROUTES.BUDGET_PLAN;
+  return STATIC_ROUTES.HOME;
 };
 
 // ═══════════════════════════════════════════
@@ -63,14 +63,18 @@ export const useRecovery = (): RecoveryController | null => {
     const settled = endPeriod(user);
     updateUser(() => settled);
 
-    // Growth is the loudest reward in the game (docs/pet.md) — it interrupts
-    // the child's own next step rather than sliding past unseen. The scene
-    // hands them back to `destination` once it is dismissed.
-    router.replace(
-      hasPendingGrowth(settled)
-        ? petGrewPath(routeFor(destination))
-        : routeFor(destination),
-    );
+    const next = hasPendingGrowth(settled)
+      ? DYNAMIC_ROUTES.petGrew(routeFor(destination))
+      : routeFor(destination);
+
+    // Pop summary/recovery off the stack first. `replace` alone left those
+    // screens underneath budget-plan, so Back reopened a stale summary that
+    // Redirects to home — looks like the back button is broken.
+    if (router.canDismiss()) {
+      router.dismissTo(STATIC_ROUTES.HOME);
+    }
+    if (next === STATIC_ROUTES.HOME) return;
+    router.push(next);
   };
 
   return {

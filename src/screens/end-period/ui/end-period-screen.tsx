@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { ROUTES, SPACING } from '@/shared/constants';
+import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Card, Screen, Text } from '@/shared/ui';
@@ -28,7 +28,7 @@ export const EndPeriodScreen = () => {
   const confirm = useEndPeriodConfirm();
 
   if (!confirm) {
-    return <Redirect href={ROUTES.HOME} />;
+    return <Redirect href={STATIC_ROUTES.HOME} />;
   }
 
   return (
@@ -66,20 +66,20 @@ export const EndPeriodScreen = () => {
 
       <View style={styles.actions}>
         <Button
-          variant="primary"
-          size="l"
-          isFullWidth
-          onPress={confirm.confirm}
-        >
-          {t('endPeriod.confirm')}
-        </Button>
-        <Button
           variant="ghost"
           size="l"
           isFullWidth
           onPress={() => router.back()}
         >
           {t('endPeriod.cancel')}
+        </Button>
+        <Button
+          variant="primary"
+          size="l"
+          isFullWidth
+          onPress={confirm.confirm}
+        >
+          {t('endPeriod.confirm')}
         </Button>
       </View>
     </Screen>

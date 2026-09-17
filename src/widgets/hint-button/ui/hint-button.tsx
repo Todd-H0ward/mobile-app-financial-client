@@ -122,7 +122,11 @@ export const HintButton = ({ screen, isPulsing = false }: HintButtonProps) => {
         </Pressable>
       </Animated.View>
 
-      <Sheet.Modal isVisible={isOpen} onClose={() => setIsOpen(false)}>
+      <Sheet.Modal
+        isVisible={isOpen}
+        onClose={() => setIsOpen(false)}
+        isAnimated={isAnimationEnabled}
+      >
         <Sheet.Title>{title}</Sheet.Title>
 
         <View style={styles.body}>

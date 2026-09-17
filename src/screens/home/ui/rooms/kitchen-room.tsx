@@ -1,5 +1,7 @@
+import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
+import { DYNAMIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 
 import { RoomHotspot } from './room-hotspot';
@@ -11,11 +13,12 @@ import { RoomHotspot } from './room-hotspot';
 /**
  * The kitchen: where feeding will live.
  *
- * Two plates on the two things a child looks for — where food is kept and
- * where it is cooked — so the room is already legible with nothing behind it.
+ * Fridge already opens the grocery shop — one real door so the room is not
+ * only "скоро". The stove keeps the honest soon-sheet until cooking lands.
  */
 export const KitchenRoom = () => {
   const { t } = useTranslation();
+  const router = useRouter();
 
   return (
     <View pointerEvents="box-none" style={styles.root}>
@@ -28,6 +31,8 @@ export const KitchenRoom = () => {
       <RoomHotspot
         label={t('rooms.soon.fridgeTitle')}
         text={t('rooms.soon.fridgeText')}
+        tone="success"
+        onPress={() => router.push(DYNAMIC_ROUTES.shop('grocery'))}
         style={styles.fridge}
       />
     </View>

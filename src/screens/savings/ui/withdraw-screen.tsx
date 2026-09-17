@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { goalPath, ROUTES, SPACING } from '@/shared/constants';
+import { SPACING, DYNAMIC_ROUTES, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Card, ProgressBar, Screen, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
@@ -48,7 +48,7 @@ export const WithdrawScreen = ({ goalId, amount }: WithdrawScreenProps) => {
   const withdraw = useWithdraw(goalId, amount);
 
   if (!withdraw) {
-    return <Redirect href={ROUTES.SAVINGS} />;
+    return <Redirect href={STATIC_ROUTES.SAVINGS} />;
   }
 
   const title = t(`savings.goals.${withdraw.goalId}.title`, {
@@ -57,7 +57,7 @@ export const WithdrawScreen = ({ goalId, amount }: WithdrawScreenProps) => {
   const { explain } = withdraw;
 
   const backToGoal = () => {
-    router.replace(goalPath(goalId));
+    router.replace(DYNAMIC_ROUTES.goal(goalId));
   };
 
   return (
@@ -171,7 +171,7 @@ export const WithdrawRouteScreen = ({
   const amount = parseAmount(amountParam);
 
   if (!goalId || amount == null) {
-    return <Redirect href={goalId ? goalPath(goalId) : ROUTES.SAVINGS} />;
+    return <Redirect href={goalId ? DYNAMIC_ROUTES.goal(goalId) : STATIC_ROUTES.SAVINGS} />;
   }
 
   return <WithdrawScreen goalId={goalId} amount={amount} />;

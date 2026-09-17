@@ -3,7 +3,7 @@ import { StyleSheet, View, type ViewStyle } from 'react-native';
 
 import { SHOP_IDS, type ShopId } from '@/entities/catalogue';
 
-import { shopPath } from '@/shared/constants';
+import { DYNAMIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 
 import { RoomHotspot, type RoomHotspotTone } from './room-hotspot';
@@ -58,7 +58,7 @@ export const StreetRoom = () => {
           label={t(`rooms.shop.${shopId}.label`)}
           text={t(`rooms.shop.${shopId}.hint`)}
           tone={SHOP_TONE[shopId]}
-          onPress={() => router.push(shopPath(shopId))}
+          onPress={() => router.push(DYNAMIC_ROUTES.shop(shopId))}
           style={SHOP_PLACEMENT[shopId]}
         />
       ))}

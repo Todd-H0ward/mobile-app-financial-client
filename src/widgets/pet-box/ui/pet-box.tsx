@@ -34,6 +34,11 @@ interface PetBoxProps {
   size?: number;
   /** Caption under the box. The box alone would not say it may be tapped. */
   label?: string;
+  /**
+   * Draws attention once after onboarding — the child just named themselves
+   * and the box is the next thing to open.
+   */
+  isPulsing?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -63,6 +68,11 @@ const PRESS_SCALE = 0.96;
 
 const PRESS_DURATION = 90;
 
+const PULSE_SCALE = 1.06;
+const PULSE_DURATION = 420;
+/** A few beats, then the rock alone keeps the box alive. */
+const PULSE_COUNT = 3;
+
 // ═══════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════
@@ -78,6 +88,7 @@ export const PetBox = ({
   onPress,
   size = DEFAULT_SIZE,
   label,
+  isPulsing = false,
   style,
 }: PetBoxProps) => {
   const { t } = useTranslation();
@@ -89,6 +100,7 @@ export const PetBox = ({
 
   const rock = useSharedValue(0);
   const press = useSharedValue(1);
+  const pulse = useSharedValue(1);
 
   useEffect(() => {
     if (!isAnimationEnabled) {
@@ -117,10 +129,31 @@ export const PetBox = ({
     );
   }, [isAnimationEnabled, rock]);
 
+  useEffect(() => {
+    if (!isPulsing || !isAnimationEnabled) {
+      pulse.value = 1;
+      return;
+    }
+
+    pulse.value = withRepeat(
+      withSequence(
+        withTiming(PULSE_SCALE, {
+          duration: PULSE_DURATION,
+          easing: Easing.out(Easing.quad),
+        }),
+        withTiming(1, {
+          duration: PULSE_DURATION,
+          easing: Easing.in(Easing.quad),
+        }),
+      ),
+      PULSE_COUNT,
+    );
+  }, [isAnimationEnabled, isPulsing, pulse]);
+
   const boxStyle = useAnimatedStyle(() => ({
     transform: [
       { rotate: `${rock.value * ROCK_ANGLE}deg` },
-      { scale: press.value },
+      { scale: press.value * pulse.value },
     ],
   }));
 
@@ -157,7 +190,7 @@ export const PetBox = ({
         </Animated.View>
       </Pressable>
 
-      <Text variant="small" themeColor="textSecondary" style={styles.label}>
+      <Text variant="smallBold" themeColor="textSecondary" style={styles.label}>
         {boxLabel}
       </Text>
     </View>

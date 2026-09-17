@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { PetBox } from '@/widgets/pet-box';
 
 import { SPACING } from '@/shared/constants';
+import { useTranslation } from '@/shared/i18n';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -40,6 +41,8 @@ const FLOOR_INSET = 190;
  * "this is where we live" readable on the first visit.
  */
 export const LivingRoom = ({ isPetMet, onOpenBox }: LivingRoomProps) => {
+  const { t } = useTranslation();
+
   if (isPetMet) {
     return <View pointerEvents="box-none" style={styles.root} />;
   }
@@ -47,7 +50,7 @@ export const LivingRoom = ({ isPetMet, onOpenBox }: LivingRoomProps) => {
   return (
     <View pointerEvents="box-none" style={styles.root}>
       <View style={styles.stage}>
-        <PetBox onPress={onOpenBox} />
+        <PetBox onPress={onOpenBox} label={t('home.petBoxInvite')} isPulsing />
       </View>
     </View>
   );

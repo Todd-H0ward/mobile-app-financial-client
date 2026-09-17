@@ -75,7 +75,7 @@ export const CoinBadge = ({
       </Text>
 
       {label != null && (
-        <Text variant="label" themeColor="textMuted">
+        <Text variant="small" themeColor="textMuted">
           {label}
         </Text>
       )}

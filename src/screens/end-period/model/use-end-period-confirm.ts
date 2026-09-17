@@ -8,7 +8,7 @@ import {
   useUser,
 } from '@/entities/user';
 
-import { ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES } from '@/shared/constants';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -50,7 +50,7 @@ export const useEndPeriodConfirm = (): EndPeriodConfirmController | null => {
     needsGap,
     confirm: () => {
       updateUser((current) => finishPeriod(current));
-      router.replace(ROUTES.PERIOD_SUMMARY);
+      router.replace(STATIC_ROUTES.PERIOD_SUMMARY);
     },
   };
 };

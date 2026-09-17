@@ -67,14 +67,14 @@ export const FeedbackSheet = ({
 }: FeedbackSheetProps) => {
   const { t } = useTranslation();
 
-  if (!report) return null;
+  if (!report || !isVisible) return null;
 
   const params = formatParams(report.params);
   const why =
     report.whyText ?? (report.whyKey ? t(report.whyKey, params) : null);
 
   return (
-    <Sheet.Modal isVisible={isVisible} onClose={onClose}>
+    <Sheet.Modal isVisible onClose={onClose}>
       <Sheet.Title>{t(report.titleKey, params)}</Sheet.Title>
 
       {report.changes.length > 0 ? (

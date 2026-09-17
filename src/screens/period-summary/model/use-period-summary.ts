@@ -8,7 +8,7 @@ import {
 } from '@/entities/budget';
 import { useUser } from '@/entities/user';
 
-import { ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES } from '@/shared/constants';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -54,7 +54,7 @@ export const usePeriodSummary = (): PeriodSummaryController | null => {
     explain,
     barMax,
     continueNext: () => {
-      router.push(ROUTES.RECOVERY);
+      router.push(STATIC_ROUTES.RECOVERY);
     },
   };
 };

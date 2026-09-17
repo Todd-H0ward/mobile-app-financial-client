@@ -1,6 +1,6 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 
-import { ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES } from '@/shared/constants';
 
 import { TaskRouteScreen } from '@/screens/tasks';
 
@@ -18,7 +18,7 @@ export default function TaskRoute() {
   );
 
   if (!taskId) {
-    return <Redirect href={ROUTES.TASKS} />;
+    return <Redirect href={STATIC_ROUTES.TASKS} />;
   }
 
   return <TaskRouteScreen taskId={taskId} />;

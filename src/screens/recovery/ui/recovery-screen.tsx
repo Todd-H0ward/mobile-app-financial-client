@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { ROUTES, SPACING } from '@/shared/constants';
+import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, ListRow, Screen, Text } from '@/shared/ui';
 
@@ -24,7 +24,7 @@ export const RecoveryScreen = () => {
   const recovery = useRecovery();
 
   if (!recovery) {
-    return <Redirect href={ROUTES.HOME} />;
+    return <Redirect href={STATIC_ROUTES.HOME} />;
   }
 
   return (

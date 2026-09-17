@@ -20,9 +20,9 @@ import {
   CONTENT_PADDING,
   MAX_CONTENT_WIDTH,
   RADII,
-  ROUTES,
   SPACING,
   type Spacing,
+  STATIC_ROUTES,
   type ThemeColor,
 } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
@@ -106,7 +106,7 @@ const ScreenBack = ({
           return;
         }
 
-        router.replace(ROUTES.ENTRY);
+        router.replace(STATIC_ROUTES.ENTRY);
       }}
       style={({ pressed }) => [
         styles.back,

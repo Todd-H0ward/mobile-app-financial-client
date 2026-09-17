@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { RADII, ROUTES, SPACING } from '@/shared/constants';
+import { RADII, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import {
@@ -100,7 +100,7 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
   const goal = useGoal(goalId);
 
   if (!goal) {
-    return <Redirect href={ROUTES.SAVINGS} />;
+    return <Redirect href={STATIC_ROUTES.SAVINGS} />;
   }
 
   const title = t(`savings.goals.${goal.goalId}.title`, {
@@ -133,12 +133,27 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
       />
 
       <View style={styles.progressBlock}>
-        <ProgressBar value={goal.progress} height={10} />
+        <ProgressBar
+          value={goal.progress}
+          height={10}
+          accessibilityLabel={t('home.goal.progressA11y', {
+            percent: Math.round(goal.progress * 100),
+          })}
+        />
         <Text variant="bodyBold">{goal.progressLabel}</Text>
       </View>
 
       {!goal.canTransfer && (
-        <Text themeColor="textSecondary">{t('savings.planFirstBanner')}</Text>
+        <>
+          <Text themeColor="textSecondary">{t('savings.planFirstBanner')}</Text>
+          <Button
+            variant="secondary"
+            isFullWidth
+            onPress={() => router.push(STATIC_ROUTES.BUDGET_PLAN)}
+          >
+            {t('savings.goPlan')}
+          </Button>
+        </>
       )}
 
       {!goal.isActive && (
@@ -221,7 +236,7 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
             isFullWidth
             onPress={() => {
               goal.dismissSheet();
-              router.push(ROUTES.BUDGET_PLAN);
+              router.push(STATIC_ROUTES.BUDGET_PLAN);
             }}
           >
             {t('savings.goPlan')}
@@ -237,7 +252,7 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
  */
 export const GoalRouteScreen = ({ goalId }: { goalId: string }) => {
   if (!goalId) {
-    return <Redirect href={ROUTES.SAVINGS} />;
+    return <Redirect href={STATIC_ROUTES.SAVINGS} />;
   }
 
   return <GoalScreen goalId={goalId} />;

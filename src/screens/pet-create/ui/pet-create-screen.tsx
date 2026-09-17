@@ -1,5 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
+import { HintButton } from '@/widgets/hint-button';
+
 import {
   appearanceFor,
   PET_COLORS,
@@ -25,25 +27,6 @@ const PREVIEW_SIZE = 200;
 /** The pet is meeting the child, so it is shown at its best. */
 const PREVIEW_EMOTION = 'happy';
 
-/** The words a child reads instead of the axis ids. */
-const SPECIES_LABEL: Record<(typeof PET_SPECIES)[number], string> = {
-  cat: 'Кот',
-  dog: 'Пёс',
-  capybara: 'Капибара',
-};
-
-const COLOR_LABEL: Record<(typeof PET_COLORS)[number], string> = {
-  sand: 'Песочный',
-  graphite: 'Графит',
-  mint: 'Мятный',
-};
-
-const PATTERN_LABEL: Record<(typeof PET_PATTERNS)[number], string> = {
-  solid: 'Однотонный',
-  spots: 'Пятна',
-  stripes: 'Полоски',
-};
-
 // ═══════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════
@@ -67,6 +50,7 @@ export const PetCreateScreen = () => {
           <Screen.Title>{t('petCreate.title')}</Screen.Title>
           <Screen.Subtitle>{t('petCreate.subtitle')}</Screen.Subtitle>
         </Screen.Heading>
+        <HintButton screen="pet-create" />
       </Screen.Header>
 
       <View style={styles.stage}>
@@ -83,7 +67,7 @@ export const PetCreateScreen = () => {
       </View>
 
       <View style={styles.row}>
-        <Text variant="label" themeColor="textMuted">
+        <Text variant="small" themeColor="textMuted">
           {t('petCreate.whoIsThis')}
         </Text>
         <View style={styles.chips}>
@@ -93,16 +77,14 @@ export const PetCreateScreen = () => {
               variant={petCreate.species === species ? 'selected' : 'neutral'}
               onPress={() => petCreate.setSpecies(species)}
             >
-              {t(`pet.species.${species}`, {
-                defaultValue: SPECIES_LABEL[species],
-              })}
+              {t(`pet.species.${species}`)}
             </Chip>
           ))}
         </View>
       </View>
 
       <View style={styles.row}>
-        <Text variant="label" themeColor="textMuted">
+        <Text variant="small" themeColor="textMuted">
           {t('petCreate.color')}
         </Text>
         <View style={styles.chips}>
@@ -112,16 +94,14 @@ export const PetCreateScreen = () => {
               variant={petCreate.color === color ? 'selected' : 'neutral'}
               onPress={() => petCreate.setColor(color)}
             >
-              {t(`pet.color.${color}`, {
-                defaultValue: COLOR_LABEL[color],
-              })}
+              {t(`pet.color.${color}`)}
             </Chip>
           ))}
         </View>
       </View>
 
       <View style={styles.row}>
-        <Text variant="label" themeColor="textMuted">
+        <Text variant="small" themeColor="textMuted">
           {t('petCreate.pattern')}
         </Text>
         <View style={styles.chips}>
@@ -131,9 +111,7 @@ export const PetCreateScreen = () => {
               variant={petCreate.pattern === pattern ? 'selected' : 'neutral'}
               onPress={() => petCreate.setPattern(pattern)}
             >
-              {t(`pet.pattern.${pattern}`, {
-                defaultValue: PATTERN_LABEL[pattern],
-              })}
+              {t(`pet.pattern.${pattern}`)}
             </Chip>
           ))}
         </View>
