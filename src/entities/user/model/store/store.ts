@@ -173,7 +173,9 @@ export const useHomeHudSource = () =>
       return {
         pet: user.pet,
         balance: user.wallet.balance,
-        lastEntry: user.wallet.history[0] ?? null,
+        /** Newest earn — 2.5.4 on home; spends must not steal the badge. */
+        lastEarn:
+          user.wallet.history.find((entry) => entry.kind === 'earn') ?? null,
         savings: user.savings,
         tasks: user.tasks,
         phase: user.period.phase,

@@ -294,9 +294,7 @@ export const useHomeHud = (): HomeHud => {
       goal: activeGoal
         ? buildGoal(activeGoal.content, activeGoal.saved, t)
         : null,
-      lastCredit: source.lastEntry
-        ? buildLastCredit(source.lastEntry, t)
-        : null,
+      lastCredit: source.lastEarn ? buildLastCredit(source.lastEarn, t) : null,
       taskTitle: buildTaskTitle(source.tasks, t),
       taskHint: buildTaskHint(source.tasks, t),
       isPlanning: source.phase === 'planning',

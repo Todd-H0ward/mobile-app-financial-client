@@ -197,9 +197,7 @@ export const HomeScreen = () => {
           </View>
         </View>
         <View pointerEvents="none">
-          {!hud.isPlanning && !hud.isActive ? (
-            <HomeHudLastCredit credit={hud.lastCredit} />
-          ) : null}
+          <HomeHudLastCredit credit={hud.lastCredit} />
         </View>
         {hud.isPlanning && (
           <HomeHudPlanBanner
