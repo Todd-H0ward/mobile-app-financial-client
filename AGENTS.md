@@ -375,7 +375,7 @@ Full rationale: [docs/layout.md](docs/layout.md).
 4. Run `pnpm typecheck`, `pnpm test` and `pnpm format` before finishing.
 5. Never edit `src/app/*` to add UI — add a screen and re-export it.
 6. Do not resurrect `reset-project` or switch lint back to `expo lint` / ESLint
-   — lint is Biome (`pnpm lint`).
+   — lint is Biome (`pnpm lint`), scoped to `src/**` and `plugins/**`.
 
 ## Do not
 

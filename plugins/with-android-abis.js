@@ -15,7 +15,9 @@ module.exports = (config) =>
     if (process.env.ANDROID_RELEASE_ABIS_ALL === '1') return cfg;
 
     cfg.modResults = cfg.modResults.map((item) =>
-      item.type === 'property' && item.key === KEY ? { ...item, value: RELEASE_ABIS } : item,
+      item.type === 'property' && item.key === KEY
+        ? { ...item, value: RELEASE_ABIS }
+        : item,
     );
 
     return cfg;

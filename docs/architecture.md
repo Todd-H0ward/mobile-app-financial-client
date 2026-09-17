@@ -184,16 +184,18 @@ Reanimated worklets in this project — the details and the symptom are in
 ## Checks
 
 ```bash
-pnpm lint                 # biome check src
-pnpm format               # biome check --write src
+pnpm lint                 # biome check (src + plugins)
+pnpm format               # biome check --write
 pnpm typecheck            # tsc --noEmit
 pnpm test                 # vitest
 pnpm test:coverage        # vitest + thresholds on economy / minigame
 npx expo start            # run
 ```
 
-Lint **is** Biome — `package.json` → `"lint": "biome check src"`. There is no
-ESLint / `expo lint` / `reset-project` template script in this repo.
+Lint **is** Biome — `package.json` → `"lint": "biome check"`, scope in
+`biome.json` → `files.includes` (`src/**`, `plugins/**`). Import groups follow
+FSD: `app` → `_app` → `screens` → `widgets` → `features` → `entities` →
+`shared` (no `@/pages`). There is no ESLint / `expo lint` / `reset-project`.
 
 CI (`.github/workflows/ci.yml`) runs typecheck, `pnpm test:coverage` (economy +
 minigame thresholds and i18n en↔ru key parity), and `pnpm lint` with
