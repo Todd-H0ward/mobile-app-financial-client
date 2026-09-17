@@ -66,20 +66,20 @@ export const EndPeriodScreen = () => {
 
       <View style={styles.actions}>
         <Button
-          variant="primary"
-          size="l"
-          isFullWidth
-          onPress={confirm.confirm}
-        >
-          {t('endPeriod.confirm')}
-        </Button>
-        <Button
           variant="ghost"
           size="l"
           isFullWidth
           onPress={() => router.back()}
         >
           {t('endPeriod.cancel')}
+        </Button>
+        <Button
+          variant="primary"
+          size="l"
+          isFullWidth
+          onPress={confirm.confirm}
+        >
+          {t('endPeriod.confirm')}
         </Button>
       </View>
     </Screen>

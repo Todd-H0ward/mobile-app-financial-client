@@ -133,12 +133,27 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
       />
 
       <View style={styles.progressBlock}>
-        <ProgressBar value={goal.progress} height={10} />
+        <ProgressBar
+          value={goal.progress}
+          height={10}
+          accessibilityLabel={t('home.goal.progressA11y', {
+            percent: Math.round(goal.progress * 100),
+          })}
+        />
         <Text variant="bodyBold">{goal.progressLabel}</Text>
       </View>
 
       {!goal.canTransfer && (
-        <Text themeColor="textSecondary">{t('savings.planFirstBanner')}</Text>
+        <>
+          <Text themeColor="textSecondary">{t('savings.planFirstBanner')}</Text>
+          <Button
+            variant="secondary"
+            isFullWidth
+            onPress={() => router.push(ROUTES.BUDGET_PLAN)}
+          >
+            {t('savings.goPlan')}
+          </Button>
+        </>
       )}
 
       {!goal.isActive && (

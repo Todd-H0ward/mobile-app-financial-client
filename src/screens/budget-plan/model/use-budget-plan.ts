@@ -17,6 +17,7 @@ import type { BudgetDirection } from '@/entities/economy';
 import { startPeriod, useUpdateUser, useUser } from '@/entities/user';
 
 import { ROUTES } from '@/shared/constants';
+import { hapticSuccess } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -84,6 +85,7 @@ export const useBudgetPlan = (): BudgetPlanController => {
     };
     const after = startPeriod(drafted);
 
+    hapticSuccess();
     showFeedback({
       before: user,
       after,

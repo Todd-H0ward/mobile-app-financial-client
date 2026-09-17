@@ -15,7 +15,7 @@ import {
   useUser,
 } from '@/entities/user';
 
-import { useTimeSource } from '@/shared/lib';
+import { hapticSuccess, useTimeSource } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -112,6 +112,7 @@ export const useTaskPlay = (taskId: string): TaskPlayController | null => {
       const outcome = applyCompleteTask(user, task.id, time, rewardShare);
       if (!outcome.ok) return false;
 
+      hapticSuccess();
       showFeedback({
         before: user,
         after: outcome.user,

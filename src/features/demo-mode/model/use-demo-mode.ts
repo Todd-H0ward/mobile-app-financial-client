@@ -7,6 +7,7 @@ import {
   useUser,
 } from '@/entities/user';
 
+import { useTranslation } from '@/shared/i18n';
 import { toast } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
@@ -19,6 +20,7 @@ import { toast } from '@/shared/ui';
  * Demo is a test profile + reset + FSM run — no accelerated clock.
  */
 export const useDemoMode = () => {
+  const { t } = useTranslation();
   const user = useUser();
   const updateUser = useUpdateUser();
   const setDemoMode = useSetDemoMode();
@@ -30,31 +32,31 @@ export const useDemoMode = () => {
 
   const enable = () => {
     setDemoMode(true);
-    toast('Включён тестовый профиль');
+    toast(t('demoMode.toastEnabled'));
   };
 
   const disable = () => {
     setDemoMode(false);
-    toast('Демо-режим выключен, профиль вернулся');
+    toast(t('demoMode.toastDisabled'));
   };
 
   const runPeriods = () => {
     if (!isDemoMode) {
-      toast('Прогон периодов доступен только в демо-режиме');
+      toast(t('demoMode.toastRunOnlyInDemo'));
       return;
     }
 
     try {
       updateUser((current) => runDemoPeriods(current));
-      toast(`Прогнано ${DEMO_RUN_PERIODS} периодов`);
+      toast(t('demoMode.toastRunDone', { count: DEMO_RUN_PERIODS }));
     } catch {
-      toast('Не удалось прогнать периоды', { variant: 'warning' });
+      toast(t('demoMode.toastRunFailed'), { variant: 'warning' });
     }
   };
 
   const resetProfile = () => {
     resetUser();
-    toast('Профиль сброшен к исходному');
+    toast(t('demoMode.toastReset'));
   };
 
   return {

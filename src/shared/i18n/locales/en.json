@@ -37,14 +37,20 @@
     "title": "Demo mode",
     "switchLabel": "Test profile",
     "periodInfo": "Period {{periodIndex}} · historical periods {{finishedPeriods}}",
-    "desc1": "Five consecutive periods without waiting for real time. Direction actuals are currently zero — wallet and tasks will appear later.",
+    "desc1": "Five consecutive periods without waiting for real time — wallet, tasks and facts advance on each run.",
     "desc2": "Child profile is preserved: it waits during the demo and is restored completely.",
     "runPeriods": "Run {{count}} periods",
     "resetProfile": "Reset to initial",
     "confirmTitle": "Enable demo mode?",
     "confirmDesc": "The game will switch to the test profile. Child progress will be saved and restored when demo mode is turned off.",
     "confirmCancel": "Cancel",
-    "confirmEnable": "Enable"
+    "confirmEnable": "Enable",
+    "toastEnabled": "Test profile is on",
+    "toastDisabled": "Demo mode off — child profile restored",
+    "toastRunOnlyInDemo": "Run periods only works in demo mode",
+    "toastRunDone": "Ran {{count}} periods",
+    "toastRunFailed": "Could not run periods",
+    "toastReset": "Profile reset to the starting state"
   },
   "profileRestart": {
     "buttonLabel": "Restart onboarding",
@@ -53,7 +59,8 @@
     "modalDescWithoutName": "Profile will be deleted from the device: coins, savings jar, and period history will be lost.",
     "modalWarning": "It cannot be restored — onboarding will start from scratch.",
     "keepAsIs": "Keep as is",
-    "confirm": "Delete and restart"
+    "confirm": "Delete and restart",
+    "toastDeleted": "Profile deleted — onboarding starts again"
   },
   "home": {
     "settingsA11y": "Settings",
@@ -61,6 +68,7 @@
     "atHome": "At home: {{name}}",
     "roomComingSoon": "Pet room will appear in the first wave",
     "petBoxLabel": "Someone is scratching inside. Tap",
+    "petBoxInvite": "Open the box — your pet is waiting",
     "balance": "Balance",
     "savings": "Savings jar",
     "planBannerTitle": "Make a budget plan",
@@ -70,11 +78,15 @@
     "endBannerBody": "See where the coins went — plan next to fact.",
     "endBannerWarnTitle": "End the day?",
     "endBannerWarnBody": "Needs are still under plan — you can finish anyway; the totals will show the gap.",
+    "endBannerDisabledTitle": "End the day",
+    "endBannerDisabledBody": "First make a budget plan — then you can finish the day.",
+    "endBannerDisabledAction": "Make a plan",
     "endBannerAction": "End day",
     "goal": {
       "none": "No goal chosen",
       "noneHint": "Open the savings jar and pick what to save for",
-      "progress": "{{saved}} of {{price}}"
+      "progress": "{{saved}} of {{price}}",
+      "progressA11y": "Goal progress: {{percent}} percent"
     },
     "lastCredit": "Latest credit",
     "task": {
@@ -125,6 +137,7 @@
       "kitchen": "Kitchen"
     },
     "goA11y": "Go to: {{room}}",
+    "here": "You are here: {{room}}",
     "hint": "Swipe, or tap a door",
     "soon": {
       "shopTitle": "Shop",
@@ -303,6 +316,22 @@
         "Open a term to read a plain-language definition.",
         "The same words show up in hints and on screens so the story stays one piece."
       ]
+    },
+    "budget-plan": {
+      "title": "Budget plan",
+      "body": [
+        "Split coins across three directions: needs, wants and the jar.",
+        "The remainder stays on screen — the plan cannot go below zero.",
+        "When you press Confirm, the period goes live and you can spend."
+      ]
+    },
+    "pet-create": {
+      "title": "Meet the pet",
+      "body": [
+        "Pick a species, colour and pattern — the pet updates while you look.",
+        "Choose a name; you can change it later.",
+        "Take home opens the box on the main screen."
+      ]
     }
   },
   "onboarding": {
@@ -408,6 +437,7 @@
     "available": "Available this period: {{count}}",
     "remainder": "Left to allocate: {{count}}",
     "remainderHint": "You do not have to allocate every coin — the remainder carries into the next period.",
+    "progressA11y": "Plan laid out: {{percent}} percent",
     "confirm": "Confirm plan",
     "stepperMinusA11y": "Remove coin: {{label}}",
     "stepperPlusA11y": "Add coin: {{label}}",
@@ -485,8 +515,8 @@
     "shortageOptionJarShort": "the jar for «{{goal}}» has {{saved}}, and you need {{count}} — save a bit more first",
     "shortageOptionJarNoGoal": "pick a savings goal first — then you can take from the jar",
     "shortageOptionWait": "wait and buy it next period",
-    "shortageTask": "Got it — I'll earn",
-    "shortageJar": "Maybe from the jar later",
+    "shortageTask": "Do a task",
+    "shortageJar": "Open the jar",
     "shortageWait": "Wait until next period",
     "planFirstBanner": "First confirm a budget plan — then the shop opens for real.",
     "planFirstTitle": "Plan first",

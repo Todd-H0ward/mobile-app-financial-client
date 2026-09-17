@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
+import { useTranslation } from '@/shared/i18n';
 import { Button, Screen } from '@/shared/ui';
 
 import { useOnboarding } from '../model';
@@ -21,16 +22,25 @@ import {
 // ═══════════════════════════════════════════
 
 export const OnboardingScreen = () => {
+  const { t } = useTranslation();
   const onboarding = useOnboarding();
   const { stepId, title, line, stepNumber, stepCount } = onboarding;
+
+  const isHintPulsing =
+    stepId === 'greeting' || stepId === 'sorting' || stepId === 'plan';
 
   return (
     <Screen gap="three" isTabBarVisible={false}>
       <Screen.Header>
+        {onboarding.canGoBack ? (
+          <Button size="s" variant="ghost" onPress={onboarding.goBack}>
+            {t('common.back')}
+          </Button>
+        ) : null}
         <Screen.Heading>
           <Screen.Title>{title}</Screen.Title>
         </Screen.Heading>
-        <HintButton screen="onboarding" isPulsing={stepId === 'greeting'} />
+        <HintButton screen="onboarding" isPulsing={isHintPulsing} />
       </Screen.Header>
 
       <PawTrail current={stepNumber} total={stepCount} />
@@ -80,7 +90,6 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   buttonUnderDrag: {
-    elevation: 0,
     zIndex: 0,
   },
 });

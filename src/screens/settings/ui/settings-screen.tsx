@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { useChangeLanguage } from '@/features/change-language';
 
-import { useIsAnimationEnabled, useIsSoundEnabled } from '@/entities/settings';
+import { useIsAnimationEnabled } from '@/entities/settings';
 import { useUpdateUser } from '@/entities/user';
 
 import { ROUTES, SPACING } from '@/shared/constants';
@@ -31,18 +31,11 @@ export const SettingsScreen = () => {
   const { languagePreference, changeLanguage } = useChangeLanguage();
   const updateUser = useUpdateUser();
   const isAnimationEnabled = useIsAnimationEnabled();
-  const isSoundEnabled = useIsSoundEnabled();
 
   const setAnimation = (isEnabled: boolean) =>
     updateUser((u) => ({
       ...u,
       settings: { ...u.settings, isAnimationEnabled: isEnabled },
-    }));
-
-  const setSound = (isEnabled: boolean) =>
-    updateUser((u) => ({
-      ...u,
-      settings: { ...u.settings, isSoundEnabled: isEnabled },
     }));
 
   return (
@@ -87,17 +80,6 @@ export const SettingsScreen = () => {
               />
             }
           />
-          <ListRow
-            title={t('settings.sound')}
-            subtitle={t('settings.soundSubtitle')}
-            trailing={
-              <Switch
-                isChecked={isSoundEnabled}
-                onChange={setSound}
-                label={t('settings.sound')}
-              />
-            }
-          />
         </Card.Content>
       </Card>
 
@@ -128,23 +110,25 @@ export const SettingsScreen = () => {
         </Card.Content>
       </Card>
 
-      <Card tone="surfaceSoft">
-        <Card.Title>{t('settings.development')}</Card.Title>
-        <Card.Content>
-          <Text variant="small" themeColor="textSecondary">
-            {t('settings.uiKitDescription')}
-          </Text>
-        </Card.Content>
-        <Card.Footer>
-          <Button
-            size="m"
-            isFullWidth
-            onPress={() => router.push(ROUTES.UI_KIT)}
-          >
-            {t('settings.openUiKit')}
-          </Button>
-        </Card.Footer>
-      </Card>
+      {__DEV__ ? (
+        <Card tone="surfaceSoft">
+          <Card.Title>{t('settings.development')}</Card.Title>
+          <Card.Content>
+            <Text variant="small" themeColor="textSecondary">
+              {t('settings.uiKitDescription')}
+            </Text>
+          </Card.Content>
+          <Card.Footer>
+            <Button
+              size="m"
+              isFullWidth
+              onPress={() => router.push(ROUTES.UI_KIT)}
+            >
+              {t('settings.openUiKit')}
+            </Button>
+          </Card.Footer>
+        </Card>
+      ) : null}
 
       {/* Last and quiet — docs/parents.md: the panel a child sees every day
           must not advertise the room they are not allowed into. */}

@@ -1,11 +1,11 @@
 import { type ReactNode, useEffect, useState } from 'react';
 
 import {
-  Dimensions,
   Modal,
   Pressable,
   type StyleProp,
   StyleSheet,
+  useWindowDimensions,
   View,
   type ViewStyle,
 } from 'react-native';
@@ -22,7 +22,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { RADII } from '@/shared/constants';
+import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 
 import { Text, type TextProps } from './text';
@@ -53,14 +53,17 @@ interface SheetModalProps {
   onClose: () => void;
   /** Disables the drag handle and the tap-outside dismissal. */
   isDismissible?: boolean;
+  /**
+   * When false, the sheet appears and disappears without slide timing —
+   * for the grown-up's "animations off" switch. Defaults to true.
+   */
+  isAnimated?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
-
-const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 const OPEN_DURATION = 260;
 const CLOSE_DURATION = 200;
@@ -118,32 +121,37 @@ const SheetModal = ({
   isVisible,
   onClose,
   isDismissible = true,
+  isAnimated = true,
   style,
 }: SheetModalProps) => {
   const theme = useTheme();
+  const { height: windowHeight } = useWindowDimensions();
   const [isMounted, setIsMounted] = useState(isVisible);
-  const offset = useSharedValue(SCREEN_HEIGHT);
-  const height = useSharedValue(SCREEN_HEIGHT);
+  const offset = useSharedValue(windowHeight);
+  const height = useSharedValue(windowHeight);
+
+  const openMs = isAnimated ? OPEN_DURATION : 0;
+  const closeMs = isAnimated ? CLOSE_DURATION : 0;
 
   useEffect(() => {
     if (isVisible) {
       setIsMounted(true);
-      offset.value = SCREEN_HEIGHT;
+      offset.value = windowHeight;
       offset.value = withTiming(0, {
-        duration: OPEN_DURATION,
+        duration: openMs,
         easing: Easing.out(Easing.cubic),
       });
       return;
     }
 
     offset.value = withTiming(
-      SCREEN_HEIGHT,
-      { duration: CLOSE_DURATION, easing: Easing.in(Easing.cubic) },
+      windowHeight,
+      { duration: closeMs, easing: Easing.in(Easing.cubic) },
       (finished) => {
         if (finished) runOnJS(setIsMounted)(false);
       },
     );
-  }, [isVisible, offset]);
+  }, [closeMs, isVisible, offset, openMs, windowHeight]);
 
   const close = () => {
     if (isDismissible) onClose();
@@ -162,8 +170,8 @@ const SheetModal = ({
 
       if (isDismissed) {
         offset.value = withTiming(
-          SCREEN_HEIGHT,
-          { duration: CLOSE_DURATION, easing: Easing.in(Easing.cubic) },
+          windowHeight,
+          { duration: closeMs, easing: Easing.in(Easing.cubic) },
           (finished) => {
             if (finished) runOnJS(onClose)();
           },
@@ -172,7 +180,7 @@ const SheetModal = ({
       }
 
       offset.value = withTiming(0, {
-        duration: CLOSE_DURATION,
+        duration: closeMs,
         easing: Easing.out(Easing.cubic),
       });
     });
@@ -253,8 +261,8 @@ export const Sheet = Object.assign(SheetRoot, {
 const styles = StyleSheet.create({
   root: {
     borderRadius: RADII.xxl,
-    gap: 14,
-    padding: 20,
+    gap: SPACING.three,
+    padding: SPACING.four,
   },
   grabber: {
     alignSelf: 'center',
@@ -279,13 +287,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sheetSlot: {
-    padding: 8,
+    padding: SPACING.two,
   },
   centered: {
     textAlign: 'center',
   },
   actions: {
-    gap: 8,
+    gap: SPACING.two,
   },
 });
 

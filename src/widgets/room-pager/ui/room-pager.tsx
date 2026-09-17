@@ -17,7 +17,10 @@ import {
   stepRoom,
 } from '@/entities/room';
 
+import { RADII, SPACING } from '@/shared/constants';
+import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
+import { Text } from '@/shared/ui';
 
 import { RoomBackground } from './room-background';
 import { RoomDoor } from './room-door';
@@ -90,6 +93,7 @@ const RoomPagerRoot = ({
   isHintVisible = false,
 }: RoomPagerProps) => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const { width } = useWindowDimensions();
   const scroll = useRef<ScrollView>(null);
   /** The page the strip is actually resting on, to tell a door from a swipe. */
@@ -97,6 +101,7 @@ const RoomPagerRoot = ({
 
   const index = roomIndex(room);
   const { left, right } = neighboursOf(room);
+  const hereLabel = t('rooms.here', { room: t(`rooms.name.${room}`) });
 
   useEffect(() => {
     if (settledIndex.current === index) return;
@@ -136,6 +141,23 @@ const RoomPagerRoot = ({
       >
         {children}
       </ScrollView>
+
+      <View
+        pointerEvents="none"
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={[
+          styles.here,
+          {
+            backgroundColor: theme.surface,
+            borderColor: theme.border,
+          },
+        ]}
+      >
+        <Text variant="smallBold" themeColor="textSecondary">
+          {hereLabel}
+        </Text>
+      </View>
 
       {left && (
         <RoomDoor
@@ -179,6 +201,15 @@ export const RoomPager = Object.assign(RoomPagerRoot, {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+  },
+  here: {
+    alignSelf: 'center',
+    borderRadius: RADII.pill,
+    borderWidth: 1,
+    paddingHorizontal: SPACING.three,
+    paddingVertical: SPACING.one,
+    position: 'absolute',
+    top: '48%',
   },
   strip: {
     flex: 1,

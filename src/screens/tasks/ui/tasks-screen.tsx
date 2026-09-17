@@ -3,9 +3,9 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { SPACING, taskPath } from '@/shared/constants';
+import { ROUTES, SPACING, taskPath } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { ListRow, Screen, TasksIcon, Text } from '@/shared/ui';
+import { Button, ListRow, Screen, TasksIcon, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
 import { useTasksList } from '../model';
@@ -34,7 +34,16 @@ export const TasksScreen = () => {
       </Screen.Header>
 
       {!list.canPlay && (
-        <Text themeColor="textSecondary">{t('tasks.planFirstBanner')}</Text>
+        <>
+          <Text themeColor="textSecondary">{t('tasks.planFirstBanner')}</Text>
+          <Button
+            variant="secondary"
+            isFullWidth
+            onPress={() => router.push(ROUTES.BUDGET_PLAN)}
+          >
+            {t('tasks.goPlan')}
+          </Button>
+        </>
       )}
 
       <View style={styles.list}>

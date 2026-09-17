@@ -11,6 +11,8 @@ import {
 } from '@/entities/pet';
 import { useUpdateUser, useUserPet } from '@/entities/user';
 
+import { hapticSuccess } from '@/shared/lib';
+
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
@@ -89,6 +91,7 @@ export const usePetCreate = (): PetCreateController => {
         },
       }));
 
+      hapticSuccess();
       router.back();
     },
   };

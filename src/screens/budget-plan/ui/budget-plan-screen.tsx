@@ -1,5 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
+import { HintButton } from '@/widgets/hint-button';
+
 import { BUDGET_DIRECTIONS } from '@/entities/economy';
 
 import { SPACING } from '@/shared/constants';
@@ -36,13 +38,19 @@ export const BudgetPlanScreen = () => {
             {t('budgetPlan.available', { count: formatMoney(plan.available) })}
           </Screen.Subtitle>
         </Screen.Heading>
+        <HintButton screen="budget-plan" />
       </Screen.Header>
 
       <View style={styles.remainder}>
         <Text variant="bodyBold">
           {t('budgetPlan.remainder', { count: formatMoney(plan.planLeft) })}
         </Text>
-        <ProgressBar value={laidOut} />
+        <ProgressBar
+          value={laidOut}
+          accessibilityLabel={t('budgetPlan.progressA11y', {
+            percent: Math.round(laidOut * 100),
+          })}
+        />
         <Text variant="small" themeColor="textSecondary">
           {t('budgetPlan.remainderHint')}
         </Text>

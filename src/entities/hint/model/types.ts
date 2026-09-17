@@ -22,6 +22,8 @@ const HINT_SCREENS = [
   'tasks',
   'history',
   'glossary',
+  'budget-plan',
+  'pet-create',
 ] as const;
 
 // ═══════════════════════════════════════════

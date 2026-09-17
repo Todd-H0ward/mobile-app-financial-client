@@ -174,17 +174,20 @@ export const HomeScreen = () => {
             <HintButton screen="home" />
           </View>
         </View>
-
         <View pointerEvents="none">
-          <HomeHudLastCredit credit={hud.lastCredit} />
+          {!hud.isPlanning && !hud.isActive ? (
+            <HomeHudLastCredit credit={hud.lastCredit} />
+          ) : null}
         </View>
-
         {hud.isPlanning && (
           <HomeHudPlanBanner onPress={() => router.push(ROUTES.BUDGET_PLAN)} />
         )}
-
         {hud.isActive && (
-          <HomeHudEndBanner status={endStatus} onPress={openConfirm} />
+          <HomeHudEndBanner
+            status={endStatus}
+            onPress={openConfirm}
+            onDisabledPress={() => router.push(ROUTES.BUDGET_PLAN)}
+          />
         )}
       </View>
 

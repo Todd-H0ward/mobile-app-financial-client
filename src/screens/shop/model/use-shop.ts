@@ -17,7 +17,7 @@ import {
   useUser,
 } from '@/entities/user';
 
-import { useTimeSource } from '@/shared/lib';
+import { hapticSuccess, useTimeSource } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -171,6 +171,7 @@ export const useShop = (shopId: ShopId): ShopController => {
       }
 
       updateUser(() => result.user);
+      hapticSuccess();
       showFeedback({
         before: user,
         after: result.user,

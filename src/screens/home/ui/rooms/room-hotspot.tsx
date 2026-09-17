@@ -7,10 +7,16 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { RADII, SPACING, type ThemeColor } from '@/shared/constants';
+import {
+  HIT_SLOP_SIZE,
+  RADII,
+  SPACING,
+  type ThemeColor,
+} from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Sheet, Text } from '@/shared/ui';
+import { hitSlopFor } from '@/shared/utils';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -98,6 +104,7 @@ export const RoomHotspot = ({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
+        hitSlop={hitSlopFor(HIT_SLOP_SIZE)}
         onPress={() => {
           if (onPress) {
             onPress();
@@ -110,7 +117,7 @@ export const RoomHotspot = ({
           {
             backgroundColor: colors ? theme[colors.background] : theme.surface,
             borderColor: colors ? theme[colors.border] : theme.border,
-            opacity: pressed ? 0.7 : 1,
+            opacity: pressed ? 0.85 : 1,
           },
           style,
         ]}
@@ -148,7 +155,7 @@ const styles = StyleSheet.create({
     borderRadius: RADII.pill,
     borderWidth: 1.5,
     justifyContent: 'center',
-    minHeight: 40,
+    minHeight: HIT_SLOP_SIZE,
     paddingHorizontal: SPACING.three,
     position: 'absolute',
   },

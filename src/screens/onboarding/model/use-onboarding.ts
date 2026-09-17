@@ -24,7 +24,7 @@ import {
 
 import { ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { useTimeSource } from '@/shared/lib';
+import { hapticSuccess, useTimeSource } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
 // CONSTANTS
@@ -104,6 +104,12 @@ interface OnboardingController {
   markCoinsRevealed: () => void;
   /** Moves on; on the last step it creates the profile and leaves onboarding. */
   goNext: () => void;
+  /**
+   * Soft back to the previous step. Hidden on greeting — there is nowhere to
+   * go without abandoning the walk.
+   */
+  canGoBack: boolean;
+  goBack: () => void;
 }
 
 // ═══════════════════════════════════════════
@@ -153,6 +159,7 @@ export const useOnboarding = (): OnboardingController => {
       createdAt: time.now(),
     });
 
+    hapticSuccess();
     router.replace(ROUTES.HOME);
   };
 
@@ -216,6 +223,12 @@ export const useOnboarding = (): OnboardingController => {
       }
 
       setStepIndex(stepIndex + 1);
+    },
+
+    canGoBack: stepIndex > 0,
+    goBack: () => {
+      if (stepIndex === 0) return;
+      setStepIndex(stepIndex - 1);
     },
   };
 };

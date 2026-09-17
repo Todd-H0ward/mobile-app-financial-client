@@ -70,6 +70,15 @@ export const ShopScreen = ({ shopId }: ShopScreenProps) => {
       />
 
       {!shop.canShop && (
+        <Button
+          variant="secondary"
+          isFullWidth
+          onPress={() => router.push(ROUTES.BUDGET_PLAN)}
+        >
+          {t('shop.goPlan')}
+        </Button>
+      )}
+      {!shop.canShop && (
         <Text themeColor="textSecondary">{t('shop.planFirstBanner')}</Text>
       )}
 
@@ -201,11 +210,21 @@ export const ShopScreen = ({ shopId }: ShopScreenProps) => {
             variant="secondary"
             isFullWidth
             disabled={!shop.shortageExplain?.jar.isAvailable}
-            onPress={shop.dismissSheet}
+            onPress={() => {
+              shop.dismissSheet();
+              router.push(ROUTES.SAVINGS);
+            }}
           >
             {t('shop.shortageJar')}
           </Button>
-          <Button variant="primary" isFullWidth onPress={shop.dismissSheet}>
+          <Button
+            variant="primary"
+            isFullWidth
+            onPress={() => {
+              shop.dismissSheet();
+              router.push(ROUTES.TASKS);
+            }}
+          >
             {t('shop.shortageTask')}
           </Button>
         </Sheet.Actions>

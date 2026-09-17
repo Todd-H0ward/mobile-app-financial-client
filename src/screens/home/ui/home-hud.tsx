@@ -53,6 +53,11 @@ interface HomeHudEndBannerProps {
   /** `disabled` | `ready` | `warn` — three HUD states from 0.3-R. */
   status: 'disabled' | 'ready' | 'warn';
   onPress: () => void;
+  /**
+   * When the day cannot end yet (no live plan), a tap should open the plan
+   * screen instead of doing nothing — opacity alone does not teach why.
+   */
+  onDisabledPress?: () => void;
 }
 
 // ═══════════════════════════════════════════
@@ -172,7 +177,13 @@ export const HomeHudBoard = ({
           </Text>
 
           {goal ? (
-            <ProgressBar value={goal.progress} height={6} />
+            <ProgressBar
+              value={goal.progress}
+              height={6}
+              accessibilityLabel={t('home.goal.progressA11y', {
+                percent: Math.round(goal.progress * 100),
+              })}
+            />
           ) : (
             <Text variant="small" themeColor="textMuted" numberOfLines={1}>
               {t('home.goal.noneHint')}
@@ -253,26 +264,38 @@ export const HomeHudPlanBanner = ({ onPress }: HomeHudPlanBannerProps) => {
  *
  * Three states: unavailable without a live plan, ready when needs are covered,
  * warn when they are not — soft amber, never a red alarm or a hard block.
+ * Disabled still explains why and can send the child to make a plan.
  */
 export const HomeHudEndBanner = ({
   status,
   onPress,
+  onDisabledPress,
 }: HomeHudEndBannerProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
 
   const isDisabled = status === 'disabled';
   const isWarn = status === 'warn';
-  const titleKey = isWarn ? 'home.endBannerWarnTitle' : 'home.endBannerTitle';
-  const bodyKey = isWarn ? 'home.endBannerWarnBody' : 'home.endBannerBody';
+  const titleKey = isDisabled
+    ? 'home.endBannerDisabledTitle'
+    : isWarn
+      ? 'home.endBannerWarnTitle'
+      : 'home.endBannerTitle';
+  const bodyKey = isDisabled
+    ? 'home.endBannerDisabledBody'
+    : isWarn
+      ? 'home.endBannerWarnBody'
+      : 'home.endBannerBody';
+  const actionKey = isDisabled
+    ? 'home.endBannerDisabledAction'
+    : 'home.endBannerAction';
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={t('home.endBannerAction')}
-      accessibilityState={{ disabled: isDisabled }}
-      disabled={isDisabled}
-      onPress={onPress}
+      accessibilityLabel={t(actionKey)}
+      accessibilityState={{ disabled: false }}
+      onPress={isDisabled ? onDisabledPress : onPress}
       style={({ pressed }) => [
         styles.planBanner,
         {
@@ -286,7 +309,7 @@ export const HomeHudEndBanner = ({
             : isWarn
               ? theme.warning
               : theme.accent,
-          opacity: isDisabled ? 0.55 : pressed ? 0.85 : 1,
+          opacity: pressed ? 0.85 : 1,
         },
       ]}
     >
@@ -299,15 +322,15 @@ export const HomeHudEndBanner = ({
         >
           {t(titleKey)}
         </Text>
-        <Text variant="small" themeColor="textSecondary">
+        <Text variant="body" themeColor="textSecondary">
           {t(bodyKey)}
         </Text>
       </View>
       <Text
         variant="smallBold"
-        themeColor={isDisabled ? 'textMuted' : isWarn ? 'warning' : 'accent'}
+        themeColor={isDisabled ? 'primary' : isWarn ? 'warning' : 'accent'}
       >
-        {t('home.endBannerAction')}
+        {t(actionKey)}
       </Text>
     </Pressable>
   );
