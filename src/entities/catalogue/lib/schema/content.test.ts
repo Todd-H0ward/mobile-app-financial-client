@@ -6,6 +6,7 @@ import {
   getCatalogueItem,
   listCatalogue,
   listCatalogueByShop,
+  listOwnedToys,
   SHOP_IDS,
 } from '../..';
 
@@ -57,6 +58,14 @@ describe('content/catalogue.json', () => {
     for (const id of ids) {
       expect(getCatalogueItem(id)?.id).toBe(id);
     }
+  });
+
+  it('lists toys unlocked by furniture ids', () => {
+    expect(listOwnedToys([])).toEqual([]);
+    const owned = listOwnedToys(['toy-car', 'rooms-living', 'rug']);
+    expect(owned.map((item) => item.id).sort()).toEqual(
+      ['puzzle-living', 'toy-car'].sort(),
+    );
   });
 
   it('maps kinds onto budget directions', () => {

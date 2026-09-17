@@ -111,6 +111,16 @@
       "category": "toy",
       "furnitureId": "ball",
       "note": "Катать и ловить. Мини-игра появится чуть позже."
+    },
+    {
+      "id": "puzzle-living",
+      "title": "Пазл «Гостиная»",
+      "price": 10,
+      "kind": "want",
+      "shop": "toys",
+      "category": "toy",
+      "furnitureId": "rooms-living",
+      "note": "Купи — пазл появится на полке в гостиной."
     }
   ]
 }

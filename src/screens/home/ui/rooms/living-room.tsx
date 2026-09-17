@@ -1,9 +1,17 @@
+import { useState } from 'react';
+
 import { StyleSheet, View } from 'react-native';
 
 import { PetBox } from '@/widgets/pet-box';
 
+import type { CatalogueItem } from '@/entities/catalogue';
+
 import { SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
+
+import { ToyShelfSheet } from '../toy-shelf-sheet';
+
+import { RoomHotspot } from './room-hotspot';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -17,6 +25,10 @@ interface LivingRoomProps {
   isPetMet: boolean;
   /** Opens the meeting screen. Only reachable while the box is closed. */
   onOpenBox: () => void;
+  /** Toys already bought — drives the shelf hotspot and its menu. */
+  ownedToys: readonly CatalogueItem[];
+  /** Opens a playable toy from the shelf menu. */
+  onPlayToy: (furnitureId: string) => void;
 }
 
 // ═══════════════════════════════════════════
@@ -37,21 +49,52 @@ const FLOOR_INSET = 190;
  * Home before the meeting: the closed box on the floorboards.
  *
  * After the box opens, the pet leaves with the child — see
- * `HomePetCompanion`. Keeping the box here (and only here) is what makes
- * "this is where we live" readable on the first visit.
+ * `HomePetCompanion`. Bought toys land on a shelf hotspot; tapping it opens
+ * a pick-a-toy menu.
  */
-export const LivingRoom = ({ isPetMet, onOpenBox }: LivingRoomProps) => {
+export const LivingRoom = ({
+  isPetMet,
+  onOpenBox,
+  ownedToys,
+  onPlayToy,
+}: LivingRoomProps) => {
   const { t } = useTranslation();
+  const [isShelfOpen, setIsShelfOpen] = useState(false);
+  const hasToyShelf = ownedToys.length > 0;
 
-  if (isPetMet) {
-    return <View pointerEvents="box-none" style={styles.root} />;
-  }
+  const playToy = (furnitureId: string) => {
+    setIsShelfOpen(false);
+    onPlayToy(furnitureId);
+  };
 
   return (
     <View pointerEvents="box-none" style={styles.root}>
-      <View style={styles.stage}>
-        <PetBox onPress={onOpenBox} label={t('home.petBoxInvite')} isPulsing />
-      </View>
+      {hasToyShelf && (
+        <RoomHotspot
+          label={t('home.toyShelf')}
+          text={t('home.toyShelfHint')}
+          tone="coin"
+          onPress={() => setIsShelfOpen(true)}
+          style={styles.shelf}
+        />
+      )}
+
+      {!isPetMet && (
+        <View style={styles.stage}>
+          <PetBox
+            onPress={onOpenBox}
+            label={t('home.petBoxInvite')}
+            isPulsing
+          />
+        </View>
+      )}
+
+      <ToyShelfSheet
+        toys={ownedToys}
+        isVisible={isShelfOpen}
+        onClose={() => setIsShelfOpen(false)}
+        onPlayToy={playToy}
+      />
     </View>
   );
 };
@@ -65,6 +108,10 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     justifyContent: 'flex-end',
     paddingBottom: FLOOR_INSET,
+  },
+  shelf: {
+    left: '8%',
+    top: '38%',
   },
   stage: {
     alignItems: 'center',

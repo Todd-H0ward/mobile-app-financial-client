@@ -1,0 +1,17 @@
+export {
+  applyDrop,
+  buildPieces,
+  dropTargetOf,
+  IN_TRAY,
+  isBoardComplete,
+  loosePlacementOf,
+  placedCountOf,
+  restorePlacements,
+  revealEdges,
+  revealPiece,
+  SNAP_THRESHOLD_RATIO,
+  slotRectOf,
+  trayOrderOf,
+  trayPiecesOf,
+  visibleBoardRect,
+} from './board-session';
