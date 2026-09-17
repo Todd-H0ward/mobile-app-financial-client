@@ -1,4 +1,8 @@
 export {
+  MotionEnabledProvider,
+  useMotionEnabled,
+} from './motion-enabled';
+export {
   createPersistStorage,
   flushPersistWrites,
 } from './persist-storage';

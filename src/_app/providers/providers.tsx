@@ -7,9 +7,17 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { FeedbackHost } from '@/features/feedback';
 
+import { useIsMotionEnabled } from '@/entities/settings';
+import { useUserStore } from '@/entities/user';
+
 import { queryClient } from '@/shared/api';
 import { useAppLanguage } from '@/shared/hooks';
-import { realTimeSource, TimeSourceContext } from '@/shared/lib';
+import {
+  bindHapticsSoundGate,
+  realTimeSource,
+  TimeSourceContext,
+} from '@/shared/lib';
+import { MotionEnabledProvider } from '@/shared/model';
 import { Toaster } from '@/shared/ui';
 
 import '@/shared/i18n';
@@ -26,6 +34,21 @@ interface ProvidersProps {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
+const AccessibilityBridge = ({ children }: { children: ReactNode }) => {
+  const isMotionEnabled = useIsMotionEnabled();
+
+  // Shared haptics must not import the user store — FSD; gate is bound here.
+  bindHapticsSoundGate(
+    () => useUserStore.getState().user?.settings.isSoundEnabled ?? true,
+  );
+
+  return (
+    <MotionEnabledProvider isEnabled={isMotionEnabled}>
+      {children}
+    </MotionEnabledProvider>
+  );
+};
+
 /**
  * App shell. TimeSource is only for wallet / content stamps — the period
  * engine never reads it (0.3-R).
@@ -38,10 +61,12 @@ export const Providers = ({ children }: ProvidersProps) => {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <TimeSourceContext.Provider value={realTimeSource}>
-            {children}
+            <AccessibilityBridge>
+              {children}
 
-            <FeedbackHost />
-            <Toaster />
+              <FeedbackHost />
+              <Toaster />
+            </AccessibilityBridge>
           </TimeSourceContext.Provider>
         </QueryClientProvider>
       </SafeAreaProvider>

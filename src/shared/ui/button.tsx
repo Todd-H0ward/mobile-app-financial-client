@@ -25,6 +25,7 @@ import Animated, {
 
 import { RADII, SPACING, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useMotionEnabled } from '@/shared/model';
 import { hitSlopFor, isTextOnly } from '@/shared/utils';
 
 import { Text, type TextProps, type TextVariant } from './text';
@@ -191,6 +192,7 @@ const ButtonRoot = ({
 
   const travel = hasShadow ? shadowHeight * PRESS_TRAVEL_RATIO : 0;
   const offset = useSharedValue(0);
+  const isMotionEnabled = useMotionEnabled();
 
   const contextValue = useMemo<ButtonContextValue>(
     () => ({ size, labelColor }),
@@ -203,7 +205,7 @@ const ButtonRoot = ({
 
   const handlePressIn = (event: GestureResponderEvent) => {
     offset.value = withTiming(travel, {
-      duration: PRESS_IN_DURATION,
+      duration: isMotionEnabled ? PRESS_IN_DURATION : 0,
       easing: Easing.out(Easing.quad),
     });
     onPressIn?.(event);
@@ -211,7 +213,7 @@ const ButtonRoot = ({
 
   const handlePressOut = (event: GestureResponderEvent) => {
     offset.value = withTiming(0, {
-      duration: PRESS_OUT_DURATION,
+      duration: isMotionEnabled ? PRESS_OUT_DURATION : 0,
       easing: Easing.out(Easing.quad),
     });
     onPressOut?.(event);

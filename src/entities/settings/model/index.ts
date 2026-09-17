@@ -1,6 +1,7 @@
 export {
   useIsAnimationEnabled,
   useIsDemoMode,
+  useIsMotionEnabled,
   useIsParentGateEnabled,
   useIsSoundEnabled,
   useSettings,

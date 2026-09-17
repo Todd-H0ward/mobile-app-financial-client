@@ -1,4 +1,4 @@
-export { hapticLight, hapticSuccess } from './haptics';
+export { bindHapticsSoundGate, hapticLight, hapticSuccess } from './haptics';
 export type { DemoTimeSource, TimeSource } from './time-source';
 export {
   demoTimeSource,

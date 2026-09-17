@@ -1,24 +1,29 @@
 import { useUserStore } from '@/entities/user';
 
+import { useReducedMotion } from '@/shared/hooks';
 import { useLanguagePreference } from '@/shared/model';
 
 // ═══════════════════════════════════════════
 // SELECTORS
 // ═══════════════════════════════════════════
 
-/** Animations on, unless the grown-up turned them off. Default `true` with no profile. */
+/** Saved animation switch — settings UI only. */
 export const useIsAnimationEnabled = () =>
   useUserStore((state) => state.user?.settings.isAnimationEnabled ?? true);
 
-/** Sound on, unless the grown-up turned it off. Default `true` with no profile. */
+/** Runtime motion: user switch on and system Reduce Motion off. */
+export const useIsMotionEnabled = (): boolean => {
+  const isPreferred = useIsAnimationEnabled();
+  const isReduced = useReducedMotion();
+  return isPreferred && !isReduced;
+};
+
 export const useIsSoundEnabled = () =>
   useUserStore((state) => state.user?.settings.isSoundEnabled ?? true);
 
-/** Whether demo mode is playing. Default `false` with no profile. */
 export const useIsDemoMode = () =>
   useUserStore((state) => state.user?.settings.isDemoMode ?? false);
 
-/** Arithmetic gate in front of the parents' section. Default `true` with no profile. */
 export const useIsParentGateEnabled = () =>
   useUserStore((state) => state.user?.settings.isParentGateEnabled ?? true);
 
@@ -26,16 +31,10 @@ export const useIsParentGateEnabled = () =>
 // MAIN HOOK
 // ═══════════════════════════════════════════
 
-/**
- * Convenience read for the settings screen and widgets that show a value
- * without being a feature themselves.
- *
- * Write-side actions come through dedicated features: `change-language` for
- * the language, `useUpdateUser` for the booleans.
- */
 export const useSettings = () => ({
   languagePreference: useLanguagePreference(),
   isAnimationEnabled: useIsAnimationEnabled(),
+  isMotionEnabled: useIsMotionEnabled(),
   isSoundEnabled: useIsSoundEnabled(),
   isDemoMode: useIsDemoMode(),
   isParentGateEnabled: useIsParentGateEnabled(),

@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { useChangeLanguage } from '@/features/change-language';
 
-import { useIsAnimationEnabled } from '@/entities/settings';
+import { useIsAnimationEnabled, useIsSoundEnabled } from '@/entities/settings';
 import { useUpdateUser } from '@/entities/user';
 
 import { SPACING, STATIC_ROUTES } from '@/shared/constants';
@@ -31,11 +31,18 @@ export const SettingsScreen = () => {
   const { languagePreference, changeLanguage } = useChangeLanguage();
   const updateUser = useUpdateUser();
   const isAnimationEnabled = useIsAnimationEnabled();
+  const isSoundEnabled = useIsSoundEnabled();
 
   const setAnimation = (isEnabled: boolean) =>
     updateUser((u) => ({
       ...u,
       settings: { ...u.settings, isAnimationEnabled: isEnabled },
+    }));
+
+  const setSound = (isEnabled: boolean) =>
+    updateUser((u) => ({
+      ...u,
+      settings: { ...u.settings, isSoundEnabled: isEnabled },
     }));
 
   return (
@@ -77,6 +84,17 @@ export const SettingsScreen = () => {
                 isChecked={isAnimationEnabled}
                 onChange={setAnimation}
                 label={t('settings.animations')}
+              />
+            }
+          />
+          <ListRow
+            title={t('settings.sound')}
+            subtitle={t('settings.soundSubtitle')}
+            trailing={
+              <Switch
+                isChecked={isSoundEnabled}
+                onChange={setSound}
+                label={t('settings.sound')}
               />
             }
           />

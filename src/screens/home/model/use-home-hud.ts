@@ -12,6 +12,7 @@ import {
   type PetStage,
 } from '@/entities/pet';
 import { progressFor } from '@/entities/savings';
+import { useIsMotionEnabled } from '@/entities/settings';
 import { getTaskById } from '@/entities/task';
 import {
   type PetSave,
@@ -65,7 +66,7 @@ interface HomeHud {
   subtitle: string;
   /** `null` while the box on the room screen is still closed. */
   pet: HomeHudPet | null;
-  /** The grown-up's switch — the pet card passes it straight to the rig. */
+  /** User switch + system Reduce Motion. */
   isAnimationEnabled: boolean;
   balance: number;
   /** Coins across every goal, not only the active one. */
@@ -256,13 +257,14 @@ const buildTaskTitle = (tasks: UserSave['tasks'], t: Translate): string => {
 export const useHomeHud = (): HomeHud => {
   const { t } = useTranslation();
   const source = useHomeHudSource();
+  const isMotionEnabled = useIsMotionEnabled();
 
   return useMemo(() => {
     if (!source) {
       return {
         subtitle: t('home.roomComingSoon'),
         pet: null,
-        isAnimationEnabled: true,
+        isAnimationEnabled: isMotionEnabled,
         balance: 0,
         savingsTotal: 0,
         goal: null,
@@ -283,7 +285,7 @@ export const useHomeHud = (): HomeHud => {
         ? t('home.atHome', { name: source.pet.name })
         : t('home.roomComingSoon'),
       pet: isPetMet(source.pet) ? buildPet(source.pet, t) : null,
-      isAnimationEnabled: source.isAnimationEnabled,
+      isAnimationEnabled: isMotionEnabled,
       balance: source.balance,
       savingsTotal: source.savings.goals.reduce(
         (total: number, entry: { saved: number }) => total + entry.saved,
@@ -302,7 +304,7 @@ export const useHomeHud = (): HomeHud => {
       isSummary: source.phase === 'summary',
       isGrowthPending: source.pet.stage !== source.pet.celebratedStage,
     };
-  }, [source, t]);
+  }, [source, t, isMotionEnabled]);
 };
 
 export type { HomeHud, HomeHudCredit, HomeHudGoal, HomeHudPet, MoodTone };

@@ -15,6 +15,7 @@ import Animated, {
 
 import { HIT_SLOP_SIZE, RADII } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useMotionEnabled } from '@/shared/model';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -59,15 +60,16 @@ export const Switch = ({
   style,
 }: SwitchProps) => {
   const theme = useTheme();
+  const isMotionEnabled = useMotionEnabled();
 
   const progress = useSharedValue(isChecked ? 1 : 0);
 
   useEffect(() => {
     progress.value = withTiming(isChecked ? 1 : 0, {
-      duration: DURATION,
+      duration: isMotionEnabled ? DURATION : 0,
       easing: EASING,
     });
-  }, [isChecked, progress]);
+  }, [isChecked, isMotionEnabled, progress]);
 
   const knobStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: progress.value * TRAVEL }],
