@@ -67,7 +67,7 @@
 | Пункт | Требование | Где | Статус |
 | --- | --- | --- | --- |
 | 3.2 | Контент отделён от кода | `content/*.json`, см. [content.md](./content.md) | частично — `goals.json`, `tasks.json`, `onboarding.json`, `hints.json`; сейв хранит только id |
-| 3.3 | Подписанный релизный APK | `npm run build:apk` и `.github/workflows/build-apk.yml` (тег `v*` или вручную), см. [android-release.md](./android-release.md#ci) | готово |
+| 3.3 | Подписанный релизный APK | `npm run build:apk` и `.github/workflows/build-apk.yml` (пуш ветки `release/*`), см. [android-release.md](./android-release.md#ci) | готово |
 | 3.4 | Разделение слоёв, автотесты | [architecture.md](./architecture.md) | частично — economy / content JSON / user storage разделены; UI заданий и кошелёк — волна 1 |
 | 3.6 | Доступность: 48dp, 16sp, цвет не единственный носитель | `shared/ui` + [accessibility.md](./accessibility.md) | частично — кит соблюдает 48dp/16sp и не-цветные состояния; звук/анимации и прогон на устройстве — с экраном родителей |
 | 3.7 | Старт ≤5 с, отклик ≤1 с на устройстве от 3 ГБ | [performance.md](./performance.md) | не начато |
