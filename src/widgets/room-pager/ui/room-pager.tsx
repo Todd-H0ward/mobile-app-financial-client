@@ -3,11 +3,18 @@ import { type ReactNode, useEffect, useRef } from 'react';
 import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
-  ScrollView,
   StyleSheet,
   useWindowDimensions,
   View,
 } from 'react-native';
+import Animated, {
+  Extrapolation,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import {
   neighboursOf,
@@ -41,6 +48,11 @@ interface RoomPagerProps {
   children?: ReactNode;
   /** Invites the first visit with a pulse on the doors. */
   isHintVisible?: boolean;
+  /**
+   * Softens the slide with a dim veil and a fading "here" chip. Off when the
+   * grown-up disables animations — the strip still pages.
+   */
+  isAnimated?: boolean;
 }
 
 interface RoomPageProps {
@@ -50,6 +62,16 @@ interface RoomPageProps {
 }
 
 // ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/** Peak opacity of the dim veil at the midpoint of a page slide. */
+const VEIL_MAX_OPACITY = 0.22;
+
+/** "You are here" chip fades in after the strip settles on a new room. */
+const HERE_FADE_MS = 280;
+
+// ═══════════════════════════════════════════
 // COMPOUND COMPONENTS
 // ═══════════════════════════════════════════
 
@@ -57,13 +79,15 @@ interface RoomPageProps {
  * One page of the map: a scene with whatever stands in it on top.
  *
  * It sizes itself to the window rather than to a prop, so the pager stays a
- * plain row of full-width pages and paging needs no measurement.
+ * plain row of full-width pages and paging needs no measurement. Pages stay
+ * opaque and full-size — scaling or fading them showed cream/white gaps
+ * behind the strip.
  */
 const RoomPage = ({ room, children }: RoomPageProps) => {
   const { width } = useWindowDimensions();
 
   return (
-    <View style={{ width }}>
+    <View style={{ width, height: '100%' }}>
       <RoomBackground room={room} />
       {children}
     </View>
@@ -82,35 +106,71 @@ const RoomPage = ({ room, children }: RoomPageProps) => {
  * swipe by looking — and 3.6 forbids leaving a gesture as the only way
  * through. The doors are the visible half; the swipe is the fast half.
  *
- * A native paging `ScrollView` carries the movement rather than a hand-rolled
- * gesture: the momentum, the rubber band at the ends and the accessibility
- * scroll actions all come for free, and none of it runs on the JS thread.
+ * Softening is a dim veil over the strip mid-slide — not page scale/opacity,
+ * which punched holes of the screen background through the art.
  */
 const RoomPagerRoot = ({
   room,
   onRoomChange,
   children,
   isHintVisible = false,
+  isAnimated = true,
 }: RoomPagerProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const { width } = useWindowDimensions();
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<Animated.ScrollView>(null);
   /** The page the strip is actually resting on, to tell a door from a swipe. */
   const settledIndex = useRef(roomIndex(room));
+  const lastWidth = useRef(width);
+  /** First layout must land on `room` without animating from street. */
+  const didPlace = useRef(false);
+  // Frozen: updating `contentOffset` on every room change fought `scrollTo`
+  // and made door taps feel like a hard cut.
+  const initialOffset = useRef({ x: roomIndex(room) * width, y: 0 }).current;
 
   const index = roomIndex(room);
   const { left, right } = neighboursOf(room);
   const hereLabel = t('rooms.here', { room: t(`rooms.name.${room}`) });
 
-  useEffect(() => {
-    if (settledIndex.current === index) return;
+  const scrollX = useSharedValue(index * width);
+  const hereOpacity = useSharedValue(1);
 
-    // The room changed from the outside — a door, or a screen that sent the
-    // child somewhere. A swipe has already moved the strip itself.
-    settledIndex.current = index;
-    scroll.current?.scrollTo({ x: index * width, animated: true });
-  }, [index, width]);
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x;
+    },
+  });
+
+  useEffect(() => {
+    scrollX.value = index * width;
+
+    if (!didPlace.current) {
+      didPlace.current = true;
+      settledIndex.current = index;
+      lastWidth.current = width;
+      scroll.current?.scrollTo({ x: index * width, animated: false });
+      return;
+    }
+
+    const roomChanged = settledIndex.current !== index;
+    const widthChanged = lastWidth.current !== width;
+    lastWidth.current = width;
+
+    if (roomChanged) {
+      settledIndex.current = index;
+      scroll.current?.scrollTo({ x: index * width, animated: isAnimated });
+      if (isAnimated) {
+        hereOpacity.value = 0;
+        hereOpacity.value = withTiming(1, { duration: HERE_FADE_MS });
+      }
+      return;
+    }
+
+    if (widthChanged) {
+      scroll.current?.scrollTo({ x: index * width, animated: false });
+    }
+  }, [hereOpacity, index, isAnimated, scrollX, width]);
 
   const handleSettled = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const next = Math.round(event.nativeEvent.contentOffset.x / width);
@@ -118,31 +178,68 @@ const RoomPagerRoot = ({
 
     settledIndex.current = next;
 
-    const room = ROOM_IDS[next];
-    if (room) onRoomChange(room);
+    const nextRoom = ROOM_IDS[next];
+    if (nextRoom) onRoomChange(nextRoom);
+
+    if (isAnimated) {
+      hereOpacity.value = 0;
+      hereOpacity.value = withTiming(1, { duration: HERE_FADE_MS });
+    }
   };
 
   const go = (direction: 'left' | 'right') => {
     onRoomChange(stepRoom(room, direction));
   };
 
+  const hereStyle = useAnimatedStyle(() => ({
+    opacity: hereOpacity.value,
+  }));
+
+  const veilStyle = useAnimatedStyle(() => {
+    if (!isAnimated || width <= 0) return { opacity: 0 };
+
+    const page = scrollX.value / width;
+    const dist = Math.abs(page - Math.round(page));
+    return {
+      opacity: interpolate(
+        dist,
+        [0, 0.5],
+        [0, VEIL_MAX_OPACITY],
+        Extrapolation.CLAMP,
+      ),
+    };
+  });
+
   return (
     <View style={styles.root}>
-      <ScrollView
+      <Animated.ScrollView
         ref={scroll}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         bounces={false}
         overScrollMode="never"
+        decelerationRate="fast"
+        scrollEventThrottle={16}
+        onScroll={onScroll}
         onMomentumScrollEnd={handleSettled}
-        contentOffset={{ x: index * width, y: 0 }}
+        contentOffset={initialOffset}
         style={styles.strip}
       >
         {children}
-      </ScrollView>
+      </Animated.ScrollView>
 
-      <View
+      {/* Dim only — never scales the art, so no cream/white gutters. */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.veil,
+          { backgroundColor: theme.inverseSurface },
+          veilStyle,
+        ]}
+      />
+
+      <Animated.View
         pointerEvents="none"
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
@@ -152,12 +249,13 @@ const RoomPagerRoot = ({
             backgroundColor: theme.surface,
             borderColor: theme.border,
           },
+          hereStyle,
         ]}
       >
         <Text variant="smallBold" themeColor="textSecondary">
           {hereLabel}
         </Text>
-      </View>
+      </Animated.View>
 
       {left && (
         <RoomDoor
@@ -200,6 +298,7 @@ export const RoomPager = Object.assign(RoomPagerRoot, {
 
 const styles = StyleSheet.create({
   root: {
+    backgroundColor: 'transparent',
     flex: 1,
   },
   here: {
@@ -212,7 +311,11 @@ const styles = StyleSheet.create({
     top: '48%',
   },
   strip: {
+    backgroundColor: 'transparent',
     flex: 1,
+  },
+  veil: {
+    ...StyleSheet.absoluteFill,
   },
 });
 

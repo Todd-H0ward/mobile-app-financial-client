@@ -133,6 +133,7 @@ export const HomeScreen = () => {
         room={room}
         onRoomChange={handleRoomChange}
         isHintVisible={!hasWalked && hud.isAnimationEnabled}
+        isAnimated={hud.isAnimationEnabled}
       >
         <RoomPager.Room room="street">
           <StreetRoom />
