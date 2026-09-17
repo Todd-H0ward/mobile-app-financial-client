@@ -18,6 +18,10 @@ export const ROUTES = {
   SAVINGS: '/savings',
   /** Chores showcase — all six tasks for the period. */
   TASKS: '/tasks',
+  /** Finished periods and named wallet lines — 2.5.11. */
+  HISTORY: '/history',
+  /** Child-facing glossary of money words — 2.5.11. */
+  GLOSSARY: '/glossary',
   SETTINGS: '/settings',
   UI_KIT: '/ui-kit',
 } as const;

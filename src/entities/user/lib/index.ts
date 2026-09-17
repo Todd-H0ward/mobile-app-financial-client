@@ -5,6 +5,13 @@ export {
   exitDemoMode,
   runDemoPeriods,
 } from './demo';
+export type { WalletHistoryRow, WalletSourceRef } from './history';
+export {
+  describeWalletSource,
+  getLastPeriod,
+  listPeriodHistory,
+  listWalletHistory,
+} from './history';
 export {
   acknowledgeSummary,
   canFinishPeriod,

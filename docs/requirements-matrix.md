@@ -39,7 +39,7 @@
 | 2.5.9 | Путь восстановления после ошибки без обнуления прогресса | `screens/recovery` | `entities/budget/lib/recovery` (`pickRecoveryOptions`) | `recovery.test.ts`, `explain.test.ts` | готово — правила выбора 1–2 вариантов + экран; `acknowledgeSummary` не обнуляет сейв |
 | 2.5.10 | ≥3 состояния питомца с объяснением причины | `screens/home` | `entities/pet/lib/mood` | `mood.test.ts` | не начато |
 | 2.5.10 | ≥3 стадии развития по совокупности решений за несколько периодов | `screens/home` | `entities/pet/lib/growth` | `growth.test.ts` | не начато |
-| 2.5.11 | История, итоги последнего периода, справочник терминов | `screens/history`, `screens/glossary` | `entities/period/model` | — | не начато |
+| 2.5.11 | История, итоги последнего периода, справочник терминов | `screens/history`, `screens/glossary` | `entities/user/lib/history` + `entities/glossary` + `content/glossary.json` | `history.test.ts`, `content.test.ts` | готово — выборки периодов/кошелька, 12 терминов, экраны из настроек |
 | 2.5.12 | Раздел для взрослого за арифметическим барьером | `screens/parents` | `entities/settings/lib/gate` | `gate.test.ts` | не начато |
 | 2.5.12 | Сброс и удаление профиля | `screens/home` (временно; позже `screens/parents`) | `entities/user/lib/reset` + `features/profile-restart` | `reset.test.ts` | в работе — сброс в демо-карточке, удаление с подтверждением и возвратом в онбординг; экрана взрослого нет |
 | 2.5.13 | Сохранение состояния между запусками | — | `entities/user` | `store.test.ts`, `migrations.test.ts` | готово |

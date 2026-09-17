@@ -1,0 +1,1 @@
+export { assertGlossaryContent } from './schema';
