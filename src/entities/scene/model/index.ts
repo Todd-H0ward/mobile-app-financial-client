@@ -5,6 +5,7 @@ export {
   MIN_ELEVATION,
   ROOM_ELEVATION,
   ROOM_FIT,
+  SCENE_PLATFORM_Y,
   TOP_ELEVATION,
   TOP_FIT,
 } from './camera';

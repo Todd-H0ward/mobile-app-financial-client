@@ -4,6 +4,7 @@ import { Redirect, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { DEFAULT_ROOM } from '@/entities/room';
 import { SCENE_STEP_COUNT } from '@/entities/scene';
 import { RoomScene, type SceneView } from '@/widgets/room-scene';
 
@@ -97,8 +98,8 @@ export const HomeScreen = () => {
   const { t } = useTranslation();
   const hud = useHomeHud();
 
-  /** The camera opens on the whole map, not inside a room. */
-  const [view, setView] = useState<SceneView>('top');
+  /** Opens looking into a room on the horizon — not overhead at an angle. */
+  const [view, setView] = useState<SceneView>(DEFAULT_ROOM);
   /**
    * How many disc tiers stand up in every room, `0` (flat) … `SCENE_STEP_COUNT`.
    * Starts fully raised — that is the model as the artist left it.

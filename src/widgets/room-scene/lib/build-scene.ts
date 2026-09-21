@@ -17,6 +17,7 @@ import {
 import {
   SCENE_FLAT_STEP,
   SCENE_PALETTE,
+  SCENE_PLATFORM_Y,
   SCENE_RADIUS,
   SCENE_SEGMENT_COUNT,
   SCENE_SHARED_SEGMENT,
@@ -136,6 +137,9 @@ const nodesOf = (segment: number, step: number): SceneNode[] =>
 const buildScene = (): SceneModel => {
   const scene = new Scene();
   const root = new Group();
+  // Drop the arena under the look-at point so it reads in the lower half of
+  // the frame at horizon elevation, not centred on the crosshair.
+  root.position.y = SCENE_PLATFORM_Y;
   scene.add(root);
 
   const rooms: MeshLambertMaterial[] = [];

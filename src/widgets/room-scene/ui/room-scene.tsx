@@ -137,9 +137,9 @@ const createRenderer = (gl: ExpoWebGLRenderingContext): WebGLRenderer => {
  *
  * Three rooms sit 120° apart around the same axis, so walking between them is
  * the model turning rather than a page sliding: the child keeps seeing where
- * the other rooms are while they travel to one. The camera starts overhead,
- * where the whole map is visible at once, and drops into a room on a swipe or
- * a button.
+ * the other rooms are while they travel to one. The camera opens on the
+ * horizon in front of a room; the overhead stop is still one swipe or button
+ * away.
  *
  * Nothing here runs on the UI runtime. The pan gesture is `runOnJS`, because
  * everything it drives — the three.js camera, the GL context — lives on the JS
@@ -175,6 +175,8 @@ export const RoomScene = ({
   } | null>(null);
 
   const frame = useRef<number | null>(null);
+  /** Bumped whenever a new GL context owns the loop — stale RAFs exit. */
+  const loopId = useRef(0);
   const model = useRef<SceneModel | null>(null);
   const renderer = useRef<WebGLRenderer | null>(null);
 
@@ -190,12 +192,14 @@ export const RoomScene = ({
   /** Read by the loop, which outlives every render that changes them. */
   const clearColor = useRef(theme.background);
   const isAnimatedRef = useRef(isAnimated);
+  const viewRef = useRef(view);
   const highlight = useRef<number | null>(null);
   const appliedHighlight = useRef<number | null | undefined>(undefined);
 
   useEffect(() => {
     clearColor.current = theme.background;
     isAnimatedRef.current = isAnimated;
+    viewRef.current = view;
     highlight.current = view === 'top' ? null : roomIndex(view);
   }, [isAnimated, theme.background, view]);
 
@@ -223,19 +227,26 @@ export const RoomScene = ({
 
   useEffect(() => {
     return () => {
+      loopId.current += 1;
       if (frame.current !== null) cancelAnimationFrame(frame.current);
+      frame.current = null;
+      // Drop the scene graph only — never `renderer.dispose()` on expo-gl:
+      // disposing the WebGLRenderer tears down the native surface and the
+      // next context often paints a frozen first frame (or nothing at all).
       model.current?.dispose();
-      renderer.current?.dispose();
+      model.current = null;
+      renderer.current = null;
     };
   }, []);
 
   const onContextCreate = useCallback(
     (gl: ExpoWebGLRenderingContext) => {
-      // A remounted GLView must not leave the previous loop ticking against a
-      // dead context — Fast Refresh and rotation both rebuild the surface.
+      const id = (loopId.current += 1);
       if (frame.current !== null) cancelAnimationFrame(frame.current);
+      frame.current = null;
       model.current?.dispose();
-      renderer.current?.dispose();
+      model.current = null;
+      renderer.current = null;
 
       const webgl = createRenderer(gl);
       // expo-gl already hands us a buffer in device pixels.
@@ -261,6 +272,8 @@ export const RoomScene = ({
       renderer.current = webgl;
       model.current = built;
       camera.setAspect(lens.aspect);
+      // Re-seat the orbit against the (possibly hot-reloaded) elevations.
+      camera.jumpToView(viewRef.current);
 
       // Reused every frame: a fresh Color sixty times a second is litter.
       const clear = new Color(clearColor.current);
@@ -270,6 +283,8 @@ export const RoomScene = ({
       let last = Date.now();
 
       const loop = () => {
+        if (loopId.current !== id) return;
+
         frame.current = requestAnimationFrame(loop);
 
         // The native surface resizes on rotation without telling us.
@@ -319,15 +334,15 @@ export const RoomScene = ({
 
         for (let segment = 0; segment < SCENE_SEGMENT_COUNT; segment += 1) {
           for (let step = 0; step < SCENE_STEP_COUNT; step += 1) {
-            const target = stepTargets.current[segment][step];
+            const stepTarget = stepTargets.current[segment][step];
             const lift = isAnimatedRef.current
               ? damp(
                   stepLifts.current[segment][step],
-                  target,
+                  stepTarget,
                   STEP_SMOOTHING,
                   delta,
                 )
-              : target;
+              : stepTarget;
 
             stepLifts.current[segment][step] = lift;
             built.liftStep(segment, step, lift);

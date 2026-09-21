@@ -1,5 +1,3 @@
-import { SCENE_SOURCE } from './source';
-
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
@@ -13,15 +11,14 @@ import { SCENE_SOURCE } from './source';
 const TOP_ELEVATION = 82;
 
 /**
- * Where the camera sits once it has walked into a room.
- *
- * The artist left a camera in the scene at this angle and the terraces read
- * best from it: low enough to see the steps, high enough to see the floor.
+ * Eye-level with the arena — on the horizon line, not the artist's tilted
+ * shot in the FBX (~35°). A couple of degrees above zero keeps the floor
+ * readable without tipping the camera into a top-down.
  */
-const ROOM_ELEVATION = SCENE_SOURCE.camera.elevation;
+const ROOM_ELEVATION = 6;
 
-/** Clamp for a drag: below the floor there is nothing to see. */
-const MIN_ELEVATION = 14;
+/** Clamp for a drag: on the horizon there is still something to see. */
+const MIN_ELEVATION = 0;
 
 /** Field of view, degrees, vertical. */
 const CAMERA_FOV = 45;
@@ -33,11 +30,19 @@ const CAMERA_FAR = 10000;
 /**
  * Breathing room around the model when the camera frames it.
  *
- * A room view sits a little closer than the whole-map view: the arena is
- * tilted away from the camera there, so its silhouette is shorter.
+ * Smaller = closer. Room view is tighter than the whole-map view so a single
+ * wedge fills the phone; top still needs the full circle.
  */
-const ROOM_FIT = 0.94;
-const TOP_FIT = 1.04;
+const ROOM_FIT = 0.72;
+const TOP_FIT = 0.86;
+
+/**
+ * How far the arena sits below the look-at point, in world units.
+ *
+ * The camera still aims at the origin; dropping the model puts the platform
+ * in the lower half of the frame instead of dead-centre.
+ */
+const SCENE_PLATFORM_Y = -120;
 
 export {
   CAMERA_FAR,
@@ -46,6 +51,7 @@ export {
   MIN_ELEVATION,
   ROOM_ELEVATION,
   ROOM_FIT,
+  SCENE_PLATFORM_Y,
   TOP_ELEVATION,
   TOP_FIT,
 };
