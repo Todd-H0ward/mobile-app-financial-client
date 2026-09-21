@@ -747,6 +747,24 @@ export const UiKitScreen = () => {
               onChange={playground.setSliderValue}
             />
           </KitSection.Row>
+
+          <KitSection.Row
+            label={`vertical — сейчас ${playground.sliderValue}`}
+          >
+            <View style={styles.verticalSliderRow}>
+              <Slider
+                orientation="vertical"
+                value={playground.sliderValue}
+                min={0}
+                max={100}
+                step={5}
+                color="primary"
+                isThumbFilled
+                onChange={playground.setSliderValue}
+                style={styles.verticalSlider}
+              />
+            </View>
+          </KitSection.Row>
         </KitSection>
 
         <KitSection title="Switch" caption="Настоящее переключение и disabled">
@@ -1117,5 +1135,14 @@ const styles = StyleSheet.create({
     height: 56,
     justifyContent: 'center',
     width: 96,
+  },
+  verticalSliderRow: {
+    alignItems: 'center',
+    height: 180,
+    justifyContent: 'center',
+    width: '100%',
+  },
+  verticalSlider: {
+    height: 180,
   },
 });

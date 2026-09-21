@@ -188,6 +188,12 @@
       }
     }
   },
+  "scene": {
+    "top": "Top",
+    "topA11y": "Look from above",
+    "roomA11y": "Turn to the room: {{room}}",
+    "stepsA11y": "How many staircase tiers are raised"
+  },
   "wallet": {
     "source": {
       "startingWallet": "starting wallet",

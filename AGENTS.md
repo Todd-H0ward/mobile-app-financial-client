@@ -20,6 +20,7 @@ runs Expo SDK 57, React 19, React Native 0.86 and expo-router 57
 | Server state | **нет** — офлайн-игра, сейв локальный; axios / TanStack Query убраны |
 | Client state | zustand + `persist` поверх `expo-sqlite/kv-store`, синхронно (`@/entities/*/model`) |
 | Game loop | game periods, not real time — [docs/game-period.md](docs/game-period.md) |
+| 3D | `three` on `expo-gl`, model baked to JSON — [docs/scene.md](docs/scene.md) |
 | i18n | i18next + react-i18next (`@/shared/i18n`) |
 | Lint / format | Biome (`pnpm lint` / `pnpm format`) |
 | Types | TypeScript strict (`npx tsc --noEmit`) |
@@ -252,7 +253,7 @@ What the screen must show for a component:
    a real press, a real drag, not a screenshot of one.
 4. **Edge content**: long text, zero and maximum values, missing optional slots.
 
-## Navigation: three rooms, everything else on the stack
+## Navigation: one model, three rooms on it
 
 The child moves through a **map, not a menu**: `street ↔ living ↔ kitchen`,
 in the order `ROOM_IDS` lists them (`entities/room`). The street is the shop,
@@ -260,24 +261,34 @@ the kitchen is food, the living room is where the pet lives. There is no tab
 bar — a seven-year-old reads "the kitchen is that way" long before they read a
 row of labels, and a room can hold a scene while a tab can only hold a screen.
 
-All three rooms live on one route (`/home`) inside `widgets/room-pager`, so a
-swipe slides between them without a navigation transition. Everything that is
-not a room — settings, the pet's meeting screen, the UI kit — is pushed over
-the world by the root stack.
+The three rooms are the three sectors of **one 3D model** (`assets/scene`),
+rendered on `/home` by `widgets/room-scene`. Walking to another room turns the
+model under the camera instead of sliding a page, so the child never loses
+sight of where the other rooms are. The camera opens overhead, on the whole
+map, and drops into a room on a swipe or a button. Everything that is not a
+room — settings, the pet's meeting screen, the UI kit — is pushed over the
+world by the root stack.
 
-Two ways to walk, always both: a swipe, and a door button at the edge carrying
-the **name** of the room behind it. A gesture is invisible to a child who has
-never been taught it, and 3.6 forbids leaving one as the only way through. A
-door is drawn only where a room actually is — the end of the map has no
-greyed-out button.
+Two ways to walk, always both: a swipe, and a button carrying the **name** of
+the room. A gesture is invisible to a child who has never been taught it, and
+3.6 forbids leaving one as the only way through.
 
-Adding a room is a row in `ROOM_IDS`, an image in `assets/images/rooms/` and a
-`<RoomPager.Room>` in the screen — in that tuple's order, which is the map.
+Three.js draws the scene on `expo-gl`. `expo-three` and `@react-three/fiber`
+are deliberately absent, the FBX is converted to JSON at build time by
+`scripts/fbx-to-scene.mjs`, and the camera lives in refs rather than state —
+the reasons for all three are in [docs/scene.md](docs/scene.md), which is
+required reading before touching the scene.
+
+The flat rooms that preceded this — `widgets/room-pager` and
+`screens/home/ui/rooms` — are still in the tree, unused, together with the HUD
+and the pet companion. They come back once the coins, the goal and the pet have
+a place on the 3D world; until then the home screen deliberately shows the
+model and nothing else.
 
 ## Native tabs are off — do not bring them back
 
 There is **no tab bar and no `app-tabs` widget**. Navigation is a root `Stack`
-plus the room pager on `/home` (see above).
+plus the 3D scene on `/home` (see above).
 
 `expo-router/unstable-native-tabs` was tried earlier and aborted the process on
 iOS in Expo Go: a throw inside the worklets runtime

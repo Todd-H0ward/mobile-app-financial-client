@@ -4,40 +4,23 @@ import { Redirect, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { HintButton } from '@/widgets/hint-button';
-import { RoomPager } from '@/widgets/room-pager';
-
-import { listOwnedToys } from '@/entities/catalogue';
-import { CONSOLE_FURNITURE_ID } from '@/entities/minigame/console';
-import { puzzleById } from '@/entities/minigame/puzzle';
-import { DEFAULT_ROOM, type RoomId } from '@/entities/room';
-import { useUser } from '@/entities/user';
+import { SCENE_STEP_COUNT } from '@/entities/scene';
+import { RoomScene, type SceneView } from '@/widgets/room-scene';
 
 import {
   CONTENT_PADDING,
   DYNAMIC_ROUTES,
+  HIT_SLOP_SIZE,
   RADII,
   SPACING,
   STATIC_ROUTES,
 } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { SettingsIcon, ThemedView } from '@/shared/ui';
+import { SettingsIcon, Slider, Text, ThemedView } from '@/shared/ui';
 import { hitSlopFor } from '@/shared/utils';
 
-import { useEndPeriod, useHomeHud } from '../model';
-
-import {
-  HomeHudBoard,
-  HomeHudEndBanner,
-  HomeHudLastCredit,
-  HomeHudPlanBanner,
-  HomeHudStats,
-} from './home-hud';
-import { HomePetCompanion } from './home-pet-companion';
-import { KitchenRoom } from './rooms/kitchen-room';
-import { LivingRoom } from './rooms/living-room';
-import { StreetRoom } from './rooms/street-room';
+import { useHomeHud } from '../model';
 
 // ═══════════════════════════════════════════
 // CONSTANTS
@@ -45,6 +28,15 @@ import { StreetRoom } from './rooms/street-room';
 
 /** Visual size of the settings button; hitSlop expands it to 48dp. */
 const GEAR_SIZE = 40;
+
+/**
+ * Vertical travel for the five tiers. Kept short so the rail fits between the
+ * gear and the room buttons without spilling past the safe area.
+ */
+const STEP_SLIDER_HEIGHT = 168;
+
+/** Room-button strip under the scene — keep the rail clear of it. */
+const ROOM_CONTROLS_CLEARANCE = 56;
 
 // ═══════════════════════════════════════════
 // COMPONENTS
@@ -56,7 +48,7 @@ const GEAR_SIZE = 40;
  * Reachable without the barrier on purpose. Turning the sound off on a bus is
  * an accessibility need (3.6), and an accessibility switch a child cannot
  * reach without solving 7 × 8 is not an accessible switch. The grown-up's
- * section sits behind its own quiet door further down this screen.
+ * section sits behind its own quiet door inside.
  */
 const SettingsButton = ({ onPress }: { onPress: () => void }) => {
   const { t } = useTranslation();
@@ -87,45 +79,31 @@ const SettingsButton = ({ onPress }: { onPress: () => void }) => {
 // ═══════════════════════════════════════════
 
 /**
- * The world: three rooms the child walks between, with the HUD over them.
+ * The world: one model with three rooms on it, turning under the camera.
  *
- * Not a `Screen`: a room is edge to edge and runs under the status bar, while
- * `Screen` is a padded scrolling column. What `Screen` gave — the safe area —
- * is taken directly here, so the art keeps the whole window and only the
- * controls step inside the inset.
+ * Not a `Screen`: the scene is edge to edge and runs under the status bar,
+ * while `Screen` is a padded scrolling column. What `Screen` gave — the safe
+ * area — is taken directly here, so the model keeps the whole window and only
+ * the controls step inside the inset.
  *
- * Everything requirement 2.5.3 asks to see at once stays on screen while the
- * child walks: the coins and the jar along the top, the goal and the task
- * along the bottom, and the pet — once met — walking with them from room to
- * room as a single companion over the strip.
+ * The pet and the HUD are off while the scene is being built: the coins, the
+ * goal and the companion have to be placed against the 3D world rather than
+ * over the old flat rooms, and half-placed they would only get in the way.
  */
 export const HomeScreen = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const { t } = useTranslation();
   const hud = useHomeHud();
-  const user = useUser();
-  const { status: endStatus, openConfirm } = useEndPeriod();
 
-  const [room, setRoom] = useState<RoomId>(DEFAULT_ROOM);
+  /** The camera opens on the whole map, not inside a room. */
+  const [view, setView] = useState<SceneView>('top');
   /**
-   * The doors invite the very first visit and then stop.
-   *
-   * Once the child has walked anywhere, they know the rooms are there — a
-   * button that keeps pulsing forever is a banner, not a hint.
+   * How many disc tiers stand up in every room, `0` (flat) … `SCENE_STEP_COUNT`.
+   * Starts fully raised — that is the model as the artist left it.
    */
-  const [hasWalked, setHasWalked] = useState(false);
-
-  const furnitureIds = user?.home.furnitureIds ?? [];
-  const ownedToys = listOwnedToys(furnitureIds);
-
-  const playToy = (furnitureId: string) => {
-    if (furnitureId === CONSOLE_FURNITURE_ID) {
-      router.push(STATIC_ROUTES.GAMES_CONSOLE);
-      return;
-    }
-    if (!puzzleById(furnitureId)) return;
-    router.push(DYNAMIC_ROUTES.puzzle(furnitureId));
-  };
+  const [raisedStepCount, setRaisedStepCount] = useState(SCENE_STEP_COUNT);
 
   if (hud.isSummary) {
     return <Redirect href={STATIC_ROUTES.PERIOD_SUMMARY} />;
@@ -139,92 +117,60 @@ export const HomeScreen = () => {
     return <Redirect href={DYNAMIC_ROUTES.petGrew(STATIC_ROUTES.HOME)} />;
   }
 
-  const handleRoomChange = (next: RoomId) => {
-    setHasWalked(true);
-    setRoom(next);
-  };
-
   return (
     <ThemedView variant="background" style={styles.root}>
-      <RoomPager
-        room={room}
-        onRoomChange={handleRoomChange}
-        isHintVisible={!hasWalked && hud.isAnimationEnabled}
+      <RoomScene
+        view={view}
+        onViewChange={setView}
+        raisedStepCount={raisedStepCount}
         isAnimated={hud.isAnimationEnabled}
-      >
-        <RoomPager.Room room="street">
-          <StreetRoom />
-        </RoomPager.Room>
-
-        <RoomPager.Room room="living">
-          <LivingRoom
-            isPetMet={hud.pet !== null}
-            onOpenBox={() => router.push(STATIC_ROUTES.PET_CREATE)}
-            onOpenHeating={() => router.push(STATIC_ROUTES.HEATING)}
-            ownedToys={ownedToys}
-            onPlayToy={playToy}
-          />
-        </RoomPager.Room>
-
-        <RoomPager.Room room="kitchen">
-          <KitchenRoom />
-        </RoomPager.Room>
-      </RoomPager>
-
-      {hud.pet && (
-        <HomePetCompanion pet={hud.pet} isAnimated={hud.isAnimationEnabled} />
-      )}
+      />
 
       {/* box-none: the scene keeps every touch the controls do not want, so a
-          swipe started next to a badge still walks to the next room. */}
+          swipe started next to the gear still turns the world. */}
       <View
         pointerEvents="box-none"
         style={[styles.top, { paddingTop: insets.top + SPACING.two }]}
       >
-        <View pointerEvents="box-none" style={styles.topRow}>
-          <View pointerEvents="box-none">
-            <HomeHudStats
-              balance={hud.balance}
-              savingsTotal={hud.savingsTotal}
-              onOpenSavings={() => router.push(STATIC_ROUTES.SAVINGS)}
-            />
-          </View>
-
-          <View style={styles.actions}>
-            <SettingsButton
-              onPress={() => router.push(STATIC_ROUTES.SETTINGS)}
-            />
-            <HintButton screen="home" />
-          </View>
-        </View>
-        <View pointerEvents="none">
-          <HomeHudLastCredit credit={hud.lastCredit} />
-        </View>
-        {hud.isPlanning && (
-          <HomeHudPlanBanner
-            onPress={() => router.push(STATIC_ROUTES.BUDGET_PLAN)}
-          />
-        )}
-        {hud.isActive && (
-          <HomeHudEndBanner
-            status={endStatus}
-            onPress={openConfirm}
-            onDisabledPress={() => router.push(STATIC_ROUTES.BUDGET_PLAN)}
-          />
-        )}
+        <SettingsButton onPress={() => router.push(STATIC_ROUTES.SETTINGS)} />
       </View>
 
       <View
         pointerEvents="box-none"
-        style={[styles.bottom, { paddingBottom: insets.bottom + SPACING.two }]}
+        style={[
+          styles.stepsRail,
+          {
+            paddingBottom:
+              insets.bottom + ROOM_CONTROLS_CLEARANCE + SPACING.three,
+            paddingTop: insets.top + GEAR_SIZE + SPACING.four,
+          },
+        ]}
       >
-        <HomeHudBoard
-          goal={hud.goal}
-          taskTitle={hud.taskTitle}
-          taskHint={hud.taskHint}
-          onOpenSavings={() => router.push(STATIC_ROUTES.SAVINGS)}
-          onOpenTasks={() => router.push(STATIC_ROUTES.TASKS)}
-        />
+        <View
+          style={[
+            styles.stepsCard,
+            {
+              backgroundColor: theme.surface,
+              borderColor: theme.border,
+            },
+          ]}
+        >
+          <Text variant="label" themeColor="textMuted">
+            {raisedStepCount}
+          </Text>
+          <Slider
+            accessibilityLabel={t('scene.stepsA11y')}
+            orientation="vertical"
+            value={raisedStepCount}
+            min={0}
+            max={SCENE_STEP_COUNT}
+            step={1}
+            color="primary"
+            isThumbFilled
+            onChange={setRaisedStepCount}
+            style={styles.stepsSlider}
+          />
+        </View>
       </View>
     </ThemedView>
   );
@@ -238,18 +184,6 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
   },
-  actions: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: SPACING.two,
-  },
-  bottom: {
-    bottom: 0,
-    left: 0,
-    paddingHorizontal: CONTENT_PADDING,
-    position: 'absolute',
-    right: 0,
-  },
   gear: {
     alignItems: 'center',
     borderRadius: RADII.m,
@@ -259,17 +193,40 @@ const styles = StyleSheet.create({
     width: GEAR_SIZE,
   },
   top: {
-    gap: SPACING.one,
+    alignItems: 'flex-end',
     left: 0,
     paddingHorizontal: CONTENT_PADDING,
     position: 'absolute',
     right: 0,
     top: 0,
   },
-  topRow: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    gap: SPACING.two,
-    justifyContent: 'space-between',
+  stepsRail: {
+    bottom: 0,
+    justifyContent: 'center',
+    paddingRight: CONTENT_PADDING,
+    pointerEvents: 'box-none',
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  stepsCard: {
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    borderRadius: RADII.l,
+    borderWidth: 1,
+    gap: SPACING.one,
+    height: STEP_SLIDER_HEIGHT,
+    justifyContent: 'center',
+    overflow: 'hidden',
+    paddingHorizontal: SPACING.one,
+    paddingVertical: SPACING.two,
+    // Track hit area is HIT_SLOP_SIZE; padding keeps the thumb inside the card.
+    width: HIT_SLOP_SIZE + SPACING.two,
+  },
+  stepsSlider: {
+    // Explicit height — `%` / flex on the vertical slider overgrows the card.
+    height:
+      STEP_SLIDER_HEIGHT - SPACING.two * 2 - SPACING.one - 12 /* label line */,
+    width: HIT_SLOP_SIZE,
   },
 });
