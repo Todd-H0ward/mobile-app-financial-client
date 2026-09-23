@@ -39,6 +39,8 @@ interface HomeHudPet {
   stage: PetStage;
   /** What a screen reader says — name, mood and why (2.5.10). */
   accessibilityLabel: string;
+  /** The mood itself, for anything that reacts rather than reads it out. */
+  moodName: PetMoodName;
   /** The mood, already translated — "скучает". */
   moodLabel: string;
   /** Why, already translated — "нечего делать". Never empty. */
@@ -154,6 +156,7 @@ const buildPet = (pet: PetSave, t: Translate): HomeHudPet => {
   return {
     appearance: appearanceFor(pet.species, pet.color, pet.pattern),
     emotion: emotionFor(mood),
+    moodName: mood.name,
     stage: pet.stage,
     accessibilityLabel: `${pet.name}, ${moodLabel}, ${moodReasonLabel}`,
     moodLabel,

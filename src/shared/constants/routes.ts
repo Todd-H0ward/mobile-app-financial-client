@@ -42,6 +42,11 @@ export const DYNAMIC_ROUTES = {
       pathname: '/savings/withdraw' as const,
       params: { goalId, amount: String(amount) },
     }) as const,
+  lesson: (cellId: string) =>
+    ({
+      pathname: '/lesson/[cellId]' as const,
+      params: { cellId },
+    }) as const,
   task: (taskId: string) =>
     ({
       pathname: '/tasks/[taskId]' as const,

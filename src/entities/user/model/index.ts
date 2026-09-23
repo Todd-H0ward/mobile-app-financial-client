@@ -36,5 +36,7 @@ export {
   useIsMotionEnabled,
   useIsParentGateEnabled,
   useIsSoundEnabled,
+  usePetAction,
+  usePetSkin,
   useSettings,
 } from './use-settings';

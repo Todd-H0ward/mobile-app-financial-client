@@ -20,6 +20,7 @@ runs Expo SDK 57, React 19, React Native 0.86 and expo-router 57
 | Server state | **нет** — офлайн-игра, сейв локальный; axios / TanStack Query убраны |
 | Client state | zustand + `persist` поверх `expo-sqlite/kv-store`, синхронно (`@/entities/*/model`) |
 | Game loop | game periods, not real time — [docs/game-period.md](docs/game-period.md) |
+| 3D | `three` on `expo-gl`, model baked to JSON — [docs/scene.md](docs/scene.md) |
 | i18n | i18next + react-i18next (`@/shared/i18n`) |
 | Lint / format | Biome (`pnpm lint` / `pnpm format`) |
 | Types | TypeScript strict (`npx tsc --noEmit`) |
@@ -252,32 +253,92 @@ What the screen must show for a component:
    a real press, a real drag, not a screenshot of one.
 4. **Edge content**: long text, zero and maximum values, missing optional slots.
 
-## Navigation: three rooms, everything else on the stack
+## Navigation: one model, three segments on it
 
-The child moves through a **map, not a menu**: `street ↔ living ↔ kitchen`,
-in the order `ROOM_IDS` lists them (`entities/room`). The street is the shop,
-the kitchen is food, the living room is where the pet lives. There is no tab
-bar — a seven-year-old reads "the kitchen is that way" long before they read a
-row of labels, and a room can hold a scene while a tab can only hold a screen.
+There are **no rooms**. `entities/room` is gone, and with it the street, the
+living room and the kitchen: the arena has three wedges, the model numbers
+them `0 … 2`, and a view is `'top' | number` (`SceneView`). The names went
+because the wedges outlived them — what a wedge holds is now decided by its
+thirty cells, not by a label over the door.
 
-All three rooms live on one route (`/home`) inside `widgets/room-pager`, so a
-swipe slides between them without a navigation transition. Everything that is
-not a room — settings, the pet's meeting screen, the UI kit — is pushed over
-the world by the root stack.
+The three segments are the three sectors of **one 3D model** (`assets/scene`),
+rendered on `/home` by `widgets/room-scene`. Walking to another segment turns
+the model under the camera instead of sliding a page, so the child never loses
+sight of where the others are. The camera opens standing at a segment; the
+overhead map is a drag upwards away. Everything that is not the world —
+settings, the pet's meeting screen, the UI kit — is pushed over it by the root
+stack.
 
-Two ways to walk, always both: a swipe, and a door button at the edge carrying
-the **name** of the room behind it. A gesture is invisible to a child who has
-never been taught it, and 3.6 forbids leaving one as the only way through. A
-door is drawn only where a room actually is — the end of the map has no
-greyed-out button.
+**The map does not turn.** The overhead view is a composed shot on a fixed
+heading (`TOP_AZIMUTH`), so that the child arrives at the same picture
+whichever segment they left, and the pan gesture is disabled there. The way
+down is a tap on a cell, which walks into that cell's segment — so the map is
+a place you read and point at, not one you fiddle with. The same freeze
+applies in front of a watcher.
 
-Adding a room is a row in `ROOM_IDS`, an image in `assets/images/rooms/` and a
-`<RoomPager.Room>` in the screen — in that tuple's order, which is the map.
+**Cells are the second way to walk.** Each wedge carries five terraces of six
+cells, ninety in all, and every one is framed and pressable. A tap on a cell
+of another segment turns the world to that segment instead of selecting the
+cell; a tap on a cell of the segment you are standing in selects it. That tap
+is what keeps 3.6 satisfied now the labelled buttons are gone: a gesture is
+invisible to a child who has never been taught it, and must never be the only
+way through. **Do not leave the swipe as the only way across.**
+
+**A segment is the bay between two gears**, and that is not how the FBX
+groups its discs. Each terrace is a ring of eighteen tiles with three slots
+cut in it, one per gear, at 98.5°, 218.5° and 338.5° — the gear stands in the
+slot. Between two slots run six tiles with nothing between them, and those
+six by five terraces are a segment. The converter's `node.segment` instead
+buckets tiles by their nearest gear, which cuts a bay in half and puts a gear
+in the middle of it; `cellsOf` in `build-scene` regroups by angle and is the
+only grouping the game should use.
+
+The camera stands **opposite** the middle of the bay, at eye level. Three
+things make that shot work and none of them are optional:
+
+- `SEGMENT_CAMERA_OFFSET` is 240° from the gear — 60° to the bay's middle,
+  then 180° to the far side. Standing *in* the bay wraps its six cells around
+  the lens as two wings with sky between them.
+- `SCENE_GEAR_ANGLES` is what all of this is measured from — never
+  `SCENE_VIEW_ANGLES`, which already carries a half turn of its own. Mixing
+  them up is what put a gear in the middle of every segment and stood the
+  camera inside the bay it was meant to be facing.
+- Nothing is hidden: all three bays and all three gears stay on screen, so
+  the child can see where they came from. What keeps the near rim out of the
+  way is `ROOM_ELEVATION` (24°) — the rim is 160 units tall at a radius of
+  400, a slope of 21.8°, and anything flatter is a view of the back of a wall
+  with the pet behind it.
+- Distance flattens the arc. Six cells wrap 120°, and from close in the ends
+  loom while the middle falls away; `SCENE_SEGMENT_DISTANCE` (1500) is where
+  the bay stops being a bowl and starts being a board.
+
+The pet turns to face the camera wherever it goes (`setCharacterFacing`): it
+stands on the axis with three bays around it, so there is no direction that
+is right from all of them.
+
+Three.js draws the scene on `expo-gl`. `expo-three` and `@react-three/fiber`
+are deliberately absent, the FBX is converted to JSON at build time by
+`scripts/fbx-to-scene.mjs`, and the camera lives in refs rather than state —
+the reasons for all three are in [docs/scene.md](docs/scene.md), which is
+required reading before touching the scene.
+
+The pet stands at the centre of the arena as a robot dog: seven coats and four
+clips, driven by the pet's mood and answering a tap. Its textures live as loose
+files rather than inside the GLB, and that is not a style choice — expo-gl can
+only upload a texture from a `file://` path. See
+[docs/scene.md](docs/scene.md) before touching it.
+
+The flat rooms that preceded this are **deleted**, not parked:
+`widgets/room-pager`, `screens/home/ui/rooms`, `entities/room` and the
+`SceneControls` tab strip all went when the rooms did. The HUD and the 2D pet
+companion are still in the tree, unused; they come back once the coins, the
+goal and the pet have a place on the 3D world. Until then the home screen
+deliberately shows the model, the level card and nothing else.
 
 ## Native tabs are off — do not bring them back
 
 There is **no tab bar and no `app-tabs` widget**. Navigation is a root `Stack`
-plus the room pager on `/home` (see above).
+plus the 3D scene on `/home` (see above).
 
 `expo-router/unstable-native-tabs` was tried earlier and aborted the process on
 iOS in Expo Go: a throw inside the worklets runtime

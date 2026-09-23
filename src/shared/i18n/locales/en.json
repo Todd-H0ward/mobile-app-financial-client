@@ -31,7 +31,28 @@
     "glossaryDescription": "Short explanations of the game words.",
     "parents": "Grown-ups",
     "parentsDescription": "A report on the child's decisions, demo mode and profile management. Entry through a multiplication.",
-    "openParents": "Open the section"
+    "openParents": "Open the section",
+    "pet": "Pet",
+    "petSkin": "Robot dog coat",
+    "petSkinSubtitle": "Looks only — it changes nothing in the game",
+    "petAction": "What it does",
+    "petActionSubtitle": "The resting state it returns to after reacting",
+    "petTapHint": "Tap the dog on the home screen and it answers",
+    "skin": {
+      "factory": "Factory",
+      "arctic": "Arctic",
+      "carbon": "Carbon",
+      "desert": "Desert",
+      "forest": "Forest",
+      "rescue": "Rescue",
+      "rust": "Rust"
+    },
+    "action": {
+      "idle": "Idle",
+      "walk": "Walk",
+      "joy": "Joy",
+      "sad": "Sad"
+    }
   },
   "demoMode": {
     "title": "Demo mode",
@@ -168,42 +189,20 @@
       "role": "A grown-up supports and talks it through, but does not decide for the child."
     }
   },
-  "rooms": {
-    "name": {
-      "street": "Street",
-      "living": "Room",
-      "kitchen": "Kitchen"
-    },
-    "goA11y": "Go to: {{room}}",
-    "here": "You are here: {{room}}",
-    "hint": "Swipe, or tap a door",
-    "soon": {
-      "shopTitle": "Shop",
-      "shopText": "The shop will open here: food, warmth and everything a home needs.",
-      "toysTitle": "Toys",
-      "toysText": "Toys and decorations for the room will arrive here.",
-      "fridgeTitle": "Fridge",
-      "fridgeText": "You will be able to feed the pet here.",
-      "stoveTitle": "Stove",
-      "stoveText": "You will be able to cook here.",
-      "close": "Got it"
-    },
-    "shop": {
-      "grocery": {
-        "label": "Grocery",
-        "hint": "Food, soap and warmth for the home."
+  "scene": {
+    "level": "Level {{level}} of {{total}}",
+    "levelUp": "Rise",
+    "levelReset": "Restart",
+    "watcherLeave": "Go back",
+    "watcherA11y": "Talk to {{name}}",
+    "watchers": {
+      "overseer": {
+        "name": "The Overseer",
+        "line": "I count every coin. Spend one too many and I will see it."
       },
-      "clothes": {
-        "label": "Clothes",
-        "hint": "Sweaters and scarves — mostly wants."
-      },
-      "furniture": {
-        "label": "Furniture",
-        "hint": "Rugs, lamps and stickers for the room."
-      },
-      "toys": {
-        "label": "Toys",
-        "hint": "Toys to buy now — mini-games come later."
+      "keeper": {
+        "name": "The Keeper",
+        "line": "Put a little aside. Whatever you save, I will keep safe."
       }
     }
   },
@@ -1012,5 +1011,22 @@
       "empty": "No puzzles on the shelf yet. Buy one in the toys shop on the street.",
       "goToys": "Go to toys"
     }
+  },
+  "lesson": {
+    "header": "LESSON {{number}} / 30",
+    "theoryOf": "THEORY {{index}} / {{total}}",
+    "questionOf": "QUESTION {{index}} / {{total}}",
+    "next": "NEXT",
+    "toTest": "START THE TEST",
+    "nextQuestion": "NEXT QUESTION",
+    "toResult": "RESULT",
+    "right": "Correct.",
+    "wrong": "Wrong. The answer was: {{answer}}",
+    "resultLabel": "RESULT",
+    "score": "{{correct}} OF {{total}}",
+    "passedText": "Passed. The cell has sunk — the pit is one step shallower.",
+    "failedText": "Not passed. At least {{needed}} must be right. Read it again.",
+    "retry": "TAKE IT AGAIN",
+    "back": "LEAVE"
   }
 }

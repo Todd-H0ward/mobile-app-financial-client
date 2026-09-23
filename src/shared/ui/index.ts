@@ -92,7 +92,7 @@ export type {
   SheetTitleProps,
 } from './sheet';
 export { Sheet } from './sheet';
-export type { SliderProps } from './slider';
+export type { SliderOrientation, SliderProps } from './slider';
 export { Slider } from './slider';
 export { SplashOverlay } from './splash-overlay';
 export type { SwitchProps } from './switch';
