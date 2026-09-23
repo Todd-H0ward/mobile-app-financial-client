@@ -43,10 +43,20 @@ const SCENE_LEVEL_COUNT = 4;
  */
 const SCENE_GEAR_TURN = Math.PI * 1.6;
 
+/**
+ * Which way the pet's own model faces, in radians, before it is turned.
+ *
+ * Added to the camera's heading so `setCharacterFacing` can be given a plain
+ * azimuth. A quarter turn: the robot dog is built looking down its own +X,
+ * so without this it stands side on to whoever is watching it.
+ */
+const SCENE_CHARACTER_FACING = Math.PI / 2;
+
 /** Seconds a single level-up takes, gears, dust and all. */
 const SCENE_LIFT_SEC = 2.2;
 
 export {
+  SCENE_CHARACTER_FACING,
   SCENE_GEAR_TURN,
   SCENE_LEVEL_COUNT,
   SCENE_LIFT_SEC,

@@ -170,49 +170,7 @@
       }
     }
   },
-  "rooms": {
-    "name": {
-      "street": "Street",
-      "living": "Room",
-      "kitchen": "Kitchen"
-    },
-    "goA11y": "Go to: {{room}}",
-    "here": "You are here: {{room}}",
-    "hint": "Swipe, or tap a door",
-    "soon": {
-      "shopTitle": "Shop",
-      "shopText": "The shop will open here: food, warmth and everything a home needs.",
-      "toysTitle": "Toys",
-      "toysText": "Toys and decorations for the room will arrive here.",
-      "fridgeTitle": "Fridge",
-      "fridgeText": "You will be able to feed the pet here.",
-      "stoveTitle": "Stove",
-      "stoveText": "You will be able to cook here.",
-      "close": "Got it"
-    },
-    "shop": {
-      "grocery": {
-        "label": "Grocery",
-        "hint": "Food, soap and warmth for the home."
-      },
-      "clothes": {
-        "label": "Clothes",
-        "hint": "Sweaters and scarves — mostly wants."
-      },
-      "furniture": {
-        "label": "Furniture",
-        "hint": "Rugs, lamps and stickers for the room."
-      },
-      "toys": {
-        "label": "Toys",
-        "hint": "Toys to buy now — mini-games come later."
-      }
-    }
-  },
   "scene": {
-    "top": "Top",
-    "topA11y": "Look from above",
-    "roomA11y": "Turn to the room: {{room}}",
     "level": "Level {{level}} of {{total}}",
     "levelUp": "Rise",
     "levelReset": "Restart",

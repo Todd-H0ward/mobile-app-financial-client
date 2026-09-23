@@ -2,9 +2,13 @@ export type { OrbitPosition } from './lib';
 export {
   alignAngle,
   angleDistance,
+  cellFraction,
+  cellKey,
+  cellOfFace,
   damp,
   fitDistance,
   gearAngle,
+  isSameCell,
   levelProgress,
   liftFor,
   nearestSegment,
@@ -15,7 +19,12 @@ export {
   terraceSinkY,
   terracesInView,
 } from './lib';
-export type { SceneGeometry, SceneNode, SceneSource } from './model';
+export type {
+  SceneCell,
+  SceneGeometry,
+  SceneNode,
+  SceneSource,
+} from './model';
 export {
   CAMERA_FAR,
   CAMERA_FOV,
@@ -23,7 +32,10 @@ export {
   MIN_ELEVATION,
   ROOM_ELEVATION,
   ROOM_FIT,
+  SCENE_CELLS_PER_STEP,
+  SCENE_CHARACTER_FACING,
   SCENE_FLAT_STEP,
+  SCENE_GEAR_ANGLES,
   SCENE_GEAR_TURN,
   SCENE_LEVEL_COUNT,
   SCENE_LIFT_SEC,
@@ -33,6 +45,7 @@ export {
   SCENE_PLATFORM_Y,
   SCENE_RADIUS,
   SCENE_SEGMENT_COUNT,
+  SCENE_SEGMENT_DISTANCE,
   SCENE_SHARED_SEGMENT,
   SCENE_SOURCE,
   SCENE_STEP_COUNT,

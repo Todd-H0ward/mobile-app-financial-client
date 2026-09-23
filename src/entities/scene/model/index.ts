@@ -6,12 +6,16 @@ export {
   ROOM_ELEVATION,
   ROOM_FIT,
   SCENE_PLATFORM_Y,
+  SCENE_SEGMENT_DISTANCE,
   TOP_AZIMUTH,
   TOP_ELEVATION,
   TOP_FIT,
 } from './camera';
+export type { SceneCell } from './cells';
+export { SCENE_CELLS_PER_STEP } from './cells';
 export { SCENE_PALETTE } from './palette';
 export {
+  SCENE_CHARACTER_FACING,
   SCENE_GEAR_TURN,
   SCENE_LEVEL_COUNT,
   SCENE_LIFT_SEC,
@@ -23,6 +27,7 @@ export {
 export type { SceneGeometry, SceneNode, SceneSource } from './source';
 export {
   SCENE_FLAT_STEP,
+  SCENE_GEAR_ANGLES,
   SCENE_PIVOT,
   SCENE_RADIUS,
   SCENE_SEGMENT_COUNT,

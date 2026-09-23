@@ -1,13 +1,13 @@
 import { type MutableRefObject, useCallback, useMemo, useRef } from 'react';
 
-import { ROOM_IDS, type RoomId, roomIndex } from '@/entities/room';
 import {
   alignAngle,
   fitDistance,
   MIN_ELEVATION,
   nearestSegment,
+  SCENE_GEAR_ANGLES,
   SCENE_RADIUS,
-  SCENE_VIEW_ANGLES,
+  SCENE_SEGMENT_DISTANCE,
 } from '@/entities/scene';
 
 import { clamp } from '@/shared/utils';
@@ -18,8 +18,15 @@ import { type CameraTune, DEFAULT_CAMERA_TUNE } from './camera-tune';
 // TYPES
 // ═══════════════════════════════════════════
 
-/** Straight over the model, or standing in front of one room. */
-type SceneView = 'top' | RoomId;
+/**
+ * Straight over the model, or standing over one of its segments.
+ *
+ * A segment is an index into `SCENE_VIEW_ANGLES`, which is the model's own
+ * numbering — the arena has three wedges and no names for them. There used to
+ * be a `RoomId` here, back when the three were a street, a living room and a
+ * kitchen; the wedges outlived the rooms.
+ */
+type SceneView = 'top' | number;
 
 interface OrbitState {
   /** Heading around Y, in degrees. Unwrapped: a drag may pass 360 freely. */
@@ -75,17 +82,43 @@ const TILT_PER_POINT = 0.22;
 /** Until the surface reports its shape, assume a phone held upright. */
 const DEFAULT_ASPECT = 9 / 16;
 
+/**
+ * Where a segment's camera stands, measured from that segment's gear.
+ *
+ * Two turns in one number, and both are needed. A segment is the bay
+ * *between* two gears, so its middle is 60° past gear `s`; the camera then
+ * has to stand opposite that middle rather than in it, which is another 180.
+ * Standing in the bay wraps its six cells around the lens and leaves the
+ * child looking at the empty far side with a ramp up the middle of the
+ * frame — which is what this used to do.
+ *
+ * Measured from `SCENE_GEAR_ANGLES`, never from `SCENE_VIEW_ANGLES`: those
+ * already carry a half turn of their own.
+ */
+const SEGMENT_CAMERA_OFFSET = 240;
+
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
 
 const fitFor = (aspect: number, tune: CameraTune): SceneFit => ({
-  room: fitDistance(SCENE_RADIUS, tune.fov, aspect, tune.roomFit),
+  // Capped, not fitted: a segment shot is a place the child stands, and a
+  // wider screen should not walk them back into the stands. The cap has to
+  // live here rather than at the one call site — `distanceAt` interpolates
+  // off `fit.room` on every drag and resize, and would undo it.
+  room: Math.min(
+    fitDistance(SCENE_RADIUS, tune.fov, aspect, tune.roomFit),
+    SCENE_SEGMENT_DISTANCE,
+  ),
   top: fitDistance(SCENE_RADIUS, tune.fov, aspect, tune.topFit),
 });
 
-const viewAngleOf = (room: RoomId): number =>
-  SCENE_VIEW_ANGLES[roomIndex(room)];
+/**
+ * Where the camera stands to look at a segment: opposite the middle of its
+ * bay, with the bay's six cells facing it across the pit.
+ */
+const viewAngleOf = (segment: number): number =>
+  (SCENE_GEAR_ANGLES[segment] ?? 0) + SEGMENT_CAMERA_OFFSET;
 
 const climbOf = (elevation: number, tune: CameraTune): number =>
   clamp(
@@ -109,8 +142,11 @@ const viewAt = (
 ): SceneView => {
   if (state.elevation >= topThreshold(tune)) return 'top';
 
-  const segment = nearestSegment(state.azimuth, SCENE_VIEW_ANGLES);
-  return ROOM_IDS[segment] ?? ROOM_IDS[0];
+  // Read back against the gears the camera was placed relative to.
+  return nearestSegment(
+    state.azimuth - SEGMENT_CAMERA_OFFSET,
+    SCENE_GEAR_ANGLES,
+  );
 };
 
 const stateFor = (
@@ -163,7 +199,7 @@ const useSceneCamera = (
   const initial = useRef(
     stateFor(
       initialView,
-      viewAngleOf(ROOM_IDS[0]),
+      viewAngleOf(0),
       fit.current,
       tuneRef?.current ?? DEFAULT_CAMERA_TUNE,
     ),

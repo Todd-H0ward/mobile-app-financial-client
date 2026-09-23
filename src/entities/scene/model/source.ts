@@ -79,15 +79,25 @@ const SCENE_SEGMENT_COUNT = SCENE_SOURCE.segmentAngles.length;
 const SCENE_SHARED_SEGMENT = -1;
 
 /**
- * Where the camera stands to look **into** a room, not at its back.
+ * Where the three gears stand, in degrees.
  *
- * The model is an arena: each room is a wedge of terraces facing the middle.
- * Parking at the room's own angle puts the camera behind it, so the view is
- * taken from across the circle — half a turn away.
+ * The model's own headings, untouched. Each ring of tiles has a slot cut in
+ * it at each of these, the gear sits in the slot, and a ramp climbs through
+ * it — so these are the **edges** of the segments, never their middles.
+ * Measure anything about a segment from here.
  */
-const SCENE_VIEW_ANGLES = SCENE_SOURCE.segmentAngles.map(
-  (angle) => (angle + 180) % 360,
-);
+const SCENE_GEAR_ANGLES = SCENE_SOURCE.segmentAngles;
+
+/**
+ * Where the camera stands to look **into** a segment, not at its back.
+ *
+ * Half a turn from the gears, and kept only because so much already reads
+ * it. It is a camera heading, not a feature of the model: adding 180 here is
+ * exactly the trap that put a gear in the middle of every segment and the
+ * camera inside the bay it was meant to be facing. Group tiles with
+ * `SCENE_GEAR_ANGLES`.
+ */
+const SCENE_VIEW_ANGLES = SCENE_GEAR_ANGLES.map((angle) => (angle + 180) % 360);
 
 /** Everything fits inside this sphere around the origin. */
 const SCENE_RADIUS = SCENE_SOURCE.bounds.sphereRadius;
@@ -110,6 +120,7 @@ const SCENE_FLAT_STEP = -1;
 export type { SceneGeometry, SceneNode, SceneSource };
 export {
   SCENE_FLAT_STEP,
+  SCENE_GEAR_ANGLES,
   SCENE_PIVOT,
   SCENE_RADIUS,
   SCENE_SEGMENT_COUNT,

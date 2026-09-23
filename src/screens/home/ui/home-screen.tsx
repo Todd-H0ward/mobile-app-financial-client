@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { RoomScene, type SceneView } from '@/widgets/room-scene';
 
-import { DEFAULT_ROOM } from '@/entities/room';
 import { SCENE_LEVEL_COUNT } from '@/entities/scene';
 import { usePetAction, usePetSkin } from '@/entities/user';
 import type { WatcherId } from '@/entities/watcher';
@@ -139,8 +138,8 @@ export const HomeScreen = () => {
   const petSkin = usePetSkin();
   const chosenAction = usePetAction();
 
-  /** Opens looking into a room on the horizon — not overhead at an angle. */
-  const [view, setView] = useState<SceneView>(DEFAULT_ROOM);
+  /** Opens over the first segment, not on the map: a place, not a menu. */
+  const [view, setView] = useState<SceneView>(0);
   /**
    * How far out of the pit the game has climbed, `0 … SCENE_LEVEL_COUNT`.
    *

@@ -4,6 +4,43 @@
 отдельная картинка, а сектор модели; переход между комнатами — поворот сцены
 под камерой, а не перелистывание страниц.
 
+## Cells: the ninety pressable tiles
+
+The FBX holds 90 discs: five terraces of eighteen tiles. Each ring has three
+slots cut in it, one per gear, at 98.5°, 218.5° and 338.5° — measured off the
+vertices, and the gear sits in the slot. Between two slots run six unbroken
+tiles, and **those six are a segment's row**. Five rows, six cells, ninety
+tiles, three bays.
+
+Do not trust `node.segment` from the converter for this. It buckets each tile
+by its nearest gear, which cuts every bay down the middle and leaves a gear
+standing in the centre of it. `cellsOf` regroups by angle instead. Nor can a
+tile's position be read off `matrix[12..14]`: the tiles are clones and their
+transforms carry rotation and scale with the translation left at zero, so
+every one of them looks like it is standing on the axis. `nodeAngle` averages
+the transformed vertices, the same trap the converter had to work around.
+
+Each cell is framed and pressable.
+
+The six cells of a terrace are **merged into one buffer**. Ninety separate
+meshes would be ninety draw calls for a floor, and the arena is already well
+over the draw-call budget in `docs/design-brief-3d.md`. The price of merging
+is that a ray comes back with a triangle index and no idea whose it is, so
+`build-scene` writes the first triangle of each cell onto the mesh
+(`userData.starts`) and `cellOfFace` turns a hit back into a cell. The frames
+are merged the same way: one `LineSegments` per terrace per segment, fifteen
+in all, plus one bright outline that moves to whichever cell is selected.
+
+Two things to know before touching them:
+
+- **Cell order is angular, not file order.** `cellsOf` sorts by the angle
+  around the axis so `cell` means a place on the arc. The game will store
+  cell indices; a modelling accident must not move them.
+- **The outlines are lifted one unit.** An edge sitting exactly on the face it
+  came from is a coin toss per pixel on a phone GPU, and the frame comes out
+  dashed and crawling.
+
+
 ## Откуда берётся геометрия
 
 Исходник — `assets/scene/сцена.fbx` (экспорт из Cinema 4D, FBX 7700, бинарный).

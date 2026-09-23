@@ -5,8 +5,11 @@ import {
   Color,
   DirectionalLight,
   DoubleSide,
+  EdgesGeometry,
   Group,
   HemisphereLight,
+  LineBasicMaterial,
+  LineSegments,
   Matrix3,
   Matrix4,
   Mesh,
@@ -20,8 +23,14 @@ import {
 
 import type { RobotDogAction, RobotDogSkin } from '@/entities/robot-dog';
 import {
+  cellKey,
+  cellOfFace,
   gearAngle,
+  isSameCell,
+  SCENE_CELLS_PER_STEP,
+  SCENE_CHARACTER_FACING,
   SCENE_FLAT_STEP,
+  SCENE_GEAR_ANGLES,
   SCENE_PALETTE,
   SCENE_PIVOT,
   SCENE_PLATFORM_Y,
@@ -31,6 +40,7 @@ import {
   SCENE_SOURCE,
   SCENE_TERRACE_COUNT,
   SCENE_TERRACE_RADII,
+  type SceneCell,
   type SceneNode,
   terraceSinkY,
 } from '@/entities/scene';
@@ -74,6 +84,20 @@ interface SceneModel {
   reactCharacter: (action: RobotDogAction, fallback: RobotDogAction) => void;
   /** What a tap ray is tested against — `null` until the model has loaded. */
   characterRoot: () => Object3D | null;
+  /**
+   * Turns the pet to face the camera, in radians.
+   *
+   * It stands on the axis with three segments around it, so there is no
+   * direction it could face that is right from all of them: it faces the
+   * child instead, wherever the child has walked to.
+   */
+  setCharacterFacing: (azimuthRad: number) => void;
+  /** The tile buffers a tap ray is tested against, one per room and terrace. */
+  cellTargets: () => Object3D[];
+  /** Turns a ray hit into the cell it landed on, or `null` for a miss. */
+  cellAt: (object: Object3D, faceIndex: number) => SceneCell | null;
+  /** Picks one cell out of its row, or clears the pick with `null`. */
+  selectCell: (cell: SceneCell | null) => void;
   /** Same, for one of the two screens overhead. */
   watcherRoot: (watcher: WatcherId) => Object3D | null;
   /** Where the camera stands to talk to a screen, and what it looks at. */
@@ -123,6 +147,24 @@ const POINT_LIGHT_DISTANCE = 1200;
 const POINT_LIGHT_DECAY = 1;
 
 const DEG_TO_RAD = Math.PI / 180;
+
+/**
+ * Crease angle, in degrees, above which an edge is drawn.
+ *
+ * The tiles are low prisms: twenty keeps the rim and drops the triangulation
+ * running across the top face, which is the difference between a frame and a
+ * cobweb.
+ */
+const CELL_EDGE_ANGLE = 20;
+
+/** Degrees of arc one bay covers — a third of the ring, gear to gear. */
+const SEGMENT_ARC = 360 / SCENE_SEGMENT_COUNT;
+
+/** World units the outline floats above its tile, to settle the z-fighting. */
+const CELL_FRAME_LIFT = 1;
+
+/** How solid a resting frame is drawn; the selected one is opaque. */
+const CELL_FRAME_OPACITY = 0.5;
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -177,6 +219,120 @@ const nodesOf = (segment: number, step: number): SceneNode[] =>
   SCENE_SOURCE.nodes.filter(
     (node) => node.segment === segment && node.step === step,
   );
+
+/**
+ * Where a node sits in the world, as a heading in degrees.
+ *
+ * Averaged over its vertices, not read off the matrix: the ninety tiles are
+ * clones, and a clone's transform in this FBX carries rotation and scale but
+ * leaves the translation at zero. Reading `matrix[12..14]` puts every tile on
+ * the axis — the converter hit the same trap, which is why it assigns
+ * segments by centroid too (docs/scene.md).
+ */
+const nodeAngle = (node: SceneNode): number => {
+  const matrix = new Matrix4().fromArray(node.matrix);
+  const geometry = SCENE_SOURCE.geometries[node.geometry];
+  const point = new Vector3();
+  let x = 0;
+  let z = 0;
+
+  for (let i = 0; i < geometry.position.length; i += 3) {
+    point
+      .set(
+        geometry.position[i],
+        geometry.position[i + 1],
+        geometry.position[i + 2],
+      )
+      .applyMatrix4(matrix);
+    x += point.x;
+    z += point.z;
+  }
+
+  return (Math.atan2(x, z) * 180) / Math.PI;
+};
+
+/**
+ * The six cells of one terrace of one segment, left to right.
+ *
+ * A **segment is the bay between two gears**, and that is not how the FBX
+ * groups its discs. The artist laid eighteen tiles round each terrace in
+ * three arcs of six, each arc centred on a gear — so the converter's
+ * `node.segment` cuts the ring straight through the middle of a bay. Read
+ * that way the child faces a gear with three cells either side of it, which
+ * is not a wall of anything.
+ *
+ * Cut instead **at** the gears: bay `s` runs from gear `s` to gear `s + 1`,
+ * taking the far three cells of one arc, the gap the ramp climbs, and the
+ * near three of the next. Six again, and this time with the gears standing
+ * at its edges like pillars.
+ *
+ * Sorted by angle within the bay, so `cell` is a place on the arc rather
+ * than an accident of the export — the game stores these.
+ */
+const cellsOf = (segment: number, step: number): SceneNode[] => {
+  const from = SCENE_GEAR_ANGLES[segment] ?? 0;
+
+  return SCENE_SOURCE.nodes
+    .filter((node) => node.step === step && node.segment >= 0)
+    .map((node) => ({
+      node,
+      offset: (((nodeAngle(node) - from) % 360) + 360) % 360,
+    }))
+    .filter((entry) => entry.offset < SEGMENT_ARC)
+    .sort((a, b) => a.offset - b.offset)
+    .map((entry) => entry.node);
+};
+
+/**
+ * The first triangle of each node inside a merged buffer.
+ *
+ * `mergeNodes` lays the nodes down back to back, so a node's triangles start
+ * where the ones before it ended — this counts them out without walking the
+ * vertices again.
+ */
+const faceStarts = (nodes: SceneNode[]): number[] => {
+  const starts: number[] = [];
+  let at = 0;
+  for (const node of nodes) {
+    starts.push(at);
+    at += SCENE_SOURCE.geometries[node.geometry].position.length / 9;
+  }
+  return starts;
+};
+
+/**
+ * The outline of one cell, lifted clear of the tile it traces.
+ *
+ * An edge sits exactly on the surface it came from, which on a phone GPU is a
+ * coin toss per pixel between the line and the floor — the frame comes out
+ * dashed and crawling. A single unit of daylight settles it.
+ */
+const cellEdges = (node: SceneNode): BufferGeometry => {
+  const solid = mergeNodes([node]);
+  const edges = new EdgesGeometry(solid, CELL_EDGE_ANGLE);
+  solid.dispose();
+  edges.translate(0, CELL_FRAME_LIFT, 0);
+  return edges;
+};
+
+/** The six outlines of a terrace as one buffer — one line per draw call. */
+const mergeEdges = (parts: BufferGeometry[]): BufferGeometry => {
+  const total = parts.reduce(
+    (sum, part) => sum + part.getAttribute('position').array.length,
+    0,
+  );
+
+  const position = new Float32Array(total);
+  let at = 0;
+  for (const part of parts) {
+    position.set(part.getAttribute('position').array as Float32Array, at);
+    at += part.getAttribute('position').array.length;
+  }
+
+  const merged = new BufferGeometry();
+  merged.setAttribute('position', new BufferAttribute(position, 3));
+  return merged;
+};
 
 const roomMaterial = (hex: string): MeshPhongMaterial =>
   new MeshPhongMaterial({
@@ -285,6 +441,21 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
 
   const rooms: MeshPhongMaterial[] = [];
   const geometries: BufferGeometry[] = [];
+  /** One outline material per room, so a muted room's frames mute with it. */
+  const frames: LineBasicMaterial[] = [];
+  /** The fifteen tile buffers a tap ray is tested against. */
+  const cellMeshes: Mesh[] = [];
+  /** Everything belonging to one segment, so a segment view can hide the rest. */
+  const segmentParts: Object3D[][] = [[], [], []];
+  /** Every cell's own outline, kept for the selection to borrow. */
+  const cellOutlines = new Map<string, BufferGeometry>();
+  /** The one bright outline, moved from tile to tile as the child picks. */
+  const selectionMaterial = new LineBasicMaterial({
+    color: new Color(SCENE_PALETTE.cellFrameActive),
+  });
+  const selection = new LineSegments(new BufferGeometry(), selectionMaterial);
+  selection.visible = false;
+  let selected: SceneCell | null = null;
 
   /**
    * The three wheels standing around the bowl — the machine that lifts the
@@ -305,9 +476,19 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     root.add(group);
   }
 
+  /** The pillars between the bays — their own colour, they belong to no bay. */
+  const gearMaterial = roomMaterial(SCENE_PALETTE.shared);
+
   for (let segment = 0; segment < SCENE_SEGMENT_COUNT; segment += 1) {
     const material = roomMaterial(SCENE_PALETTE.segments[segment]);
     rooms.push(material);
+    frames.push(
+      new LineBasicMaterial({
+        color: new Color(SCENE_PALETTE.cellFrame),
+        transparent: true,
+        opacity: CELL_FRAME_OPACITY,
+      }),
+    );
 
     // The wheel: one buffer, hung on its own axle.
     const wheelGeometry = mergeNodes(nodesOf(segment, SCENE_FLAT_STEP));
@@ -319,7 +500,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
 
     const gear = new Group();
     gear.position.copy(hub);
-    gear.add(new Mesh(wheelGeometry, material));
+    gear.add(new Mesh(wheelGeometry, gearMaterial));
     gears.push(gear);
     root.add(gear);
 
@@ -327,9 +508,30 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     // group of its own: the floor takes the rings it passes up with it, and a
     // ring split per room would be torn into three arcs at different heights.
     for (let terrace = 0; terrace < SCENE_TERRACE_COUNT; terrace += 1) {
-      const geometry = mergeNodes(nodesOf(segment, terrace));
+      const cells = cellsOf(segment, terrace);
+      const geometry = mergeNodes(cells);
       geometries.push(geometry);
-      terraces[terrace].add(new Mesh(geometry, material));
+
+      // The six cells share one buffer and one draw call; `starts` is how a
+      // ray that comes back with a triangle number turns into a cell.
+      const tiles = new Mesh(geometry, material);
+      tiles.userData = { segment, step: terrace, starts: faceStarts(cells) };
+      terraces[terrace].add(tiles);
+      cellMeshes.push(tiles);
+      segmentParts[segment].push(tiles);
+
+      // Every cell keeps its own outline, so the selected one can be picked
+      // out of the row without rebuilding anything.
+      const outlines = cells.map((node) => cellEdges(node));
+      outlines.forEach((edges, cell) => {
+        cellOutlines.set(cellKey({ segment, step: terrace, cell }), edges);
+      });
+
+      const frame = mergeEdges(outlines);
+      geometries.push(frame);
+      const frameLines = new LineSegments(frame, frames[segment]);
+      terraces[terrace].add(frameLines);
+      segmentParts[segment].push(frameLines);
     }
   }
 
@@ -435,12 +637,77 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       material.emissiveIntensity = isLit ? 0.22 : 0.1;
     });
 
+    frames.forEach((material, index) => {
+      const isLit = segment === null || segment === index;
+      material.color.set(
+        isLit ? SCENE_PALETTE.cellFrame : SCENE_PALETTE.cellFrameMuted,
+      );
+      material.opacity = isLit ? CELL_FRAME_OPACITY : CELL_FRAME_OPACITY * 0.45;
+    });
+
     roomLamps.forEach((lamp, index) => {
       const isLit = segment === null || segment === index;
       lamp.intensity = isLit
         ? ROOM_POINT_INTENSITY
         : ROOM_POINT_INTENSITY * 0.35;
     });
+
+    // Everything stays on screen. Hiding the other two bays was tried and
+    // the arena stopped being a place: the child could no longer see where
+    // they had come from. What keeps the near rim out of the way is
+    // `ROOM_ELEVATION` instead — see `camera.ts`.
+  };
+
+  /**
+   * Which cell a ray landed on.
+   *
+   * The six cells of a terrace share one mesh, so the hit alone says nothing:
+   * what identifies the tile is the triangle number, checked against the
+   * ranges written onto the mesh when it was merged.
+   */
+  const cellAt = (object: Object3D, faceIndex: number): SceneCell | null => {
+    const data = object.userData as {
+      segment?: number;
+      step?: number;
+      starts?: number[];
+    };
+    if (data.segment === undefined || data.step === undefined) return null;
+    if (!data.starts) return null;
+
+    const cell = cellOfFace(data.starts, faceIndex);
+    if (cell === null || cell >= SCENE_CELLS_PER_STEP) return null;
+
+    return { segment: data.segment, step: data.step, cell };
+  };
+
+  /** The tile buffers, and nothing else, for a tap ray to be tested against. */
+  const cellTargets = () => cellMeshes;
+
+  /**
+   * Picks one cell out of its row, or clears the pick.
+   *
+   * The outline is one object that borrows the chosen cell's edges and moves
+   * into its terrace, so the arena carries a single extra draw call however
+   * many cells there turn out to be.
+   */
+  const selectCell = (next: SceneCell | null) => {
+    if (isSameCell(next, selected)) return;
+    selected = next;
+
+    if (!next) {
+      selection.visible = false;
+      return;
+    }
+
+    const edges = cellOutlines.get(cellKey(next));
+    if (!edges) {
+      selection.visible = false;
+      return;
+    }
+
+    selection.geometry = edges;
+    selection.visible = true;
+    terraces[next.step]?.add(selection);
   };
 
   /** Axle of a wheel: horizontal and tangential, so it rolls around the bowl. */
@@ -508,6 +775,10 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
 
   const characterRoot = () => character?.root ?? null;
 
+  const setCharacterFacing = (azimuthRad: number) => {
+    characterMount.rotation.y = azimuthRad + SCENE_CHARACTER_FACING;
+  };
+
   const setPlatformY = (y: number) => {
     root.position.y = y;
   };
@@ -523,6 +794,11 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     effects.dispose();
     for (const geometry of geometries) geometry.dispose();
     for (const material of rooms) material.dispose();
+    gearMaterial.dispose();
+    for (const material of frames) material.dispose();
+    for (const edges of cellOutlines.values()) edges.dispose();
+    cellOutlines.clear();
+    selectionMaterial.dispose();
     sharedMaterial.dispose();
   };
 
@@ -537,6 +813,10 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     playCharacterAction,
     reactCharacter,
     characterRoot,
+    setCharacterFacing,
+    cellTargets,
+    cellAt,
+    selectCell,
     watcherRoot: (watcher) => watchers?.root(watcher) ?? null,
     watcherFocus: (watcher) => watchers?.focus(watcher) ?? null,
     playWatcher: (watcher, action) => watchers?.play(watcher, action),

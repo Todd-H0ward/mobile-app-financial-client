@@ -20,6 +20,12 @@ const SCENE_PALETTE = {
   segmentsMuted: ['#C4788A', '#6AADB0', '#C4B06A'],
   /** Whatever stands on the axis and belongs to no room. */
   shared: '#9B7EBD',
+  /** Outline around every cell — the thing that says a tile can be pressed. */
+  cellFrame: '#FFFFFF',
+  /** The same outline in a room the camera is not looking at. */
+  cellFrameMuted: '#E6EEF2',
+  /** The cell under the child's finger, picked out of its row. */
+  cellFrameActive: '#FFE8A3',
   /** Grit thrown off the rim when the platform climbs out of the pit. */
   dust: '#C9B08A',
   /** The gear train straining — brief, bright, drawn additively. */

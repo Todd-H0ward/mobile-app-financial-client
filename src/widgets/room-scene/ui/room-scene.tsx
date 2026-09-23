@@ -19,7 +19,6 @@ import {
   type RobotDogAction,
   type RobotDogSkin,
 } from '@/entities/robot-dog';
-import { roomIndex } from '@/entities/room';
 import {
   CAMERA_FAR,
   CAMERA_NEAR,
@@ -29,6 +28,7 @@ import {
   SCENE_LIFT_SEC,
   SCENE_PALETTE,
   SCENE_PIVOT,
+  type SceneCell,
 } from '@/entities/scene';
 import {
   DEFAULT_WATCHER_ACTION,
@@ -44,7 +44,6 @@ import { type CameraTune, DEFAULT_CAMERA_TUNE } from '../model/camera-tune';
 import { type SceneView, useSceneCamera } from '../model/use-scene-camera';
 
 import { CameraRigPanel } from './camera-rig-panel';
-import { SceneControls } from './scene-controls';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -53,7 +52,7 @@ import { SceneControls } from './scene-controls';
 interface RoomSceneProps {
   /** The stop the camera is heading for. Controlled by the screen. */
   view: SceneView;
-  /** Raised by a button and by a settled swipe alike. */
+  /** Raised by a settled swipe, and by a tap on another segment's cell. */
   onViewChange: (view: SceneView) => void;
   /**
    * How far out of the pit the game has climbed, `0 … SCENE_TERRACE_COUNT`.
@@ -83,6 +82,13 @@ interface RoomSceneProps {
   focusedWatcher?: WatcherId | null;
   /** A tap landed on a screen, or on nothing while one was focused. */
   onWatcherFocus?: (watcher: WatcherId | null) => void;
+  /**
+   * A cell of the room the camera is already in was pressed.
+   *
+   * A cell in one of the other two rooms never reaches here: that tap is the
+   * child pointing at where they want to go, so it turns the world instead.
+   */
+  onCellPress?: (cell: SceneCell) => void;
   /** Off when the grown-up disables animations — the camera then cuts. */
   isAnimated?: boolean;
   /**
@@ -209,6 +215,7 @@ export const RoomScene = ({
   petTapAction = 'joy',
   focusedWatcher = null,
   onWatcherFocus,
+  onCellPress,
   isAnimated = true,
   isCameraRig = __DEV__,
 }: RoomSceneProps) => {
@@ -298,7 +305,7 @@ export const RoomScene = ({
     clearColor.current = SCENE_PALETTE.background;
     isAnimatedRef.current = isAnimated;
     viewRef.current = view;
-    highlight.current = view === 'top' ? null : roomIndex(view);
+    highlight.current = view === 'top' ? null : view;
   }, [isAnimated, view]);
 
   useEffect(() => {
@@ -486,8 +493,13 @@ export const RoomScene = ({
         // The camera rides with the floor: the pet climbs two hundred units
         // over five levels, and a camera left at the bottom would lose it.
         const eyeY = built.platformHeight();
+
         orbitEye.set(x, y + eyeY, z);
         orbitAim.set(SCENE_PIVOT[0], eyeY, SCENE_PIVOT[2]);
+
+        // The pet turns with the camera rather than with the world: from
+        // whichever segment the child is standing in, it is looking at them.
+        built.setCharacterFacing((state.azimuth * Math.PI) / 180);
 
         // Talking to a screen is not an orbit: the camera leaves the axis
         // entirely and parks in front of a face. Rather than teach the orbit
@@ -537,11 +549,12 @@ export const RoomScene = ({
   };
 
   /**
-   * A tap answers only when it actually lands on the dog.
+   * A tap is answered by whatever it actually landed on.
    *
-   * The ray is cast against the model, not the screen half it stands in: the
-   * camera tilts and turns, and a child tapping the floor next to the dog
-   * should not get a wag.
+   * The ray is cast against the model, not the half of the screen a thing
+   * stands in: the camera tilts and turns, and a child tapping the floor
+   * beside the dog should not get a wag. The order is the order of things
+   * the child means — the screens overhead, then the pet, then the floor.
    */
   const tap = Gesture.Tap()
     .runOnJS(true)
@@ -549,20 +562,14 @@ export const RoomScene = ({
     .onEnd((event) => {
       const built = model.current;
       const size = surface;
-      const view = lensRef.current;
-      if (!built || !size || !view) return;
+      const lens = lensRef.current;
+      if (!built || !size || !lens) return;
 
       pointer.current.set(
         (event.x / size.width) * 2 - 1,
         -(event.y / size.height) * 2 + 1,
       );
-      raycaster.current.setFromCamera(pointer.current, view);
-
-      for (const w of WATCHER_IDS) {
-        const r = built.watcherRoot(w);
-        const hits = r ? raycaster.current.intersectObject(r, true) : [];
-        console.warn('[dbg]', w, 'hits', hits.length, 'first', hits[0]?.object?.name, 'dist', hits[0]?.distance?.toFixed(0));
-      }
+      raycaster.current.setFromCamera(pointer.current, lens);
 
       // The screens are asked first: they hang in front of the sky where
       // nothing else is, so a ray that finds one found nothing else.
@@ -573,7 +580,6 @@ export const RoomScene = ({
           continue;
         }
 
-        console.warn('[dbg] chose', watcher);
         onWatcherFocus?.(focusedWatcher === watcher ? null : watcher);
         return;
       }
@@ -585,12 +591,38 @@ export const RoomScene = ({
         return;
       }
 
-      if (petTapAction === null) return;
       const root = built.characterRoot();
-      if (!root) return;
-      if (raycaster.current.intersectObject(root, true).length === 0) return;
+      if (
+        petTapAction !== null &&
+        root &&
+        raycaster.current.intersectObject(root, true).length > 0
+      ) {
+        built.reactCharacter(petTapAction, petActionRef.current);
+        return;
+      }
 
-      built.reactCharacter(petTapAction, petActionRef.current);
+      // The floor last, and only the tile buffers: a ray through the arena
+      // also finds the sky sphere and the ramps, and neither is a cell.
+      const hit = raycaster.current.intersectObjects(
+        built.cellTargets(),
+        false,
+      )[0];
+      if (hit?.faceIndex === undefined || hit.faceIndex === null) return;
+
+      const cell = built.cellAt(hit.object, hit.faceIndex);
+      if (!cell) return;
+
+      // A tap on another segment is the child pointing at where they want to
+      // be, not at a tile — walking there first is what they meant. With the
+      // buttons gone this is also the one way across that is not a gesture.
+      if (view !== cell.segment) {
+        built.selectCell(null);
+        onViewChange(cell.segment);
+        return;
+      }
+
+      built.selectCell(cell);
+      onCellPress?.(cell);
     });
 
   const pan = Gesture.Pan()
@@ -628,16 +660,6 @@ export const RoomScene = ({
           <CameraRigPanel tune={tune} onTuneChange={setTune} live={liveOrbit} />
         </View>
       ) : null}
-
-      <View
-        pointerEvents="box-none"
-        style={[
-          styles.controls,
-          { paddingBottom: insets.bottom + SPACING.two },
-        ]}
-      >
-        <SceneControls view={view} onSelect={onViewChange} />
-      </View>
     </View>
   );
 };
@@ -649,14 +671,6 @@ export const RoomScene = ({
 const styles = StyleSheet.create({
   canvas: {
     flex: 1,
-  },
-  controls: {
-    alignItems: 'center',
-    bottom: 0,
-    left: 0,
-    paddingHorizontal: CONTENT_PADDING,
-    position: 'absolute',
-    right: 0,
   },
   rig: {
     left: 0,

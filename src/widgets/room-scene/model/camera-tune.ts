@@ -32,10 +32,10 @@ interface CameraTune {
 
 /** Mirrors `entities/scene/model/camera.ts` — keep in sync when you paste. */
 const DEFAULT_CAMERA_TUNE: CameraTune = {
-  roomElevation: 6,
+  roomElevation: 24,
   topElevation: 30,
   topAzimuth: 315,
-  roomFit: 0.72,
+  roomFit: 0.66,
   topFit: 0.765,
   platformY: -120,
   fov: 45,

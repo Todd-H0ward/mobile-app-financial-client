@@ -1,3 +1,4 @@
+export { cellFraction, cellKey, cellOfFace, isSameCell } from './cells';
 export type { OrbitPosition } from './orbit';
 export {
   alignAngle,
