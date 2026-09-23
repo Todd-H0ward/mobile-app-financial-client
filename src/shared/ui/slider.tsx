@@ -139,17 +139,20 @@ export const Slider = ({
     // gesture wins, so a tap or the first pixels of a vertical scroll would
     // commit a value the user never asked for.
     .onStart((event) => {
+      'worklet';
       dragging.value = 1;
       const along = isVertical ? event.y : event.x;
       offset.value = clamp(along - THUMB_SIZE / 2, 0, usable);
       runOnJS(commit)(offset.value);
     })
     .onChange((event) => {
+      'worklet';
       const along = isVertical ? event.y : event.x;
       offset.value = clamp(along - THUMB_SIZE / 2, 0, usable);
       runOnJS(commit)(offset.value);
     })
     .onFinalize(() => {
+      'worklet';
       dragging.value = 0;
       if (onChangeEnd) {
         runOnJS(finish)(offset.value);

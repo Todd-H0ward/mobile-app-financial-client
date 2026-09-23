@@ -1,4 +1,8 @@
 import { listGoals } from '@/entities/goal';
+import {
+  DEFAULT_ROBOT_DOG_ACTION,
+  DEFAULT_ROBOT_DOG_SKIN,
+} from '@/entities/robot-dog';
 import { nextTaskId } from '@/entities/task';
 
 import { startingWallet } from '../../lib/wallet';
@@ -9,7 +13,7 @@ import type { UserSave } from '../types';
 // ═══════════════════════════════════════════
 
 /** Save schema version. Bumped on every incompatible change. */
-const USER_SAVE_VERSION = 4;
+const USER_SAVE_VERSION = 5;
 
 /** Starting thermostat position: chilly, but not cold. */
 const STARTING_TEMPERATURE = 0.5;
@@ -106,6 +110,8 @@ export const createInitialUser = ({
     isSoundEnabled: true,
     isAnimationEnabled: true,
     isDemoMode: false,
+    petSkin: DEFAULT_ROBOT_DOG_SKIN,
+    petAction: DEFAULT_ROBOT_DOG_ACTION,
   },
 });
 

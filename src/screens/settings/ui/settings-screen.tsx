@@ -3,9 +3,12 @@ import { StyleSheet, View } from 'react-native';
 
 import { useChangeLanguage } from '@/features/change-language';
 
+import type { RobotDogAction, RobotDogSkin } from '@/entities/robot-dog';
 import {
   useIsAnimationEnabled,
   useIsSoundEnabled,
+  usePetAction,
+  usePetSkin,
   useUpdateUser,
 } from '@/entities/user';
 
@@ -13,6 +16,8 @@ import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import type { LanguagePreference } from '@/shared/types';
 import { Button, Card, ListRow, Screen, Switch, Text } from '@/shared/ui';
+
+import { PetCard } from './pet-card';
 
 // ═══════════════════════════════════════════
 // CONSTANTS
@@ -35,6 +40,17 @@ export const SettingsScreen = () => {
   const updateUser = useUpdateUser();
   const isAnimationEnabled = useIsAnimationEnabled();
   const isSoundEnabled = useIsSoundEnabled();
+  const petSkin = usePetSkin();
+  const petAction = usePetAction();
+
+  const setPetSkin = (skin: RobotDogSkin) =>
+    updateUser((u) => ({ ...u, settings: { ...u.settings, petSkin: skin } }));
+
+  const setPetAction = (action: RobotDogAction) =>
+    updateUser((u) => ({
+      ...u,
+      settings: { ...u.settings, petAction: action },
+    }));
 
   const setAnimation = (isEnabled: boolean) =>
     updateUser((u) => ({
@@ -103,6 +119,13 @@ export const SettingsScreen = () => {
           />
         </Card.Content>
       </Card>
+
+      <PetCard
+        skin={petSkin}
+        action={petAction}
+        onSkinChange={setPetSkin}
+        onActionChange={setPetAction}
+      />
 
       <Card tone="surfaceSoft">
         <Card.Title>{t('settings.handbook')}</Card.Title>

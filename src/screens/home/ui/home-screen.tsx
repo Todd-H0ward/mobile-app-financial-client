@@ -4,9 +4,11 @@ import { Redirect, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { RoomScene, type SceneView } from '@/widgets/room-scene';
+
 import { DEFAULT_ROOM } from '@/entities/room';
 import { SCENE_STEP_COUNT } from '@/entities/scene';
-import { RoomScene, type SceneView } from '@/widgets/room-scene';
+import { usePetAction, usePetSkin } from '@/entities/user';
 
 import {
   CONTENT_PADDING,
@@ -21,6 +23,7 @@ import { useTranslation } from '@/shared/i18n';
 import { SettingsIcon, Slider, Text, ThemedView } from '@/shared/ui';
 import { hitSlopFor } from '@/shared/utils';
 
+import { petActionFor } from '../lib/pet-action';
 import { useHomeHud } from '../model';
 
 // ═══════════════════════════════════════════
@@ -97,6 +100,8 @@ export const HomeScreen = () => {
   const theme = useTheme();
   const { t } = useTranslation();
   const hud = useHomeHud();
+  const petSkin = usePetSkin();
+  const chosenAction = usePetAction();
 
   /** Opens looking into a room on the horizon — not overhead at an angle. */
   const [view, setView] = useState<SceneView>(DEFAULT_ROOM);
@@ -124,6 +129,8 @@ export const HomeScreen = () => {
         view={view}
         onViewChange={setView}
         raisedStepCount={raisedStepCount}
+        petSkin={petSkin}
+        petAction={petActionFor(hud.pet?.moodName ?? null, chosenAction)}
         isAnimated={hud.isAnimationEnabled}
       />
 

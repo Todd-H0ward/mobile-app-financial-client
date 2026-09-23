@@ -12,7 +12,7 @@ export default function RootLayout() {
   return (
     <Providers>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
+        {/*<Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />*/}
       </Stack>
 
       <SplashOverlay />

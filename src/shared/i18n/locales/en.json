@@ -31,7 +31,28 @@
     "glossaryDescription": "Short explanations of the game words.",
     "parents": "Grown-ups",
     "parentsDescription": "A report on the child's decisions, demo mode and profile management. Entry through a multiplication.",
-    "openParents": "Open the section"
+    "openParents": "Open the section",
+    "pet": "Pet",
+    "petSkin": "Robot dog coat",
+    "petSkinSubtitle": "Looks only — it changes nothing in the game",
+    "petAction": "What it does",
+    "petActionSubtitle": "The resting state it returns to after reacting",
+    "petTapHint": "Tap the dog on the home screen and it answers",
+    "skin": {
+      "factory": "Factory",
+      "arctic": "Arctic",
+      "carbon": "Carbon",
+      "desert": "Desert",
+      "forest": "Forest",
+      "rescue": "Rescue",
+      "rust": "Rust"
+    },
+    "action": {
+      "idle": "Idle",
+      "walk": "Walk",
+      "joy": "Joy",
+      "sad": "Sad"
+    }
   },
   "demoMode": {
     "title": "Demo mode",

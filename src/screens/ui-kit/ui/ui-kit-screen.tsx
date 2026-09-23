@@ -748,9 +748,7 @@ export const UiKitScreen = () => {
             />
           </KitSection.Row>
 
-          <KitSection.Row
-            label={`vertical — сейчас ${playground.sliderValue}`}
-          >
+          <KitSection.Row label={`vertical — сейчас ${playground.sliderValue}`}>
             <View style={styles.verticalSliderRow}>
               <Slider
                 orientation="vertical"

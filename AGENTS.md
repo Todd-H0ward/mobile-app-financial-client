@@ -279,9 +279,15 @@ are deliberately absent, the FBX is converted to JSON at build time by
 the reasons for all three are in [docs/scene.md](docs/scene.md), which is
 required reading before touching the scene.
 
+The pet stands at the centre of the arena as a robot dog: seven coats and four
+clips, driven by the pet's mood and answering a tap. Its textures live as loose
+files rather than inside the GLB, and that is not a style choice — expo-gl can
+only upload a texture from a `file://` path. See
+[docs/scene.md](docs/scene.md) before touching it.
+
 The flat rooms that preceded this — `widgets/room-pager` and
 `screens/home/ui/rooms` — are still in the tree, unused, together with the HUD
-and the pet companion. They come back once the coins, the goal and the pet have
+and the 2D pet companion. They come back once the coins, the goal and the pet have
 a place on the 3D world; until then the home screen deliberately shows the
 model and nothing else.
 

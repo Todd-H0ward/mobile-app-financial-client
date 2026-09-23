@@ -1,21 +1,18 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { type MutableRefObject, useCallback, useMemo, useRef } from 'react';
 
 import { ROOM_IDS, type RoomId, roomIndex } from '@/entities/room';
 import {
   alignAngle,
-  CAMERA_FOV,
   fitDistance,
   MIN_ELEVATION,
   nearestSegment,
-  ROOM_ELEVATION,
-  ROOM_FIT,
   SCENE_RADIUS,
   SCENE_VIEW_ANGLES,
-  TOP_ELEVATION,
-  TOP_FIT,
 } from '@/entities/scene';
 
 import { clamp } from '@/shared/utils';
+
+import { type CameraTune, DEFAULT_CAMERA_TUNE } from './camera-tune';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -27,7 +24,7 @@ type SceneView = 'top' | RoomId;
 interface OrbitState {
   /** Heading around Y, in degrees. Unwrapped: a drag may pass 360 freely. */
   azimuth: number;
-  /** Degrees above the floor, `MIN_ELEVATION … TOP_ELEVATION`. */
+  /** Degrees above the floor, `MIN_ELEVATION … topElevation`. */
   elevation: number;
   /** Distance from the axis, in world units. */
   distance: number;
@@ -51,6 +48,8 @@ interface SceneCamera {
   applyView: (view: SceneView) => void;
   /** Snaps both to a view at once — used when animations are off. */
   jumpToView: (view: SceneView) => void;
+  /** Re-applies the current view after the rig knobs move. */
+  reframe: () => void;
   beginDrag: () => void;
   dragBy: (dx: number, dy: number) => void;
   /** Settles on the nearest view and reports it back. */
@@ -73,9 +72,6 @@ const DEGREES_PER_POINT = 0.42;
 /** Vertical drag is slower: the whole arc from floor to top fits one screen. */
 const TILT_PER_POINT = 0.22;
 
-/** Above this the drag lets go into the top view instead of a room. */
-const TOP_THRESHOLD = (ROOM_ELEVATION + TOP_ELEVATION) / 2;
-
 /** Until the surface reports its shape, assume a phone held upright. */
 const DEFAULT_ASPECT = 9 / 16;
 
@@ -83,22 +79,23 @@ const DEFAULT_ASPECT = 9 / 16;
 // HELPERS
 // ═══════════════════════════════════════════
 
-const fitFor = (aspect: number): SceneFit => ({
-  room: fitDistance(SCENE_RADIUS, CAMERA_FOV, aspect, ROOM_FIT),
-  top: fitDistance(SCENE_RADIUS, CAMERA_FOV, aspect, TOP_FIT),
+const fitFor = (aspect: number, tune: CameraTune): SceneFit => ({
+  room: fitDistance(SCENE_RADIUS, tune.fov, aspect, tune.roomFit),
+  top: fitDistance(SCENE_RADIUS, tune.fov, aspect, tune.topFit),
 });
 
 const viewAngleOf = (room: RoomId): number =>
   SCENE_VIEW_ANGLES[roomIndex(room)];
 
-/**
- * How far along the climb from a room to the top view an elevation sits.
- *
- * The camera pulls back as it rises: at a room's own height the arena fills
- * the screen, overhead the whole circle has to.
- */
-const climbOf = (elevation: number): number =>
-  clamp((elevation - ROOM_ELEVATION) / (TOP_ELEVATION - ROOM_ELEVATION), 0, 1);
+const climbOf = (elevation: number, tune: CameraTune): number =>
+  clamp(
+    (elevation - tune.roomElevation) / (tune.topElevation - tune.roomElevation),
+    0,
+    1,
+  );
+
+const topThreshold = (tune: CameraTune): number =>
+  (tune.roomElevation + tune.topElevation) / 2;
 
 /**
  * The view for a settled camera.
@@ -106,8 +103,11 @@ const climbOf = (elevation: number): number =>
  * Elevation decides first — a camera pulled overhead is looking at the whole
  * model, whichever wedge happens to be under it.
  */
-const viewAt = (state: OrbitState): SceneView => {
-  if (state.elevation >= TOP_THRESHOLD) return 'top';
+const viewAt = (
+  state: OrbitState,
+  tune: CameraTune = DEFAULT_CAMERA_TUNE,
+): SceneView => {
+  if (state.elevation >= topThreshold(tune)) return 'top';
 
   const segment = nearestSegment(state.azimuth, SCENE_VIEW_ANGLES);
   return ROOM_IDS[segment] ?? ROOM_IDS[0];
@@ -117,16 +117,17 @@ const stateFor = (
   view: SceneView,
   azimuth: number,
   fit: SceneFit,
+  tune: CameraTune,
 ): OrbitState => {
   if (view === 'top') {
     // The top view keeps the heading it arrived with, so leaving and coming
     // back does not spin the model under the child.
-    return { azimuth, elevation: TOP_ELEVATION, distance: fit.top };
+    return { azimuth, elevation: tune.topElevation, distance: fit.top };
   }
 
   return {
     azimuth: alignAngle(azimuth, viewAngleOf(view)),
-    elevation: ROOM_ELEVATION,
+    elevation: tune.roomElevation,
     distance: fit.room,
   };
 };
@@ -142,11 +143,26 @@ const stateFor = (
  * sixty React renders and a rebuilt scene graph behind them. The GL loop reads
  * these refs directly and React only hears about a change when the camera
  * settles on a new room.
+ *
+ * `tuneRef` lets the framing desk rewrite elevations / fit without remounting
+ * the GL context — call `reframe()` after changing it.
  */
-const useSceneCamera = (initialView: SceneView): SceneCamera => {
-  const fit = useRef<SceneFit>(fitFor(DEFAULT_ASPECT));
+const useSceneCamera = (
+  initialView: SceneView,
+  tuneRef?: MutableRefObject<CameraTune>,
+): SceneCamera => {
+  const aspectRef = useRef(DEFAULT_ASPECT);
+  const fit = useRef<SceneFit>(
+    fitFor(DEFAULT_ASPECT, tuneRef?.current ?? DEFAULT_CAMERA_TUNE),
+  );
+  const viewRef = useRef<SceneView>(initialView);
   const initial = useRef(
-    stateFor(initialView, viewAngleOf(ROOM_IDS[0]), fit.current),
+    stateFor(
+      initialView,
+      viewAngleOf(ROOM_IDS[0]),
+      fit.current,
+      tuneRef?.current ?? DEFAULT_CAMERA_TUNE,
+    ),
   ).current;
 
   const current = useRef<OrbitState>({ ...initial });
@@ -156,29 +172,60 @@ const useSceneCamera = (initialView: SceneView): SceneCamera => {
 
   /** Distance for a given height above the floor, on this screen. */
   const distanceAt = useCallback(
-    (elevation: number) =>
-      fit.current.room +
-      (fit.current.top - fit.current.room) * climbOf(elevation),
-    [],
+    (elevation: number) => {
+      const tune = tuneRef?.current ?? DEFAULT_CAMERA_TUNE;
+      return (
+        fit.current.room +
+        (fit.current.top - fit.current.room) * climbOf(elevation, tune)
+      );
+    },
+    [tuneRef],
   );
 
   const setAspect = useCallback(
     (aspect: number) => {
-      fit.current = fitFor(aspect);
+      aspectRef.current = aspect;
+      fit.current = fitFor(aspect, tuneRef?.current ?? DEFAULT_CAMERA_TUNE);
       target.current.distance = distanceAt(target.current.elevation);
       current.current.distance = distanceAt(current.current.elevation);
     },
-    [distanceAt],
+    [distanceAt, tuneRef],
   );
 
-  const applyView = useCallback((view: SceneView) => {
-    target.current = stateFor(view, target.current.azimuth, fit.current);
-  }, []);
+  const applyView = useCallback(
+    (view: SceneView) => {
+      viewRef.current = view;
+      target.current = stateFor(
+        view,
+        target.current.azimuth,
+        fit.current,
+        tuneRef?.current ?? DEFAULT_CAMERA_TUNE,
+      );
+    },
+    [tuneRef],
+  );
 
-  const jumpToView = useCallback((view: SceneView) => {
-    target.current = stateFor(view, target.current.azimuth, fit.current);
-    current.current = { ...target.current };
-  }, []);
+  const jumpToView = useCallback(
+    (view: SceneView) => {
+      viewRef.current = view;
+      target.current = stateFor(
+        view,
+        target.current.azimuth,
+        fit.current,
+        tuneRef?.current ?? DEFAULT_CAMERA_TUNE,
+      );
+      current.current = { ...target.current };
+    },
+    [tuneRef],
+  );
+
+  const reframe = useCallback(() => {
+    fit.current = fitFor(
+      aspectRef.current,
+      tuneRef?.current ?? DEFAULT_CAMERA_TUNE,
+    );
+    jumpToView(viewRef.current);
+  }, [jumpToView, tuneRef]);
 
   const beginDrag = useCallback(() => {
     grab.current = { ...current.current };
@@ -186,10 +233,11 @@ const useSceneCamera = (initialView: SceneView): SceneCamera => {
 
   const dragBy = useCallback(
     (dx: number, dy: number) => {
+      const tune = tuneRef?.current ?? DEFAULT_CAMERA_TUNE;
       const elevation = clamp(
         grab.current.elevation + dy * TILT_PER_POINT,
         MIN_ELEVATION,
-        TOP_ELEVATION,
+        tune.topElevation,
       );
 
       target.current = {
@@ -199,14 +247,17 @@ const useSceneCamera = (initialView: SceneView): SceneCamera => {
         distance: distanceAt(elevation),
       };
     },
-    [distanceAt],
+    [distanceAt, tuneRef],
   );
 
   const endDrag = useCallback(() => {
-    const view = viewAt(target.current);
+    const view = viewAt(
+      target.current,
+      tuneRef?.current ?? DEFAULT_CAMERA_TUNE,
+    );
     applyView(view);
     return view;
-  }, [applyView]);
+  }, [applyView, tuneRef]);
 
   // Stable: the render loop closes over this object once, and an effect that
   // re-applied the view on every parent render would snap a drag in progress.
@@ -217,11 +268,12 @@ const useSceneCamera = (initialView: SceneView): SceneCamera => {
       setAspect,
       applyView,
       jumpToView,
+      reframe,
       beginDrag,
       dragBy,
       endDrag,
     }),
-    [applyView, beginDrag, dragBy, endDrag, jumpToView, setAspect],
+    [applyView, beginDrag, dragBy, endDrag, jumpToView, reframe, setAspect],
   );
 };
 

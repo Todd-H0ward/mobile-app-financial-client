@@ -4,27 +4,40 @@ import { type ExpoWebGLRenderingContext, GLView } from 'expo-gl';
 import { type LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Color, PerspectiveCamera, WebGLRenderer } from 'three';
+import {
+  Color,
+  PerspectiveCamera,
+  Raycaster,
+  Vector2,
+  WebGLRenderer,
+} from 'three';
 
+import {
+  DEFAULT_ROBOT_DOG_ACTION,
+  DEFAULT_ROBOT_DOG_SKIN,
+  type RobotDogAction,
+  type RobotDogSkin,
+} from '@/entities/robot-dog';
 import { ROOM_IDS, type RoomId, roomIndex } from '@/entities/room';
 import {
   CAMERA_FAR,
-  CAMERA_FOV,
   CAMERA_NEAR,
   damp,
   liftFor,
   orbitPosition,
+  SCENE_PALETTE,
   SCENE_PIVOT,
   SCENE_SEGMENT_COUNT,
   SCENE_STEP_COUNT,
 } from '@/entities/scene';
 
 import { CONTENT_PADDING, SPACING } from '@/shared/constants';
-import { useTheme } from '@/shared/hooks';
 
 import { buildScene, type SceneModel } from '../lib';
-import { type SceneView, useSceneCamera } from '../model';
+import { type CameraTune, DEFAULT_CAMERA_TUNE } from '../model/camera-tune';
+import { type SceneView, useSceneCamera } from '../model/use-scene-camera';
 
+import { CameraRigPanel } from './camera-rig-panel';
 import { SceneControls } from './scene-controls';
 
 // ═══════════════════════════════════════════
@@ -50,8 +63,22 @@ interface RoomSceneProps {
    * a freshly allocated object sometimes does under Fast Refresh.
    */
   raisedStepCount?: number;
+  /** The coat the dog wears. Swapping it reloads the model. */
+  petSkin?: RobotDogSkin;
+  /** What the dog does when nothing interrupts it — its state. */
+  petAction?: RobotDogAction;
+  /**
+   * What a tap on the dog plays before it settles back into `petAction`.
+   * `null` leaves taps unanswered.
+   */
+  petTapAction?: RobotDogAction | null;
   /** Off when the grown-up disables animations — the camera then cuts. */
   isAnimated?: boolean;
+  /**
+   * Framing desk at the top: dial elevations / fit / platform, then paste
+   * the dump into `camera.ts`. Defaults on in `__DEV__`.
+   */
+  isCameraRig?: boolean;
 }
 
 // ═══════════════════════════════════════════
@@ -154,11 +181,22 @@ export const RoomScene = ({
   onViewChange,
   raisedSteps,
   raisedStepCount,
+  petSkin = DEFAULT_ROBOT_DOG_SKIN,
+  petAction = DEFAULT_ROBOT_DOG_ACTION,
+  petTapAction = 'joy',
   isAnimated = true,
+  isCameraRig = __DEV__,
 }: RoomSceneProps) => {
-  const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const camera = useSceneCamera(view);
+  const [tune, setTune] = useState<CameraTune>(DEFAULT_CAMERA_TUNE);
+  const tuneRef = useRef(tune);
+  tuneRef.current = tune;
+  const camera = useSceneCamera(view, tuneRef);
+  const [liveOrbit, setLiveOrbit] = useState({
+    azimuth: 0,
+    elevation: DEFAULT_CAMERA_TUNE.roomElevation,
+    distance: 0,
+  });
 
   /**
    * The GL surface is created only once the view has been measured.
@@ -179,6 +217,18 @@ export const RoomScene = ({
   const loopId = useRef(0);
   const model = useRef<SceneModel | null>(null);
   const renderer = useRef<WebGLRenderer | null>(null);
+  /** The live camera, so a tap can cast a ray through the same lens. */
+  const lensRef = useRef<PerspectiveCamera | null>(null);
+  const raycaster = useRef(new Raycaster());
+  const pointer = useRef(new Vector2());
+  /**
+   * The dog's coat and state as of this render.
+   *
+   * `onContextCreate` runs once and closes over what it saw; these refs are
+   * how a skin chosen later still reaches a scene built earlier.
+   */
+  const petSkinRef = useRef(petSkin);
+  const petActionRef = useRef(petAction);
 
   /**
    * Where each tier is heading, and where it is now: `[segment][step]`.
@@ -190,23 +240,35 @@ export const RoomScene = ({
   const stepLifts = useRef(everyStep(() => 1));
 
   /** Read by the loop, which outlives every render that changes them. */
-  const clearColor = useRef(theme.background);
+  const clearColor = useRef(SCENE_PALETTE.background);
   const isAnimatedRef = useRef(isAnimated);
   const viewRef = useRef(view);
   const highlight = useRef<number | null>(null);
   const appliedHighlight = useRef<number | null | undefined>(undefined);
 
   useEffect(() => {
-    clearColor.current = theme.background;
+    if (!isCameraRig) return;
+    const id = setInterval(() => {
+      const state = camera.current.current;
+      setLiveOrbit({
+        azimuth: state.azimuth,
+        elevation: state.elevation,
+        distance: state.distance,
+      });
+    }, 200);
+    return () => clearInterval(id);
+  }, [camera, isCameraRig]);
+
+  useEffect(() => {
+    clearColor.current = SCENE_PALETTE.background;
     isAnimatedRef.current = isAnimated;
     viewRef.current = view;
     highlight.current = view === 'top' ? null : roomIndex(view);
-  }, [isAnimated, theme.background, view]);
+  }, [isAnimated, view]);
 
   useEffect(() => {
     ROOM_IDS.forEach((room, segment) => {
-      const raised =
-        raisedStepCount ?? raisedSteps?.[room] ?? SCENE_STEP_COUNT;
+      const raised = raisedStepCount ?? raisedSteps?.[room] ?? SCENE_STEP_COUNT;
 
       for (let step = 0; step < SCENE_STEP_COUNT; step += 1) {
         const lift = liftFor(step, raised);
@@ -225,6 +287,12 @@ export const RoomScene = ({
     else camera.jumpToView(view);
   }, [camera, isAnimated, view]);
 
+  // Rig knobs rewrite fit / elevation / platform without rebuilding GL.
+  useEffect(() => {
+    camera.reframe();
+    model.current?.setPlatformY(tune.platformY);
+  }, [camera, tune]);
+
   useEffect(() => {
     return () => {
       loopId.current += 1;
@@ -239,9 +307,22 @@ export const RoomScene = ({
     };
   }, []);
 
+  // The dog's coat and state arrive as props but reach a scene that was
+  // built once, so they travel through the model rather than a rebuild.
+  useEffect(() => {
+    petSkinRef.current = petSkin;
+    model.current?.setCharacterSkin(petSkin);
+  }, [petSkin]);
+
+  useEffect(() => {
+    petActionRef.current = petAction;
+    model.current?.playCharacterAction(petAction);
+  }, [petAction]);
+
   const onContextCreate = useCallback(
     (gl: ExpoWebGLRenderingContext) => {
-      const id = (loopId.current += 1);
+      loopId.current += 1;
+      const id = loopId.current;
       if (frame.current !== null) cancelAnimationFrame(frame.current);
       frame.current = null;
       model.current?.dispose();
@@ -253,13 +334,16 @@ export const RoomScene = ({
       webgl.setPixelRatio(1);
       webgl.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight, false);
 
-      const built = buildScene();
+      const built = buildScene(petSkinRef.current, petActionRef.current);
+      built.setPlatformY(tuneRef.current.platformY);
       const lens = new PerspectiveCamera(
-        CAMERA_FOV,
+        tuneRef.current.fov,
         gl.drawingBufferWidth / gl.drawingBufferHeight,
         CAMERA_NEAR,
         CAMERA_FAR,
       );
+
+      lensRef.current = lens;
 
       // Seed the mesh to whatever the slider already asked for, so the first
       // frame is not a full staircase that then drops a second later.
@@ -303,6 +387,12 @@ export const RoomScene = ({
         if (appliedHighlight.current !== highlight.current) {
           appliedHighlight.current = highlight.current;
           built.highlight(highlight.current);
+        }
+
+        const fov = tuneRef.current.fov;
+        if (lens.fov !== fov) {
+          lens.fov = fov;
+          lens.updateProjectionMatrix();
         }
 
         const now = Date.now();
@@ -357,6 +447,7 @@ export const RoomScene = ({
         lens.position.set(x, y, z);
         lens.lookAt(...SCENE_PIVOT);
 
+        built.tick(now / 1000, delta);
         webgl.setClearColor(clear.set(clearColor.current), 1);
         webgl.render(built.scene, lens);
         gl.endFrameEXP();
@@ -378,6 +469,37 @@ export const RoomScene = ({
     );
   };
 
+  /**
+   * A tap answers only when it actually lands on the dog.
+   *
+   * The ray is cast against the model, not the screen half it stands in: the
+   * camera tilts and turns, and a child tapping the floor next to the dog
+   * should not get a wag.
+   */
+  const tap = Gesture.Tap()
+    .runOnJS(true)
+    .maxDistance(12)
+    .onEnd((event) => {
+      const built = model.current;
+      const size = surface;
+      if (!built || !size || petTapAction === null) return;
+
+      const root = built.characterRoot();
+      if (!root) return;
+
+      pointer.current.set(
+        (event.x / size.width) * 2 - 1,
+        -(event.y / size.height) * 2 + 1,
+      );
+      const view = lensRef.current;
+      if (!view) return;
+
+      raycaster.current.setFromCamera(pointer.current, view);
+      if (raycaster.current.intersectObject(root, true).length === 0) return;
+
+      built.reactCharacter(petTapAction, petActionRef.current);
+    });
+
   const pan = Gesture.Pan()
     // Everything this touches is JS-thread only: three.js and the GL context.
     .runOnJS(true)
@@ -390,7 +512,7 @@ export const RoomScene = ({
 
   return (
     <View style={styles.root} onLayout={onLayout}>
-      <GestureDetector gesture={pan}>
+      <GestureDetector gesture={Gesture.Exclusive(pan, tap)}>
         <View style={styles.canvas}>
           {surface && (
             <GLView
@@ -401,6 +523,15 @@ export const RoomScene = ({
           )}
         </View>
       </GestureDetector>
+
+      {isCameraRig ? (
+        <View
+          pointerEvents="box-none"
+          style={[styles.rig, { paddingTop: insets.top + SPACING.two }]}
+        >
+          <CameraRigPanel tune={tune} onTuneChange={setTune} live={liveOrbit} />
+        </View>
+      ) : null}
 
       <View
         pointerEvents="box-none"
@@ -420,18 +551,27 @@ export const RoomScene = ({
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
   canvas: {
     flex: 1,
   },
   controls: {
+    alignItems: 'center',
     bottom: 0,
     left: 0,
     paddingHorizontal: CONTENT_PADDING,
     position: 'absolute',
     right: 0,
+  },
+  rig: {
+    left: 0,
+    paddingHorizontal: CONTENT_PADDING,
+    pointerEvents: 'box-none',
+    position: 'absolute',
+    right: 80,
+    top: 0,
+  },
+  root: {
+    flex: 1,
   },
 });
 

@@ -1,3 +1,9 @@
+export type { CameraTune } from './camera-tune';
+export {
+  CAMERA_TUNE_RANGE,
+  DEFAULT_CAMERA_TUNE,
+  formatCameraTune,
+} from './camera-tune';
 export type {
   OrbitState,
   SceneCamera,

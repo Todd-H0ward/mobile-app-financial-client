@@ -6,6 +6,7 @@ import type {
   PetSpecies,
   PetStage,
 } from '@/entities/pet';
+import type { RobotDogAction, RobotDogSkin } from '@/entities/robot-dog';
 
 // ═══════════════════════════════════════════
 // CONSTANTS
@@ -203,6 +204,15 @@ interface SettingsSave {
   isAnimationEnabled: boolean;
   /** Demo mode: swaps `TimeSource` and the starting profile, 2.5.13. */
   isDemoMode: boolean;
+  /** The robot dog's coat. Picked in the grown-up's section, purely looks. */
+  petSkin: RobotDogSkin;
+  /**
+   * What the dog does when nothing interrupts it.
+   *
+   * The child's taps and the pet's mood play over it, but this is where it
+   * comes back to — and it is what the settings picker sets.
+   */
+  petAction: RobotDogAction;
 }
 
 /**

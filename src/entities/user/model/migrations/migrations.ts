@@ -4,6 +4,12 @@ import {
   PET_SPECIES,
   PET_STAGES,
 } from '@/entities/pet';
+import {
+  DEFAULT_ROBOT_DOG_ACTION,
+  DEFAULT_ROBOT_DOG_SKIN,
+  isRobotDogAction,
+  isRobotDogSkin,
+} from '@/entities/robot-dog';
 
 import { isFiniteNumber, isOneOf, isRecord } from '@/shared/utils';
 
@@ -80,6 +86,27 @@ const MIGRATIONS: Record<number, MigrationStep> = {
       version: 4,
     };
   },
+
+  // v4 — the pet became a 3D robot dog with seven coats and four clips. An
+  // existing profile has no opinion about either, so it gets the defaults: a
+  // save from before this step never showed a dog at all.
+  4: (save) => {
+    const settings = isRecord(save.settings) ? save.settings : {};
+
+    return {
+      ...save,
+      settings: {
+        ...settings,
+        petSkin: isRobotDogSkin(settings.petSkin)
+          ? settings.petSkin
+          : DEFAULT_ROBOT_DOG_SKIN,
+        petAction: isRobotDogAction(settings.petAction)
+          ? settings.petAction
+          : DEFAULT_ROBOT_DOG_ACTION,
+      },
+      version: 5,
+    };
+  },
 };
 
 // ═══════════════════════════════════════════
@@ -143,7 +170,9 @@ const isSettings = (value: unknown): boolean =>
   typeof value.isParentGateEnabled === 'boolean' &&
   typeof value.isSoundEnabled === 'boolean' &&
   typeof value.isAnimationEnabled === 'boolean' &&
-  typeof value.isDemoMode === 'boolean';
+  typeof value.isDemoMode === 'boolean' &&
+  isRobotDogSkin(value.petSkin) &&
+  isRobotDogAction(value.petAction);
 
 const isTasks = (value: unknown): boolean =>
   isRecord(value) &&

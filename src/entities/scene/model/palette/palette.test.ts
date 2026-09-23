@@ -49,6 +49,16 @@ describe('the scene palette', () => {
       SCENE_PALETTE.keyLight,
       SCENE_PALETTE.fillLight,
       SCENE_PALETTE.ambientLight,
+      SCENE_PALETTE.hemisphereSky,
+      SCENE_PALETTE.hemisphereGround,
+      SCENE_PALETTE.centreLight,
+      SCENE_PALETTE.specular,
+      SCENE_PALETTE.skyTop,
+      SCENE_PALETTE.skyMid,
+      SCENE_PALETTE.skyHorizon,
+      SCENE_PALETTE.skyBottom,
+      SCENE_PALETTE.haze,
+      SCENE_PALETTE.background,
     ];
 
     for (const color of colors) {
