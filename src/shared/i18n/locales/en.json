@@ -120,9 +120,12 @@
     "subtitle": "The numbers about your child — here and nowhere else",
     "gate": {
       "title": "Grown-ups' section",
+      "subtitle": "A short sum first — then the report",
       "question": "What is {{left}} × {{right}}?",
-      "hint": "Answer to open the section",
-      "note": "A barrier against wandering in, not account security: there is no data about the child here and nothing is ever sent anywhere."
+      "prompt": "Type the answer in digits",
+      "miss": "not that one — the sum refreshed, try again",
+      "note": "A barrier against wandering in, not account security: there is no data about the child here and nothing is ever sent anywhere.",
+      "bootAccess": "service access: grown-ups section"
     },
     "report": {
       "earningsTitle": "Coins by period",
@@ -147,6 +150,22 @@
         "teen": "Teen",
         "adult": "Adult"
       }
+    },
+    "terminal": {
+      "label": "FINNI · SERVICE TERMINAL",
+      "statusTitle": "game status",
+      "player": "player",
+      "pet": "pet",
+      "period": "period",
+      "finished": "periods finished",
+      "tasks": "tasks done",
+      "purposeTitle": "what the game teaches",
+      "purpose": {
+        "plan": "plan a budget before spending",
+        "priority": "tell needs from wants",
+        "save": "save towards a goal and watch it grow"
+      },
+      "role": "A grown-up supports and talks it through, but does not decide for the child."
     }
   },
   "rooms": {

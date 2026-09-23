@@ -13,6 +13,7 @@ import { useParents } from '../model';
 
 import { EarningsChart } from './earnings-chart';
 import { ParentGate } from './parent-gate';
+import { ParentsReadout } from './parents-readout';
 import { ThemeTallyRows } from './theme-tally-rows';
 
 // ═══════════════════════════════════════════
@@ -52,6 +53,8 @@ export const ParentsScreen = () => {
           <Screen.Subtitle>{t('parents.subtitle')}</Screen.Subtitle>
         </Screen.Heading>
       </Screen.Header>
+
+      <ParentsReadout status={parents.status} />
 
       {report && (
         <>

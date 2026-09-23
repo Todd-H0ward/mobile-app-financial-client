@@ -1,2 +1,2 @@
-export type { ParentsController } from './use-parents';
+export type { ParentsController, ParentsStatus } from './use-parents';
 export { useParents } from './use-parents';
