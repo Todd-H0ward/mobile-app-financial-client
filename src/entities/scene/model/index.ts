@@ -1,0 +1,39 @@
+export {
+  CAMERA_FAR,
+  CAMERA_FOV,
+  CAMERA_NEAR,
+  MIN_ELEVATION,
+  ROOM_ELEVATION,
+  ROOM_FIT,
+  SCENE_PLATFORM_Y,
+  SCENE_SEGMENT_DISTANCE,
+  TOP_AZIMUTH,
+  TOP_ELEVATION,
+  TOP_FIT,
+} from './camera';
+export type { SceneCell } from './cells';
+export { SCENE_CELLS_PER_STEP } from './cells';
+export { SCENE_PALETTE } from './palette';
+export {
+  SCENE_CHARACTER_FACING,
+  SCENE_GEAR_TURN,
+  SCENE_LEVEL_COUNT,
+  SCENE_LIFT_SEC,
+  SCENE_PLATFORM_RADIUS,
+  SCENE_TERRACE_COUNT,
+  SCENE_TERRACE_RADII,
+  SCENE_TERRACE_RISE,
+} from './pit';
+export type { SceneGeometry, SceneNode, SceneSource } from './source';
+export {
+  SCENE_FLAT_STEP,
+  SCENE_GEAR_ANGLES,
+  SCENE_PIVOT,
+  SCENE_RADIUS,
+  SCENE_SEGMENT_COUNT,
+  SCENE_SHARED_SEGMENT,
+  SCENE_SOURCE,
+  SCENE_STEP_COUNT,
+  SCENE_STEP_RISE,
+  SCENE_VIEW_ANGLES,
+} from './source';

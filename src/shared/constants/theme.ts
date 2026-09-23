@@ -160,6 +160,55 @@ export const COLORS = {
 export type ThemeColor = keyof typeof COLORS.light & keyof typeof COLORS.dark;
 
 // ═══════════════════════════════════════════
+// TERMINAL
+// ═══════════════════════════════════════════
+
+/**
+ * The AI's own screen: a dark, hard-edged terminal.
+ *
+ * Deliberately outside `COLORS`, and deliberately not themed. The rest of the
+ * app is a warm room a seven-year-old lives in; this is the machine talking,
+ * and it looks the same whatever the child has set the theme to — the two
+ * watchers hanging over the arena are already CRTs with scanlines on them
+ * (`assets/scene/watchers`), and a lesson comes from one of those.
+ *
+ * Amber is the phosphor, cyan the live one, and everything else is rain at
+ * night.
+ */
+/**
+ * How long the world takes to dim out and the terminal to come up, in ms.
+ *
+ * Long for a page transition — the point is that the child feels handed over
+ * to something else rather than shown another page.
+ */
+export const LESSON_FADE_MS = 420;
+
+export const TERMINAL = {
+  /** Behind everything. Near black, never pure — pure black kills the glow. */
+  void: '#07090C',
+  /** Panels raised off the void. */
+  panel: '#0E1319',
+  /** The panel a choice sits in, one step up again. */
+  panelRaised: '#151C24',
+  /** Hairlines. The look is drawn with rules, not shadows. */
+  rule: '#27333D',
+  /** The rule on something the child has touched. */
+  ruleLive: '#45E3FF',
+  /** Phosphor. Headings, counters, anything the machine states. */
+  amber: '#FFB000',
+  /** Phosphor gone cold — a label rather than a statement. */
+  amberDim: '#7A5400',
+  /** The live answer, and whatever is currently under the finger. */
+  cyan: '#45E3FF',
+  /** Body text: lit, but not glowing. */
+  text: '#C4D2DB',
+  /** Everything secondary. */
+  textDim: '#657784',
+  /** One scan line. Dozens of these laid down the screen make the CRT. */
+  scanline: 'rgba(120, 200, 230, 0.035)',
+};
+
+// ═══════════════════════════════════════════
 // TYPOGRAPHY
 // ═══════════════════════════════════════════
 

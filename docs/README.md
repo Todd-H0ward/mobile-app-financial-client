@@ -37,6 +37,8 @@
 | [design-system.md](./design-system.md) | Токены и компоненты кита |
 | [ui-conventions.md](./ui-conventions.md) | Как пишется компонент |
 | [layout.md](./layout.md) | Как верстается экран под разные размеры |
+| [scene.md](./scene.md) | 3D-сцена на главной: конвертер FBX, камера, правила |
+| [design-brief-3d.md](./design-brief-3d.md) | ТЗ для 3D-артиста: полигоны, текстуры, ярусы, сдача |
 | [android-release.md](./android-release.md) | Ключ подписи и сборка релизного APK |
 
 ## Обязательный пакет документации (12 пунктов)

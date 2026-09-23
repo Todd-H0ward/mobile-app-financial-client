@@ -110,6 +110,8 @@ export {
   useIsMotionEnabled,
   useIsParentGateEnabled,
   useIsSoundEnabled,
+  usePetAction,
+  usePetSkin,
   useResetUser,
   useSetDemoMode,
   useSettings,

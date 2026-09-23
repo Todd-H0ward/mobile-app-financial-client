@@ -1,4 +1,8 @@
 import type { BudgetPlan } from '@/entities/budget';
+import {
+  DEFAULT_ROBOT_DOG_ACTION,
+  DEFAULT_ROBOT_DOG_SKIN,
+} from '@/entities/robot-dog';
 
 import { createInitialUser } from '../../model/initial-user';
 import type { UserSave } from '../../model/types';
@@ -50,6 +54,8 @@ export const createDemoProfile = (
       isSoundEnabled: settings?.isSoundEnabled ?? true,
       isAnimationEnabled: settings?.isAnimationEnabled ?? true,
       isDemoMode: true,
+      petSkin: settings?.petSkin ?? DEFAULT_ROBOT_DOG_SKIN,
+      petAction: settings?.petAction ?? DEFAULT_ROBOT_DOG_ACTION,
     },
   });
 
@@ -65,6 +71,10 @@ const carryDeviceSettings = (
   isSoundEnabled: from.isSoundEnabled,
   isAnimationEnabled: from.isAnimationEnabled,
   isDemoMode,
+  // The coat is the child's, not the profile's: a demo run should not undress
+  // the dog they picked, and leaving demo should not undo a coat picked in it.
+  petSkin: from.petSkin,
+  petAction: from.petAction,
 });
 
 export const enterDemoMode = (

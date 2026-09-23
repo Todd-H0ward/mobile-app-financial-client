@@ -91,6 +91,8 @@ describe('enterDemoMode', () => {
       isSoundEnabled: false,
       isAnimationEnabled: true,
       isDemoMode: false,
+      petSkin: 'arctic',
+      petAction: 'walk',
     },
   });
 

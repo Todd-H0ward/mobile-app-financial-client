@@ -1,0 +1,1 @@
+export { assertLessonContent } from './schema';

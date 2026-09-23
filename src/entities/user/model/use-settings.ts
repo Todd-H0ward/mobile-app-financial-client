@@ -1,3 +1,10 @@
+import {
+  DEFAULT_ROBOT_DOG_ACTION,
+  DEFAULT_ROBOT_DOG_SKIN,
+  type RobotDogAction,
+  type RobotDogSkin,
+} from '@/entities/robot-dog';
+
 import { useReducedMotion } from '@/shared/hooks';
 import { useLanguagePreference } from '@/shared/model';
 
@@ -27,6 +34,18 @@ export const useIsDemoMode = () =>
 export const useIsParentGateEnabled = () =>
   useUserStore((state) => state.user?.settings.isParentGateEnabled ?? true);
 
+/** The coat the robot dog wears on the home screen. */
+export const usePetSkin = (): RobotDogSkin =>
+  useUserStore(
+    (state) => state.user?.settings.petSkin ?? DEFAULT_ROBOT_DOG_SKIN,
+  );
+
+/** What the dog does when nothing interrupts it. */
+export const usePetAction = (): RobotDogAction =>
+  useUserStore(
+    (state) => state.user?.settings.petAction ?? DEFAULT_ROBOT_DOG_ACTION,
+  );
+
 // ═══════════════════════════════════════════
 // MAIN HOOK
 // ═══════════════════════════════════════════
@@ -39,4 +58,6 @@ export const useSettings = () => ({
   isSoundEnabled: useIsSoundEnabled(),
   isDemoMode: useIsDemoMode(),
   isParentGateEnabled: useIsParentGateEnabled(),
+  petSkin: usePetSkin(),
+  petAction: usePetAction(),
 });

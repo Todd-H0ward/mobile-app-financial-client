@@ -12,8 +12,10 @@ export {
   COLORS,
   CONTENT_PADDING,
   FONTS,
+  LESSON_FADE_MS,
   MAX_CONTENT_WIDTH,
   RADII,
   SPACING,
   SPACING_BASE,
+  TERMINAL,
 } from './theme';
