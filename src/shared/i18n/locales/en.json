@@ -215,7 +215,19 @@
     "roomA11y": "Turn to the room: {{room}}",
     "level": "Level {{level}} of {{total}}",
     "levelUp": "Rise",
-    "levelReset": "Restart"
+    "levelReset": "Restart",
+    "watcherLeave": "Go back",
+    "watcherA11y": "Talk to {{name}}",
+    "watchers": {
+      "overseer": {
+        "name": "The Overseer",
+        "line": "I count every coin. Spend one too many and I will see it."
+      },
+      "keeper": {
+        "name": "The Keeper",
+        "line": "Put a little aside. Whatever you save, I will keep safe."
+      }
+    }
   },
   "wallet": {
     "source": {

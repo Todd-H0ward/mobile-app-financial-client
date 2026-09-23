@@ -120,9 +120,13 @@ const stateFor = (
   tune: CameraTune,
 ): OrbitState => {
   if (view === 'top') {
-    // The top view keeps the heading it arrived with, so leaving and coming
-    // back does not spin the model under the child.
-    return { azimuth, elevation: tune.topElevation, distance: fit.top };
+    // A fixed heading: the map view is a composed shot, and coming to it from
+    // three different rooms would otherwise give three different pictures.
+    return {
+      azimuth: alignAngle(azimuth, tune.topAzimuth),
+      elevation: tune.topElevation,
+      distance: fit.top,
+    };
   }
 
   return {

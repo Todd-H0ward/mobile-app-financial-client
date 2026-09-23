@@ -34,12 +34,14 @@ import {
   type SceneNode,
   terraceSinkY,
 } from '@/entities/scene';
+import type { WatcherAction, WatcherId } from '@/entities/watcher';
 
 import { clamp } from '@/shared/utils';
 
 import type { CenterCharacter } from './center-character';
 import { createHazeBackdrop } from './haze-backdrop';
 import { createLiftEffects, type LiftEffects } from './lift-effects';
+import type { WatcherFocus, Watchers } from './watchers';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -72,6 +74,12 @@ interface SceneModel {
   reactCharacter: (action: RobotDogAction, fallback: RobotDogAction) => void;
   /** What a tap ray is tested against — `null` until the model has loaded. */
   characterRoot: () => Object3D | null;
+  /** Same, for one of the two screens overhead. */
+  watcherRoot: (watcher: WatcherId) => Object3D | null;
+  /** Where the camera stands to talk to a screen, and what it looks at. */
+  watcherFocus: (watcher: WatcherId) => WatcherFocus | null;
+  /** Puts one of the screens into a state — talking, idling, reacting. */
+  playWatcher: (watcher: WatcherId, action: WatcherAction) => void;
   /** Moves the arena under the look-at point (camera-rig knob). */
   setPlatformY: (y: number) => void;
   /** Frees every buffer the GL context is holding. */
@@ -254,6 +262,26 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   };
 
   loadCharacter();
+
+  // The overseer and the keeper, hung off the camera rig rather than the
+  // arena: their own file carries the ceiling they are bolted to.
+  const watcherMount = new Group();
+  scene.add(watcherMount);
+  let watchers: Watchers | null = null;
+  let watchersDisposed = false;
+
+  void import('./watchers')
+    .then(({ attachWatchers }) => attachWatchers(watcherMount))
+    .then((loaded) => {
+      if (watchersDisposed) {
+        loaded.dispose();
+        return;
+      }
+      watchers = loaded;
+    })
+    .catch((error: unknown) => {
+      console.warn('[room-scene] watchers failed to load', error);
+    });
 
   const rooms: MeshPhongMaterial[] = [];
   const geometries: BufferGeometry[] = [];
@@ -457,6 +485,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   const tick = (timeSec: number, deltaSec: number) => {
     haze.tick(timeSec);
     character?.tick(deltaSec);
+    watchers?.tick(deltaSec);
     effects.tick(deltaSec);
   };
 
@@ -484,6 +513,9 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   };
 
   const dispose = () => {
+    watchersDisposed = true;
+    watchers?.dispose();
+    watchers = null;
     characterDisposed = true;
     character?.dispose();
     character = null;
@@ -505,6 +537,9 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     playCharacterAction,
     reactCharacter,
     characterRoot,
+    watcherRoot: (watcher) => watchers?.root(watcher) ?? null,
+    watcherFocus: (watcher) => watchers?.focus(watcher) ?? null,
+    playWatcher: (watcher, action) => watchers?.play(watcher, action),
     setPlatformY,
     dispose,
   };

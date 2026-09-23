@@ -9,6 +9,7 @@ import { RoomScene, type SceneView } from '@/widgets/room-scene';
 import { DEFAULT_ROOM } from '@/entities/room';
 import { SCENE_LEVEL_COUNT } from '@/entities/scene';
 import { usePetAction, usePetSkin } from '@/entities/user';
+import type { WatcherId } from '@/entities/watcher';
 
 import {
   CONTENT_PADDING,
@@ -77,6 +78,42 @@ const SettingsButton = ({ onPress }: { onPress: () => void }) => {
   );
 };
 
+/**
+ * What a screen is saying while the child stands in front of it.
+ *
+ * Bottom of the frame rather than beside the face: the camera has flown in
+ * close, and the head fills the middle of the window. A tap anywhere on the
+ * world also walks away — the button is the visible way out, not the only
+ * one, which is 3.6.
+ */
+const WatcherCard = ({
+  watcher,
+  onLeave,
+}: {
+  watcher: WatcherId;
+  onLeave: () => void;
+}) => {
+  const { t } = useTranslation();
+  const theme = useTheme();
+
+  return (
+    <View
+      style={[
+        styles.watcherCard,
+        { backgroundColor: theme.surface, borderColor: theme.border },
+      ]}
+    >
+      <Text variant="label" themeColor="textMuted">
+        {t(`scene.watchers.${watcher}.name`)}
+      </Text>
+      <Text variant="body">{t(`scene.watchers.${watcher}.line`)}</Text>
+      <Button size="s" variant="secondary" onPress={onLeave}>
+        {t('scene.watcherLeave')}
+      </Button>
+    </View>
+  );
+};
+
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
@@ -115,6 +152,14 @@ export const HomeScreen = () => {
   const [level, setLevel] = useState(0);
   /** At the top the button turns into a way back down, not a dead end. */
   const isOutOfPit = level >= SCENE_LEVEL_COUNT;
+  /**
+   * The screen overhead the child has tapped, if any.
+   *
+   * Owned here rather than inside the widget: the camera flight is the
+   * widget's, but what the machine says is the game's, and the level card has
+   * to stand down while somebody is talking.
+   */
+  const [talkingTo, setTalkingTo] = useState<WatcherId | null>(null);
 
   if (hud.isSummary) {
     return <Redirect href={STATIC_ROUTES.PERIOD_SUMMARY} />;
@@ -136,6 +181,11 @@ export const HomeScreen = () => {
         level={level}
         petSkin={petSkin}
         petAction={petActionFor(hud.pet?.moodName ?? null, chosenAction)}
+        focusedWatcher={talkingTo}
+        onWatcherFocus={(w) => {
+          console.warn('[screen] onWatcherFocus', w, 'was', talkingTo);
+          setTalkingTo(w);
+        }}
         isAnimated={hud.isAnimationEnabled}
       />
 
@@ -148,10 +198,28 @@ export const HomeScreen = () => {
         <SettingsButton onPress={() => router.push(STATIC_ROUTES.SETTINGS)} />
       </View>
 
+      {talkingTo ? (
+        <View
+          pointerEvents="box-none"
+          style={[
+            styles.watcherDock,
+            {
+              paddingBottom:
+                insets.bottom + ROOM_CONTROLS_CLEARANCE + SPACING.three,
+            },
+          ]}
+        >
+          <WatcherCard watcher={talkingTo} onLeave={() => setTalkingTo(null)} />
+        </View>
+      ) : null}
+
+      {/* The level knob stands down mid-conversation: it belongs to the
+          arena, and the camera is not on the arena. */}
       <View
         pointerEvents="box-none"
         style={[
           styles.stepsRail,
+          talkingTo ? styles.hidden : null,
           {
             paddingBottom:
               insets.bottom + ROOM_CONTROLS_CLEARANCE + SPACING.three,
@@ -212,6 +280,22 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
   },
+  watcherCard: {
+    alignItems: 'flex-start',
+    borderRadius: RADII.l,
+    borderWidth: 1,
+    gap: SPACING.two,
+    padding: SPACING.three,
+  },
+  watcherDock: {
+    bottom: 0,
+    justifyContent: 'flex-end',
+    left: 0,
+    paddingHorizontal: CONTENT_PADDING,
+    pointerEvents: 'box-none',
+    position: 'absolute',
+    right: 0,
+  },
   stepsRail: {
     bottom: 0,
     justifyContent: 'center',
@@ -220,6 +304,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: 0,
+  },
+  hidden: {
+    display: 'none',
   },
   levelCard: {
     alignItems: 'center',

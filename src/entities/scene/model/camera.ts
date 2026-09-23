@@ -3,12 +3,22 @@
 // ═══════════════════════════════════════════
 
 /**
- * Where the camera starts: high over the model, looking down.
+ * The map view: an isometric three-quarters, not a plan.
  *
- * Not a full 90° — at the pole the up vector and the view direction line up
- * and the image spins on its own axis as the azimuth changes.
+ * Straight down flattens the arena into a disc and hides both the terraces
+ * and the two screens watching it. Thirty degrees off the floor keeps the
+ * steps readable and leaves the machinery in frame.
  */
-const TOP_ELEVATION = 82;
+const TOP_ELEVATION = 30;
+
+/**
+ * The heading the map view always settles on.
+ *
+ * Fixed rather than inherited: the shot is a composition — the gears fall
+ * where they fall and the watchers frame the corners — and arriving on it
+ * from three different rooms would give three different pictures.
+ */
+const TOP_AZIMUTH = 315;
 
 /**
  * Eye-level with the arena — on the horizon line, not the artist's tilted
@@ -34,7 +44,7 @@ const CAMERA_FAR = 10000;
  * wedge fills the phone; top still needs the full circle.
  */
 const ROOM_FIT = 0.72;
-const TOP_FIT = 0.86;
+const TOP_FIT = 0.765;
 
 /**
  * How far the arena sits below the look-at point, in world units.
@@ -52,6 +62,7 @@ export {
   ROOM_ELEVATION,
   ROOM_FIT,
   SCENE_PLATFORM_Y,
+  TOP_AZIMUTH,
   TOP_ELEVATION,
   TOP_FIT,
 };

@@ -14,6 +14,8 @@ interface CameraTune {
   roomElevation: number;
   /** Degrees for the overhead map view. */
   topElevation: number;
+  /** Heading the map view settles on, degrees. */
+  topAzimuth: number;
   /** Framing padding for a room — smaller is closer. */
   roomFit: number;
   /** Framing padding for the top view. */
@@ -31,9 +33,10 @@ interface CameraTune {
 /** Mirrors `entities/scene/model/camera.ts` — keep in sync when you paste. */
 const DEFAULT_CAMERA_TUNE: CameraTune = {
   roomElevation: 6,
-  topElevation: 82,
+  topElevation: 30,
+  topAzimuth: 315,
   roomFit: 0.72,
-  topFit: 0.86,
+  topFit: 0.765,
   platformY: -120,
   fov: 45,
 };
@@ -41,7 +44,8 @@ const DEFAULT_CAMERA_TUNE: CameraTune = {
 /** Sliders’ legal ranges — wide enough to find a shot, not infinite. */
 const CAMERA_TUNE_RANGE = {
   roomElevation: { min: 0, max: 45, step: 1 },
-  topElevation: { min: 50, max: 89, step: 1 },
+  topElevation: { min: 12, max: 89, step: 1 },
+  topAzimuth: { min: 0, max: 359, step: 5 },
   roomFit: { min: 0.35, max: 1.4, step: 0.01 },
   topFit: { min: 0.45, max: 1.6, step: 0.01 },
   platformY: { min: -280, max: 40, step: 5 },
@@ -56,9 +60,10 @@ const CAMERA_TUNE_RANGE = {
 const formatCameraTune = (tune: CameraTune): string =>
   [
     `const TOP_ELEVATION = ${Math.round(tune.topElevation)};`,
+    `const TOP_AZIMUTH = ${Math.round(tune.topAzimuth)};`,
     `const ROOM_ELEVATION = ${Math.round(tune.roomElevation)};`,
     `const ROOM_FIT = ${tune.roomFit.toFixed(2)};`,
-    `const TOP_FIT = ${tune.topFit.toFixed(2)};`,
+    `const TOP_FIT = ${tune.topFit.toFixed(3)};`,
     `const SCENE_PLATFORM_Y = ${Math.round(tune.platformY)};`,
     `const CAMERA_FOV = ${Math.round(tune.fov)};`,
   ].join('\n');

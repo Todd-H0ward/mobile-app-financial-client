@@ -9,6 +9,7 @@ import {
   PerspectiveCamera,
   Raycaster,
   Vector2,
+  Vector3,
   WebGLRenderer,
 } from 'three';
 
@@ -29,6 +30,12 @@ import {
   SCENE_PALETTE,
   SCENE_PIVOT,
 } from '@/entities/scene';
+import {
+  DEFAULT_WATCHER_ACTION,
+  WATCHER_FOCUS_ACTION,
+  WATCHER_IDS,
+  type WatcherId,
+} from '@/entities/watcher';
 
 import { CONTENT_PADDING, SPACING } from '@/shared/constants';
 
@@ -66,6 +73,16 @@ interface RoomSceneProps {
    * `null` leaves taps unanswered.
    */
   petTapAction?: RobotDogAction | null;
+  /**
+   * The screen the child is talking to, or `null` for the arena.
+   *
+   * Controlled by the screen the same way `view` is: the widget reports a tap
+   * and the screen decides, because the panel that goes with a focused
+   * watcher is the screen's to draw.
+   */
+  focusedWatcher?: WatcherId | null;
+  /** A tap landed on a screen, or on nothing while one was focused. */
+  onWatcherFocus?: (watcher: WatcherId | null) => void;
   /** Off when the grown-up disables animations — the camera then cuts. */
   isAnimated?: boolean;
   /**
@@ -98,6 +115,17 @@ const MAX_DELTA = 0.1;
  * a magic constant, so changing `SCENE_LIFT_SEC` changes the feel.
  */
 const LIFT_SMOOTHING = 0.02 ** (1 / SCENE_LIFT_SEC);
+
+/**
+ * Share of the flight to a watcher still left after a second.
+ *
+ * Slower than the orbit: this one crosses the whole arena and ends a metre
+ * from a face, and at the camera's usual pace it reads as a cut.
+ */
+const FOCUS_SMOOTHING = 0.0006;
+
+/** Below this the camera is treated as back on the arena, and stops blending. */
+const FOCUS_EPSILON = 0.002;
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -179,6 +207,8 @@ export const RoomScene = ({
   petSkin = DEFAULT_ROBOT_DOG_SKIN,
   petAction = DEFAULT_ROBOT_DOG_ACTION,
   petTapAction = 'joy',
+  focusedWatcher = null,
+  onWatcherFocus,
   isAnimated = true,
   isCameraRig = __DEV__,
 }: RoomSceneProps) => {
@@ -224,6 +254,15 @@ export const RoomScene = ({
    */
   const petSkinRef = useRef(petSkin);
   const petActionRef = useRef(petAction);
+  /** Which screen the loop is flying towards, `null` for back to the arena. */
+  const focusRef = useRef<WatcherId | null>(focusedWatcher);
+  /** `0` on the arena, `1` parked in front of a face; damped in between. */
+  const focusBlend = useRef(0);
+  /**
+   * The shot the blend is travelling to — or the one it is travelling back
+   * from, which is why it outlives `focusRef` going null.
+   */
+  const focusShot = useRef<{ anchor: Vector3; eye: Vector3 } | null>(null);
 
   /**
    * Where each tier is heading, and where it is now: `[segment][step]`.
@@ -282,6 +321,22 @@ export const RoomScene = ({
     if (isAnimated) camera.applyView(view);
     else camera.jumpToView(view);
   }, [camera, isAnimated, view]);
+
+  /**
+   * The loop reads a ref, and the screen it is aimed at starts talking.
+   *
+   * Only the one in focus changes state: the other keeps whatever it was
+   * doing, so walking away from one does not reset the pair.
+   */
+  useEffect(() => {
+    focusRef.current = focusedWatcher;
+    if (!focusedWatcher) return;
+
+    model.current?.playWatcher(focusedWatcher, WATCHER_FOCUS_ACTION);
+    return () => {
+      model.current?.playWatcher(focusedWatcher, DEFAULT_WATCHER_ACTION);
+    };
+  }, [focusedWatcher]);
 
   // Rig knobs rewrite fit / elevation / platform without rebuilding GL.
   useEffect(() => {
@@ -353,6 +408,9 @@ export const RoomScene = ({
 
       // Reused every frame: a fresh Color sixty times a second is litter.
       const clear = new Color(clearColor.current);
+      /** Same reason: where the orbit would put the lens, before any focus. */
+      const orbitEye = new Vector3();
+      const orbitAim = new Vector3();
 
       let width = gl.drawingBufferWidth;
       let height = gl.drawingBufferHeight;
@@ -428,8 +486,33 @@ export const RoomScene = ({
         // The camera rides with the floor: the pet climbs two hundred units
         // over five levels, and a camera left at the bottom would lose it.
         const eyeY = built.platformHeight();
-        lens.position.set(x, y + eyeY, z);
-        lens.lookAt(SCENE_PIVOT[0], eyeY, SCENE_PIVOT[2]);
+        orbitEye.set(x, y + eyeY, z);
+        orbitAim.set(SCENE_PIVOT[0], eyeY, SCENE_PIVOT[2]);
+
+        // Talking to a screen is not an orbit: the camera leaves the axis
+        // entirely and parks in front of a face. Rather than teach the orbit
+        // about a second pivot, both shots are computed every frame and the
+        // lens is eased from one to the other.
+        const wanted = focusRef.current;
+        if (wanted) focusShot.current = built.watcherFocus(wanted);
+
+        const blendTo = wanted && focusShot.current ? 1 : 0;
+        focusBlend.current = isAnimatedRef.current
+          ? damp(focusBlend.current, blendTo, FOCUS_SMOOTHING, delta)
+          : blendTo;
+
+        const shot = focusShot.current;
+        if (shot && focusBlend.current > FOCUS_EPSILON) {
+          const blend = focusBlend.current;
+          lens.position.lerpVectors(orbitEye, shot.eye, blend);
+          orbitAim.lerp(shot.anchor, blend);
+        } else {
+          lens.position.copy(orbitEye);
+          // Nothing left to travel back from; drop the shot so a watcher
+          // that reloads is looked up fresh.
+          if (!wanted) focusShot.current = null;
+        }
+        lens.lookAt(orbitAim);
 
         built.tick(now / 1000, delta);
         webgl.setClearColor(clear.set(clearColor.current), 1);
@@ -466,19 +549,45 @@ export const RoomScene = ({
     .onEnd((event) => {
       const built = model.current;
       const size = surface;
-      if (!built || !size || petTapAction === null) return;
-
-      const root = built.characterRoot();
-      if (!root) return;
+      const view = lensRef.current;
+      if (!built || !size || !view) return;
 
       pointer.current.set(
         (event.x / size.width) * 2 - 1,
         -(event.y / size.height) * 2 + 1,
       );
-      const view = lensRef.current;
-      if (!view) return;
-
       raycaster.current.setFromCamera(pointer.current, view);
+
+      for (const w of WATCHER_IDS) {
+        const r = built.watcherRoot(w);
+        const hits = r ? raycaster.current.intersectObject(r, true) : [];
+        console.warn('[dbg]', w, 'hits', hits.length, 'first', hits[0]?.object?.name, 'dist', hits[0]?.distance?.toFixed(0));
+      }
+
+      // The screens are asked first: they hang in front of the sky where
+      // nothing else is, so a ray that finds one found nothing else.
+      for (const watcher of WATCHER_IDS) {
+        const screen = built.watcherRoot(watcher);
+        if (!screen) continue;
+        if (raycaster.current.intersectObject(screen, true).length === 0) {
+          continue;
+        }
+
+        console.warn('[dbg] chose', watcher);
+        onWatcherFocus?.(focusedWatcher === watcher ? null : watcher);
+        return;
+      }
+
+      // Standing in front of one, a tap anywhere else is the way back —
+      // the child should not have to find the button.
+      if (focusedWatcher) {
+        onWatcherFocus?.(null);
+        return;
+      }
+
+      if (petTapAction === null) return;
+      const root = built.characterRoot();
+      if (!root) return;
       if (raycaster.current.intersectObject(root, true).length === 0) return;
 
       built.reactCharacter(petTapAction, petActionRef.current);
@@ -487,6 +596,9 @@ export const RoomScene = ({
   const pan = Gesture.Pan()
     // Everything this touches is JS-thread only: three.js and the GL context.
     .runOnJS(true)
+    // Turning the arena from a conversation would drag the camera off the
+    // face it is parked in front of; the way out is a tap, not a swipe.
+    .enabled(focusedWatcher === null)
     .onBegin(camera.beginDrag)
     .onUpdate((event) => camera.dragBy(event.translationX, event.translationY))
     .onEnd(() => onViewChange(camera.endDrag()))
