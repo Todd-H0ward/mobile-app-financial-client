@@ -18,6 +18,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { TOP_AZIMUTH } from '@/entities/scene';
 import {
   DEFAULT_WATCHER_ACTION,
+  WATCHER_ACTIONS,
   WATCHER_CLIPS,
   WATCHER_FADE_SEC,
   WATCHER_FOCUS_DISTANCE,
@@ -76,12 +77,28 @@ const WATCHER_MODELS: Record<WatcherId, number> = {
   keeper: require('../../../../assets/scene/watchers/keeper.glb') as number,
 };
 
-/** The face on the screen. One per watcher for now — the resting one. */
-const WATCHER_SCREENS: Record<WatcherId, number> = {
-  overseer:
-    require('../../../../assets/scene/watchers/screens/overseer.png') as number,
-  keeper:
-    require('../../../../assets/scene/watchers/screens/keeper.png') as number,
+/**
+ * The face on the screen, one per state.
+ *
+ * The artist ships a frame per clip and says to swap it into the `Screen`
+ * material when the animation changes (`*.README.txt` beside the models) —
+ * without that the strict one rages with a resting face on.
+ */
+const WATCHER_SCREENS: Record<WatcherId, Record<WatcherAction, number>> = {
+  overseer: {
+    idle: require('../../../../assets/scene/watchers/screens/overseer/idle.png') as number,
+    talk: require('../../../../assets/scene/watchers/screens/overseer/talk.png') as number,
+    react:
+      require('../../../../assets/scene/watchers/screens/overseer/react.png') as number,
+    rest: require('../../../../assets/scene/watchers/screens/overseer/rest.png') as number,
+  },
+  keeper: {
+    idle: require('../../../../assets/scene/watchers/screens/keeper/idle.png') as number,
+    talk: require('../../../../assets/scene/watchers/screens/keeper/talk.png') as number,
+    react:
+      require('../../../../assets/scene/watchers/screens/keeper/react.png') as number,
+    rest: require('../../../../assets/scene/watchers/screens/keeper/rest.png') as number,
+  },
 };
 
 /** The material the artist put the face on, in both models. */
@@ -147,7 +164,9 @@ const loadGlbBuffer = async (watcher: WatcherId): Promise<ArrayBuffer> => {
  * The screen is the whole point of these two: it is the only part that says
  * which of them is being kind to you.
  */
-const dress = (root: Object3D, face: Texture) => {
+const dress = (root: Object3D, face: Texture): MeshStandardMaterial | null => {
+  let screen: MeshStandardMaterial | null = null;
+
   root.traverse((object) => {
     const material = (object as Mesh).material;
     if (!material) return;
@@ -170,11 +189,14 @@ const dress = (root: Object3D, face: Texture) => {
         entry.emissiveMap = face;
         entry.emissive.setScalar(SCREEN_GLOW);
         entry.toneMapped = false;
+        screen = entry;
       }
 
       entry.needsUpdate = true;
     }
   });
+
+  return screen;
 };
 
 const disposeTree = (root: Object3D) => {
@@ -219,8 +241,22 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
   const pivots = new Map<WatcherId, Group>();
   /** The display itself, which the clips move: what the camera really aims at. */
   const faces = new Map<WatcherId, Object3D>();
+  /** The `Screen` material of each, so a state change can repaint the face. */
+  const screens = new Map<WatcherId, MeshStandardMaterial>();
+  /** Every face already on the GPU, by watcher and state. */
+  const looks = new Map<WatcherId, Map<WatcherAction, Texture>>();
 
   const play = (watcher: WatcherId, action: WatcherAction) => {
+    // The face changes even when the clip does not: a state the model has no
+    // animation for still has something to say on the screen.
+    const look = looks.get(watcher)?.get(action);
+    const screen = screens.get(watcher);
+    if (look && screen && screen.map !== look) {
+      screen.map = look;
+      screen.emissiveMap = look;
+      screen.needsUpdate = true;
+    }
+
     const next = clips.get(watcher)?.get(action);
     if (!next || next === current.get(watcher)) return;
 
@@ -231,14 +267,26 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
 
   await Promise.all(
     WATCHER_IDS.map(async (watcher) => {
-      const [buffer, face] = await Promise.all([
+      const [buffer, faceList] = await Promise.all([
         loadGlbBuffer(watcher),
-        loadTexture(WATCHER_SCREENS[watcher]),
+        Promise.all(
+          WATCHER_ACTIONS.map(async (action) =>
+            loadTexture(WATCHER_SCREENS[watcher][action]),
+          ),
+        ),
       ]);
+
+      const look = new Map<WatcherAction, Texture>();
+      WATCHER_ACTIONS.forEach((action, index) => {
+        look.set(action, faceList[index]);
+      });
+      looks.set(watcher, look);
+
       const gltf = await loader.parseAsync(buffer, '');
       const root = gltf.scene;
 
-      dress(root, face);
+      const screenMaterial = dress(root, faceList[0]);
+      if (screenMaterial) screens.set(watcher, screenMaterial);
       root.scale.setScalar(WATCHER_UNITS_PER_METRE);
 
       // Hang each one by its screen: the bracket's own origin is wherever
@@ -311,6 +359,10 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
     play,
     dispose: () => {
       for (const mixer of mixers.values()) mixer.stopAllAction();
+      for (const look of looks.values()) {
+        for (const texture of look.values()) texture.dispose();
+      }
+      looks.clear();
       mount.remove(rig);
       for (const root of roots) disposeTree(root);
     },
