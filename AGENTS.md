@@ -269,6 +269,13 @@ overhead map is a drag upwards away. Everything that is not the world —
 settings, the pet's meeting screen, the UI kit — is pushed over it by the root
 stack.
 
+**The map does not turn.** The overhead view is a composed shot on a fixed
+heading (`TOP_AZIMUTH`), so that the child arrives at the same picture
+whichever segment they left, and the pan gesture is disabled there. The way
+down is a tap on a cell, which walks into that cell's segment — so the map is
+a place you read and point at, not one you fiddle with. The same freeze
+applies in front of a watcher.
+
 **Cells are the second way to walk.** Each wedge carries five terraces of six
 cells, ninety in all, and every one is framed and pressable. A tap on a cell
 of another segment turns the world to that segment instead of selecting the

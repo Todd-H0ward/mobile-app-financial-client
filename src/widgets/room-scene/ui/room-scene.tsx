@@ -626,11 +626,8 @@ export const RoomScene = ({
     });
 
   const pan = Gesture.Pan()
-    // Everything this touches is JS-thread only: three.js and the GL context.
     .runOnJS(true)
-    // Turning the arena from a conversation would drag the camera off the
-    // face it is parked in front of; the way out is a tap, not a swipe.
-    .enabled(focusedWatcher === null)
+    .enabled(focusedWatcher === null && view !== 'top')
     .onBegin(camera.beginDrag)
     .onUpdate((event) => camera.dragBy(event.translationX, event.translationY))
     .onEnd(() => onViewChange(camera.endDrag()))
