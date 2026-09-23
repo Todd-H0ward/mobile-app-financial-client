@@ -1,4 +1,11 @@
-export { cellFraction, cellKey, cellOfFace, isSameCell } from './cells';
+export {
+  cellFraction,
+  cellFromKey,
+  cellKey,
+  cellOfFace,
+  cellOrdinal,
+  isSameCell,
+} from './cells';
 export type { OrbitPosition } from './orbit';
 export {
   alignAngle,

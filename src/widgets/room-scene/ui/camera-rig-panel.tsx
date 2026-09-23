@@ -20,7 +20,13 @@ interface CameraRigPanelProps {
   tune: CameraTune;
   onTuneChange: (tune: CameraTune) => void;
   /** Live orbit from the GL loop — for the readout only. */
-  live: { azimuth: number; elevation: number; distance: number };
+  live: {
+    azimuth: number;
+    elevation: number;
+    distance: number;
+    /** Frames the GL loop actually drew in the last sample. */
+    fps: number;
+  };
 }
 
 interface TuneRowProps {
@@ -109,7 +115,7 @@ const CameraRigPanel = ({ tune, onTuneChange, live }: CameraRigPanelProps) => {
         </Text>
         <Text variant="label" themeColor="textMuted">
           az {live.azimuth.toFixed(1)} · el {live.elevation.toFixed(1)} · d{' '}
-          {live.distance.toFixed(0)}
+          {live.distance.toFixed(0)} · {live.fps.toFixed(0)} fps
         </Text>
       </Pressable>
 

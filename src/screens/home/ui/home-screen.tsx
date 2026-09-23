@@ -6,7 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { RoomScene, type SceneView } from '@/widgets/room-scene';
 
-import { SCENE_LEVEL_COUNT } from '@/entities/scene';
+import { useDoneCells } from '@/entities/lesson';
+import { cellKey, SCENE_LEVEL_COUNT } from '@/entities/scene';
 import { usePetAction, usePetSkin } from '@/entities/user';
 import type { WatcherId } from '@/entities/watcher';
 
@@ -159,6 +160,8 @@ export const HomeScreen = () => {
    * to stand down while somebody is talking.
    */
   const [talkingTo, setTalkingTo] = useState<WatcherId | null>(null);
+  /** Tiles the child has already learnt on; the scene sinks them. */
+  const doneCells = useDoneCells();
 
   if (hud.isSummary) {
     return <Redirect href={STATIC_ROUTES.PERIOD_SUMMARY} />;
@@ -181,10 +184,11 @@ export const HomeScreen = () => {
         petSkin={petSkin}
         petAction={petActionFor(hud.pet?.moodName ?? null, chosenAction)}
         focusedWatcher={talkingTo}
-        onWatcherFocus={(w) => {
-          console.warn('[screen] onWatcherFocus', w, 'was', talkingTo);
-          setTalkingTo(w);
-        }}
+        onWatcherFocus={setTalkingTo}
+        doneCells={doneCells}
+        onCellPress={(cell) =>
+          router.push(DYNAMIC_ROUTES.lesson(cellKey(cell)))
+        }
         isAnimated={hud.isAnimationEnabled}
       />
 

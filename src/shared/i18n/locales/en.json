@@ -992,5 +992,22 @@
       "empty": "No puzzles on the shelf yet. Buy one in the toys shop on the street.",
       "goToys": "Go to toys"
     }
+  },
+  "lesson": {
+    "header": "LESSON {{number}} / 30",
+    "theoryOf": "THEORY {{index}} / {{total}}",
+    "questionOf": "QUESTION {{index}} / {{total}}",
+    "next": "NEXT",
+    "toTest": "START THE TEST",
+    "nextQuestion": "NEXT QUESTION",
+    "toResult": "RESULT",
+    "right": "Correct.",
+    "wrong": "Wrong. The answer was: {{answer}}",
+    "resultLabel": "RESULT",
+    "score": "{{correct}} OF {{total}}",
+    "passedText": "Passed. The cell has sunk — the pit is one step shallower.",
+    "failedText": "Not passed. At least {{needed}} must be right. Read it again.",
+    "retry": "TAKE IT AGAIN",
+    "back": "LEAVE"
   }
 }

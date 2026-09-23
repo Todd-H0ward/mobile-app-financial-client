@@ -89,6 +89,14 @@ interface RoomSceneProps {
    * child pointing at where they want to go, so it turns the world instead.
    */
   onCellPress?: (cell: SceneCell) => void;
+  /**
+   * Cells whose lesson has been passed, as `cellKey` strings.
+   *
+   * They sit one terrace lower than the rest. Passed while the scene was
+   * away, they are simply there; passed just now, the tile drops in front of
+   * the child — `firstDone` is what tells the two apart.
+   */
+  doneCells?: readonly string[];
   /** Off when the grown-up disables animations — the camera then cuts. */
   isAnimated?: boolean;
   /**
@@ -132,6 +140,9 @@ const FOCUS_SMOOTHING = 0.0006;
 
 /** Below this the camera is treated as back on the arena, and stops blending. */
 const FOCUS_EPSILON = 0.002;
+
+/** How often the dev readout samples the camera and the frame counter, in ms. */
+const READOUT_MS = 500;
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -216,6 +227,7 @@ export const RoomScene = ({
   focusedWatcher = null,
   onWatcherFocus,
   onCellPress,
+  doneCells,
   isAnimated = true,
   isCameraRig = __DEV__,
 }: RoomSceneProps) => {
@@ -228,7 +240,16 @@ export const RoomScene = ({
     azimuth: 0,
     elevation: DEFAULT_CAMERA_TUNE.roomElevation,
     distance: 0,
+    fps: 0,
   });
+  /**
+   * Frames drawn since the readout last looked.
+   *
+   * Counted in the loop and drained by the sampler, rather than timed per
+   * frame: the loop is the one place that knows a frame happened, and a
+   * number it increments costs nothing to keep.
+   */
+  const frames = useRef(0);
 
   /**
    * The GL surface is created only once the view has been measured.
@@ -261,6 +282,15 @@ export const RoomScene = ({
    */
   const petSkinRef = useRef(petSkin);
   const petActionRef = useRef(petAction);
+  /** False until the sunk cells have been placed once, without animating. */
+  const hasSunkOnce = useRef(false);
+  /**
+   * The sunk cells as of this render.
+   *
+   * `onContextCreate` closes over what it saw, and it runs a render after the
+   * props first arrive — this is how the scene it builds learns about them.
+   */
+  const doneCellsRef = useRef<readonly string[]>([]);
   /** Which screen the loop is flying towards, `null` for back to the arena. */
   const focusRef = useRef<WatcherId | null>(focusedWatcher);
   /** `0` on the arena, `1` parked in front of a face; damped in between. */
@@ -292,12 +322,16 @@ export const RoomScene = ({
     if (!isCameraRig) return;
     const id = setInterval(() => {
       const state = camera.current.current;
+      const drawn = frames.current;
+      frames.current = 0;
+
       setLiveOrbit({
+        fps: drawn * (1000 / READOUT_MS),
         azimuth: state.azimuth,
         elevation: state.elevation,
         distance: state.distance,
       });
-    }, 200);
+    }, READOUT_MS);
     return () => clearInterval(id);
   }, [camera, isCameraRig]);
 
@@ -328,6 +362,23 @@ export const RoomScene = ({
     if (isAnimated) camera.applyView(view);
     else camera.jumpToView(view);
   }, [camera, isAnimated, view]);
+
+  /**
+   * Sinks what the child has already learnt.
+   *
+   * The first run puts the tiles down without the drop — those lessons were
+   * passed on another day and the scene should open on their result, not
+   * replay it. Every run after that animates, because by then a change means
+   * a tile the child has just earned.
+   */
+  useEffect(() => {
+    if (!doneCells) return;
+    doneCellsRef.current = doneCells;
+
+    if (!model.current) return;
+    model.current.setCellsDone(doneCells, !hasSunkOnce.current);
+    hasSunkOnce.current = true;
+  }, [doneCells]);
 
   /**
    * The loop reads a ref, and the screen it is aimed at starts talking.
@@ -394,6 +445,12 @@ export const RoomScene = ({
 
       const built = buildScene(petSkinRef.current, petActionRef.current);
       built.setPlatformY(tuneRef.current.platformY);
+      // The effect below has already run by now and found no scene to talk
+      // to: `onContextCreate` waits for the surface to be measured, which is
+      // a render later. Without this the tiles a child sank yesterday come
+      // back up every time the app is opened.
+      built.setCellsDone(doneCellsRef.current, true);
+      hasSunkOnce.current = true;
       const lens = new PerspectiveCamera(
         tuneRef.current.fov,
         gl.drawingBufferWidth / gl.drawingBufferHeight,
@@ -526,6 +583,7 @@ export const RoomScene = ({
         }
         lens.lookAt(orbitAim);
 
+        frames.current += 1;
         built.tick(now / 1000, delta);
         webgl.setClearColor(clear.set(clearColor.current), 1);
         webgl.render(built.scene, lens);

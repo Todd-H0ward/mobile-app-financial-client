@@ -1,4 +1,8 @@
-import { SCENE_CELLS_PER_STEP, type SceneCell } from '../../model';
+import {
+  SCENE_CELLS_PER_STEP,
+  SCENE_TERRACE_COUNT,
+  type SceneCell,
+} from '../../model';
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -52,4 +56,42 @@ const cellKey = (cell: SceneCell): string =>
 const isSameCell = (a: SceneCell | null, b: SceneCell | null): boolean =>
   a !== null && b !== null && cellKey(a) === cellKey(b);
 
-export { cellFraction, cellKey, cellOfFace, isSameCell };
+/**
+ * A cell's place in the whole arena, `0 … 89`.
+ *
+ * One number for what is otherwise three, so that anything ordered by cell —
+ * which lesson sits on it, which order they unlock in — can be a single
+ * lookup rather than a table of ninety rows. Counts along a terrace first,
+ * then up the terraces, then round to the next segment, which is the order a
+ * child works through them.
+ */
+const cellOrdinal = (cell: SceneCell): number =>
+  (cell.segment * SCENE_TERRACE_COUNT + cell.step) * SCENE_CELLS_PER_STEP +
+  cell.cell;
+
+/**
+ * The cell a key names, or `null` if the string is not one.
+ *
+ * The inverse of `cellKey`: a lesson is opened by a route parameter, and a
+ * route parameter is whatever the URL happened to contain.
+ */
+const cellFromKey = (key: string): SceneCell | null => {
+  const parts = key.split('-');
+  if (parts.length !== 3) return null;
+
+  const [segment, step, cell] = parts.map(Number);
+  if (![segment, step, cell].every(Number.isInteger)) return null;
+  if (segment < 0 || step < 0 || cell < 0) return null;
+  if (step >= SCENE_TERRACE_COUNT || cell >= SCENE_CELLS_PER_STEP) return null;
+
+  return { segment, step, cell };
+};
+
+export {
+  cellFraction,
+  cellFromKey,
+  cellKey,
+  cellOfFace,
+  cellOrdinal,
+  isSameCell,
+};

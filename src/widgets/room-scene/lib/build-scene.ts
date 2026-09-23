@@ -17,7 +17,6 @@ import {
   type Object3D,
   PointLight,
   Scene,
-  SpotLight,
   Vector3,
 } from 'three';
 
@@ -25,6 +24,7 @@ import type { RobotDogAction, RobotDogSkin } from '@/entities/robot-dog';
 import {
   cellKey,
   cellOfFace,
+  damp,
   gearAngle,
   isSameCell,
   SCENE_CELLS_PER_STEP,
@@ -32,7 +32,6 @@ import {
   SCENE_FLAT_STEP,
   SCENE_GEAR_ANGLES,
   SCENE_PALETTE,
-  SCENE_PIVOT,
   SCENE_PLATFORM_Y,
   SCENE_RADIUS,
   SCENE_SEGMENT_COUNT,
@@ -40,6 +39,7 @@ import {
   SCENE_SOURCE,
   SCENE_TERRACE_COUNT,
   SCENE_TERRACE_RADII,
+  SCENE_TERRACE_RISE,
   type SceneCell,
   type SceneNode,
   terraceSinkY,
@@ -98,6 +98,14 @@ interface SceneModel {
   cellAt: (object: Object3D, faceIndex: number) => SceneCell | null;
   /** Picks one cell out of its row, or clears the pick with `null`. */
   selectCell: (cell: SceneCell | null) => void;
+  /**
+   * Sinks the cells whose lesson has been passed, and raises the rest.
+   *
+   * `isImmediate` puts them where they belong without the drop — which is
+   * what a scene being built for a child who learnt this yesterday needs,
+   * against a tile sinking in front of them, which is the reward.
+   */
+  setCellsDone: (doneKeys: readonly string[], isImmediate?: boolean) => void;
   /** Same, for one of the two screens overhead. */
   watcherRoot: (watcher: WatcherId) => Object3D | null;
   /** Where the camera stands to talk to a screen, and what it looks at. */
@@ -110,9 +118,34 @@ interface SceneModel {
   dispose: () => void;
 }
 
+interface CellSink {
+  /** The buffers this cell owns a slice of, and where that slice is. */
+  parts: { geometry: BufferGeometry; from: number; to: number }[];
+  /** How far the slice is currently pushed down, in world units. */
+  offset: number;
+  /** How far it is heading. `tick` walks `offset` to meet it. */
+  target: number;
+}
+
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
+
+/**
+ * How far a cell drops once its lesson is passed, in world units.
+ *
+ * One terrace rise, so a passed cell comes down level with the ring below
+ * it. Six passed cells leave the terrace flat, which is the same shape the
+ * level mechanic makes — the pit fills in as the child learns, one tile at a
+ * time rather than one ring at a time.
+ */
+const CELL_SINK_DROP = SCENE_TERRACE_RISE;
+
+/** Share of a cell's drop still left after a second. Slow: it is a reward. */
+const CELL_SINK_SMOOTHING = 0.004;
+
+/** Below this the drop is over and the cell stops being written to. */
+const CELL_SINK_EPSILON = 0.05;
 
 /** Key light sits above and in front, so the wedges keep a readable top face. */
 const KEY_LIGHT_POSITION = [0.6, 1, 0.45];
@@ -129,24 +162,12 @@ const FILL_LIGHT_INTENSITY = 1.2;
 const AMBIENT_INTENSITY = 0.85;
 const HEMISPHERE_INTENSITY = 1.2;
 const CENTRE_POINT_INTENSITY = 3.2;
-const ROOM_POINT_INTENSITY = 2.8;
-/** Soft overhead cone — sells “a lamp above the arena”, not just fill. */
-const SPOT_INTENSITY = 2.8;
-const SPOT_ANGLE = Math.PI / 3.5;
-const SPOT_PENUMBRA = 0.7;
-const SPOT_DISTANCE = 1400;
-
 /** How high above the dropped platform the neon lamps sit. */
 const POINT_LIGHT_HEIGHT = 220;
-
-/** Radius of the three room lamps around the axis, in world units. */
-const ROOM_POINT_RADIUS = SCENE_RADIUS * 0.42;
 
 /** Longer falloff — covers the whole arena without a black rim. */
 const POINT_LIGHT_DISTANCE = 1200;
 const POINT_LIGHT_DECAY = 1;
-
-const DEG_TO_RAD = Math.PI / 180;
 
 /**
  * Crease angle, in degrees, above which an edge is drawn.
@@ -281,6 +302,44 @@ const cellsOf = (segment: number, step: number): SceneNode[] => {
     .filter((entry) => entry.offset < SEGMENT_ARC)
     .sort((a, b) => a.offset - b.offset)
     .map((entry) => entry.node);
+};
+
+/**
+ * Where each part lands inside a buffer they were laid into end to end.
+ *
+ * Both merges — the tiles and their outlines — put one part after another in
+ * a single array, so a part's own vertices are a slice of it. These are the
+ * slices, in floats, which is what a sinking cell has to move.
+ */
+/**
+ * Pushes one cell's slice down by `delta`, in place.
+ *
+ * Every third float from the start of the slice is a Y, and nothing else in
+ * the buffer is touched — the five cells beside it keep their vertices and
+ * the terrace keeps its single draw call.
+ */
+const shiftSlice = (
+  part: { geometry: BufferGeometry; from: number; to: number },
+  delta: number,
+) => {
+  const attribute = part.geometry.getAttribute('position');
+  const array = attribute.array as Float32Array;
+
+  for (let i = part.from + 1; i < part.to; i += 3) {
+    array[i] += delta;
+  }
+
+  attribute.needsUpdate = true;
+};
+
+const rangesOf = (lengths: number[]): { from: number; to: number }[] => {
+  const ranges: { from: number; to: number }[] = [];
+  let at = 0;
+  for (const length of lengths) {
+    ranges.push({ from: at, to: at + length });
+    at += length;
+  }
+  return ranges;
 };
 
 /**
@@ -449,6 +508,15 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   const segmentParts: Object3D[][] = [[], [], []];
   /** Every cell's own outline, kept for the selection to borrow. */
   const cellOutlines = new Map<string, BufferGeometry>();
+  /**
+   * How to sink one cell without giving it a mesh of its own.
+   *
+   * Six cells share one buffer and one draw call, so a tile cannot simply be
+   * moved — what moves is its slice of the vertices, in the tile buffer and
+   * in the outline buffer together. `offset` is where the slice sits now and
+   * `target` where it is heading; `tick` walks one to the other.
+   */
+  const sinkables = new Map<string, CellSink>();
   /** The one bright outline, moved from tile to tile as the child picks. */
   const selectionMaterial = new LineBasicMaterial({
     color: new Color(SCENE_PALETTE.cellFrameActive),
@@ -529,6 +597,28 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
 
       const frame = mergeEdges(outlines);
       geometries.push(frame);
+
+      // A sunk cell takes its outline down with it, so both buffers are
+      // sliced the same way and moved together.
+      const tileRanges = rangesOf(
+        cells.map(
+          (node) => SCENE_SOURCE.geometries[node.geometry].position.length,
+        ),
+      );
+      const frameRanges = rangesOf(
+        outlines.map((edges) => edges.getAttribute('position').array.length),
+      );
+      cells.forEach((_node, cell) => {
+        sinkables.set(cellKey({ segment, step: terrace, cell }), {
+          parts: [
+            { geometry, ...tileRanges[cell] },
+            { geometry: frame, ...frameRanges[cell] },
+          ],
+          offset: 0,
+          target: 0,
+        });
+      });
+
       const frameLines = new LineSegments(frame, frames[segment]);
       terraces[terrace].add(frameLines);
       segmentParts[segment].push(frameLines);
@@ -590,38 +680,32 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   );
   centre.position.set(0, SCENE_PLATFORM_Y + POINT_LIGHT_HEIGHT + 40, 0);
 
-  // Overhead spot aimed at the pivot — a readable pool of light on the floor.
-  const spot = new SpotLight(
-    new Color(SCENE_PALETTE.centreLight),
-    SPOT_INTENSITY,
-    SPOT_DISTANCE,
-    SPOT_ANGLE,
-    SPOT_PENUMBRA,
-    POINT_LIGHT_DECAY,
-  );
-  spot.position.set(0, SCENE_PLATFORM_Y + POINT_LIGHT_HEIGHT + 160, 0);
-  spot.target.position.set(...SCENE_PIVOT);
-  spot.target.updateMatrixWorld();
-
-  // One neon lamp per room, parked over that wedge so the colour reads when
-  // the camera faces it — and the other two stay as rim light.
-  const roomLamps = SCENE_SOURCE.segmentAngles.map((angle, index) => {
-    const light = new PointLight(
-      new Color(SCENE_PALETTE.segments[index]),
-      ROOM_POINT_INTENSITY,
-      POINT_LIGHT_DISTANCE,
-      POINT_LIGHT_DECAY,
-    );
-    const radians = angle * DEG_TO_RAD;
-    light.position.set(
-      Math.sin(radians) * ROOM_POINT_RADIUS,
-      SCENE_PLATFORM_Y + POINT_LIGHT_HEIGHT,
-      Math.cos(radians) * ROOM_POINT_RADIUS,
-    );
-    return light;
-  });
-
-  scene.add(key, fill, hemisphere, centre, spot, spot.target, ...roomLamps);
+  /*
+   * Five lights, and only one of them costs anything.
+   *
+   * There were nine: these five plus an overhead spot and a coloured point
+   * lamp over each of the three wedges. On the emulator's software renderer
+   * that was six frames a second against twenty with them gone — a 3.3×
+   * difference from lighting alone, because every extra point or spot light
+   * is another full lighting calculation for every pixel the arena covers,
+   * and the arena covers the screen.
+   *
+   * What went:
+   *
+   * - The **spot** did the same job as `centre` — a pool of light on the
+   *   floor — and a cone with a penumbra and a distance falloff is the most
+   *   expensive light there is.
+   * - The **three room lamps** tinted each wedge in its own colour. They were
+   *   built when the wedges were a street, a living room and a kitchen; the
+   *   rooms are gone, and `highlight` already tints a segment through its
+   *   material, which costs nothing per pixel.
+   *
+   * Directional, hemisphere and ambient are effectively free — they have no
+   * position to attenuate from. Adding a point light back is the one change
+   * here that can halve the frame rate, so measure it: the camera rig panel
+   * shows the frames.
+   */
+  scene.add(key, fill, hemisphere, centre);
   scene.add(
     new AmbientLight(new Color(SCENE_PALETTE.ambientLight), AMBIENT_INTENSITY),
   );
@@ -643,13 +727,6 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         isLit ? SCENE_PALETTE.cellFrame : SCENE_PALETTE.cellFrameMuted,
       );
       material.opacity = isLit ? CELL_FRAME_OPACITY : CELL_FRAME_OPACITY * 0.45;
-    });
-
-    roomLamps.forEach((lamp, index) => {
-      const isLit = segment === null || segment === index;
-      lamp.intensity = isLit
-        ? ROOM_POINT_INTENSITY
-        : ROOM_POINT_INTENSITY * 0.35;
     });
 
     // Everything stays on screen. Hiding the other two bays was tried and
@@ -690,6 +767,44 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
    * into its terrace, so the arena carries a single extra draw call however
    * many cells there turn out to be.
    */
+  const setCellsDone = (doneKeys: readonly string[], isImmediate = false) => {
+    const done = new Set(doneKeys);
+
+    for (const [key, sink] of sinkables) {
+      sink.target = done.has(key) ? CELL_SINK_DROP : 0;
+      if (!isImmediate) continue;
+
+      const delta = sink.target - sink.offset;
+      if (delta === 0) continue;
+
+      for (const part of sink.parts) shiftSlice(part, -delta);
+      sink.offset = sink.target;
+    }
+  };
+
+  /** Walks every cell that is still on its way down, or back up. */
+  const tickCellSinks = (deltaSec: number) => {
+    for (const sink of sinkables.values()) {
+      const gap = sink.target - sink.offset;
+      if (Math.abs(gap) < CELL_SINK_EPSILON) {
+        if (gap !== 0) {
+          for (const part of sink.parts) shiftSlice(part, -gap);
+          sink.offset = sink.target;
+        }
+        continue;
+      }
+
+      const next = damp(
+        sink.offset,
+        sink.target,
+        CELL_SINK_SMOOTHING,
+        deltaSec,
+      );
+      for (const part of sink.parts) shiftSlice(part, -(next - sink.offset));
+      sink.offset = next;
+    }
+  };
+
   const selectCell = (next: SceneCell | null) => {
     if (isSameCell(next, selected)) return;
     selected = next;
@@ -754,6 +869,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     character?.tick(deltaSec);
     watchers?.tick(deltaSec);
     effects.tick(deltaSec);
+    tickCellSinks(deltaSec);
   };
 
   const setCharacterSkin = (next: RobotDogSkin) => {
@@ -817,6 +933,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     cellTargets,
     cellAt,
     selectCell,
+    setCellsDone,
     watcherRoot: (watcher) => watchers?.root(watcher) ?? null,
     watcherFocus: (watcher) => watchers?.focus(watcher) ?? null,
     playWatcher: (watcher, action) => watchers?.play(watcher, action),

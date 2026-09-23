@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import { SCENE_CELLS_PER_STEP } from '../../model';
 
-import { cellFraction, cellOfFace } from './cells';
+import {
+  cellFraction,
+  cellFromKey,
+  cellKey,
+  cellOfFace,
+  cellOrdinal,
+} from './cells';
 
 // ═══════════════════════════════════════════
 // TESTS
@@ -42,5 +48,48 @@ describe('cellFraction', () => {
       cellFraction(3) - cellFraction(2),
       10,
     );
+  });
+});
+
+describe('cellOrdinal', () => {
+  it('numbers the whole arena without a gap or a collision', () => {
+    const seen = new Set<number>();
+
+    for (let segment = 0; segment < 3; segment += 1) {
+      for (let step = 0; step < 5; step += 1) {
+        for (let cell = 0; cell < SCENE_CELLS_PER_STEP; cell += 1) {
+          seen.add(cellOrdinal({ segment, step, cell }));
+        }
+      }
+    }
+
+    expect(seen.size).toBe(90);
+    expect(Math.min(...seen)).toBe(0);
+    expect(Math.max(...seen)).toBe(89);
+  });
+
+  it('counts along a terrace first — the order a child works through', () => {
+    expect(cellOrdinal({ segment: 0, step: 0, cell: 1 })).toBe(1);
+    expect(cellOrdinal({ segment: 0, step: 1, cell: 0 })).toBe(6);
+  });
+});
+
+describe('cellFromKey', () => {
+  it('undoes cellKey', () => {
+    const cell = { segment: 2, step: 3, cell: 4 };
+
+    expect(cellFromKey(cellKey(cell))).toEqual(cell);
+  });
+
+  it('refuses what is not a cell — a route parameter is just a string', () => {
+    expect(cellFromKey('')).toBeNull();
+    expect(cellFromKey('1-2')).toBeNull();
+    expect(cellFromKey('a-b-c')).toBeNull();
+    expect(cellFromKey('0-0--1')).toBeNull();
+  });
+
+  it('refuses a cell the arena does not have', () => {
+    expect(cellFromKey('0-9-0')).toBeNull();
+    expect(cellFromKey(`0-0-${SCENE_CELLS_PER_STEP}`)).toBeNull();
   });
 });

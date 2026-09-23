@@ -4,6 +4,48 @@
 отдельная картинка, а сектор модели; переход между комнатами — поворот сцены
 под камерой, а не перелистывание страниц.
 
+## Lights are the frame budget
+
+The scene renders at five lights and **adding a sixth can halve the frame
+rate**. Measure before you add one — the camera rig panel shows the frames
+per second next to the orbit readout.
+
+It used to have nine: a key and a fill directional, a hemisphere, an ambient,
+a point light over the middle, an overhead spot, and a coloured point lamp
+over each of the three wedges. On the emulator's software renderer that was
+**6 fps; at five lights it is 28** — the same view, the same geometry, a 4.7×
+difference from lighting alone.
+
+The reason is that the cost is per pixel, not per light. Every point and spot
+light is another full lighting calculation for every pixel the arena covers,
+and the arena covers the screen — which is also why a segment view (close,
+d 1500) ran slower than the map (far, d 2350) before this was fixed. Timing
+the loop showed where it went: `built.tick()` cost 0–6 ms a frame while
+`webgl.render()` cost 17–82 ms.
+
+What is left, and why:
+
+- **key, fill** (directional), **hemisphere**, **ambient** — effectively free.
+  They have no position, so there is nothing to attenuate from.
+- **centre** (point) — the pool of light the pet stands in. The one light here
+  that costs anything, and the one worth it.
+
+What went, and why it was not missed:
+
+- The **spot** lit the same pool as `centre`, and a cone with a penumbra and a
+  falloff is the most expensive light there is.
+- The **three room lamps** tinted each wedge in its own colour. They were
+  built when the wedges were rooms; `highlight` already tints a segment
+  through its material, which costs nothing per pixel.
+
+Draw calls are a separate and still-unpaid debt: roughly 260 against the 50 in
+`docs/design-brief-3d.md`, and 68 800 triangles against 50 000. Most of it is
+three glTF models that arrive pre-split — the robot dog alone is 111 meshes
+and 35 648 triangles, the keeper 60 and 19 004, the overseer 54 and 8 746.
+Merging each by material would take those 225 draw calls down to about 15.
+That is worth doing, but it was not what was costing the frames.
+
+
 ## Cells: the ninety pressable tiles
 
 The FBX holds 90 discs: five terraces of eighteen tiles. Each ring has three
