@@ -20,6 +20,7 @@ import {
 
 import type { RobotDogAction, RobotDogSkin } from '@/entities/robot-dog';
 import {
+  gearAngle,
   SCENE_FLAT_STEP,
   SCENE_PALETTE,
   SCENE_PIVOT,
@@ -28,14 +29,17 @@ import {
   SCENE_SEGMENT_COUNT,
   SCENE_SHARED_SEGMENT,
   SCENE_SOURCE,
-  SCENE_STEP_COUNT,
-  SCENE_STEP_RISE,
+  SCENE_TERRACE_COUNT,
+  SCENE_TERRACE_RADII,
   type SceneNode,
-  stepOffset,
+  terraceSinkY,
 } from '@/entities/scene';
+
+import { clamp } from '@/shared/utils';
 
 import type { CenterCharacter } from './center-character';
 import { createHazeBackdrop } from './haze-backdrop';
+import { createLiftEffects, type LiftEffects } from './lift-effects';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -47,10 +51,14 @@ interface SceneModel {
   /** Highlights one room and mutes the other two; `null` mutes none. */
   highlight: (segment: number | null) => void;
   /**
-   * Moves one tier of discs: `1` leaves it where the model has it, `0` drops
-   * it flush with the bottom tier. Anything between is the way up.
+   * Where the platform stands on its way out of the pit: `0` on the floor,
+   * `1` clear of the rim. Turns the gear train to match.
    */
-  liftStep: (segment: number, step: number, lift: number) => void;
+  setLevelProgress: (progress: number) => void;
+  /** Throws dust and sparks for one level-up: the ring landing and the gears. */
+  burstLift: (level: number) => void;
+  /** Platform height in world units, for the camera to follow. */
+  platformHeight: () => number;
   /** Drifts the sky haze and advances the center character. */
   tick: (timeSec: number, deltaSec: number) => void;
   /**
@@ -205,8 +213,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
 
   // Three and a half megabytes of robot dog — dynamic import so a missing or broken GLB
   // cannot take down the arena bundle, and so the arena paints first.
+  // Parented to the platform further down, once the platform exists.
   const characterMount = new Group();
-  root.add(characterMount);
   let character: CenterCharacter | null = null;
   let characterDisposed = false;
   /** Bumped on every skin swap; a load that finishes late is dropped. */
@@ -249,41 +257,80 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
 
   const rooms: MeshPhongMaterial[] = [];
   const geometries: BufferGeometry[] = [];
-  /** One group per room and tier, indexed `[segment][step]` — what moves. */
-  const steps: Group[][] = [];
+
+  /**
+   * The three wheels standing around the bowl — the machine that lifts the
+   * floor.
+   *
+   * Each is its own group so it can turn about its own axle. The mesh is
+   * shifted back by the wheel's centre, because a wheel turning about the
+   * middle of the whole arena would swing around the bowl instead of
+   * spinning where it stands.
+   */
+  const gears: Group[] = [];
+
+  /** One group per terrace — the rings that merge into the floor as it rises. */
+  const terraces: Group[] = [];
+  for (let terrace = 0; terrace < SCENE_TERRACE_COUNT; terrace += 1) {
+    const group = new Group();
+    terraces.push(group);
+    root.add(group);
+  }
 
   for (let segment = 0; segment < SCENE_SEGMENT_COUNT; segment += 1) {
     const material = roomMaterial(SCENE_PALETTE.segments[segment]);
     rooms.push(material);
 
-    // The spiral is one surface with no tiers of its own: it never moves, so
-    // the whole of it is a single buffer.
-    const spiral = mergeNodes(nodesOf(segment, SCENE_FLAT_STEP));
-    geometries.push(spiral);
-    root.add(new Mesh(spiral, material));
+    // The wheel: one buffer, hung on its own axle.
+    const wheelGeometry = mergeNodes(nodesOf(segment, SCENE_FLAT_STEP));
+    geometries.push(wheelGeometry);
 
-    // A tier is its own group so the game can raise it. Its six discs are
-    // merged: they always move together, and six draw calls for 72 triangles
-    // would be six too many.
-    steps[segment] = [];
-    for (let step = 0; step < SCENE_STEP_COUNT; step += 1) {
-      const geometry = mergeNodes(nodesOf(segment, step));
+    wheelGeometry.computeBoundingSphere();
+    const hub = wheelGeometry.boundingSphere?.center.clone() ?? new Vector3();
+    wheelGeometry.translate(-hub.x, -hub.y, -hub.z);
+
+    const gear = new Group();
+    gear.position.copy(hub);
+    gear.add(new Mesh(wheelGeometry, material));
+    gears.push(gear);
+    root.add(gear);
+
+    // A terrace is a full ring across all three rooms, so it belongs to a
+    // group of its own: the floor takes the rings it passes up with it, and a
+    // ring split per room would be torn into three arcs at different heights.
+    for (let terrace = 0; terrace < SCENE_TERRACE_COUNT; terrace += 1) {
+      const geometry = mergeNodes(nodesOf(segment, terrace));
       geometries.push(geometry);
-
-      const group = new Group();
-      group.add(new Mesh(geometry, material));
-      steps[segment][step] = group;
-      root.add(group);
+      terraces[terrace].add(new Mesh(geometry, material));
     }
   }
+
+  /**
+   * The platform: the floor the pet stands on.
+   *
+   * The character and the dust hang off it rather than off the arena, so the
+   * whole cargo climbs together and nothing has to be moved twice.
+   */
+  const platform = new Group();
+  root.add(platform);
+  // The floor of the bowl is a flat disc at zero — the ramps around it are
+  // what reach 46, not the ground the pet walks on.
+  platform.add(characterMount);
 
   const sharedNodes = nodesOf(SCENE_SHARED_SEGMENT, SCENE_FLAT_STEP);
   const sharedMaterial = roomMaterial(SCENE_PALETTE.shared);
   if (sharedNodes.length > 0) {
     const geometry = mergeNodes(sharedNodes);
     geometries.push(geometry);
-    root.add(new Mesh(geometry, sharedMaterial));
+    platform.add(new Mesh(geometry, sharedMaterial));
   }
+
+  // Mounted on the arena, not on the platform: the wheels stand out here and
+  // the dust belongs to the floor the ring lands on.
+  const effects: LiftEffects = createLiftEffects(
+    root,
+    gears.map((gear) => gear.position),
+  );
 
   const key = new DirectionalLight(
     new Color(SCENE_PALETTE.keyLight),
@@ -368,14 +415,49 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     });
   };
 
-  const liftStep = (segment: number, step: number, lift: number) => {
-    const group = steps[segment]?.[step];
-    if (group) group.position.y = stepOffset(step, lift, SCENE_STEP_RISE);
+  /** Axle of a wheel: horizontal and tangential, so it rolls around the bowl. */
+  const axleOf = (gear: Group) => {
+    const radial = new Vector3(gear.position.x, 0, gear.position.z);
+    if (radial.lengthSq() === 0) return new Vector3(1, 0, 0);
+
+    radial.normalize();
+    return new Vector3(-radial.z, 0, radial.x);
   };
+
+  const axles = gears.map(axleOf);
+
+  const setLevelProgress = (progress: number) => {
+    // The pit sinks around the pet rather than lifting them out of it: each
+    // level swallows one more ring into the floor, and the skyline the child
+    // is counting drops by one.
+    terraces.forEach((terrace, index) => {
+      terrace.position.y = terraceSinkY(index, progress);
+    });
+
+    gears.forEach((gear, index) => {
+      gear.quaternion.setFromAxisAngle(
+        axles[index],
+        gearAngle(index, progress),
+      );
+    });
+  };
+
+  const burstLift = (level: number) => {
+    // The ring that just landed is the one the level number names, and its
+    // radius is where the dust has to come from.
+    const landed = clamp(level - 1, 0, SCENE_TERRACE_RADII.length - 1);
+
+    effects.burst(SCENE_TERRACE_RADII[landed]);
+  };
+
+  // World height, not the platform's own: the whole arena is offset under the
+  // look-at point, and a camera aimed at the local value misses by that much.
+  const platformHeight = () => root.position.y + platform.position.y;
 
   const tick = (timeSec: number, deltaSec: number) => {
     haze.tick(timeSec);
     character?.tick(deltaSec);
+    effects.tick(deltaSec);
   };
 
   const setCharacterSkin = (next: RobotDogSkin) => {
@@ -406,6 +488,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     character?.dispose();
     character = null;
     haze.dispose();
+    effects.dispose();
     for (const geometry of geometries) geometry.dispose();
     for (const material of rooms) material.dispose();
     sharedMaterial.dispose();
@@ -414,7 +497,9 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   return {
     scene,
     highlight,
-    liftStep,
+    setLevelProgress,
+    burstLift,
+    platformHeight,
     tick,
     setCharacterSkin,
     playCharacterAction,

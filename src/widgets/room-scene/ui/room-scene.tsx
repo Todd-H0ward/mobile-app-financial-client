@@ -18,17 +18,16 @@ import {
   type RobotDogAction,
   type RobotDogSkin,
 } from '@/entities/robot-dog';
-import { ROOM_IDS, type RoomId, roomIndex } from '@/entities/room';
+import { roomIndex } from '@/entities/room';
 import {
   CAMERA_FAR,
   CAMERA_NEAR,
   damp,
-  liftFor,
+  levelProgress,
   orbitPosition,
+  SCENE_LIFT_SEC,
   SCENE_PALETTE,
   SCENE_PIVOT,
-  SCENE_SEGMENT_COUNT,
-  SCENE_STEP_COUNT,
 } from '@/entities/scene';
 
 import { CONTENT_PADDING, SPACING } from '@/shared/constants';
@@ -50,19 +49,14 @@ interface RoomSceneProps {
   /** Raised by a button and by a settled swipe alike. */
   onViewChange: (view: SceneView) => void;
   /**
-   * How many tiers of discs stand raised in each room, `0 … SCENE_STEP_COUNT`.
+   * How far out of the pit the game has climbed, `0 … SCENE_TERRACE_COUNT`.
    *
-   * The staircase grows out of the floor one tier at a time, so raising the
-   * next one is a single increment here. A room left out keeps all of its
-   * tiers up — that is the model as the artist built it.
+   * Zero parks the platform on the floor of the pit with the walls towering
+   * over it; the last level lifts it clear of the rim. Raising it turns the
+   * gear train and throws dust — the climb is the reward, so it is animated
+   * rather than snapped.
    */
-  raisedSteps?: Partial<Record<RoomId, number>>;
-  /**
-   * Same ladder for every room. Prefer this over `raisedSteps` when the
-   * control is a single slider — a number dependency cannot go stale the way
-   * a freshly allocated object sometimes does under Fast Refresh.
-   */
-  raisedStepCount?: number;
+  level?: number;
   /** The coat the dog wears. Swapping it reloads the model. */
   petSkin?: RobotDogSkin;
   /** What the dog does when nothing interrupts it — its state. */
@@ -97,17 +91,19 @@ const MAX_DELTA = 0.1;
  * A step rising is the game telling the child something happened; at the
  * camera's pace it would be over before they looked.
  */
-const STEP_SMOOTHING = 0.02;
+/**
+ * Share of the climb still left after a second.
+ *
+ * Derived from the time a level is meant to take rather than written down as
+ * a magic constant, so changing `SCENE_LIFT_SEC` changes the feel.
+ */
+const LIFT_SMOOTHING = 0.02 ** (1 / SCENE_LIFT_SEC);
 
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
 
 /** A `[segment][step]` table, filled by `value`. */
-const everyStep = (value: () => number): number[][] =>
-  Array.from({ length: SCENE_SEGMENT_COUNT }, () =>
-    Array.from({ length: SCENE_STEP_COUNT }, value),
-  );
 
 /**
  * A canvas that is not a canvas.
@@ -179,8 +175,7 @@ const createRenderer = (gl: ExpoWebGLRenderingContext): WebGLRenderer => {
 export const RoomScene = ({
   view,
   onViewChange,
-  raisedSteps,
-  raisedStepCount,
+  level = 0,
   petSkin = DEFAULT_ROBOT_DOG_SKIN,
   petAction = DEFAULT_ROBOT_DOG_ACTION,
   petTapAction = 'joy',
@@ -236,8 +231,9 @@ export const RoomScene = ({
    * Same reason as the camera — a tier climbs over half a second, and driving
    * that through state would re-render the screen on every frame of it.
    */
-  const stepTargets = useRef(everyStep(() => 1));
-  const stepLifts = useRef(everyStep(() => 1));
+  /** Where the platform is heading, and where it is now: `0 … 1`. */
+  const liftTarget = useRef(levelProgress(level));
+  const lift = useRef(levelProgress(level));
 
   /** Read by the loop, which outlives every render that changes them. */
   const clearColor = useRef(SCENE_PALETTE.background);
@@ -267,20 +263,20 @@ export const RoomScene = ({
   }, [isAnimated, view]);
 
   useEffect(() => {
-    ROOM_IDS.forEach((room, segment) => {
-      const raised = raisedStepCount ?? raisedSteps?.[room] ?? SCENE_STEP_COUNT;
+    const next = levelProgress(level);
+    const isClimbing = next > liftTarget.current;
+    liftTarget.current = next;
 
-      for (let step = 0; step < SCENE_STEP_COUNT; step += 1) {
-        const lift = liftFor(step, raised);
-        stepTargets.current[segment][step] = lift;
-        // Snap the live pose too: the slider (and any future game raise) must
-        // move the mesh even if the RAF loop is between frames or was rebuilt
-        // by a Fast Refresh that left an orphaned callback.
-        stepLifts.current[segment][step] = lift;
-        model.current?.liftStep(segment, step, lift);
-      }
-    });
-  }, [raisedStepCount, raisedSteps]);
+    if (!isAnimatedRef.current) {
+      lift.current = next;
+      model.current?.setLevelProgress(next);
+      return;
+    }
+
+    // Dust on the way up only. Sliding back down is a debug knob, not an
+    // event the child earned.
+    if (isClimbing) model.current?.burstLift(level);
+  }, [level]);
 
   useEffect(() => {
     if (isAnimated) camera.applyView(view);
@@ -345,13 +341,9 @@ export const RoomScene = ({
 
       lensRef.current = lens;
 
-      // Seed the mesh to whatever the slider already asked for, so the first
-      // frame is not a full staircase that then drops a second later.
-      for (let segment = 0; segment < SCENE_SEGMENT_COUNT; segment += 1) {
-        for (let step = 0; step < SCENE_STEP_COUNT; step += 1) {
-          built.liftStep(segment, step, stepLifts.current[segment][step]);
-        }
-      }
+      // Seed the platform where the game already is, so a rebuilt context
+      // does not replay the whole climb from the bottom of the pit.
+      built.setLevelProgress(lift.current);
 
       renderer.current = webgl;
       model.current = built;
@@ -422,30 +414,22 @@ export const RoomScene = ({
           state.distance = target.distance;
         }
 
-        for (let segment = 0; segment < SCENE_SEGMENT_COUNT; segment += 1) {
-          for (let step = 0; step < SCENE_STEP_COUNT; step += 1) {
-            const stepTarget = stepTargets.current[segment][step];
-            const lift = isAnimatedRef.current
-              ? damp(
-                  stepLifts.current[segment][step],
-                  stepTarget,
-                  STEP_SMOOTHING,
-                  delta,
-                )
-              : stepTarget;
-
-            stepLifts.current[segment][step] = lift;
-            built.liftStep(segment, step, lift);
-          }
-        }
+        lift.current = isAnimatedRef.current
+          ? damp(lift.current, liftTarget.current, LIFT_SMOOTHING, delta)
+          : liftTarget.current;
+        built.setLevelProgress(lift.current);
 
         const { x, y, z } = orbitPosition(
           state.azimuth,
           state.elevation,
           state.distance,
         );
-        lens.position.set(x, y, z);
-        lens.lookAt(...SCENE_PIVOT);
+
+        // The camera rides with the floor: the pet climbs two hundred units
+        // over five levels, and a camera left at the bottom would lose it.
+        const eyeY = built.platformHeight();
+        lens.position.set(x, y + eyeY, z);
+        lens.lookAt(SCENE_PIVOT[0], eyeY, SCENE_PIVOT[2]);
 
         built.tick(now / 1000, delta);
         webgl.setClearColor(clear.set(clearColor.current), 1);

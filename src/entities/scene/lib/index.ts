@@ -8,4 +8,11 @@ export {
   normalizeAngle,
   orbitPosition,
 } from './orbit';
+export {
+  gearAngle,
+  levelProgress,
+  sinkBudget,
+  terraceSinkY,
+  terracesInView,
+} from './pit';
 export { liftFor, stepOffset } from './steps';

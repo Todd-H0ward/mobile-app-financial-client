@@ -7,20 +7,19 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RoomScene, type SceneView } from '@/widgets/room-scene';
 
 import { DEFAULT_ROOM } from '@/entities/room';
-import { SCENE_STEP_COUNT } from '@/entities/scene';
+import { SCENE_LEVEL_COUNT } from '@/entities/scene';
 import { usePetAction, usePetSkin } from '@/entities/user';
 
 import {
   CONTENT_PADDING,
   DYNAMIC_ROUTES,
-  HIT_SLOP_SIZE,
   RADII,
   SPACING,
   STATIC_ROUTES,
 } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { SettingsIcon, Slider, Text, ThemedView } from '@/shared/ui';
+import { Button, SettingsIcon, Text, ThemedView } from '@/shared/ui';
 import { hitSlopFor } from '@/shared/utils';
 
 import { petActionFor } from '../lib/pet-action';
@@ -37,7 +36,7 @@ const GEAR_SIZE = 40;
  * Vertical travel for the five tiers. Kept short so the rail fits between the
  * gear and the room buttons without spilling past the safe area.
  */
-const STEP_SLIDER_HEIGHT = 168;
+const _STEP_SLIDER_HEIGHT = 168;
 
 /** Room-button strip under the scene — keep the rail clear of it. */
 const ROOM_CONTROLS_CLEARANCE = 56;
@@ -106,10 +105,16 @@ export const HomeScreen = () => {
   /** Opens looking into a room on the horizon — not overhead at an angle. */
   const [view, setView] = useState<SceneView>(DEFAULT_ROOM);
   /**
-   * How many disc tiers stand up in every room, `0` (flat) … `SCENE_STEP_COUNT`.
-   * Starts fully raised — that is the model as the artist left it.
+   * How far out of the pit the game has climbed, `0 … SCENE_LEVEL_COUNT`.
+   *
+   * Starts at the bottom: the child opens the game standing on the floor of
+   * the pit with the walls above them, and every level lifts the platform a
+   * ring higher until it clears the rim. Local state for now — the real game
+   * will read this off the period the player has finished.
    */
-  const [raisedStepCount, setRaisedStepCount] = useState(SCENE_STEP_COUNT);
+  const [level, setLevel] = useState(0);
+  /** At the top the button turns into a way back down, not a dead end. */
+  const isOutOfPit = level >= SCENE_LEVEL_COUNT;
 
   if (hud.isSummary) {
     return <Redirect href={STATIC_ROUTES.PERIOD_SUMMARY} />;
@@ -128,7 +133,7 @@ export const HomeScreen = () => {
       <RoomScene
         view={view}
         onViewChange={setView}
-        raisedStepCount={raisedStepCount}
+        level={level}
         petSkin={petSkin}
         petAction={petActionFor(hud.pet?.moodName ?? null, chosenAction)}
         isAnimated={hud.isAnimationEnabled}
@@ -156,7 +161,7 @@ export const HomeScreen = () => {
       >
         <View
           style={[
-            styles.stepsCard,
+            styles.levelCard,
             {
               backgroundColor: theme.surface,
               borderColor: theme.border,
@@ -164,20 +169,19 @@ export const HomeScreen = () => {
           ]}
         >
           <Text variant="label" themeColor="textMuted">
-            {raisedStepCount}
+            {t('scene.level', { level, total: SCENE_LEVEL_COUNT })}
           </Text>
-          <Slider
-            accessibilityLabel={t('scene.stepsA11y')}
-            orientation="vertical"
-            value={raisedStepCount}
-            min={0}
-            max={SCENE_STEP_COUNT}
-            step={1}
-            color="primary"
-            isThumbFilled
-            onChange={setRaisedStepCount}
-            style={styles.stepsSlider}
-          />
+          <Button
+            size="s"
+            variant={isOutOfPit ? 'secondary' : 'primary'}
+            onPress={() =>
+              setLevel((current) =>
+                current >= SCENE_LEVEL_COUNT ? 0 : current + 1,
+              )
+            }
+          >
+            {t(isOutOfPit ? 'scene.levelReset' : 'scene.levelUp')}
+          </Button>
         </View>
       </View>
     </ThemedView>
@@ -217,24 +221,13 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
   },
-  stepsCard: {
+  levelCard: {
     alignItems: 'center',
     alignSelf: 'flex-end',
     borderRadius: RADII.l,
     borderWidth: 1,
     gap: SPACING.one,
-    height: STEP_SLIDER_HEIGHT,
-    justifyContent: 'center',
-    overflow: 'hidden',
-    paddingHorizontal: SPACING.one,
+    paddingHorizontal: SPACING.two,
     paddingVertical: SPACING.two,
-    // Track hit area is HIT_SLOP_SIZE; padding keeps the thumb inside the card.
-    width: HIT_SLOP_SIZE + SPACING.two,
-  },
-  stepsSlider: {
-    // Explicit height — `%` / flex on the vertical slider overgrows the card.
-    height:
-      STEP_SLIDER_HEIGHT - SPACING.two * 2 - SPACING.one - 12 /* label line */,
-    width: HIT_SLOP_SIZE,
   },
 });

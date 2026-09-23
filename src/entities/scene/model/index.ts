@@ -10,6 +10,15 @@ export {
   TOP_FIT,
 } from './camera';
 export { SCENE_PALETTE } from './palette';
+export {
+  SCENE_GEAR_TURN,
+  SCENE_LEVEL_COUNT,
+  SCENE_LIFT_SEC,
+  SCENE_PLATFORM_RADIUS,
+  SCENE_TERRACE_COUNT,
+  SCENE_TERRACE_RADII,
+  SCENE_TERRACE_RISE,
+} from './pit';
 export type { SceneGeometry, SceneNode, SceneSource } from './source';
 export {
   SCENE_FLAT_STEP,

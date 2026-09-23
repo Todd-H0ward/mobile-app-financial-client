@@ -20,6 +20,10 @@ const SCENE_PALETTE = {
   segmentsMuted: ['#C4788A', '#6AADB0', '#C4B06A'],
   /** Whatever stands on the axis and belongs to no room. */
   shared: '#9B7EBD',
+  /** Grit thrown off the rim when the platform climbs out of the pit. */
+  dust: '#C9B08A',
+  /** The gear train straining — brief, bright, drawn additively. */
+  spark: '#FFD27A',
   /** Soft warm key — Smash Hit corridor light. */
   keyLight: '#FFF4E6',
   /** Cool sky bounce on the shaded side. */

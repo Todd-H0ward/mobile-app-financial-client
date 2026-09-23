@@ -213,7 +213,9 @@
     "top": "Top",
     "topA11y": "Look from above",
     "roomA11y": "Turn to the room: {{room}}",
-    "stepsA11y": "How many staircase tiers are raised"
+    "level": "Level {{level}} of {{total}}",
+    "levelUp": "Rise",
+    "levelReset": "Restart"
   },
   "wallet": {
     "source": {
