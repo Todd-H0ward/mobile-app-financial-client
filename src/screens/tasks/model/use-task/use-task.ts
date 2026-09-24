@@ -11,8 +11,10 @@ import {
 import {
   applyCompleteTask,
   selectTask,
+  type UserSave,
   useUpdateUser,
   useUser,
+  useUserStore,
 } from '@/entities/user';
 
 import { hapticSuccess, useTimeSource } from '@/shared/lib';
@@ -48,6 +50,20 @@ interface TasksListController {
 }
 
 // ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
+const isSamePeriod = (
+  current: UserSave | null,
+  rendered: UserSave | null,
+): current is UserSave =>
+  current !== null &&
+  rendered !== null &&
+  current.createdAt === rendered.createdAt &&
+  current.settings.isDemoMode === rendered.settings.isDemoMode &&
+  current.period.index === rendered.period.index;
+
+// ═══════════════════════════════════════════
 // HOOKS
 // ═══════════════════════════════════════════
 
@@ -71,11 +87,11 @@ export const useTasksList = (): TasksListController => {
     rows,
     canPlay: Boolean(canPlay),
     openTask: (taskId) => {
-      if (!user) return;
-      if (user.period.phase === 'active') {
-        const result = selectTask(user, taskId);
-        if (result.ok) updateUser(() => result.user);
-      }
+      const current = useUserStore.getState().user;
+      if (!isSamePeriod(current, user) || current.period.phase !== 'active')
+        return;
+      const result = selectTask(current, taskId);
+      if (result.ok) updateUser(() => result.user);
     },
   };
 };
@@ -103,24 +119,27 @@ export const useTaskPlay = (taskId: string): TaskPlayController | null => {
     sheet,
 
     complete: (rewardShare, _isCorrect) => {
-      if (user.period.phase === 'planning') {
+      // A second press may arrive before React renders the updated save.
+      // Validate and credit the latest state synchronously, before feedback.
+      const current = useUserStore.getState().user;
+      if (!isSamePeriod(current, user)) return false;
+      if (current.period.phase === 'planning') {
         setSheet('planning');
         return false;
       }
-      if (!canPlay) return false;
 
-      const outcome = applyCompleteTask(user, task.id, time, rewardShare);
+      const outcome = applyCompleteTask(current, task.id, time, rewardShare);
       if (!outcome.ok) return false;
 
+      updateUser(() => outcome.user);
       hapticSuccess();
       showFeedback({
-        before: user,
+        before: current,
         after: outcome.user,
         action: 'task',
         whyText: task.explanation,
         params: { reward: outcome.reward },
       });
-      updateUser(() => outcome.user);
       return true;
     },
 
