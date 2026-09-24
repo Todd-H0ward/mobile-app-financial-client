@@ -6,7 +6,7 @@ import type { BudgetDirection } from '@/entities/economy';
 
 /** What the child set aside per direction. Coins, whole numbers, ≥ 0. */
 interface BudgetPlan {
-  /** Must-haves: food, heating. */
+  /** Must-haves: food, the robot's charge. */
   needs: number;
   /** Nice-to-haves: toys, room decorations. */
   wants: number;

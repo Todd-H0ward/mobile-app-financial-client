@@ -10,8 +10,6 @@ import {
 import { createInitialUser } from '../../model/initial-user';
 import type { UserSave } from '../../model/types';
 
-import { buildBill } from './build-bill';
-import { insulationPayback } from './insulation-payback';
 import {
   areNeedsMet,
   canFinishPeriod,
@@ -20,7 +18,6 @@ import {
   finishPeriod,
   startPeriod,
 } from './period';
-import { setTemperature } from './set-temperature';
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -124,29 +121,13 @@ describe('endPeriod — next period shape', () => {
   it('applies one-step need decay', () => {
     const before = createInitialUser({ playerName: 'Аня' });
     const settled = endPeriod(
-      finishPeriod(startPeriod(makeUser({ pet: before.pet }))),
+      finishPeriod(startPeriod(makeUser({ robot: before.robot }))),
     );
-    expect(settled.pet.comfort).toBeCloseTo(
-      clampDecay(before.pet.comfort, PERIOD_NEED_DECAY.comfort),
+    expect(settled.robot.charge).toBeCloseTo(
+      clampDecay(before.robot.charge, PERIOD_NEED_DECAY.charge),
     );
-    expect(settled.pet.spirit).toBeCloseTo(
-      clampDecay(before.pet.spirit, PERIOD_NEED_DECAY.spirit),
-    );
-  });
-
-  it('decays comfort faster for chilly — trait shifts need speed', () => {
-    const before = createInitialUser({ playerName: 'Аня' });
-    const chillyPet = { ...before.pet, traitIds: ['chilly'] };
-    const settled = endPeriod(
-      finishPeriod(startPeriod(makeUser({ pet: chillyPet }))),
-    );
-    const expectedComfort = clampDecay(
-      before.pet.comfort,
-      PERIOD_NEED_DECAY.comfort * 1.25,
-    );
-    expect(settled.pet.comfort).toBeCloseTo(expectedComfort);
-    expect(settled.pet.comfort).toBeLessThan(
-      clampDecay(before.pet.comfort, PERIOD_NEED_DECAY.comfort),
+    expect(settled.robot.spirit).toBeCloseTo(
+      clampDecay(before.robot.spirit, PERIOD_NEED_DECAY.spirit),
     );
   });
 });
@@ -154,55 +135,12 @@ describe('endPeriod — next period shape', () => {
 const clampDecay = (value: number, decay: number) =>
   Math.max(0, Math.min(1, value - decay));
 
-describe('endPeriod — heating bill', () => {
-  it('charges heating once and bumps fact.needs', () => {
-    const warm = makeUser({
-      home: {
-        ...createInitialUser().home,
-        temperature: 0.8,
-        insulationIds: [],
-        lastBilledPeriod: 0,
-      },
-    });
-    const bill = buildBill(0.8, []);
-    expect(bill.total).toBeGreaterThan(0);
-
-    const balanceBefore = warm.wallet.balance;
-    const settled = endPeriod(finishPeriod(startPeriod(warm)));
-
-    expect(settled.home.lastBilledPeriod).toBe(warm.period.index);
-    expect(settled.wallet.balance).toBe(balanceBefore - bill.total);
-    expect(settled.history[0]?.fact.needs).toBe(bill.total);
-  });
-
-  it('never drives the wallet below zero on a short bill purse', () => {
-    const poor = makeUser({
-      wallet: { balance: 3, history: [], entryCount: 0 },
-      home: {
-        ...createInitialUser().home,
-        temperature: 1,
-        insulationIds: [],
-        lastBilledPeriod: 0,
-      },
-    });
-    const settled = endPeriod(finishPeriod(startPeriod(poor)));
-    expect(settled.wallet.balance).toBe(0);
-  });
-});
-
 describe('endPeriod — regularity bonus', () => {
   it('credits the bonus when the child deposited', () => {
-    // Free heat so the heating bill does not net out the bonus under test.
     const user = makeUser({
       savings: {
         ...createInitialUser().savings,
         depositsThisPeriod: 1,
-      },
-      home: {
-        ...createInitialUser().home,
-        temperature: 0.3,
-        insulationIds: [],
-        lastBilledPeriod: 0,
       },
     });
     const before = user.wallet.balance;
@@ -285,41 +223,5 @@ describe('period history cap', () => {
     expect(user.history).toHaveLength(PERIOD_HISTORY_LIMIT);
     expect(user.history[0]?.index).toBe(total - PERIOD_HISTORY_LIMIT + 1);
     expect(user.history[PERIOD_HISTORY_LIMIT - 1]?.index).toBe(total);
-  });
-});
-
-describe('buildBill', () => {
-  it('is free at or below the free base', () => {
-    expect(buildBill(0.3, []).total).toBe(0);
-    expect(buildBill(0, []).total).toBe(0);
-  });
-
-  it('charges tenths above the base and discounts insulation', () => {
-    const plain = buildBill(0.5, []);
-    const insulated = buildBill(0.5, ['window']);
-    expect(plain.total).toBeGreaterThan(insulated.total);
-  });
-});
-
-describe('insulationPayback', () => {
-  it('says never when heat is free — nothing to save', () => {
-    expect(insulationPayback(8, 0.3, []).kind).toBe('never');
-  });
-
-  it('names periods at the current thermostat', () => {
-    const result = insulationPayback(8, 0.5, []);
-    expect(result).toEqual({
-      kind: 'periods',
-      savingPerPeriod: 4,
-      periods: 2,
-    });
-  });
-});
-
-describe('setTemperature', () => {
-  it('clamps into 0…1', () => {
-    const user = makeUser();
-    expect(setTemperature(user, 2).home.temperature).toBe(1);
-    expect(setTemperature(user, -1).home.temperature).toBe(0);
   });
 });

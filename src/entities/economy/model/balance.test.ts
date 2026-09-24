@@ -4,7 +4,6 @@ import { GAME_REWARDS } from '@/entities/minigame';
 
 import {
   BUDGET_TOLERANCE,
-  HEATING,
   PERIOD_HISTORY_LIMIT,
   PERIOD_NEED_DECAY,
   REGULARITY_BONUS,
@@ -30,7 +29,6 @@ describe('economy balance table', () => {
   it('names every built-in wallet source', () => {
     expect(WALLET_SOURCES.startingWallet).toMatch(/^wallet:/);
     expect(WALLET_SOURCES.regularityBonus).toMatch(/^bonus:/);
-    expect(WALLET_SOURCES.heatingBill).toMatch(/^bill:/);
     expect(WALLET_SOURCES.gamePuzzle).toMatch(/^game:/);
   });
 
@@ -39,17 +37,10 @@ describe('economy balance table', () => {
     expect(BUDGET_TOLERANCE).toBe(0);
   });
 
-  it('keeps heating knobs in range', () => {
-    expect(HEATING.freeTemperature).toBeGreaterThanOrEqual(0);
-    expect(HEATING.freeTemperature).toBeLessThan(1);
-    expect(HEATING.coinsPerTenth).toBeGreaterThan(0);
-    expect(HEATING.insulationDiscount).toBeGreaterThan(0);
-  });
-
   it('decays needs only on settlement, never past 1', () => {
-    expect(PERIOD_NEED_DECAY.comfort).toBeGreaterThan(0);
+    expect(PERIOD_NEED_DECAY.charge).toBeGreaterThan(0);
     expect(PERIOD_NEED_DECAY.spirit).toBeGreaterThan(0);
-    expect(PERIOD_NEED_DECAY.comfort).toBeLessThan(1);
+    expect(PERIOD_NEED_DECAY.charge).toBeLessThan(1);
     expect(PERIOD_NEED_DECAY.spirit).toBeLessThan(1);
   });
 });

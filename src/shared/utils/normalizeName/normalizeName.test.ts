@@ -16,7 +16,7 @@ describe('normalizeName', () => {
   });
 
   it('cuts to the limit it was given', () => {
-    expect(normalizeName('Длинноеимяпитомца', 6)).toBe('Длинно');
+    expect(normalizeName('Длинноеимяробота', 6)).toBe('Длинно');
   });
 
   it('gives an empty string back for spaces only', () => {

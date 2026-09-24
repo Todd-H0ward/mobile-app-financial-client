@@ -6,7 +6,7 @@ import { ICON_SIZE, ICON_STROKE, type IconProps, useIconColor } from './icon';
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** The room the pet lives in — the first tab. */
+/** Home — the pit with the robot dog in it. */
 export const HomeIcon = ({ size = ICON_SIZE, color }: IconProps) => {
   const stroke = useIconColor(color);
 

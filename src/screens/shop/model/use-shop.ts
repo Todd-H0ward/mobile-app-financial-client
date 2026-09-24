@@ -8,7 +8,6 @@ import {
   listCatalogueByShop,
   type ShopId,
 } from '@/entities/catalogue';
-import { priceFor } from '@/entities/pet';
 import {
   applyPurchase,
   canAfford,
@@ -79,16 +78,7 @@ export const useShop = (shopId: ShopId): ShopController => {
 
   const canShop = user?.period.phase === 'active';
   const balance = user?.wallet.balance ?? 0;
-  const traitIds = user?.pet.traitIds;
-
-  const items = useMemo(
-    () =>
-      listCatalogueByShop(shopId).map((item) => ({
-        ...item,
-        price: priceFor(item.price, item.category, traitIds ?? []),
-      })),
-    [shopId, traitIds],
-  );
+  const items = useMemo(() => listCatalogueByShop(shopId), [shopId]);
 
   const overPlanBy =
     user && selected

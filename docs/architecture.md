@@ -15,27 +15,20 @@ src/
 │   ├── _layout.tsx           # Providers + root Stack
 │   ├── index.tsx             # → screens/entry
 │   ├── home.tsx
-│   ├── heating.tsx
-│   ├── onboarding.tsx
-│   ├── pet-create.tsx
-│   ├── pet-grew.tsx
+│   ├── lesson/[cellId].tsx
 │   ├── budget-plan.tsx
 │   ├── end-period.tsx
 │   ├── period-summary.tsx
 │   ├── recovery.tsx
 │   ├── shop/ · savings/ · tasks/ · games/
 │   ├── history.tsx · glossary.tsx
-│   ├── settings.tsx · parents.tsx · ui-kit.tsx
-│   └── …
+│   └── settings.tsx · parents.tsx · ui-kit.tsx
 ├── _app/
-│   └── providers/            # Theme, Query, i18n, feedback, time, …
+│   └── providers/            # Theme, i18n, feedback, time, …
 ├── screens/
-│   ├── entry/                # / → /home or /onboarding
-│   ├── home/                 # три комнаты + HUD (2.5.3)
-│   ├── heating/              # термостат, квитанция, утепление (house.md)
-│   ├── onboarding/           # знакомство, три типа решений (2.5.1)
-│   ├── pet-create/           # встреча с питомцем (2.5.2)
-│   ├── pet-grew/             # разовая сцена роста (2.5.10)
+│   ├── entry/                # / → гостевой профиль → /home
+│   ├── home/                 # 3D-яма с робопсом (2.5.3)
+│   ├── lesson/               # урок за клеткой сцены
 │   ├── budget-plan/          # план по трём направлениям (2.5.5)
 │   ├── end-period/           # мягкое подтверждение конца дня
 │   ├── period-summary/       # план vs факт (2.5.5)
@@ -48,9 +41,9 @@ src/
 │   ├── settings/ · parents/  # ребёнок / взрослый (2.5.12)
 │   └── ui-kit/               # витрина дизайн-системы
 ├── widgets/
-│   ├── room-pager/           # street ↔ living ↔ kitchen
+│   ├── room-scene/           # three.js на expo-gl: яма, клетки, робопёс
 │   ├── hint-button/          # «?» в шапке (2.5.1)
-│   ├── pet-box/ · plan-fact-bars/ · direction-look/
+│   ├── plan-fact-bars/ · direction-look/
 │   └── minigame/             # сцены аркады
 ├── features/
 │   ├── demo-mode/            # тестовый профиль + 5 периодов (2.5.13)
@@ -60,11 +53,11 @@ src/
 │   └── games/                # вход в аркаду / лимиты сидений
 ├── entities/
 │   ├── user/                 # сейв целиком, кошелёк, период, покупки, демо
-│   ├── pet/                  # внешность, mood, рост, traits, ui/
+│   ├── robot-dog/            # окрасы, клипы, стадии, настроение, имя (лист)
 │   ├── economy/              # таблица баланса (лист)
 │   ├── budget/               # план, факт, compare, recovery tips
-│   ├── catalogue/ · goal/ · task/ · glossary/ · onboarding/ · hint/
-│   ├── room/                 # ROOM_IDS, слоты мебели
+│   ├── catalogue/ · goal/ · task/ · glossary/ · hint/ · lesson/
+│   ├── scene/ · watcher/     # геометрия ямы, камера, экраны над ареной
 │   ├── savings/              # прогресс копилки, explain withdraw
 │   ├── settings/             # барьер взрослых (лист: только gate, без store)
 │   └── minigame/             # правила аркады
@@ -80,9 +73,10 @@ Import direction is strictly downwards:
 Biome's `organizeImports` groups imports in that order (`biome.json`), so a
 misplaced import is visible in the diff.
 
-Wallet, period machine and heating bill live under `entities/user/lib/`
-(`wallet`, `period`, `purchase`, …) — there is no separate `entities/wallet` or
-`entities/heating`. Heating *UI* is `screens/heating`.
+Wallet and period machine live under `entities/user/lib/` (`wallet`,
+`period`, `purchase`, …) — there is no separate `entities/wallet`. The old
+pet-in-a-house concept (`entities/pet`, onboarding, heating) is deleted; see
+[robot-dog.md](./robot-dog.md).
 
 ## Adding a screen
 
@@ -92,8 +86,8 @@ Wallet, period machine and heating bill live under `entities/user/lib/`
 4. Add a row to `STATIC_ROUTES` / `DYNAMIC_ROUTES` when the screen is reached by
    name, and a hint id in `HINT_SCREENS` + `content/hints.json` (2.5.1).
 
-There is **no tab bar**. Navigation is a root `Stack`: `/home` holds the three
-rooms (`widgets/room-pager`); everything else is pushed over the world. See
+There is **no tab bar**. Navigation is a root `Stack`: `/home` holds the 3D
+pit (`widgets/room-scene`); everything else is pushed over the world. See
 [AGENTS.md](../AGENTS.md#navigation-three-rooms-everything-else-on-the-stack).
 
 A module that has a test is a folder: `rules.ts` and `rules.test.ts` live in
@@ -149,11 +143,11 @@ Child-facing sound / motion switches live on `/settings` and on the user save.
   2.5.14, см. [content.md](./content.md). Импортируется по алиасу
   `@/content/*` (`tsconfig.json`); сейв хранит только id позиций.
 - Числа экономики — в `entities/economy` (`balance.ts`): стартовый кошелёк,
-  награды за задания, бонус регулярности, отопление (`HEATING`), лимит
+  награды за задания, бонус регулярности, спад заряда за период, лимит
   истории. Экраны числа не правят. Там же `directions.ts` — три направления
   бюджета (листовая сущность).
 - Контентные сущности валидируют JSON при загрузке модуля:
-  `onboarding`, `hint`, `task`, `goal`, `catalogue`, `glossary`. Битая строка
+  `hint`, `task`, `goal`, `catalogue`, `glossary`, `lesson`. Битая строка
   падает в тестах, а не на первом экране ребёнка.
 - Сетевого слоя нет: игровой цикл офлайн ([privacy.md](./privacy.md)).
   `shared/api`, axios и TanStack Query удалены — не заготовка, а сознательный
@@ -171,7 +165,7 @@ components; keep keys in `shared/i18n/locales/*.json`.
 ## Navigation
 
 Root layout is a `Stack` (`src/app/_layout.tsx`). There is no `(tabs)` group and
-no `app-tabs` widget: the world is `/home` + `widgets/room-pager`. Native tabs
+no `app-tabs` widget: the world is `/home` + `widgets/room-scene`. Native tabs
 were tried and abandoned — they abort iOS in Expo Go; details in
 [AGENTS.md](../AGENTS.md#native-tabs-are-off--do-not-bring-them-back).
 

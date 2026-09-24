@@ -29,8 +29,6 @@ const sourceLabel = (
       return t('wallet.source.startingWallet');
     case 'regularityBonus':
       return t('wallet.source.regularityBonus');
-    case 'heatingBill':
-      return t('wallet.source.heatingBill');
     case 'gamePuzzle':
       return t('wallet.source.gamePuzzle');
     case 'gameSpacewar':

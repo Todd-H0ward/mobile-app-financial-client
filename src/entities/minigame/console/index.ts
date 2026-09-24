@@ -7,7 +7,7 @@ export {
   recordSpacewarTime,
 } from './lib';
 export {
-  CONSOLE_FURNITURE_ID,
+  CONSOLE_OWNED_ID,
   isConsoleOwned,
   useArcadeScoresStore,
 } from './model';

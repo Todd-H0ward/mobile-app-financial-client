@@ -5,8 +5,6 @@ export {
   isShopId,
   listCatalogue,
   listCatalogueByShop,
-  listInsulationItems,
-  listOwnedToys,
 } from './lib';
 export type {
   CatalogueFile,

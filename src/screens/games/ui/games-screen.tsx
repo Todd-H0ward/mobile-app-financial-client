@@ -18,7 +18,7 @@ export const GamesScreen = () => {
   const { t } = useTranslation();
   const router = useRouter();
   const user = useUser();
-  const levels = ownedPuzzles(user?.home.furnitureIds ?? []);
+  const levels = ownedPuzzles(user?.ownedItemIds ?? []);
 
   return (
     <Screen gap="three" isTabBarVisible={false}>

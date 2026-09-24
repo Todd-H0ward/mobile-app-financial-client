@@ -3,7 +3,6 @@ import {
   directionForKind,
   getCatalogueItem,
 } from '@/entities/catalogue';
-import { priceFor } from '@/entities/pet';
 
 import type { TimeSource } from '@/shared/lib/time-source';
 import { clamp } from '@/shared/utils';
@@ -46,8 +45,7 @@ type PurchaseResult = PurchaseOk | PurchaseFail;
  *
  * Only legal in the `active` phase — docs/game-period.md. Shortfalls come back
  * as a result so the shop can name the gap and the three recovery options
- * (2.5.6 / docs/economy.md). Price follows `priceFor` so traits shift the till,
- * not only the label on the shelf.
+ * (2.5.6 / docs/economy.md).
  */
 export const applyPurchase = (
   user: UserSave,
@@ -63,7 +61,7 @@ export const applyPurchase = (
     return { ok: false, reason: 'unknown_item' };
   }
 
-  const price = priceFor(item.price, item.category, user.pet.traitIds);
+  const price = item.price;
   const direction = directionForKind(item.kind);
   const debit = debitWallet(user.wallet, {
     source: `purchase:${item.id}`,
@@ -87,20 +85,15 @@ export const applyPurchase = (
   const factNext = user.period.fact[direction] + price;
   const overPlanBy = Math.max(0, factNext - user.period.plan[direction]);
 
-  let comfort = user.pet.comfort;
-  if (item.comfortDelta != null) {
-    comfort = clamp(comfort + item.comfortDelta, 0, 1);
-  }
+  const charge =
+    item.chargeDelta != null
+      ? clamp(user.robot.charge + item.chargeDelta, 0, 1)
+      : user.robot.charge;
 
-  const furnitureIds =
-    item.furnitureId && !user.home.furnitureIds.includes(item.furnitureId)
-      ? [...user.home.furnitureIds, item.furnitureId]
-      : user.home.furnitureIds;
-
-  const insulationIds =
-    item.insulationId && !user.home.insulationIds.includes(item.insulationId)
-      ? [...user.home.insulationIds, item.insulationId]
-      : user.home.insulationIds;
+  const ownedItemIds =
+    item.ownedId && !user.ownedItemIds.includes(item.ownedId)
+      ? [...user.ownedItemIds, item.ownedId]
+      : user.ownedItemIds;
 
   return {
     ok: true,
@@ -117,15 +110,11 @@ export const applyPurchase = (
           [direction]: factNext,
         },
       },
-      pet: {
-        ...user.pet,
-        comfort,
+      robot: {
+        ...user.robot,
+        charge,
       },
-      home: {
-        ...user.home,
-        furnitureIds,
-        insulationIds,
-      },
+      ownedItemIds,
     },
   };
 };

@@ -16,14 +16,14 @@
     "english": "English",
     "interface": "Interface",
     "animations": "Animations",
-    "animationsSubtitle": "Smooth transitions and pet movement. Honours system Reduce Motion",
+    "animationsSubtitle": "Smooth transitions and robot movement. Honours system Reduce Motion",
     "sound": "Sound",
     "soundSubtitle": "Haptics and future audio — one switch for both",
     "development": "Development",
     "uiKitDescription": "Design system showcase: all components and states on one screen.",
     "openUiKit": "Open UI kit",
     "profile": "Profile",
-    "profileDescription": "Deletes profile and restarts onboarding. Coins, savings jar, and period history will be permanently lost.",
+    "profileDescription": "Deletes the profile and starts the game from scratch. Coins, savings jar, and period history will be permanently lost.",
     "handbook": "History and glossary",
     "openHistory": "History",
     "openGlossary": "Glossary",
@@ -32,10 +32,10 @@
     "parents": "Grown-ups",
     "parentsDescription": "A report on the child's decisions, demo mode and profile management. Entry through a multiplication.",
     "openParents": "Open the section",
-    "pet": "Pet",
-    "petSkin": "Robot dog coat",
+    "robot": "Robot dog",
+    "robotSkin": "Robot dog coat",
     "petSkinSubtitle": "Looks only — it changes nothing in the game",
-    "petAction": "What it does",
+    "robotAction": "What it does",
     "petActionSubtitle": "The resting state it returns to after reacting",
     "petTapHint": "Tap the dog on the home screen and it answers",
     "skin": {
@@ -74,22 +74,17 @@
     "toastReset": "Profile reset to the starting state"
   },
   "profileRestart": {
-    "buttonLabel": "Restart onboarding",
+    "buttonLabel": "Start over",
     "modalTitle": "Delete profile?",
     "modalDescWithName": "Profile “{{playerName}}” will be deleted from the device: coins, savings jar, and period history ({{finishedPeriods}}) will be lost.",
     "modalDescWithoutName": "Profile will be deleted from the device: coins, savings jar, and period history will be lost.",
-    "modalWarning": "It cannot be restored — onboarding will start from scratch.",
+    "modalWarning": "It cannot be restored — the game will start from scratch.",
     "keepAsIs": "Keep as is",
     "confirm": "Delete and restart",
-    "toastDeleted": "Profile deleted — onboarding starts again"
+    "toastDeleted": "Profile deleted — the game starts again"
   },
   "home": {
     "settingsA11y": "Settings",
-    "title": "Paw",
-    "atHome": "At home: {{name}}",
-    "roomComingSoon": "Pet room will appear in the first wave",
-    "petBoxLabel": "Someone is scratching inside. Tap",
-    "petBoxInvite": "Open the box — your pet is waiting",
     "balance": "Balance",
     "savings": "Savings jar",
     "planBannerTitle": "Make a budget plan",
@@ -115,26 +110,7 @@
       "comingSoon": "Tasks will show up here very soon",
       "allDone": "Every chore this period is done — well done"
     },
-    "parentsA11y": "Grown-ups",
-    "toyShelf": "Toy shelf",
-    "toyShelfTitle": "Toys on the shelf",
-    "toyShelfHint": "Pick a toy you bought. Photos will appear here later.",
-    "heating": "Warmth",
-    "heatingHint": "Thermostat and bill — choose how much comfort costs",
-    "toyPlay": "Play",
-    "toySoon": "Coming soon",
-    "furnitureSoon": "art soon",
-    "furniture": {
-      "rug": "Rug",
-      "lamp": "Night lamp",
-      "stickers": "Stickers",
-      "sweater": "Sweater",
-      "scarf": "Scarf",
-      "toy-car": "Toy car",
-      "ball": "Ball",
-      "rooms-living": "Puzzle",
-      "game-console": "Console"
-    }
+    "parentsA11y": "Grown-ups"
   },
   "parents": {
     "title": "Grown-ups",
@@ -163,20 +139,20 @@
         "savings": "Saving",
         "payments": "Payments"
       },
-      "growthTitle": "The pet",
+      "growthTitle": "The robot",
       "growthNext": "To reach “{{stage}}”: {{periods}} more periods, {{goals}} more goals, {{plans}} more kept plans.",
-      "growthDone": "The pet is fully grown — there is nowhere further to go.",
+      "growthDone": "The robot is fully built — all three stages are done.",
       "stages": {
-        "baby": "Baby",
-        "teen": "Teen",
-        "adult": "Adult"
+        "basic": "Basic build",
+        "upgraded": "Upgraded build",
+        "complete": "Complete build"
       }
     },
     "terminal": {
       "label": "FINNI · SERVICE TERMINAL",
       "statusTitle": "game status",
       "player": "player",
-      "pet": "pet",
+      "robot": "robot",
       "period": "period",
       "finished": "periods finished",
       "tasks": "tasks done",
@@ -210,7 +186,6 @@
     "source": {
       "startingWallet": "starting wallet",
       "regularityBonus": "regularity bonus",
-      "heatingBill": "heating",
       "task": "chore «{{title}}»",
       "purchase": "bought {{title}}",
       "savingsDeposit": "saved into «{{title}}»",
@@ -221,88 +196,34 @@
       "gameSnake": "snake sitting"
     }
   },
-  "pet": {
-    "species": {
-      "cat": "Cat",
-      "dog": "Dog",
-      "capybara": "Capybara"
-    },
-    "color": {
-      "sand": "Sand",
-      "graphite": "Graphite",
-      "mint": "Mint"
-    },
-    "pattern": {
-      "solid": "Solid",
-      "spots": "Spots",
-      "stripes": "Stripes"
-    },
+  "robot": {
+    "unnamed": "Robot dog",
     "mood": {
       "proud": "proud of itself",
       "content": "calm",
       "bored": "bored",
-      "uncomfortable": "uncomfortable",
+      "tired": "tired",
       "sad": "sad"
     },
     "reason": {
-      "fed": "full",
-      "warm": "the house is warm",
-      "hungry": "wants to eat",
-      "cold": "the house feels chilly",
+      "charged": "fully charged",
+      "drained": "running low on charge",
       "goal-near": "the goal is close",
-      "tasks-done": "chores are done",
-      "plan-kept": "the plan held",
+      "tasks-done": "got things done",
+      "plan-kept": "the plan worked out",
       "goal-far": "the goal is still far",
       "nothing-to-do": "nothing to do",
-      "plan-broken": "the plan slipped"
-    },
-    "play": {
-      "a11y": "You can stroke, tap and lift",
-      "hint": "Swipe to stroke. Tap to boop. Hold and pull up to lift"
-    },
-    "traits": {
-      "chilly": {
-        "title": "Chilly",
-        "blurb": "Food costs less, but gets cold faster."
-      },
-      "sweet-tooth": {
-        "title": "Sweet tooth",
-        "blurb": "Stays full longer, but food costs more."
-      },
-      "fidget": {
-        "title": "Fidget",
-        "blurb": "Toys cost less, but gets bored faster."
-      }
+      "plan-broken": "the plan drifted"
     }
-  },
-  "petCreate": {
-    "title": "Who is in the box",
-    "subtitle": "Choose who you take home and come up with a name",
-    "whoIsThis": "WHO IS THIS",
-    "color": "COLOR",
-    "pattern": "PATTERN",
-    "trait": "TRAIT",
-    "traitHint": "Every trait has a plus and a minus — that keeps it fair.",
-    "namePlaceholder": "Pet name",
-    "nameHint": "Pick any name — you can change it later",
-    "takeHome": "Take home"
   },
   "hints": {
     "buttonA11y": "Hint",
     "buttonA11yHint": "Will open hint: {{title}}",
     "understood": "Got it",
-    "onboarding": {
-      "title": "What is happening here",
-      "body": [
-        "You are getting to know the game: boop the pet, sort into boxes, and scratch a coin ticket.",
-        "Three boxes: Needs — essentials, Wants — nice things, Savings — for a goal.",
-        "You cannot fail. Any step can be retried, nothing will be lost."
-      ]
-    },
     "home": {
       "title": "Main Screen",
       "body": [
-        "Here you see the pet, coins, savings jar, and what the pet is currently doing.",
+        "The robot dog stands on a platform at the bottom of the pit. Around it are the steps with lessons.",
         "Coins come from chores and tasks. Each income shows where it came from.",
         "Tap «?» on any screen — I will tell you what to do there."
       ]
@@ -348,7 +269,7 @@
     "shop": {
       "title": "Shop",
       "body": [
-        "The street has four shops: grocery, clothes, furniture and toys. Each has its own shelf.",
+        "There are four shops: grocery, clothes, decor and toys. Each has its own shelf.",
         "A purchase spends coins and updates the period fact — so the plan can be compared with real life.",
         "If you do not have enough coins, I will say exactly how many are missing and three options: earn, take from the jar, or wait. You cannot go below zero. Toys will get mini-games later."
       ]
@@ -392,113 +313,7 @@
         "The remainder stays on screen — the plan cannot go below zero.",
         "When you press Confirm, the period goes live and you can spend."
       ]
-    },
-    "pet-create": {
-      "title": "Meet the pet",
-      "body": [
-        "Pick a species, colour and pattern — the pet updates while you look.",
-        "Choose a name; you can change it later.",
-        "Take home opens the box on the main screen."
-      ]
     }
-  },
-  "onboarding": {
-    "pawTrailA11y": "Step {{current}} of {{total}}",
-    "starterCoins": "starter coins",
-    "starterCoinsA11y": "{{count}} coins fall into the wallet",
-    "starterCoinsCaption": "Coins always show where they came from. Later, chores will bring more.",
-    "privacyNote": "The game stays on this device — it sends nothing anywhere.",
-    "emptySign": "Home ?",
-    "namedSign": "{{name}}'s Home",
-    "namePlaceholder": "Player name",
-    "nameHintEmpty": "Type any name — only you will see it",
-    "nameHintFilled": "You can change the name later in the parents section",
-    "remainder": "Coins in hand: {{count}}",
-    "remainderHint": "Tap a box — a coin jumps in. You may keep some for yourself.",
-    "stepperMinusA11y": "Remove coin: {{label}}",
-    "stepperPlusA11y": "Add coin: {{label}}",
-    "sortedCounter": "{{done}} of {{total}} done",
-    "whichBox": "Drag into a box",
-    "allSorted": "All sorted",
-    "sortCardA11y": "Put “{{item}}” into box “{{decision}}”",
-    "actions": {
-      "greeting": "Let's go!",
-      "sorting": "Next",
-      "coins": "Next",
-      "plan": "Done",
-      "name": "Play"
-    },
-    "steps": {
-      "greeting": {
-        "title": "Meet me!",
-        "line": "Boop my nose — then we'll look at three magic boxes. If anything is unclear, tap «?» above."
-      },
-      "sorting": {
-        "title": "Three boxes",
-        "line": "Drag the card into a box. If you miss, I will simply say where it belongs. You cannot fail!"
-      },
-      "coins": {
-        "title": "Secret ticket",
-        "line": "Rub the grey layer with your finger, like a lottery ticket — and see your first coins."
-      },
-      "plan": {
-        "title": "Place the coins",
-        "line": "Put coins into the boxes. You may keep some — you'll do the same at the start of every period."
-      },
-      "name": {
-        "title": "Sign by the door",
-        "line": "Type your player name — I will hang a sign over the door. Who I am — you'll find out at home, in the box."
-      }
-    },
-    "decisions": {
-      "needs": {
-        "title": "Needs",
-        "example": "Food, heating at home"
-      },
-      "wants": {
-        "title": "Wants",
-        "example": "Toy car, stickers"
-      },
-      "savings": {
-        "title": "Savings",
-        "example": "Saving for a scooter"
-      }
-    },
-    "items": {
-      "bread": {
-        "title": "Bread and milk",
-        "explanation": "Food is a Need: you cannot get through the period without it."
-      },
-      "heating": {
-        "title": "Heating at home",
-        "explanation": "Heating is paid every period, otherwise it gets chilly. That's a Need."
-      },
-      "toy-car": {
-        "title": "Toy car",
-        "explanation": "A toy car is a Want: it's fun, but you can live without it."
-      },
-      "stickers": {
-        "title": "Stickers",
-        "explanation": "Stickers are a Want: you can buy them in the next period."
-      },
-      "scooter": {
-        "title": "Saving for a scooter",
-        "explanation": "Not enough to buy a scooter right away, so we put it in Savings."
-      },
-      "rainy-day": {
-        "title": "Saving for a rainy day",
-        "explanation": "Savings help when something breaks. That's also Savings."
-      }
-    },
-    "scratchFoil": "Rub with your finger",
-    "scratchHint": "Scratch off the grey layer — like a lottery ticket.",
-    "boopA11y": "Boop the pet on the nose",
-    "boopHint": "Tap me!",
-    "trayEmpty": "All coins are in the boxes",
-    "dropCoinA11y": "Drop a coin into “{{label}}”",
-    "takeBack": "take back",
-    "planProgress": "Placed {{laid}} of {{total}}",
-    "petPreviewA11y": "Pet"
   },
   "budgetPlan": {
     "title": "Budget plan",
@@ -512,13 +327,13 @@
     "stepperMinusA11y": "Remove coin: {{label}}",
     "stepperPlusA11y": "Add coin: {{label}}",
     "needsZeroTitle": "Nothing set aside for needs",
-    "needsZeroBody": "There will be nothing to buy food and heating with. Confirm the plan anyway?",
+    "needsZeroBody": "There will be nothing to buy food and other needs with. Confirm the plan anyway?",
     "needsZeroKeep": "Back to the plan",
     "needsZeroConfirm": "Confirm anyway",
     "directions": {
       "needs": {
         "title": "Needs",
-        "example": "Food, heating at home"
+        "example": "Food, soap"
       },
       "wants": {
         "title": "Wants",
@@ -543,7 +358,7 @@
     "story": {
       "allOnPlan": "Every direction landed on the plan. Nice work keeping the three boxes in balance.",
       "wantsAteSavings": "Wants took more than planned, and those coins did not reach the savings jar. The money moved — it did not vanish.",
-      "needsOver": "Needs went over the plan. Sometimes that happens — food and heating come first.",
+      "needsOver": "Needs went over the plan. Sometimes that happens — needs come first.",
       "mixed": "Some boxes went over ({{over}}), some finished under ({{under}}). The coins moved between them.",
       "underspent": "You spent less than planned on {{under}}. The leftover coins stay with you for the next period."
     },
@@ -595,15 +410,15 @@
     "stores": {
       "grocery": {
         "title": "Grocery",
-        "subtitle": "Food, soap and warmth"
+        "subtitle": "Food and soap"
       },
       "clothes": {
         "title": "Clothes",
         "subtitle": "What you want to wear"
       },
       "furniture": {
-        "title": "Furniture",
-        "subtitle": "For the room and insulation"
+        "title": "Decor",
+        "subtitle": "Nice to have, not required"
       },
       "toys": {
         "title": "Toys",
@@ -617,15 +432,11 @@
     "items": {
       "bread": {
         "title": "Bread and milk",
-        "note": "Food for the period — without it the pet gets hungry."
+        "note": "Food for the period — a need."
       },
       "porridge": {
         "title": "Porridge",
-        "note": "A filling breakfast: the pet stays content longer."
-      },
-      "heating": {
-        "title": "Warm home",
-        "note": "Heating for the period — otherwise it gets chilly."
+        "note": "A filling breakfast — a need, not a luxury."
       },
       "soap": {
         "title": "Soap",
@@ -637,7 +448,7 @@
       },
       "toy-car": {
         "title": "Toy car",
-        "note": "A toy for the room. You will be able to play with it later."
+        "note": "A toy. You will be able to play with it later."
       },
       "ball": {
         "title": "Ball",
@@ -645,7 +456,7 @@
       },
       "rug": {
         "title": "Rug",
-        "note": "A soft floor in the pet's room."
+        "note": "A soft rug — decor, not a need."
       },
       "lamp": {
         "title": "Night light",
@@ -661,48 +472,13 @@
       },
       "puzzle-living": {
         "title": "Living-room puzzle",
-        "note": "Buy it — the puzzle appears on the living-room shelf."
+        "note": "Buy it — the puzzle unlocks in the mini-games."
       },
       "game-console": {
         "title": "Game console",
-        "note": "Buy it — Spacewar and snake unlock from the living-room shelf."
-      },
-      "window-seal": {
-        "title": "Seal the window",
-        "note": "One-time spend — every later heating bill gets smaller."
-      },
-      "draft-stopper": {
-        "title": "Door draft stopper",
-        "note": "Keeps warmth in. Pays back over a few periods at the current heat."
+        "note": "Buy it — Spacewar and snake unlock in the mini-games."
       }
     }
-  },
-  "heating": {
-    "title": "Warmth at home",
-    "subtitle": "More comfort — more coins each period",
-    "thermostatTitle": "Temperature",
-    "chilly": "chilly",
-    "cozy": "cozy",
-    "warm": "warm",
-    "coinsPerPeriod": "{{count}} coins",
-    "nowCost": "Now {{comfort}} · {{count}} coins per period",
-    "billTitle": "Bill for period {{period}}",
-    "bill": {
-      "base": "Base heat",
-      "aboveBase": "Above base: {{count}} steps",
-      "insulation": "Insulation ({{count}})"
-    },
-    "billTotal": "Total",
-    "insulationTitle": "Insulation",
-    "insulationLead": "A one-time spend lowers every later bill. Payback is counted at the current heat.",
-    "insulationOwned": "Already in — lowers the bill",
-    "ownedBadge": "yours",
-    "paybackNever": "with heat off there is nothing to save",
-    "paybackPeriods": "pays back in about {{count}} periods (−{{saving}} each)",
-    "buyWhenActive": "after the plan",
-    "confirmTitle": "Buy «{{title}}»?",
-    "confirmBody": "{{price}} will be charged. The heat discount stays forever.",
-    "confirmBuy": "Buy"
   },
   "savings": {
     "title": "Savings jar",
@@ -843,7 +619,7 @@
       },
       "needs": {
         "title": "Needs",
-        "definition": "What you cannot skip: food, warmth, soap. Leave coins for needs first."
+        "definition": "What you cannot skip: food, soap, the robot's charge. Leave coins for needs first."
       },
       "wants": {
         "title": "Wants",
@@ -930,7 +706,7 @@
       "purchaseOverPlan": "The coins left the wallet. This purchase went {{over}} over the plan for that box — the money moved, it did not vanish.",
       "deposit": "Coins left the wallet and filled the jar. The savings fact grew by the same amount.",
       "withdraw": "Coins came back to the wallet from the jar. The goal is a little farther now.",
-      "task": "A finished chore pays coins and lifts the pet's spirit a little.",
+      "task": "A finished chore pays coins and lifts the robot's spirit a little.",
       "plan": "The three boxes are set. Spending opens only after this — the plan is the map for the period.",
       "gamePuzzle": "A finished arcade sitting pays coins. Games pay less than chores on purpose.",
       "gameSpacewar": "A finished arcade sitting pays coins. Games pay less than chores on purpose.",
@@ -942,20 +718,10 @@
       "factNeeds": "Needs fact",
       "factWants": "Wants fact",
       "factSavings": "Savings fact",
-      "comfort": "Comfort",
+      "charge": "Charge",
       "spirit": "Spirit",
-      "furniture": "Furniture in the room"
+      "owned": "Things you keep"
     }
-  },
-  "petGrew": {
-    "title": "The pet grew up!",
-    "body": "Now {{name}} is a {{stage}}.",
-    "reasonIntro": "It did not just happen:",
-    "reasonPeriods": "periods finished — at least {{count}}",
-    "reasonGoals": "goals reached — at least {{count}}",
-    "reasonPlans": "plans kept — at least {{count}}",
-    "confirm": "Great!",
-    "a11y": "{{name}} bounces happily — grew to the \"{{stage}}\" stage"
   },
   "games": {
     "title": "Arcade",

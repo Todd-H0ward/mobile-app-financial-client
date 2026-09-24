@@ -19,14 +19,15 @@ interface CatalogueItem {
    */
   kind: CatalogueKind;
   shop: ShopId;
-  /** Soft grouping inside a shop: food, warmth, toy, … */
+  /** Soft grouping inside a shop: food, hygiene, toy, … */
   category: string;
-  /** Optional bump to pet comfort, 0…1. */
-  comfortDelta?: number;
-  /** Optional home furniture id unlocked by the purchase. */
-  furnitureId?: string;
-  /** Optional home insulation id unlocked by the purchase. */
-  insulationId?: string;
+  /** Optional bump to the robot's charge, 0…1. */
+  chargeDelta?: number;
+  /**
+   * Optional id the purchase leaves in `ownedItemIds` — what a bought toy or
+   * the console unlocks in the arcade.
+   */
+  ownedId?: string;
   /** Extra line under the title — why it exists. */
   note?: string;
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { PET_SPECIES } from '@/entities/pet';
+import { ROBOT_DOG_STAGES } from '@/entities/robot-dog';
 
 import { createInitialUser, USER_SAVE_VERSION } from '../initial-user';
 import { PERIOD_PHASES } from '../types';
@@ -11,14 +11,14 @@ import { isUserSave, migrateUser } from './migrations';
 // HELPERS
 // ═══════════════════════════════════════════
 
-/** A save from a build before versioning: no `version`, no home fields. */
+/** A save from a build before versioning: no `version`, no settings. */
 const legacySave = (): Record<string, unknown> => {
   const save: Record<string, unknown> = {
     ...createInitialUser({ playerName: 'Аня' }),
   };
 
   delete save.version;
-  delete save.home;
+  delete save.ownedItemIds;
   delete save.settings;
 
   return save;
@@ -40,7 +40,7 @@ describe('migrateUser', () => {
 
     expect(migrated?.version).toBe(USER_SAVE_VERSION);
     // Taken from the starting profile.
-    expect(migrated?.home.lastBilledPeriod).toBe(0);
+    expect(migrated?.ownedItemIds).toEqual([]);
     expect(migrated?.settings.isParentGateEnabled).toBe(true);
     // Earned by the player.
     expect(migrated?.playerName).toBe('Аня');
@@ -104,13 +104,7 @@ describe('isUserSave', () => {
       isUserSave({ ...save, period: { ...save.period, phase: 'settlement' } }),
     ).toBe(false);
     expect(
-      isUserSave({ ...save, pet: { ...save.pet, species: 'dragon' } }),
-    ).toBe(false);
-    expect(isUserSave({ ...save, pet: { ...save.pet, stage: 'elder' } })).toBe(
-      false,
-    );
-    expect(
-      isUserSave({ ...save, pet: { ...save.pet, color: 'invisible' } }),
+      isUserSave({ ...save, robot: { ...save.robot, stage: 'elder' } }),
     ).toBe(false);
   });
 
@@ -122,9 +116,63 @@ describe('isUserSave', () => {
         true,
       );
     }
-    for (const species of PET_SPECIES) {
-      expect(isUserSave({ ...save, pet: { ...save.pet, species } })).toBe(true);
+    for (const stage of ROBOT_DOG_STAGES) {
+      expect(isUserSave({ ...save, robot: { ...save.robot, stage } })).toBe(
+        true,
+      );
     }
+  });
+
+  it('runs the v5 step: the pet becomes the robot, the house goes', () => {
+    const {
+      robot: _robot,
+      ownedItemIds: _owned,
+      ...rest
+    } = createInitialUser({
+      playerName: 'Аня',
+    });
+    const v5 = {
+      ...rest,
+      version: 5,
+      pet: {
+        species: 'cat',
+        color: 'sand',
+        pattern: 'solid',
+        name: 'Кекс',
+        traitIds: ['chilly'],
+        stage: 'teen',
+        celebratedStage: 'teen',
+        comfort: 0.4,
+        spirit: 0.7,
+      },
+      home: {
+        temperature: 0.8,
+        insulationIds: ['window'],
+        furnitureIds: ['game-console'],
+        lastBilledPeriod: 2,
+      },
+      settings: {
+        ...rest.settings,
+        robotSkin: undefined,
+        robotAction: undefined,
+        petSkin: 'arctic',
+        petAction: 'walk',
+      },
+    };
+
+    const migrated = migrateUser(v5, 5);
+
+    expect(migrated?.robot).toEqual({
+      name: 'Кекс',
+      stage: 'upgraded',
+      charge: 0.4,
+      spirit: 0.7,
+    });
+    expect(migrated?.ownedItemIds).toEqual(['game-console']);
+    expect(migrated?.settings.robotSkin).toBe('arctic');
+    expect(migrated?.settings.robotAction).toBe('walk');
+    expect(migrated).not.toHaveProperty('pet');
+    expect(migrated).not.toHaveProperty('home');
   });
 
   it('rejects anything that is not an object', () => {

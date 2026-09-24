@@ -8,7 +8,7 @@ describe('puzzle catalogue', () => {
     expect(PUZZLE_STUB.id).toBe('rooms-living');
   });
 
-  it('finds levels by furniture id', () => {
+  it('finds levels by owned id', () => {
     expect(puzzleById('rooms-living')).toEqual(PUZZLE_STUB);
     expect(puzzleById('missing')).toBeUndefined();
   });

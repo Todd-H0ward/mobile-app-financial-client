@@ -33,11 +33,12 @@ interface FeedbackSnapshot {
   factNeeds: number;
   factWants: number;
   factSavings: number;
-  /** Pet comfort 0…1. */
-  comfort: number;
-  /** Pet spirit 0…1. */
+  /** Robot charge 0…1. */
+  charge: number;
+  /** Robot spirit 0…1. */
   spirit: number;
-  furnitureCount: number;
+  /** How many bought items the child owns — toys, the console. */
+  ownedCount: number;
 }
 
 interface DescribeChangeInput {
@@ -108,14 +109,14 @@ export const snapshotUser = (user: UserSave): FeedbackSnapshot => ({
   factNeeds: user.period.fact.needs,
   factWants: user.period.fact.wants,
   factSavings: user.period.fact.savings,
-  comfort: user.pet.comfort,
-  spirit: user.pet.spirit,
-  furnitureCount: user.home.furnitureIds.length,
+  charge: user.robot.charge,
+  spirit: user.robot.spirit,
+  ownedCount: user.ownedItemIds.length,
 });
 
 /**
  * Diffs two snapshots into the lines a child can read: balance, jar, fact,
- * comfort, spirit, furniture. The why comes from the action context —
+ * charge, spirit, owned items. The why comes from the action context —
  * never invented here.
  */
 export const describeChange = (input: DescribeChangeInput): FeedbackReport => {
@@ -168,10 +169,10 @@ export const describeChange = (input: DescribeChangeInput): FeedbackReport => {
   });
 
   pushIfChanged(changes, {
-    id: 'comfort',
-    labelKey: 'feedback.metrics.comfort',
-    before: before.comfort,
-    after: after.comfort,
+    id: 'charge',
+    labelKey: 'feedback.metrics.charge',
+    before: before.charge,
+    after: after.charge,
     format: 'percent',
   });
 
@@ -184,10 +185,10 @@ export const describeChange = (input: DescribeChangeInput): FeedbackReport => {
   });
 
   pushIfChanged(changes, {
-    id: 'furniture',
-    labelKey: 'feedback.metrics.furniture',
-    before: before.furnitureCount,
-    after: after.furnitureCount,
+    id: 'owned',
+    labelKey: 'feedback.metrics.owned',
+    before: before.ownedCount,
+    after: after.ownedCount,
     format: 'count',
   });
 

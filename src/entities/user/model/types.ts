@@ -1,12 +1,10 @@
 import type { BudgetFact, BudgetPlan } from '@/entities/budget';
 import type { BudgetDirection } from '@/entities/economy';
 import type {
-  PetColor,
-  PetPattern,
-  PetSpecies,
-  PetStage,
-} from '@/entities/pet';
-import type { RobotDogAction, RobotDogSkin } from '@/entities/robot-dog';
+  RobotDogAction,
+  RobotDogSkin,
+  RobotDogStage,
+} from '@/entities/robot-dog';
 
 // ═══════════════════════════════════════════
 // CONSTANTS
@@ -20,9 +18,9 @@ import type { RobotDogAction, RobotDogSkin } from '@/entities/robot-dog';
  * hand-edited file, and a string check alone would let it reach the screens.
  *
  * Two sets live elsewhere for the same reason: the budget directions in
- * `entities/economy` and the pet's appearance axes in `entities/pet`, because
- * the onboarding content, the budget screens and the pet's skin, pose and
- * anchors all need them without needing the save. Plan/fact shapes live in
+ * `entities/economy` and the robot's stages and coats in `entities/robot-dog`,
+ * because the budget screens and the 3D scene need them without needing the
+ * save. Plan/fact shapes live in
  * `entities/budget` — the leaf that owns the allocation rules.
  */
 
@@ -41,31 +39,20 @@ const PERIOD_PHASES = ['planning', 'active', 'summary'] as const;
  */
 type PeriodPhase = (typeof PERIOD_PHASES)[number];
 
-/** The pet: how it looks, what it is called, how it feels. */
-interface PetSave {
-  /** Species. Picked during onboarding, never changes afterwards. */
-  species: PetSpecies;
-  /** Coat. Picked during onboarding, never changes afterwards. */
-  color: PetColor;
-  /** Pattern. Picked during onboarding, never changes afterwards. */
-  pattern: PetPattern;
-  /** Name the child gave it. The only free-text field in the app, see privacy.md. */
-  name: string;
-  /** Character traits. They shift prices and rates; ids from `content/traits.json`. */
-  traitIds: string[];
-  /** Growth stage. Recomputed by the settlement step, and only upwards. */
-  stage: PetStage;
+/** The robot dog: what it is called, how far it is built, how it feels. */
+interface RobotSave {
   /**
-   * The stage the child has already been shown a ceremony for.
-   *
-   * Behind `stage` for exactly as long as the growth scene is owed. It lives
-   * in the save rather than in a screen's state because growing up is the most
-   * visible reward in the game (docs/pet.md) — an app killed between the
-   * settlement and the scene must still owe it, not swallow it.
+   * Name the child gave it. Empty until the introduction asks for one — the
+   * only free-text field besides the player's name, see privacy.md.
    */
-  celebratedStage: PetStage;
-  /** Body: fed and warm. 0…1, with inertia — the mood eases, never jumps. */
-  comfort: number;
+  name: string;
+  /**
+   * Build stage, docs/robot-dog.md. Recomputed by the settlement step from the
+   * period history, and only ever upwards — a mistake never takes it away.
+   */
+  stage: RobotDogStage;
+  /** The battery: needs paid for. 0…1, eased — the mood never jumps. */
+  charge: number;
   /** Everything else: goal proximity, tasks done, how the period ended. 0…1. */
   spirit: number;
 }
@@ -114,7 +101,7 @@ interface SavingsGoalSave {
   goalId: string;
   /** Put away towards this goal. Only a withdrawal lowers it — 2.5.7. */
   saved: number;
-  /** Period the goal was reached in, or `null`. Feeds the pet's growth. */
+  /** Period the goal was reached in, or `null`. Feeds the robot's stages. */
   reachedInPeriod: number | null;
 }
 
@@ -153,31 +140,12 @@ interface PeriodRecord {
   plan: BudgetPlan;
   /** The fact the period ended with. */
   fact: BudgetFact;
-  /** No direction overspent. A growth condition for the pet, see pet.md. */
+  /** No direction overspent. A stage condition, see docs/robot-dog.md. */
   isPlanKept: boolean;
   /** Goals reached during this very period. Another growth condition. */
   reachedGoalIds: string[];
   /** Epoch ms of the ending, from `TimeSource.now()`. */
   endedAt: number;
-}
-
-/** The home: warmth, one-off improvements and furnishing. */
-interface HomeSave {
-  /**
-   * Thermostat position, 0…1. Shown to the child as "chilly / warm" plus the
-   * price per period — the percentage is never shown, see house.md.
-   */
-  temperature: number;
-  /** Insulation bought, ids from the catalogue. Lowers every later bill. */
-  insulationIds: string[];
-  /** Furniture bought, ids from the catalogue. Changes the room, nothing else. */
-  furnitureIds: string[];
-  /**
-   * Period the bill has already been issued for. Guards against double
-   * charging: the bill is issued once per period, even if settlement runs
-   * a second time.
-   */
-  lastBilledPeriod: number;
 }
 
 /** Progress on chores for the current period — 2.5.8 / roadmap 1.16. */
@@ -204,15 +172,15 @@ interface SettingsSave {
   isAnimationEnabled: boolean;
   /** Demo mode: swaps `TimeSource` and the starting profile, 2.5.13. */
   isDemoMode: boolean;
-  /** The robot dog's coat. Picked in the grown-up's section, purely looks. */
-  petSkin: RobotDogSkin;
+  /** The robot dog's coat. Purely looks — the stage is what the child earns. */
+  robotSkin: RobotDogSkin;
   /**
    * What the dog does when nothing interrupts it.
    *
-   * The child's taps and the pet's mood play over it, but this is where it
+   * The child's taps and the robot's mood play over it, but this is where it
    * comes back to — and it is what the settings picker sets.
    */
-  petAction: RobotDogAction;
+  robotAction: RobotDogAction;
 }
 
 /**
@@ -223,12 +191,12 @@ interface SettingsSave {
 interface UserSave {
   /** Schema version. Bumped on every incompatible change. */
   version: number;
-  /** The child's in-game name. Set during onboarding, 2.5.1. */
+  /** The child's in-game name. Empty until the introduction asks for it. */
   playerName: string;
   /** Epoch ms the profile was created. For the grown-up's section. */
   createdAt: number;
-  /** The pet: species, coat, pattern, name, traits, stage. */
-  pet: PetSave;
+  /** The robot dog: name, build stage, charge and spirit. */
+  robot: RobotSave;
   /** The wallet: balance and recent operations with a source and an amount. */
   wallet: WalletSave;
   /** The savings jar: goals and what is put away in each. */
@@ -239,8 +207,11 @@ interface UserSave {
   period: PeriodSave;
   /** Finished periods: plan, fact and outcome of each. For history, 2.5.11. */
   history: PeriodRecord[];
-  /** The home: temperature, insulation bought, furniture. */
-  home: HomeSave;
+  /**
+   * Catalogue `ownedId`s of everything bought that stays — toys, the console,
+   * puzzles. Never shrinks; the arcade unlocks games off it.
+   */
+  ownedItemIds: string[];
   /** What the grown-up configured: gate, sound, animations, demo mode. */
   settings: SettingsSave;
 }
@@ -248,11 +219,10 @@ interface UserSave {
 export type {
   BudgetFact,
   BudgetPlan,
-  HomeSave,
   PeriodPhase,
   PeriodRecord,
   PeriodSave,
-  PetSave,
+  RobotSave,
   SavingsGoalSave,
   SavingsSave,
   SettingsSave,

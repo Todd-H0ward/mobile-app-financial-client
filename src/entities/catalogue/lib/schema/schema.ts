@@ -53,18 +53,15 @@ const assertItem = (item: unknown, path: string): CatalogueItem => {
     throw new Error(`${path}.category: non-empty string required`);
   }
   if (
-    item.comfortDelta !== undefined &&
-    (typeof item.comfortDelta !== 'number' ||
-      item.comfortDelta < 0 ||
-      item.comfortDelta > 1)
+    item.chargeDelta !== undefined &&
+    (typeof item.chargeDelta !== 'number' ||
+      item.chargeDelta < 0 ||
+      item.chargeDelta > 1)
   ) {
-    throw new Error(`${path}.comfortDelta: number in 0…1 when present`);
+    throw new Error(`${path}.chargeDelta: number in 0…1 when present`);
   }
-  if (item.furnitureId !== undefined && !isNonEmptyString(item.furnitureId)) {
-    throw new Error(`${path}.furnitureId: non-empty string when present`);
-  }
-  if (item.insulationId !== undefined && !isNonEmptyString(item.insulationId)) {
-    throw new Error(`${path}.insulationId: non-empty string when present`);
+  if (item.ownedId !== undefined && !isNonEmptyString(item.ownedId)) {
+    throw new Error(`${path}.ownedId: non-empty string when present`);
   }
   if (item.note !== undefined && !isNonEmptyString(item.note)) {
     throw new Error(`${path}.note: non-empty string when present`);

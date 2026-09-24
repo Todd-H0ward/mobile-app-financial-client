@@ -3,18 +3,14 @@ import { useMemo } from 'react';
 import { WALLET_SOURCES } from '@/entities/economy';
 import { type GoalContent, getGoalById } from '@/entities/goal';
 import {
-  appearanceFor,
-  type EmotionKey,
-  emotionFor,
   moodFor,
-  type PetAppearance,
-  type PetMoodName,
-  type PetStage,
-} from '@/entities/pet';
+  type RobotDogMoodName,
+  type RobotDogStage,
+} from '@/entities/robot-dog';
 import { progressFor } from '@/entities/savings';
 import { getTaskById } from '@/entities/task';
 import {
-  type PetSave,
+  type RobotSave,
   type UserSave,
   useHomeHudSource,
   useIsMotionEnabled,
@@ -33,14 +29,13 @@ type Translate = ReturnType<typeof useTranslation>['t'];
 /** Whether the state row reaches for a warm color or a calm one. Never red. */
 type MoodTone = 'calm' | 'attention';
 
-interface HomeHudPet {
-  appearance: PetAppearance;
-  emotion: EmotionKey;
-  stage: PetStage;
+interface HomeHudRobot {
+  /** Build stage — what the scene will dress the dog in. */
+  stage: RobotDogStage;
   /** What a screen reader says — name, mood and why (2.5.10). */
   accessibilityLabel: string;
   /** The mood itself, for anything that reacts rather than reads it out. */
-  moodName: PetMoodName;
+  moodName: RobotDogMoodName;
   /** The mood, already translated — "скучает". */
   moodLabel: string;
   /** Why, already translated — "нечего делать". Never empty. */
@@ -66,10 +61,8 @@ interface HomeHudCredit {
 }
 
 interface HomeHud {
-  /** Header subtitle: the pet's name once met, an onboarding line before. */
-  subtitle: string;
-  /** `null` while the box on the room screen is still closed. */
-  pet: HomeHudPet | null;
+  /** The robot's mood and stage. Always there — the dog stands in the pit. */
+  robot: HomeHudRobot | null;
   /** User switch + system Reduce Motion. */
   isAnimationEnabled: boolean;
   balance: number;
@@ -97,13 +90,6 @@ interface HomeHud {
    * screen; the child cannot walk the rooms until they have seen the totals.
    */
   isSummary: boolean;
-  /**
-   * True once the pet's stage has outrun `celebratedStage` — home must
-   * redirect to the growth ceremony before the child walks the rooms. A
-   * demo run can raise the stage several periods before anyone was there to
-   * see it happen; this is what still catches it.
-   */
-  isGrowthPending: boolean;
 }
 
 // ═══════════════════════════════════════════
@@ -116,11 +102,11 @@ interface HomeHud {
  * Two tones, never a third: docs/accessibility.md bans an alarming red for a
  * low meter, so "attention" still has to read as warm, not as a warning.
  */
-const MOOD_TONE: Record<PetMoodName, MoodTone> = {
+const MOOD_TONE: Record<RobotDogMoodName, MoodTone> = {
   proud: 'calm',
   content: 'calm',
   bored: 'attention',
-  uncomfortable: 'attention',
+  tired: 'attention',
   sad: 'attention',
 };
 
@@ -134,7 +120,6 @@ const MOOD_TONE: Record<PetMoodName, MoodTone> = {
 const CREDIT_REASON_KEY: Record<string, string> = {
   [WALLET_SOURCES.startingWallet]: 'wallet.source.startingWallet',
   [WALLET_SOURCES.regularityBonus]: 'wallet.source.regularityBonus',
-  [WALLET_SOURCES.heatingBill]: 'wallet.source.heatingBill',
   [WALLET_SOURCES.gamePuzzle]: 'wallet.source.gamePuzzle',
   [WALLET_SOURCES.gameSpacewar]: 'wallet.source.gameSpacewar',
   [WALLET_SOURCES.gameSnake]: 'wallet.source.gameSnake',
@@ -144,21 +129,17 @@ const CREDIT_REASON_KEY: Record<string, string> = {
 // HELPERS
 // ═══════════════════════════════════════════
 
-/** Whether the box on the room screen has been opened — the pet has a name. */
-const isPetMet = (pet: PetSave): boolean => pet.name !== '';
-
-/** The pet card, from a pet that has already been met. */
-const buildPet = (pet: PetSave, t: Translate): HomeHudPet => {
-  const mood = moodFor(pet.comfort, pet.spirit);
-  const moodLabel = t(`pet.mood.${mood.name}`);
-  const moodReasonLabel = t(`pet.reason.${mood.reason}`);
+/** The robot card: mood with its cause, and the build stage. */
+const buildRobot = (robot: RobotSave, t: Translate): HomeHudRobot => {
+  const mood = moodFor(robot.charge, robot.spirit);
+  const moodLabel = t(`robot.mood.${mood.name}`);
+  const moodReasonLabel = t(`robot.reason.${mood.reason}`);
+  const name = robot.name || t('robot.unnamed');
 
   return {
-    appearance: appearanceFor(pet.species, pet.color, pet.pattern),
-    emotion: emotionFor(mood),
     moodName: mood.name,
-    stage: pet.stage,
-    accessibilityLabel: `${pet.name}, ${moodLabel}, ${moodReasonLabel}`,
+    stage: robot.stage,
+    accessibilityLabel: `${name}, ${moodLabel}, ${moodReasonLabel}`,
     moodLabel,
     moodReasonLabel,
     moodTone: MOOD_TONE[mood.name],
@@ -256,10 +237,11 @@ const buildTaskTitle = (tasks: UserSave['tasks'], t: Translate): string => {
 /**
  * The home screen's state, as one object.
  *
- * One shallow save slice, memoized layout — balance ticks do not rebuild pet
- * appearance when the pet fields did not change. Requirement 2.5.3 asks for
- * the pet, the balance, the savings, the active goal, the pet's state and the
- * active task all on screen together; this is where "together" is assembled.
+ * One shallow save slice, memoized — balance ticks do not rebuild the
+ * robot's mood when its fields did not change. Requirement 2.5.3 asks for the
+ * character, the balance, the savings, the active goal, the character's state
+ * and the active task all on screen together; this is where "together" is
+ * assembled.
  */
 export const useHomeHud = (): HomeHud => {
   const { t } = useTranslation();
@@ -269,8 +251,7 @@ export const useHomeHud = (): HomeHud => {
   return useMemo(() => {
     if (!source) {
       return {
-        subtitle: t('home.roomComingSoon'),
-        pet: null,
+        robot: null,
         isAnimationEnabled: isMotionEnabled,
         balance: 0,
         savingsTotal: 0,
@@ -281,17 +262,13 @@ export const useHomeHud = (): HomeHud => {
         isPlanning: false,
         isActive: false,
         isSummary: false,
-        isGrowthPending: false,
       };
     }
 
     const activeGoal = findActiveGoal(source.savings);
 
     return {
-      subtitle: isPetMet(source.pet)
-        ? t('home.atHome', { name: source.pet.name })
-        : t('home.roomComingSoon'),
-      pet: isPetMet(source.pet) ? buildPet(source.pet, t) : null,
+      robot: buildRobot(source.robot, t),
       isAnimationEnabled: isMotionEnabled,
       balance: source.balance,
       savingsTotal: source.savings.goals.reduce(
@@ -307,9 +284,8 @@ export const useHomeHud = (): HomeHud => {
       isPlanning: source.phase === 'planning',
       isActive: source.phase === 'active',
       isSummary: source.phase === 'summary',
-      isGrowthPending: source.pet.stage !== source.pet.celebratedStage,
     };
   }, [source, t, isMotionEnabled]);
 };
 
-export type { HomeHud, HomeHudCredit, HomeHudGoal, HomeHudPet, MoodTone };
+export type { HomeHud, HomeHudCredit, HomeHudGoal, HomeHudRobot, MoodTone };

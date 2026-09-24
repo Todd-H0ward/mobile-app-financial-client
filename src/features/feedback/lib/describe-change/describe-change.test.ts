@@ -14,9 +14,9 @@ const baseSnapshot = (): FeedbackSnapshot => ({
   factNeeds: 0,
   factWants: 0,
   factSavings: 0,
-  comfort: 0.5,
+  charge: 0.5,
   spirit: 0.5,
-  furnitureCount: 0,
+  ownedCount: 0,
 });
 
 // ═══════════════════════════════════════════
@@ -27,7 +27,7 @@ describe('describeChange', () => {
       ...before,
       balance: before.balance - 8,
       factNeeds: 8,
-      comfort: 0.6,
+      charge: 0.6,
     };
 
     const report = describeChange({
@@ -42,7 +42,7 @@ describe('describeChange', () => {
     expect(report.changes.map((line) => line.id)).toEqual([
       'balance',
       'factNeeds',
-      'comfort',
+      'charge',
     ]);
     expect(report.changes[0]).toMatchObject({
       before: STARTING_BALANCE,

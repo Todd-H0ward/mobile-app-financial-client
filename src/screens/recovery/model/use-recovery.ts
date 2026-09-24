@@ -6,14 +6,9 @@ import {
   type RecoveryDestination,
   type RecoveryOption,
 } from '@/entities/budget';
-import {
-  endPeriod,
-  hasPendingGrowth,
-  useUpdateUser,
-  useUser,
-} from '@/entities/user';
+import { endPeriod, useUpdateUser, useUser } from '@/entities/user';
 
-import { DYNAMIC_ROUTES, STATIC_ROUTES } from '@/shared/constants';
+import { STATIC_ROUTES } from '@/shared/constants';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -55,14 +50,9 @@ export const useRecovery = (): RecoveryController | null => {
   const options = pickRecoveryOptions(rows);
 
   const settleAndGo = (destination: RecoveryDestination) => {
-    // Computed once, outside `updateUser`: the route decision needs the
-    // settled save, and `updateUser`'s producer has no return value to read.
-    const settled = endPeriod(user);
-    updateUser(() => settled);
+    updateUser(endPeriod);
 
-    const next = hasPendingGrowth(settled)
-      ? DYNAMIC_ROUTES.petGrew(routeFor(destination))
-      : routeFor(destination);
+    const next = routeFor(destination);
 
     // Pop summary/recovery off the stack first. `replace` alone left those
     // screens underneath budget-plan, so Back reopened a stale summary that

@@ -7,8 +7,8 @@
       "kind": "need",
       "shop": "grocery",
       "category": "food",
-      "comfortDelta": 0.08,
-      "note": "Еда на период — без неё питомцу зябко в животе."
+      "chargeDelta": 0.08,
+      "note": "Еда на период — обязательный расход."
     },
     {
       "id": "porridge",
@@ -17,18 +17,8 @@
       "kind": "need",
       "shop": "grocery",
       "category": "food",
-      "comfortDelta": 0.1,
-      "note": "Сытный завтрак: питомец дольше остаётся довольным."
-    },
-    {
-      "id": "heating",
-      "title": "Тёплый дом",
-      "price": 15,
-      "kind": "need",
-      "shop": "grocery",
-      "category": "warmth",
-      "comfortDelta": 0.12,
-      "note": "Отопление на период — иначе дома будет зябко."
+      "chargeDelta": 0.1,
+      "note": "Сытный завтрак — нужное, а не роскошь."
     },
     {
       "id": "soap",
@@ -37,7 +27,7 @@
       "kind": "need",
       "shop": "grocery",
       "category": "hygiene",
-      "comfortDelta": 0.05,
+      "chargeDelta": 0.05,
       "note": "Чистота — тоже нужное, не роскошь."
     },
     {
@@ -47,8 +37,8 @@
       "kind": "want",
       "shop": "clothes",
       "category": "clothes",
-      "comfortDelta": 0.06,
-      "furnitureId": "sweater",
+      "chargeDelta": 0.06,
+      "ownedId": "sweater",
       "note": "Красивый свитер. Дорогой — стоит сначала накопить."
     },
     {
@@ -58,8 +48,8 @@
       "kind": "want",
       "shop": "clothes",
       "category": "clothes",
-      "comfortDelta": 0.04,
-      "furnitureId": "scarf",
+      "chargeDelta": 0.04,
+      "ownedId": "scarf",
       "note": "Тёплый шарф — хочется, а не обязательно."
     },
     {
@@ -69,8 +59,8 @@
       "kind": "want",
       "shop": "furniture",
       "category": "decor",
-      "furnitureId": "rug",
-      "note": "Мягкий пол в комнате питомца."
+      "ownedId": "rug",
+      "note": "Мягкий коврик — украшение, не нужное."
     },
     {
       "id": "lamp",
@@ -79,7 +69,7 @@
       "kind": "want",
       "shop": "furniture",
       "category": "decor",
-      "furnitureId": "lamp",
+      "ownedId": "lamp",
       "note": "Тёплый свет вечером — украшение, не нужное."
     },
     {
@@ -89,28 +79,8 @@
       "kind": "want",
       "shop": "furniture",
       "category": "decor",
-      "furnitureId": "stickers",
+      "ownedId": "stickers",
       "note": "Украсят стену. Можно и в следующий период."
-    },
-    {
-      "id": "window-seal",
-      "title": "Уплотнить окно",
-      "price": 8,
-      "kind": "want",
-      "shop": "furniture",
-      "category": "insulation",
-      "insulationId": "window",
-      "note": "Разовая трата — каждая следующая квитанция за тепло станет меньше."
-    },
-    {
-      "id": "draft-stopper",
-      "title": "Заслон у двери",
-      "price": 12,
-      "kind": "want",
-      "shop": "furniture",
-      "category": "insulation",
-      "insulationId": "draft",
-      "note": "Держит тепло дома. Окупается за несколько периодов при текущем тепле."
     },
     {
       "id": "toy-car",
@@ -119,8 +89,8 @@
       "kind": "want",
       "shop": "toys",
       "category": "toy",
-      "furnitureId": "toy-car",
-      "note": "Игрушка для комнаты. Позже с ней можно будет поиграть."
+      "ownedId": "toy-car",
+      "note": "Игрушка. Позже с ней можно будет поиграть."
     },
     {
       "id": "ball",
@@ -129,7 +99,7 @@
       "kind": "want",
       "shop": "toys",
       "category": "toy",
-      "furnitureId": "ball",
+      "ownedId": "ball",
       "note": "Катать и ловить. Мини-игра появится чуть позже."
     },
     {
@@ -139,8 +109,8 @@
       "kind": "want",
       "shop": "toys",
       "category": "toy",
-      "furnitureId": "rooms-living",
-      "note": "Купи — пазл появится на полке в гостиной."
+      "ownedId": "rooms-living",
+      "note": "Купи — пазл откроется в мини-играх."
     },
     {
       "id": "game-console",
@@ -149,8 +119,8 @@
       "kind": "want",
       "shop": "toys",
       "category": "toy",
-      "furnitureId": "game-console",
-      "note": "Купи — на полке откроются Spacewar и змейка."
+      "ownedId": "game-console",
+      "note": "Купи — в мини-играх откроются Spacewar и змейка."
     }
   ]
 }

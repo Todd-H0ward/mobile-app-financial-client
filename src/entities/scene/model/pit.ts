@@ -6,7 +6,7 @@
  * Terraces in the bowl — the levels the child climbs.
  *
  * The model is a stepped cone: five rings, each one step taller and wider
- * than the one inside it. The pet starts on the innermost, lowest ring with
+ * than the one inside it. The robot starts on the innermost, lowest ring with
  * all five in view.
  */
 const SCENE_TERRACE_COUNT = 5;
@@ -28,9 +28,9 @@ const SCENE_PLATFORM_RADIUS = 267;
 /**
  * Level-ups it takes to get out of the pit.
  *
- * Four, not five: the pet stands on the floor of the bowl, level with the
+ * Four, not five: the robot stands on the floor of the bowl, level with the
  * innermost ring, so it is the four rings above that have somewhere to sink.
- * When the last one lands, the pit is a plain and the pet is out of it.
+ * When the last one lands, the pit is a plain and the robot is out of it.
  */
 const SCENE_LEVEL_COUNT = 4;
 
@@ -44,7 +44,7 @@ const SCENE_LEVEL_COUNT = 4;
 const SCENE_GEAR_TURN = Math.PI * 1.6;
 
 /**
- * Which way the pet's own model faces, in radians, before it is turned.
+ * Which way the robot's own model faces, in radians, before it is turned.
  *
  * Added to the camera's heading so `setCharacterFacing` can be given a plain
  * azimuth. A quarter turn: the robot dog is built looking down its own +X,

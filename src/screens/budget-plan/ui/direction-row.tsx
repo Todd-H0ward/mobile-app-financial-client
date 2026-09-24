@@ -3,7 +3,6 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { DIRECTION_LOOK } from '@/widgets/direction-look';
 
 import type { BudgetDirection } from '@/entities/economy';
-import { listDecisions } from '@/entities/onboarding';
 
 import { RADII, SPACING, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
@@ -128,14 +127,8 @@ export const DirectionRow = ({
   const { t } = useTranslation();
   const theme = useTheme();
   const look = DIRECTION_LOOK[direction];
-  const decision = listDecisions().find((entry) => entry.id === direction);
-
-  const title = t(`budgetPlan.directions.${direction}.title`, {
-    defaultValue: decision?.title ?? direction,
-  });
-  const example = t(`budgetPlan.directions.${direction}.example`, {
-    defaultValue: decision?.example ?? '',
-  });
+  const title = t(`budgetPlan.directions.${direction}.title`);
+  const example = t(`budgetPlan.directions.${direction}.example`);
 
   const max = value + remainder;
 

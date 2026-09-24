@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { ComparisonRow } from '@/widgets/plan-fact-bars';
 
 import { DemoModeCard } from '@/features/demo-mode';
-import { RestartOnboardingButton } from '@/features/profile-restart';
+import { RestartProfileButton } from '@/features/profile-restart';
 
 import { SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
@@ -148,7 +148,7 @@ export const ParentsScreen = () => {
           </Text>
         </Card.Content>
         <Card.Footer>
-          <RestartOnboardingButton />
+          <RestartProfileButton />
         </Card.Footer>
       </Card>
     </Screen>

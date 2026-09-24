@@ -13,26 +13,23 @@ import type { UserSave } from '../types';
 // ═══════════════════════════════════════════
 
 /** Save schema version. Bumped on every incompatible change. */
-const USER_SAVE_VERSION = 5;
+const USER_SAVE_VERSION = 6;
 
-/** Starting thermostat position: chilly, but not cold. */
-const STARTING_TEMPERATURE = 0.5;
-
-/** Player name before onboarding. Onboarding overwrites it first thing. */
+/** Player name before the introduction asks for one. */
 const DEFAULT_PLAYER_NAME = '';
 
-/** Pet name before onboarding. The child picks their own, 2.5.2. */
-const DEFAULT_PET_NAME = '';
+/** Robot name before the introduction asks for one. The child picks it, 2.5.2. */
+const DEFAULT_ROBOT_NAME = '';
 
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
 
 interface CreateUserInput {
-  /** The child's in-game name, from onboarding. */
+  /** The child's in-game name, from the introduction. */
   playerName?: string;
-  /** The pet from onboarding: species, coat, pattern, name. */
-  pet?: Partial<UserSave['pet']>;
+  /** The robot from the introduction: its name, usually. */
+  robot?: Partial<UserSave['robot']>;
   /** Epoch ms of creation, from `TimeSource.now()`. */
   createdAt?: number;
   /** Grown-up settings. A reset passes the previous ones back in, untouched. */
@@ -52,25 +49,19 @@ interface CreateUserInput {
  */
 export const createInitialUser = ({
   playerName = DEFAULT_PLAYER_NAME,
-  pet,
+  robot,
   createdAt = 0,
   settings,
 }: CreateUserInput = {}): UserSave => ({
   version: USER_SAVE_VERSION,
   playerName,
   createdAt,
-  pet: {
-    species: 'cat',
-    color: 'sand',
-    pattern: 'solid',
-    name: DEFAULT_PET_NAME,
-    traitIds: [],
-    stage: 'baby',
-    // A baby is where every pet starts, so nothing is owed on a fresh profile.
-    celebratedStage: 'baby',
-    comfort: 1,
+  robot: {
+    name: DEFAULT_ROBOT_NAME,
+    stage: 'basic',
+    charge: 1,
     spirit: 1,
-    ...pet,
+    ...robot,
   },
   // Credited, not materialized: the starting balance is named income too —
   // 2.5.4 makes no exception for the very first coin.
@@ -99,19 +90,14 @@ export const createInitialUser = ({
     phaseEnteredAt: createdAt,
   },
   history: [],
-  home: {
-    temperature: STARTING_TEMPERATURE,
-    insulationIds: [],
-    furnitureIds: [],
-    lastBilledPeriod: 0,
-  },
+  ownedItemIds: [],
   settings: settings ?? {
     isParentGateEnabled: true,
     isSoundEnabled: true,
     isAnimationEnabled: true,
     isDemoMode: false,
-    petSkin: DEFAULT_ROBOT_DOG_SKIN,
-    petAction: DEFAULT_ROBOT_DOG_ACTION,
+    robotSkin: DEFAULT_ROBOT_DOG_SKIN,
+    robotAction: DEFAULT_ROBOT_DOG_ACTION,
   },
 });
 

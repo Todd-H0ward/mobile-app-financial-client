@@ -1,14 +1,10 @@
 import {
-  PET_COLORS,
-  PET_PATTERNS,
-  PET_SPECIES,
-  PET_STAGES,
-} from '@/entities/pet';
-import {
   DEFAULT_ROBOT_DOG_ACTION,
   DEFAULT_ROBOT_DOG_SKIN,
   isRobotDogAction,
   isRobotDogSkin,
+  ROBOT_DOG_STAGES,
+  type RobotDogStage,
 } from '@/entities/robot-dog';
 
 import { isFiniteNumber, isOneOf, isRecord } from '@/shared/utils';
@@ -22,6 +18,17 @@ import { PERIOD_PHASES, type UserSave } from '../types';
 
 /** One migration step: a save of version N in, version N+1 out. */
 type MigrationStep = (save: Record<string, unknown>) => Record<string, unknown>;
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/** The pet's growth stages, as the robot's build stages — for the v5 step. */
+const STAGE_FROM_PET: Record<string, RobotDogStage> = {
+  baby: 'basic',
+  teen: 'upgraded',
+  adult: 'complete',
+};
 
 // ═══════════════════════════════════════════
 // MIGRATIONS
@@ -107,6 +114,39 @@ const MIGRATIONS: Record<number, MigrationStep> = {
       version: 5,
     };
   },
+
+  // v5 — the game left the pet's house for the pit. The 2D pet's species,
+  // coat, pattern and traits go; its name, stage and mood carry over to the
+  // robot. The house goes too: no thermostat, no insulation, no bill. What
+  // was bought and stays — the console, the puzzles — keeps unlocking the
+  // arcade from `ownedItemIds`.
+  5: (save) => {
+    const pet = isRecord(save.pet) ? save.pet : {};
+    const home = isRecord(save.home) ? save.home : {};
+    const settings = isRecord(save.settings) ? save.settings : {};
+    const { pet: _pet, home: _home, ...rest } = save;
+    const { petSkin, petAction, ...keptSettings } = settings;
+    const owned = Array.isArray(home.furnitureIds) ? home.furnitureIds : [];
+
+    return {
+      ...rest,
+      robot: {
+        name: typeof pet.name === 'string' ? pet.name : '',
+        stage: STAGE_FROM_PET[String(pet.stage)] ?? 'basic',
+        charge: isFiniteNumber(pet.comfort) ? pet.comfort : 1,
+        spirit: isFiniteNumber(pet.spirit) ? pet.spirit : 1,
+      },
+      ownedItemIds: owned.filter((id): id is string => typeof id === 'string'),
+      settings: {
+        ...keptSettings,
+        robotSkin: isRobotDogSkin(petSkin) ? petSkin : DEFAULT_ROBOT_DOG_SKIN,
+        robotAction: isRobotDogAction(petAction)
+          ? petAction
+          : DEFAULT_ROBOT_DOG_ACTION,
+      },
+      version: 6,
+    };
+  },
 };
 
 // ═══════════════════════════════════════════
@@ -119,17 +159,11 @@ const isBudget = (value: unknown): boolean =>
   isFiniteNumber(value.wants) &&
   isFiniteNumber(value.savings);
 
-const isPet = (value: unknown): boolean =>
+const isRobot = (value: unknown): boolean =>
   isRecord(value) &&
-  isOneOf(value.species, PET_SPECIES) &&
-  isOneOf(value.color, PET_COLORS) &&
-  isOneOf(value.pattern, PET_PATTERNS) &&
   typeof value.name === 'string' &&
-  Array.isArray(value.traitIds) &&
-  value.traitIds.every((id) => typeof id === 'string') &&
-  isOneOf(value.stage, PET_STAGES) &&
-  isOneOf(value.celebratedStage, PET_STAGES) &&
-  isFiniteNumber(value.comfort) &&
+  isOneOf(value.stage, ROBOT_DOG_STAGES) &&
+  isFiniteNumber(value.charge) &&
   isFiniteNumber(value.spirit);
 
 const isWallet = (value: unknown): boolean =>
@@ -158,21 +192,14 @@ const isPeriod = (value: unknown): boolean =>
   isBudget(value.fact) &&
   isFiniteNumber(value.phaseEnteredAt);
 
-const isHome = (value: unknown): boolean =>
-  isRecord(value) &&
-  isFiniteNumber(value.temperature) &&
-  Array.isArray(value.insulationIds) &&
-  Array.isArray(value.furnitureIds) &&
-  isFiniteNumber(value.lastBilledPeriod);
-
 const isSettings = (value: unknown): boolean =>
   isRecord(value) &&
   typeof value.isParentGateEnabled === 'boolean' &&
   typeof value.isSoundEnabled === 'boolean' &&
   typeof value.isAnimationEnabled === 'boolean' &&
   typeof value.isDemoMode === 'boolean' &&
-  isRobotDogSkin(value.petSkin) &&
-  isRobotDogAction(value.petAction);
+  isRobotDogSkin(value.robotSkin) &&
+  isRobotDogAction(value.robotAction);
 
 const isTasks = (value: unknown): boolean =>
   isRecord(value) &&
@@ -190,13 +217,14 @@ export const isUserSave = (value: unknown): value is UserSave =>
   value.version === USER_SAVE_VERSION &&
   typeof value.playerName === 'string' &&
   isFiniteNumber(value.createdAt) &&
-  isPet(value.pet) &&
+  isRobot(value.robot) &&
   isWallet(value.wallet) &&
   isSavings(value.savings) &&
   isTasks(value.tasks) &&
   isPeriod(value.period) &&
   Array.isArray(value.history) &&
-  isHome(value.home) &&
+  Array.isArray(value.ownedItemIds) &&
+  value.ownedItemIds.every((id) => typeof id === 'string') &&
   isSettings(value.settings);
 
 // ═══════════════════════════════════════════

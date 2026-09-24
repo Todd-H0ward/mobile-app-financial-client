@@ -22,9 +22,9 @@ export const ConsoleScreen = () => {
   const theme = useTheme();
   const router = useRouter();
   const user = useUser();
-  const furnitureIds = user?.home.furnitureIds ?? [];
+  const ownedItemIds = user?.ownedItemIds ?? [];
 
-  if (!isConsoleOwned(furnitureIds)) {
+  if (!isConsoleOwned(ownedItemIds)) {
     return <Redirect href={STATIC_ROUTES.HOME} />;
   }
 

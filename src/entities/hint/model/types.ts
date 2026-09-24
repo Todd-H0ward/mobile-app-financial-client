@@ -11,7 +11,6 @@
  * finding a "?" that opens nothing.
  */
 const HINT_SCREENS = [
-  'onboarding',
   'home',
   'ui-kit',
   'end-period',
@@ -23,8 +22,6 @@ const HINT_SCREENS = [
   'history',
   'glossary',
   'budget-plan',
-  'pet-create',
-  'heating',
 ] as const;
 
 // ═══════════════════════════════════════════

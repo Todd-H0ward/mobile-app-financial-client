@@ -25,10 +25,10 @@ const TOP_AZIMUTH = 315;
  *
  * True horizon — a couple of degrees — cannot work from outside the arena:
  * the rim is 160 units tall at a radius of 400, so anything flatter than
- * 21.8° is a view of the back of a wall with the pet behind it. What makes
+ * 21.8° is a view of the back of a wall with the robot behind it. What makes
  * the shot read as eye-level instead of a map is the distance, not the
  * angle: `SCENE_SEGMENT_DISTANCE` brings the camera in over its own wedge,
- * where the terraces step down and away and the pet is in the open.
+ * where the terraces step down and away and the robot is in the open.
  */
 const ROOM_ELEVATION = 24;
 
@@ -39,7 +39,7 @@ const ROOM_ELEVATION = 24;
  * the ring, so from close in the two ends loom over the camera and the
  * middle falls away — five rows of six turn into a pair of wings. Distance
  * flattens the arc; 1500 is where it stops being a bowl and starts being a
- * board, with the pet still large enough to read in front of it.
+ * board, with the robot still large enough to read in front of it.
  *
  * The near side never gets in the way at any distance, because it is not
  * drawn: a segment view renders its own bay and hides the other two with the

@@ -43,7 +43,7 @@ const DEFAULT_WATCHER_ACTION = 'idle';
  * Arena units per metre.
  *
  * Both models are built to scale — one unit is one metre — while the arena is
- * in the units the house was modelled in. The pet is the yardstick: a robot
+ * in the units the arena was modelled in. The dog is the yardstick: a robot
  * dog stands 95 units tall here and about seventy centimetres tall in life.
  *
  * True scale would be 85, but the keeper is 4.9 metres across its mount and
@@ -88,7 +88,7 @@ const WATCHER_HIDDEN_MATERIALS = ['Ceiling', 'FX_Field', 'FX_FloorGlow'];
  *
  * They hang in the world now instead of riding the camera, so they need a
  * pose rather than a permanent stare: both are angled in towards the middle
- * of the arena, which is where the pet is and where the child is looking.
+ * of the arena, which is where the robot is and where the child is looking.
  * Turned, not spun — the faces have to stay readable from the top view.
  */
 const WATCHER_YAW = {

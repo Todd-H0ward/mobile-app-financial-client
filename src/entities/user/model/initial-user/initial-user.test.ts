@@ -65,24 +65,18 @@ describe('createInitialUser', () => {
     ]);
   });
 
-  it('takes the identity from the onboarding input', () => {
+  it('takes the identity from the introduction input', () => {
     const user = createInitialUser({
       playerName: 'Аня',
       createdAt: 1700000000000,
-      pet: {
-        species: 'dog',
-        color: 'graphite',
-        pattern: 'spots',
-        name: 'Кекс',
-      },
+      robot: { name: 'Кекс' },
     });
 
     expect(user.playerName).toBe('Аня');
     expect(user.createdAt).toBe(1700000000000);
     expect(user.period.phaseEnteredAt).toBe(1700000000000);
-    expect(user.pet.species).toBe('dog');
-    expect(user.pet.name).toBe('Кекс');
-    expect(user.pet.stage).toBe('baby');
+    expect(user.robot.name).toBe('Кекс');
+    expect(user.robot.stage).toBe('basic');
   });
 
   it('does not read the system clock: the same input gives the same user', () => {

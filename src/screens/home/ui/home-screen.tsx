@@ -7,8 +7,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RoomScene, type SceneView } from '@/widgets/room-scene';
 
 import { useDoneCells } from '@/entities/lesson';
+import { actionForMood } from '@/entities/robot-dog';
 import { cellKey, SCENE_LEVEL_COUNT } from '@/entities/scene';
-import { usePetAction, usePetSkin } from '@/entities/user';
+import { useRobotAction, useRobotSkin } from '@/entities/user';
 import type { WatcherId } from '@/entities/watcher';
 
 import {
@@ -23,7 +24,6 @@ import { useTranslation } from '@/shared/i18n';
 import { Button, SettingsIcon, Text, ThemedView } from '@/shared/ui';
 import { hitSlopFor } from '@/shared/utils';
 
-import { petActionFor } from '../lib/pet-action';
 import { useHomeHud } from '../model';
 
 // ═══════════════════════════════════════════
@@ -126,9 +126,10 @@ const WatcherCard = ({
  * area — is taken directly here, so the model keeps the whole window and only
  * the controls step inside the inset.
  *
- * The pet and the HUD are off while the scene is being built: the coins, the
- * goal and the companion have to be placed against the 3D world rather than
- * over the old flat rooms, and half-placed they would only get in the way.
+ * The HUD is off while the scene is being built: the coins, the goal and the
+ * task have to be placed against the 3D world, and half-placed they would
+ * only get in the way. The robot dog already stands on the platform and
+ * shows its mood through its clip.
  */
 export const HomeScreen = () => {
   const router = useRouter();
@@ -136,8 +137,8 @@ export const HomeScreen = () => {
   const theme = useTheme();
   const { t } = useTranslation();
   const hud = useHomeHud();
-  const petSkin = usePetSkin();
-  const chosenAction = usePetAction();
+  const robotSkin = useRobotSkin();
+  const chosenAction = useRobotAction();
 
   /** Opens over the first segment, not on the map: a place, not a menu. */
   const [view, setView] = useState<SceneView>(0);
@@ -167,22 +168,14 @@ export const HomeScreen = () => {
     return <Redirect href={STATIC_ROUTES.PERIOD_SUMMARY} />;
   }
 
-  // Usually caught right after settlement, in `useRecovery`. This is the
-  // fallback for whatever reaches home without going through it — a demo run
-  // that advanced several periods unattended chief among them; 1.6 requires
-  // the scene to be seen, not merely computable.
-  if (hud.isGrowthPending) {
-    return <Redirect href={DYNAMIC_ROUTES.petGrew(STATIC_ROUTES.HOME)} />;
-  }
-
   return (
     <ThemedView variant="background" style={styles.root}>
       <RoomScene
         view={view}
         onViewChange={setView}
         level={level}
-        petSkin={petSkin}
-        petAction={petActionFor(hud.pet?.moodName ?? null, chosenAction)}
+        robotSkin={robotSkin}
+        robotAction={actionForMood(hud.robot?.moodName ?? null, chosenAction)}
         focusedWatcher={talkingTo}
         onWatcherFocus={setTalkingTo}
         doneCells={doneCells}

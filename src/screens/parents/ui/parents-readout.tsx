@@ -49,8 +49,8 @@ export const ParentsReadout = ({ status }: ParentsReadoutProps) => {
           />
           <Terminal.Row
             order={2}
-            name={t('parents.terminal.pet')}
-            value={status.petName}
+            name={t('parents.terminal.robot')}
+            value={status.robotName || '—'}
           />
           <Terminal.Row
             order={3}

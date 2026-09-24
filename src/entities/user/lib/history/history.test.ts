@@ -83,9 +83,6 @@ describe('describeWalletSource', () => {
     expect(describeWalletSource(WALLET_SOURCES.startingWallet)).toEqual({
       kind: 'startingWallet',
     });
-    expect(describeWalletSource(WALLET_SOURCES.heatingBill)).toEqual({
-      kind: 'heatingBill',
-    });
     expect(describeWalletSource(WALLET_SOURCES.gamePuzzle)).toEqual({
       kind: 'gamePuzzle',
     });

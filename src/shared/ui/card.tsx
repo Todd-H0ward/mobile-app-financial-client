@@ -85,9 +85,9 @@ const CardFooter = ({ children, isSpread = false, style }: CardFooterProps) => {
  *
  * @example
  * <Card onPress={choose} isSelected={isChosen}>
- *   <Card.Title>Питомец</Card.Title>
+ *   <Card.Title>Робопёс</Card.Title>
  *   <Card.Content>
- *     <Text>Голодный, но довольный.</Text>
+ *     <Text>Заряд на исходе, но доволен.</Text>
  *   </Card.Content>
  *   <Card.Footer>
  *     <Button size="s">Покормить</Button>

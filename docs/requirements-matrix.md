@@ -21,26 +21,26 @@
 
 | Пункт | Требование | Экран | Модуль | Тест | Статус |
 | --- | --- | --- | --- | --- | --- |
-| 2.5.1 | Онбординг: цель игры и три типа решений (обязательное / желаемое / отложить) | `screens/onboarding` | `entities/onboarding` + `content/onboarding.json` | `content.test.ts`, `sorting.test.ts` | готово — drag-сортировка, скретч монет, boop; прогон на устройстве ещё желателен |
-| 2.5.1 | Гостевой режим, локальный профиль, игровое имя | `screens/onboarding` | `entities/user` + `lib/player-name` | `player-name.test.ts`, `store.test.ts` | готово — профиль создаётся в конце знакомства, аккаунта нет |
+| 2.5.1 | Знакомство: цель игры и три типа решений (обязательное / желаемое / отложить) | — | — | — | не начато — старый онбординг про питомца удалён; знакомство будет внутри сцены-ямы |
+| 2.5.1 | Гостевой режим, локальный профиль, игровое имя | `screens/entry` | `entities/user` + `lib/player-name` | `player-name.test.ts`, `store.test.ts` | частично — гостевой профиль создаётся при первом запуске, аккаунта нет; имя пока не спрашивается |
 | 2.5.1 | Доступ к подсказке в любой момент | все экраны | `widgets/hint-button` + `entities/hint` | `content.test.ts` | готово — «?» в шапке, тексты в `content/hints.json`, id экранов в `HINT_SCREENS` |
-| 2.5.2 | Создание питомца: внешность + имя, ≥9 различимых комбинаций | `screens/pet-create` | `entities/pet` (`appearance`, `lib/pet-name`) | `anchors.test.ts` (оси × стадии), `pet-name` | готово — вид/окрас/узор (3×3×3) и имя на встрече из коробки; ≥9 силуэтов по осям вид×окрас |
-| 2.5.3 | Главный экран: питомец, баланс, накопления, цель, состояние, активное задание — одновременно | `screens/home` | `use-home-hud`, `home-hud`, `HomePetCompanion`, `widgets/room-pager` | ручной — home в демо | готово — HUD держит всё сразу поверх трёх комнат |
+| 2.5.2 | Персонаж: внешность + имя, ≥9 различимых комбинаций | `screens/settings` (`RobotCard`) | `entities/robot-dog` (`ROBOT_DOG_SKINS`, `lib/robot-name`) | `robot-name.test.ts` | частично — 7 окрасов робопса в настройках, правила имени есть; экрана имени нет, до 9 комбинаций не хватает |
+| 2.5.3 | Главный экран: персонаж, баланс, накопления, цель, состояние, активное задание — одновременно | `screens/home` | `use-home-hud`, `widgets/room-scene` | ручной — home в демо | частично — робопёс в яме и его клип по настроению; данные HUD считаются, но на 3D-сцене пока не размещены |
 | 2.5.4 | Валюта с явным источником и суммой каждого начисления | `screens/history`, `screens/home` | `entities/user/lib/wallet` + `lib/history` | `wallet.test.ts`, `history.test.ts` | готово — у каждой записи `source` + сумма; история из настроек; на home бейдж последнего earn в `planning`/`active` |
 | 2.5.5 | План бюджета по трём направлениям, контроль остатка, подтверждение | `screens/budget-plan` | `entities/budget` | `plan.test.ts`, `compare.test.ts` | готово — валидация и остаток в entity, экран со слайдером и степпером, баннер на home в `planning` |
 | 2.5.5 | Сравнение плана с фактом после периода | `screens/period-summary` | `entities/budget` (`compare`, `explainSummary`) | `compare.test.ts`, `explain.test.ts` | готово — экран итогов с план/факт барами, историей и tips; вход с home в `active`, редирект в `summary` |
-| 2.5.6 | Каталог покупок: ≥8 позиций, обязательные и необязательные, цена, категория, влияние | `screens/shop` | `entities/catalogue` | `content.test.ts` | готово — 15 позиций в четырёх витринах + утепление (`insulationId`); мини-игры игрушек — на полке |
+| 2.5.6 | Каталог покупок: ≥8 позиций, обязательные и необязательные, цена, категория, влияние | `screens/shop` | `entities/catalogue` | `content.test.ts` | готово — 12 позиций в четырёх витринах; консоль и пазл открывают мини-игры (`ownedId`) |
 | 2.5.6 | Запрет отрицательного баланса + объяснение вариантов | `screens/shop` | `entities/user/lib/wallet` + `lib/shortage` (`explainShortage`) | `wallet.test.ts`, `purchase.test.ts`, `shortage.test.ts` | готово — shortfall, задание с наградой, последствие копилки, ожидание |
 | 2.5.7 | Накопления, ≥3 цели, прогресс | `screens/savings` | `entities/savings` + `entities/user/lib/savings` + `content/goals.json` | `progress.test.ts`, `savings.test.ts` | готово — витрина, экран цели, депозит/снятие |
 | 2.5.7 | Снятие только по отдельному подтверждению с показом последствий | `screens/savings` (`WithdrawScreen`) | `entities/savings/lib/withdraw` (`explainWithdraw`) | `explain.test.ts`, `savings.test.ts` | готово — отдельный экран с пересчётом remaining/progress/периодов до и после |
 | 2.5.8 | ≥6 заданий по 3 темам, с последствиями, не только тесты | `screens/tasks` | `entities/task` + `entities/user/lib/tasks` + `content/tasks.json` | `queue.test.ts`, `score.test.ts`, `tasks.test.ts`, `content.test.ts` | готово — 6 заданий, 5 механик (quiz/change/basket/priority/dialog), витрина и экран прохождения |
 | 2.5.9 | Обратная связь после каждого действия: что изменилось и почему | все экраны | `features/feedback` (`describeChange`, `FeedbackSheet`) | `describe-change.test.ts` | готово — дифф сейва + шит «что / почему»; покупка, депозит, снятие, задание, план |
 | 2.5.9 | Путь восстановления после ошибки без обнуления прогресса | `screens/recovery` | `entities/budget/lib/recovery` (`pickRecoveryOptions`) | `recovery.test.ts`, `explain.test.ts` | готово — правила выбора 1–2 вариантов + экран; `acknowledgeSummary` не обнуляет сейв |
-| 2.5.10 | ≥3 состояния питомца с объяснением причины | `screens/home` | `entities/pet/lib/mood` + `lib/presentation` (`emotionFor`) | `mood.test.ts` | готово — ≥5 mood + `reason` в модели; home показывает ярлык и причину (`pet.reason.*`), a11y тоже |
-| 2.5.10 | ≥3 стадии развития по совокупности решений за несколько периодов | `screens/pet-grew` | `entities/pet/lib/growth` (правило), `entities/user/lib/growth` (`celebrateStage`) | `growth.test.ts` (оба файла) | готово — `growPet` считает стадию, `/pet-grew` поднимает разовую сцену с причиной в числах, `celebratedStage` не даёт эффекту потеряться в демо-прогоне |
+| 2.5.10 | ≥3 состояния персонажа с объяснением причины | `screens/home` | `entities/robot-dog/lib/mood` (`moodFor`, `actionForMood`) | `mood.test.ts`, `action.test.ts` | частично — 5 состояний с причиной (`robot.reason.*`), робопёс играет клип по настроению; текст причины на сцене пока не показан |
+| 2.5.10 | ≥3 стадии развития по совокупности решений за несколько периодов | `screens/parents` | `entities/robot-dog/lib/growth` (`growRobotDog`) | `growth.test.ts` | частично — стадия считается при закрытии периода и видна взрослому; визуального отличия стадий робота и сцены перехода нет |
 | 2.5.11 | История, итоги последнего периода, справочник терминов | `screens/history`, `screens/glossary` | `entities/user/lib/history` + `entities/glossary` + `content/glossary.json` | `history.test.ts`, `content.test.ts` | готово — выборки периодов/кошелька, 12 терминов, экраны из настроек |
 | 2.5.12 | Раздел для взрослого за арифметическим барьером | `screens/parents` | `entities/settings/lib/gate` + `entities/user/lib/report` | `gate.test.ts`, `report.test.ts` | готово — барьер 6–9 из настроек, отчёт из четырёх ответов, линейный график монет и задания по темам |
-| 2.5.12 | Сброс и удаление профиля | `screens/parents` | `entities/user/lib/reset` + `features/profile-restart` | `reset.test.ts` | готово — за барьером: сброс в демо-карточке, удаление с подтверждением и возвратом в онбординг |
+| 2.5.12 | Сброс и удаление профиля | `screens/parents` | `entities/user/lib/reset` + `features/profile-restart` | `reset.test.ts` | готово — за барьером: сброс в демо-карточке, удаление с подтверждением и новым гостевым профилем |
 | 2.5.13 | Сохранение состояния между запусками | — | `entities/user` | `store.test.ts`, `migrations.test.ts` | готово |
 | 2.5.13 | Демо-режим: тестовый профиль, сброс, 5 периодов подряд | `screens/parents` | `entities/user/lib/demo` + `features/demo-mode` | `demo.test.ts` | готово — за барьером |
 | 2.5.14 | Новое задание добавляется без переработки логики | — | `content/tasks.json` + `entities/task` | `content.test.ts` | готово |
@@ -49,9 +49,7 @@
 
 | Пункт | Требование | Экран | Модуль | Статус |
 | --- | --- | --- | --- | --- |
-| — | Питомец следует за игроком между комнатами | `screens/home` | `HomePetCompanion` | готово — один питомец над пейджером |
-| — | Жесты с питомцем: ткнуть / гладить / поднять | `screens/home` | `PetPlay` + `entities/pet/lib/interaction` | готово — мягкие реакции, без «пинка» |
-| — | Отопление: термостат, квитанция, утепление | `screens/heating` | `entities/user/lib/period` (`buildBill`, `setTemperature`, `insulationPayback`) + каталог | готово — хотспот в гостиной, скидка навсегда |
+| — | Мини-игры аркады за купленные вещи | `screens/games` | `entities/minigame` + `ownedItemIds` | готово |
 
 ## 2.2, 2.7 Рамки
 
@@ -60,13 +58,13 @@
 | 2.2 | Финансовая нейтральность | Нет процентов по вкладам, инфляции, скидок и упоминаний реальных продуктов — см. [economy.md](./economy.md#чего-в-экономике-намеренно-нет) | готово |
 | 2.2 | Отсутствие давления и обнуления прогресса | Нет провала, нет стриков с наказанием, нет пушей — см. [game-period.md](./game-period.md#нет-состояния-провала) | готово |
 | 2.7 | Игровая валюта не приравнивается к рублю | Монеты без курса, нигде не сопоставляются с реальными деньгами | готово |
-| 3.5 | Нет текстов, которые пугают или стыдят | Отопление — про уют, не про выживание: [house.md](./house.md#рамка-уют-а-не-выживание); `/heating` + квитанция + утепление | готово |
+| 3.5 | Нет текстов, которые пугают или стыдят | Нулевой заряд — усталость робота, не поломка и не потеря прогресса: [robot-dog.md](./robot-dog.md#настроение-2510--причина-объясняется) | готово |
 
 ## 3.x Технические требования
 
 | Пункт | Требование | Где | Статус |
 | --- | --- | --- | --- |
-| 3.2 | Контент отделён от кода | `content/*.json`, см. [content.md](./content.md) | готово — goals, tasks, onboarding, hints, catalogue, glossary, traits; сейв хранит только id |
+| 3.2 | Контент отделён от кода | `content/*.json`, см. [content.md](./content.md) | готово — goals, tasks, lessons, hints, catalogue, glossary; сейв хранит только id |
 | 3.3 | Подписанный релизный APK | `npm run build:apk` и `.github/workflows/build-apk.yml` (пуш ветки `release/*`), см. [android-release.md](./android-release.md#ci) | готово |
 | 3.4 | Разделение слоёв, автотесты | [architecture.md](./architecture.md), [AGENTS.md](../AGENTS.md) | готово — FSD; vitest; CI: coverage economy/minigame + i18n en↔ru parity; lint = Biome |
 | 3.6 | Доступность: 48dp, 16sp, цвет не единственный носитель | `shared/ui` + [accessibility.md](./accessibility.md) | частично — кит + свитчи звука/анимаций на `/settings` (хаптики, Reduce Motion); прогон на устройстве ещё открыт |
@@ -80,9 +78,9 @@
 
 | Что | Нужно | Есть | Статус |
 | --- | --- | --- | --- |
-| Комбинации внешности питомца | 9 | 27 (3×3×3), ≥9 силуэтов | готово — `PET_SPECIES` × `PET_COLORS` × `PET_PATTERNS` |
+| Комбинации внешности персонажа | 9 | 7 | не хватает — 7 окрасов робопса (`ROBOT_DOG_SKINS`) |
 | Игровые периоды в демо-режиме | 5 | 5 | готово — `runDemoPeriods` + `demo.test.ts` |
 | Задания | 6 по 3 темам | 6 | готово — контент + экран с интерактивом |
-| Позиции каталога покупок | 8, двух типов | 15 | готово — needs/wants + `insulationId` |
+| Позиции каталога покупок | 8, двух типов | 12 | готово — 3 needs + 9 wants |
 | Цели накопления | 3 | 3 | готово — `content/goals.json` |
-| Стадии развития питомца | 3 | 3 | готово — `baby` / `teen` / `adult`, `growPet` + `/pet-grew` |
+| Стадии развития персонажа | 3 | 3 | частично — `basic` / `upgraded` / `complete` считаются `growRobotDog`; визуала стадий нет |

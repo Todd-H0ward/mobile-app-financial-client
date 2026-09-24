@@ -30,7 +30,7 @@ export const WALLET_HISTORY_LIMIT = 100;
 /**
  * How many finished periods the save keeps. Same rule as the wallet: a report
  * window, not an archive. Growth only needs four periods to reach adult, so a
- * fifty-row cap is plenty for the pet and the parents chart.
+ * fifty-row cap is plenty for the robot's stages and the parents chart.
  */
 export const PERIOD_HISTORY_LIMIT = 50;
 
@@ -53,8 +53,6 @@ export const WALLET_SOURCES = {
   startingWallet: 'wallet:starting',
   /** Credited at settlement when the child deposited at least once. */
   regularityBonus: 'bonus:regularity',
-  /** Heating bill charged once per period at settlement — docs/house.md. */
-  heatingBill: 'bill:heating',
   /** Arcade puzzle sitting payout — under a medium chore on purpose. */
   gamePuzzle: 'game:puzzle',
   /** Console Spacewar sitting payout — under a medium chore on purpose. */
@@ -64,28 +62,16 @@ export const WALLET_SOURCES = {
 } as const;
 
 /**
- * How much comfort / spirit fall when a period ends — one step, not a tick.
+ * How much charge / spirit fall when a period ends — one step, not a tick.
  *
- * Replaces realtime need decay (0.3-R): closing the app never changes the pet;
- * only pressing "End day" does.
+ * Replaces realtime need decay (0.3-R): closing the app never changes the
+ * robot; only pressing "End day" does.
  */
 export const PERIOD_NEED_DECAY = {
-  /** Body: fed and warm. 0…1 subtracted once per settled period. */
-  comfort: 0.12,
+  /** The robot's battery. 0…1 subtracted once per settled period. */
+  charge: 0.12,
   /** Spirit: mood axis. 0…1 subtracted once per settled period. */
   spirit: 0.08,
-} as const;
-
-/**
- * Heating bill knobs — docs/house.md. Thermostat is 0…1; free below the base.
- */
-export const HEATING = {
-  /** Thermostat at or below this is free heat. */
-  freeTemperature: 0.3,
-  /** Coins per 0.1 of thermostat above the free base. */
-  coinsPerTenth: 4,
-  /** Flat discount per installed insulation id. */
-  insulationDiscount: 4,
 } as const;
 
 // ═══════════════════════════════════════════

@@ -3,7 +3,7 @@ export type {
   HomeHud,
   HomeHudCredit,
   HomeHudGoal,
-  HomeHudPet,
+  HomeHudRobot,
   MoodTone,
 } from './use-home-hud';
 export { useHomeHud } from './use-home-hud';

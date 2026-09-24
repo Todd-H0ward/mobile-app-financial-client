@@ -23,7 +23,8 @@ import {
 /** One glance at where the child is — the terminal readout on top. */
 interface ParentsStatus {
   playerName: string;
-  petName: string;
+  /** Name the child gave the robot; empty until it is asked for. */
+  robotName: string;
   /** The period being played now, from 1. */
   periodIndex: number;
   finishedPeriods: number;
@@ -96,7 +97,7 @@ export const useParents = (): ParentsController => {
       user && report
         ? {
             playerName: user.playerName,
-            petName: user.pet.name,
+            robotName: user.robot.name,
             periodIndex: user.period.index,
             finishedPeriods: user.history.length,
             tasksDone: report.tasksDone,

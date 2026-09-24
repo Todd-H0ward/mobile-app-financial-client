@@ -9,7 +9,7 @@ import { makeDemoTimeSource, type TimeSource } from '@/shared/lib/time-source';
 import { createInitialUser } from '../../model/initial-user';
 import type { UserSave } from '../../model/types';
 import { DEMO_RUN_PERIODS } from '../demo';
-import { buildBill, endPeriod, finishPeriod, startPeriod } from '../period';
+import { endPeriod, finishPeriod, startPeriod } from '../period';
 import { applyPurchase } from '../purchase';
 import { applyDeposit, setActiveGoal } from '../savings';
 import { applyCompleteTask } from '../tasks';
@@ -64,8 +64,8 @@ interface SimRun {
   minBalance: number;
   /** Which period each goal was reached in — the map is missing the unreached. */
   goalsReachedIn: Record<string, number>;
-  /** The stage the pet grew to over the run. */
-  stage: UserSave['pet']['stage'];
+  /** The build stage the robot reached over the run. */
+  stage: UserSave['robot']['stage'];
 }
 
 interface SimOptions {
@@ -116,11 +116,8 @@ const expectedIncome = (profile: SimProfile): number =>
  * "доступно к плану" — the balance on entering the planning phase, plus what
  * the period's chores are going to pay.
  *
- * `buys` is the intent, so its cost is the needs and wants lines; heating is
- * the fixed need `endPeriod` will bill (0.3-R / docs/house.md), so it belongs
- * on the needs line too — otherwise every period that keeps the thermostat
- * above the free base would look like a broken plan. Whatever is left over
- * goes on the savings line at the profile's rate. A profile whose shopping
+ * `buys` is the intent, so its cost is the needs and wants lines. Whatever is
+ * left over goes on the savings line at the profile's rate. A profile whose shopping
  * outgrows its plan is the one that breaks it — see `impulsive` in the tests.
  */
 const planFor = (
@@ -135,11 +132,6 @@ const planFor = (
     if (!item) continue;
     if (item.kind === 'need') needs += item.price;
     else wants += item.price;
-  }
-
-  // Settlement bills heating once per period index — plan for it here.
-  if (user.home.lastBilledPeriod !== user.period.index) {
-    needs += buildBill(user.home.temperature, user.home.insulationIds).total;
   }
 
   const available = user.wallet.balance + expectedIncome(profile);
@@ -269,18 +261,9 @@ export const simulate = (
       time.tick();
     }
 
-    const upcomingBill =
-      user.home.lastBilledPeriod === user.period.index
-        ? 0
-        : buildBill(user.home.temperature, user.home.insulationIds).total;
-    // Leave the heating coins in the wallet — settlement will take them, and
-    // saving them first would push fact.savings over a plan that already
-    // reserved that bill on the needs line.
     const put = putAside(
       user,
-      Math.floor(
-        Math.max(0, user.wallet.balance - upcomingBill) * profile.saveShare,
-      ),
+      Math.floor(user.wallet.balance * profile.saveShare),
       time,
     );
     user = put.user;
@@ -320,7 +303,7 @@ export const simulate = (
     periods: rows,
     minBalance,
     goalsReachedIn,
-    stage: user.pet.stage,
+    stage: user.robot.stage,
   };
 };
 

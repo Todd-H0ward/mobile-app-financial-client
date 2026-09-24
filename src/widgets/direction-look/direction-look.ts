@@ -28,8 +28,8 @@ interface DirectionLook {
 /**
  * The look of the three budget directions.
  *
- * Shared by onboarding and the real plan screen so the same three words keep
- * the same colours and markers everywhere — docs/budget.md.
+ * Shared by the plan screen, the shop and the summary so the same three words
+ * keep the same colours and markers everywhere — docs/budget.md.
  */
 export const DIRECTION_LOOK: Record<BudgetDirection, DirectionLook> = {
   needs: {

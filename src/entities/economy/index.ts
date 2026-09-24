@@ -2,7 +2,6 @@ export type { BudgetDirection, TaskDifficulty } from './model';
 export {
   BUDGET_DIRECTIONS,
   BUDGET_TOLERANCE,
-  HEATING,
   PERIOD_HISTORY_LIMIT,
   PERIOD_NEED_DECAY,
   REGULARITY_BONUS,

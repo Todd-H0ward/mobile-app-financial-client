@@ -129,10 +129,10 @@ export const applyCompleteTask = (
       activeTaskId: user.tasks.activeTaskId,
       completedThisPeriod,
     },
-    pet: {
-      ...user.pet,
-      // A finished chore lifts spirit a little — docs/pet.md.
-      spirit: clamp(user.pet.spirit + 0.05, 0, 1),
+    robot: {
+      ...user.robot,
+      // A finished chore lifts spirit a little — docs/robot-dog.md.
+      spirit: clamp(user.robot.spirit + 0.05, 0, 1),
     },
   };
 

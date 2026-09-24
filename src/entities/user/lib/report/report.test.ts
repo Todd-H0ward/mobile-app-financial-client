@@ -133,15 +133,15 @@ describe('tasks', () => {
 });
 
 // ═══════════════════════════════════════════
-// 3. The pet's stage
+// 3. The robot's build stage
 // ═══════════════════════════════════════════
 
 describe('growth', () => {
   it('names the stage and what the next one still needs', () => {
     const report = buildParentsReport(withWallet([]));
 
-    expect(report.growth.stage).toBe('baby');
-    expect(report.growth.progress).toMatchObject({ next: 'teen' });
+    expect(report.growth.stage).toBe('basic');
+    expect(report.growth.progress).toMatchObject({ next: 'upgraded' });
   });
 
   it('counts the history rather than a stored counter', () => {
@@ -162,18 +162,20 @@ describe('growth', () => {
       }),
     );
 
-    // One period, one goal, one kept plan — teen still wants a second period.
+    // One period, one goal, one kept plan — upgraded still wants a second period.
     expect(report.growth.progress).toMatchObject({
-      next: 'teen',
+      next: 'upgraded',
       periods: 1,
       goalsReached: 0,
       plansKept: 0,
     });
   });
 
-  it('has nothing left to ask once the pet is grown', () => {
+  it('has nothing left to ask once the robot is complete', () => {
     const report = buildParentsReport(
-      withWallet([], { pet: { ...createInitialUser().pet, stage: 'adult' } }),
+      withWallet([], {
+        robot: { ...createInitialUser().robot, stage: 'complete' },
+      }),
     );
 
     expect(report.growth.progress).toBeNull();

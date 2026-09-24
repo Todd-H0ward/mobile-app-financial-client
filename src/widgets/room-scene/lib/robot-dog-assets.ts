@@ -19,7 +19,7 @@ type RobotDogTextureSlot = 'body' | 'dark' | 'mid';
  * megabyte models became one of three and a half.
  */
 const ROBOT_DOG_MODEL =
-  require('../../../../assets/pet/robot-dog/robot-dog.glb') as number;
+  require('../../../../assets/robot-dog/robot-dog.glb') as number;
 
 /**
  * Albedo per coat, one file per material group.
@@ -35,39 +35,39 @@ const ROBOT_DOG_TEXTURES: Record<
   Record<RobotDogTextureSlot, number>
 > = {
   factory: {
-    body: require('../../../../assets/pet/robot-dog/skins/factory/body.png') as number,
-    dark: require('../../../../assets/pet/robot-dog/skins/factory/dark.png') as number,
-    mid: require('../../../../assets/pet/robot-dog/skins/factory/mid.png') as number,
+    body: require('../../../../assets/robot-dog/skins/factory/body.png') as number,
+    dark: require('../../../../assets/robot-dog/skins/factory/dark.png') as number,
+    mid: require('../../../../assets/robot-dog/skins/factory/mid.png') as number,
   },
   arctic: {
-    body: require('../../../../assets/pet/robot-dog/skins/arctic/body.png') as number,
-    dark: require('../../../../assets/pet/robot-dog/skins/arctic/dark.png') as number,
-    mid: require('../../../../assets/pet/robot-dog/skins/arctic/mid.png') as number,
+    body: require('../../../../assets/robot-dog/skins/arctic/body.png') as number,
+    dark: require('../../../../assets/robot-dog/skins/arctic/dark.png') as number,
+    mid: require('../../../../assets/robot-dog/skins/arctic/mid.png') as number,
   },
   carbon: {
-    body: require('../../../../assets/pet/robot-dog/skins/carbon/body.png') as number,
-    dark: require('../../../../assets/pet/robot-dog/skins/carbon/dark.png') as number,
-    mid: require('../../../../assets/pet/robot-dog/skins/carbon/mid.png') as number,
+    body: require('../../../../assets/robot-dog/skins/carbon/body.png') as number,
+    dark: require('../../../../assets/robot-dog/skins/carbon/dark.png') as number,
+    mid: require('../../../../assets/robot-dog/skins/carbon/mid.png') as number,
   },
   desert: {
-    body: require('../../../../assets/pet/robot-dog/skins/desert/body.png') as number,
-    dark: require('../../../../assets/pet/robot-dog/skins/desert/dark.png') as number,
-    mid: require('../../../../assets/pet/robot-dog/skins/desert/mid.png') as number,
+    body: require('../../../../assets/robot-dog/skins/desert/body.png') as number,
+    dark: require('../../../../assets/robot-dog/skins/desert/dark.png') as number,
+    mid: require('../../../../assets/robot-dog/skins/desert/mid.png') as number,
   },
   forest: {
-    body: require('../../../../assets/pet/robot-dog/skins/forest/body.png') as number,
-    dark: require('../../../../assets/pet/robot-dog/skins/forest/dark.png') as number,
-    mid: require('../../../../assets/pet/robot-dog/skins/forest/mid.png') as number,
+    body: require('../../../../assets/robot-dog/skins/forest/body.png') as number,
+    dark: require('../../../../assets/robot-dog/skins/forest/dark.png') as number,
+    mid: require('../../../../assets/robot-dog/skins/forest/mid.png') as number,
   },
   rescue: {
-    body: require('../../../../assets/pet/robot-dog/skins/rescue/body.png') as number,
-    dark: require('../../../../assets/pet/robot-dog/skins/rescue/dark.png') as number,
-    mid: require('../../../../assets/pet/robot-dog/skins/rescue/mid.png') as number,
+    body: require('../../../../assets/robot-dog/skins/rescue/body.png') as number,
+    dark: require('../../../../assets/robot-dog/skins/rescue/dark.png') as number,
+    mid: require('../../../../assets/robot-dog/skins/rescue/mid.png') as number,
   },
   rust: {
-    body: require('../../../../assets/pet/robot-dog/skins/rust/body.png') as number,
-    dark: require('../../../../assets/pet/robot-dog/skins/rust/dark.png') as number,
-    mid: require('../../../../assets/pet/robot-dog/skins/rust/mid.png') as number,
+    body: require('../../../../assets/robot-dog/skins/rust/body.png') as number,
+    dark: require('../../../../assets/robot-dog/skins/rust/dark.png') as number,
+    mid: require('../../../../assets/robot-dog/skins/rust/mid.png') as number,
   },
 };
 

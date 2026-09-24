@@ -25,7 +25,7 @@ const levelProgress = (
 /**
  * How much of the bowl has been swallowed, in world units.
  *
- * The pit does not lift the pet out — it sinks around them. One terrace's
+ * The pit does not lift the robot out — it sinks around them. One terrace's
  * worth of depth goes per level, and rings drop into that budget from the
  * inside out.
  */
@@ -36,14 +36,14 @@ const sinkBudget = (progress: number): number =>
  * How far a terrace has sunk, in world units. Negative: it goes down.
  *
  * A ring stops once it is flush with the floor — it cannot sink past the
- * thing the pet is standing on. That cap is what staggers the collapse: the
+ * thing the robot is standing on. That cap is what staggers the collapse: the
  * inner rings run out of room first, so each level takes exactly one more
  * ring out of the skyline and the child counts one fewer level.
  */
 const terraceSinkY = (terrace: number, progress: number): number =>
   -Math.min(
-    // A ring settles flush with the floor of the bowl — the flat disc the pet
-    // stands on, at zero. Stopping a step short leaves the pet in a trench;
+    // A ring settles flush with the floor of the bowl — the flat disc the robot
+    // stands on, at zero. Stopping a step short leaves the robot in a trench;
     // going a step further leaves it on a pedestal.
     terrace * SCENE_TERRACE_RISE,
     sinkBudget(progress),

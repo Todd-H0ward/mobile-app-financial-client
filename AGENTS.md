@@ -11,6 +11,15 @@ runs Expo SDK 57, React 19, React Native 0.86 and expo-router 57
 (`Keyframe` animations from `react-native-reanimated` 4,
 `react-native-worklets`). Native tabs are **not** used — see below.
 
+## The game and the brief
+
+The game is a robot dog climbing out of a pit — story, rules and open
+decisions are in [docs/concept.md](docs/concept.md). The competition's
+requirements are in `output/planning/tz-finni-brief.md` (with the full text in
+`tz-finni-full.md`). **Never delete or rewrite those files**: every feature is
+checked against them, and where the concept and the brief disagree, the brief
+wins.
+
 ## Stack
 
 | Area | Choice |
@@ -50,13 +59,10 @@ Rules:
    In `shared/ui` a component is a single flat file — `button.tsx` —
    re-exported from `src/shared/ui/index.ts`. Import components from
    `@/shared/ui`, never by file path.
-   The one exception is an **entity that owns a component**: its `ui/` segment
-   gets an entry point of its own (`@/entities/pet/ui`) and the slice barrel
-   stays free of React. `entities/user` reads the pet's appearance tuples from
-   `@/entities/pet`, and those reads happen inside `vitest`'s node environment,
-   where importing a component would drag react-native in and fail the suite.
-   Two entry points, still no deep imports: `@/entities/pet` for the logic,
-   `@/entities/pet/ui` for the rig.
+   Should an entity ever own a component, its `ui/` segment gets an entry
+   point of its own (`@/entities/<slice>/ui`) and the slice barrel stays free
+   of React: entities are read inside `vitest`'s node environment, where
+   importing a component would drag react-native in and fail the suite.
 3. **Segments inside a slice:** `ui/` (components), `model/` (state, stores,
    selectors, types), `lib/` (pure helpers), `api/` (requests). Create a segment
    only when it has content — do not scaffold empty folders.
@@ -80,9 +86,10 @@ entities/budget/lib/compare/
    public API when that entity is a **leaf** — no state, no store, no imports of
    its own from the layer. `entities/economy` (the balance table),
    `entities/goal` / `entities/task` / `entities/catalogue` / `entities/glossary`
-   / `entities/hint` / `entities/onboarding` (validated content) and
-   `entities/settings` (parent-gate math only — `SettingsSave` switches live on
-   `entities/user`) are those leaves. The rule that does not bend: a slice never
+   / `entities/hint` (validated content), `entities/robot-dog` (the character's
+   coats, clips, stages and mood rules) and `entities/settings` (parent-gate
+   math only — `SettingsSave` switches live on `entities/user`) are those
+   leaves. The rule that does not bend: a slice never
    **re-exports** another slice's API. `STARTING_BALANCE` is imported from
    `@/entities/economy` by everyone who needs it, never through `@/entities/user`.
 7. `shared/` knows nothing about the domain. No entity types, no feature logic.
@@ -225,7 +232,7 @@ interface ChoresSave {
 ```
 
 Say the unit (`Epoch ms`, `°C`, `0…1`), the invariant (`never below zero`) or
-what depends on it (`the pet grows up on this`). Elsewhere in the codebase the
+what depends on it (`the robot's stage is counted from this`). Elsewhere in the codebase the
 usual rule still holds: a comment earns its place by explaining *why*.
 
 ## The UI-kit screen — mandatory for UI components
@@ -266,7 +273,7 @@ rendered on `/home` by `widgets/room-scene`. Walking to another segment turns
 the model under the camera instead of sliding a page, so the child never loses
 sight of where the others are. The camera opens standing at a segment; the
 overhead map is a drag upwards away. Everything that is not the world —
-settings, the pet's meeting screen, the UI kit — is pushed over it by the root
+settings, the grown-ups' section, the UI kit — is pushed over it by the root
 stack.
 
 **The map does not turn.** The overhead view is a composed shot on a fixed
@@ -307,12 +314,12 @@ things make that shot work and none of them are optional:
   the child can see where they came from. What keeps the near rim out of the
   way is `ROOM_ELEVATION` (24°) — the rim is 160 units tall at a radius of
   400, a slope of 21.8°, and anything flatter is a view of the back of a wall
-  with the pet behind it.
+  with the robot behind it.
 - Distance flattens the arc. Six cells wrap 120°, and from close in the ends
   loom while the middle falls away; `SCENE_SEGMENT_DISTANCE` (1500) is where
   the bay stops being a bowl and starts being a board.
 
-The pet turns to face the camera wherever it goes (`setCharacterFacing`): it
+The robot turns to face the camera wherever it goes (`setCharacterFacing`): it
 stands on the axis with three bays around it, so there is no direction that
 is right from all of them.
 
@@ -322,18 +329,29 @@ are deliberately absent, the FBX is converted to JSON at build time by
 the reasons for all three are in [docs/scene.md](docs/scene.md), which is
 required reading before touching the scene.
 
-The pet stands at the centre of the arena as a robot dog: seven coats and four
-clips, driven by the pet's mood and answering a tap. Its textures live as loose
+The robot dog stands at the centre of the arena: seven coats and four clips,
+driven by its mood (`entities/robot-dog`, `actionForMood`) and answering a
+tap. Its textures live as loose
 files rather than inside the GLB, and that is not a style choice — expo-gl can
 only upload a texture from a `file://` path. See
 [docs/scene.md](docs/scene.md) before touching it.
 
 The flat rooms that preceded this are **deleted**, not parked:
 `widgets/room-pager`, `screens/home/ui/rooms`, `entities/room` and the
-`SceneControls` tab strip all went when the rooms did. The HUD and the 2D pet
-companion are still in the tree, unused; they come back once the coins, the
-goal and the pet have a place on the 3D world. Until then the home screen
-deliberately shows the model, the level card and nothing else.
+`SceneControls` tab strip all went when the rooms did.
+
+**The pet concept is gone too.** The game is about climbing out of a pit, not
+about looking after a pet in a house: `entities/pet` (species, coats,
+patterns, traits, the 2D rig), `entities/onboarding`, the onboarding,
+pet-create and pet-grew screens, `widgets/pet-box`, the 2D HUD companion and
+the whole house — thermostat, insulation, heating bill, furniture — are
+deleted, not parked. What the new game still needs moved to
+`entities/robot-dog`: the three build stages, the charge / spirit mood and the
+name rules. A first launch makes a guest profile and drops straight into the
+pit; the introduction is to be built inside the game. The HUD data
+(`useHomeHud`) is still computed for when the coins, the goal and the task
+get a place on the 3D world; until then the home screen deliberately shows
+the model, the level card and nothing else.
 
 ## Native tabs are off — do not bring them back
 
@@ -364,7 +382,7 @@ threw inside the UI runtime. That is not a red screen — it is a native abort,
 which surfaces as `simctl openurl … exited with non-zero code: 60` and looks
 exactly like a hung simulator.
 
-This app leans on Reanimated everywhere (pet animations, sheets, slider,
+This app leans on Reanimated everywhere (the robot, sheets, slider,
 toasts), so the compiler stays off until it is verified against
 `react-native-worklets`. If you turn it on, check for new reports in
 `~/Library/Logs/DiagnosticReports` before believing it works.
@@ -446,11 +464,11 @@ Full rationale: [docs/layout.md](docs/layout.md).
   is plain `StyleSheet` + theme tokens.
 - Do not create `src/components`; that folder is gone on purpose.
 - Do not hardcode colors outside `shared/constants/theme.ts`. The one exception
-  is an entity's own art data — the pet's coats are the child's pet, not the
-  design system, and `shared/` may not know about them (rule 7). Such colors
-  live in a **single** palette file inside that entity
-  (`entities/pet/model/palette.ts`), nothing else in the slice writes a hex, and
-  a test asserts it.
+  is an entity's own art data — the arena's colours belong to the world, not
+  the design system, and `shared/` may not know about them (rule 7). Such
+  colors live in a **single** palette file inside that entity
+  (`entities/scene/model/palette`), nothing else in the slice writes a hex,
+  and a test asserts it.
 - Do not add barrels that re-export a whole layer (`src/screens/index.ts`);
   import the slice.
 - Do not use `export *` in a barrel — list every export by name, values and

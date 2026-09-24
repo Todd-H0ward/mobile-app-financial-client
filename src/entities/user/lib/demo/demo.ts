@@ -15,8 +15,8 @@ import { endPeriod, finishPeriod, startPeriod } from '../period';
 /** Player name shown during a demo run. Not a real child's name. */
 const DEMO_PLAYER_NAME = 'Демо';
 
-/** Pet name used in the demo profile. */
-const DEMO_PET_NAME = 'Лапик';
+/** Robot name used in the demo profile. */
+const DEMO_ROBOT_NAME = 'Болт';
 
 /**
  * Plan the demo run fills in for the child. All three directions are occupied
@@ -48,14 +48,14 @@ export const createDemoProfile = (
   createInitialUser({
     playerName: DEMO_PLAYER_NAME,
     createdAt: 0,
-    pet: { name: DEMO_PET_NAME },
+    robot: { name: DEMO_ROBOT_NAME },
     settings: {
       isParentGateEnabled: true,
       isSoundEnabled: settings?.isSoundEnabled ?? true,
       isAnimationEnabled: settings?.isAnimationEnabled ?? true,
       isDemoMode: true,
-      petSkin: settings?.petSkin ?? DEFAULT_ROBOT_DOG_SKIN,
-      petAction: settings?.petAction ?? DEFAULT_ROBOT_DOG_ACTION,
+      robotSkin: settings?.robotSkin ?? DEFAULT_ROBOT_DOG_SKIN,
+      robotAction: settings?.robotAction ?? DEFAULT_ROBOT_DOG_ACTION,
     },
   });
 
@@ -73,8 +73,8 @@ const carryDeviceSettings = (
   isDemoMode,
   // The coat is the child's, not the profile's: a demo run should not undress
   // the dog they picked, and leaving demo should not undo a coat picked in it.
-  petSkin: from.petSkin,
-  petAction: from.petAction,
+  robotSkin: from.robotSkin,
+  robotAction: from.robotAction,
 });
 
 export const enterDemoMode = (

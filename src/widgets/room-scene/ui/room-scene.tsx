@@ -64,11 +64,11 @@ interface RoomSceneProps {
    */
   level?: number;
   /** The coat the dog wears. Swapping it reloads the model. */
-  petSkin?: RobotDogSkin;
+  robotSkin?: RobotDogSkin;
   /** What the dog does when nothing interrupts it — its state. */
-  petAction?: RobotDogAction;
+  robotAction?: RobotDogAction;
   /**
-   * What a tap on the dog plays before it settles back into `petAction`.
+   * What a tap on the dog plays before it settles back into `robotAction`.
    * `null` leaves taps unanswered.
    */
   petTapAction?: RobotDogAction | null;
@@ -221,8 +221,8 @@ export const RoomScene = ({
   view,
   onViewChange,
   level = 0,
-  petSkin = DEFAULT_ROBOT_DOG_SKIN,
-  petAction = DEFAULT_ROBOT_DOG_ACTION,
+  robotSkin = DEFAULT_ROBOT_DOG_SKIN,
+  robotAction = DEFAULT_ROBOT_DOG_ACTION,
   petTapAction = 'joy',
   focusedWatcher = null,
   onWatcherFocus,
@@ -280,8 +280,8 @@ export const RoomScene = ({
    * `onContextCreate` runs once and closes over what it saw; these refs are
    * how a skin chosen later still reaches a scene built earlier.
    */
-  const petSkinRef = useRef(petSkin);
-  const petActionRef = useRef(petAction);
+  const robotSkinRef = useRef(robotSkin);
+  const robotActionRef = useRef(robotAction);
   /** False until the sunk cells have been placed once, without animating. */
   const hasSunkOnce = useRef(false);
   /**
@@ -419,14 +419,14 @@ export const RoomScene = ({
   // The dog's coat and state arrive as props but reach a scene that was
   // built once, so they travel through the model rather than a rebuild.
   useEffect(() => {
-    petSkinRef.current = petSkin;
-    model.current?.setCharacterSkin(petSkin);
-  }, [petSkin]);
+    robotSkinRef.current = robotSkin;
+    model.current?.setCharacterSkin(robotSkin);
+  }, [robotSkin]);
 
   useEffect(() => {
-    petActionRef.current = petAction;
-    model.current?.playCharacterAction(petAction);
-  }, [petAction]);
+    robotActionRef.current = robotAction;
+    model.current?.playCharacterAction(robotAction);
+  }, [robotAction]);
 
   const onContextCreate = useCallback(
     (gl: ExpoWebGLRenderingContext) => {
@@ -443,7 +443,7 @@ export const RoomScene = ({
       webgl.setPixelRatio(1);
       webgl.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight, false);
 
-      const built = buildScene(petSkinRef.current, petActionRef.current);
+      const built = buildScene(robotSkinRef.current, robotActionRef.current);
       built.setPlatformY(tuneRef.current.platformY);
       // The effect below has already run by now and found no scene to talk
       // to: `onContextCreate` waits for the surface to be measured, which is
@@ -547,14 +547,14 @@ export const RoomScene = ({
           state.distance,
         );
 
-        // The camera rides with the floor: the pet climbs two hundred units
+        // The camera rides with the floor: the robot climbs two hundred units
         // over five levels, and a camera left at the bottom would lose it.
         const eyeY = built.platformHeight();
 
         orbitEye.set(x, y + eyeY, z);
         orbitAim.set(SCENE_PIVOT[0], eyeY, SCENE_PIVOT[2]);
 
-        // The pet turns with the camera rather than with the world: from
+        // The robot turns with the camera rather than with the world: from
         // whichever segment the child is standing in, it is looking at them.
         built.setCharacterFacing((state.azimuth * Math.PI) / 180);
 
@@ -612,7 +612,7 @@ export const RoomScene = ({
    * The ray is cast against the model, not the half of the screen a thing
    * stands in: the camera tilts and turns, and a child tapping the floor
    * beside the dog should not get a wag. The order is the order of things
-   * the child means — the screens overhead, then the pet, then the floor.
+   * the child means — the screens overhead, then the robot, then the floor.
    */
   const tap = Gesture.Tap()
     .runOnJS(true)
@@ -655,7 +655,7 @@ export const RoomScene = ({
         root &&
         raycaster.current.intersectObject(root, true).length > 0
       ) {
-        built.reactCharacter(petTapAction, petActionRef.current);
+        built.reactCharacter(petTapAction, robotActionRef.current);
         return;
       }
 

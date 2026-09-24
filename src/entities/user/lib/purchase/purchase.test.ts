@@ -76,51 +76,36 @@ describe('applyPurchase', () => {
     expect(result.overPlanBy).toBe(3);
   });
 
-  it('can bump comfort when the item carries a delta', () => {
+  it('can bump charge when the item carries a delta', () => {
     const time = makeDemoTimeSource();
     const active = makeActive();
-    const chilly: UserSave = {
+    const drained: UserSave = {
       ...active,
-      pet: { ...active.pet, comfort: 0.4 },
+      robot: { ...active.robot, charge: 0.4 },
     };
-    const result = applyPurchase(chilly, 'heating', time);
+    const result = applyPurchase(drained, 'bread', time);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.user.pet.comfort).toBeGreaterThan(0.4);
+    expect(result.user.robot.charge).toBeGreaterThan(0.4);
   });
 
-  it('writes furnitureId into the home — the room slot reads it', () => {
+  it('keeps an owned id — the arcade unlocks off it', () => {
     const time = makeDemoTimeSource();
-    const result = applyPurchase(makeActive(), 'rug', time);
+    const result = applyPurchase(makeActive(), 'game-console', time);
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.user.home.furnitureIds).toContain('rug');
+    expect(result.user.ownedItemIds).toContain('game-console');
   });
 
-  it('writes insulationId into the home — later bills discount it', () => {
+  it('charges the catalogue price as is', () => {
     const time = makeDemoTimeSource();
-    const result = applyPurchase(makeActive(), 'window-seal', time);
+    const result = applyPurchase(makeActive(), 'bread', time);
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.user.home.insulationIds).toContain('window');
-  });
-
-  it('charges chilly less for food — trait shifts the till', () => {
-    const time = makeDemoTimeSource();
-    const active = makeActive();
-    const chilly: UserSave = {
-      ...active,
-      pet: { ...active.pet, traitIds: ['chilly'] },
-    };
-    const result = applyPurchase(chilly, 'bread', time);
-
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    // Catalogue bread is 8; chilly food ×0.8 → 6.
-    expect(result.price).toBe(6);
-    expect(result.user.wallet.balance).toBe(50 - 6);
-    expect(result.user.period.fact.needs).toBe(6);
+    expect(result.price).toBe(8);
+    expect(result.user.wallet.balance).toBe(50 - 8);
+    expect(result.user.period.fact.needs).toBe(8);
   });
 });

@@ -19,17 +19,12 @@ const playedProfile = (): UserSave => {
   const user = createInitialUser({
     playerName: 'Аня',
     createdAt: 1000,
-    pet: {
-      species: 'capybara',
-      color: 'mint',
-      pattern: 'stripes',
-      name: 'Кекс',
-    },
+    robot: { name: 'Кекс' },
   });
 
   return {
     ...user,
-    pet: { ...user.pet, stage: 'teen', comfort: 0.4, spirit: 0.9 },
+    robot: { ...user.robot, stage: 'upgraded', charge: 0.4, spirit: 0.9 },
     wallet: {
       balance: 137,
       history: [
@@ -61,12 +56,7 @@ const playedProfile = (): UserSave => {
         endedAt: 3000,
       },
     ],
-    home: {
-      temperature: 0.8,
-      insulationIds: ['window'],
-      furnitureIds: ['rug'],
-      lastBilledPeriod: 3,
-    },
+    ownedItemIds: ['rug'],
     settings: { ...user.settings, isSoundEnabled: false, isDemoMode: true },
   };
 };
@@ -76,7 +66,7 @@ const playedProfile = (): UserSave => {
 // ═══════════════════════════════════════════
 
 describe('resetUser', () => {
-  it('returns exactly the starting state for the same child and pet', () => {
+  it('returns exactly the starting state for the same child and robot', () => {
     const user = playedProfile();
 
     expect(resetUser(user)).toEqual(
@@ -84,24 +74,16 @@ describe('resetUser', () => {
         playerName: 'Аня',
         createdAt: 1000,
         settings: user.settings,
-        pet: {
-          species: 'capybara',
-          color: 'mint',
-          pattern: 'stripes',
-          name: 'Кекс',
-        },
+        robot: { name: 'Кекс' },
       }),
     );
   });
 
-  it('keeps who the child is: name, pet name and appearance', () => {
+  it('keeps who the child is: their name and the robot\u2019s', () => {
     const reset = resetUser(playedProfile());
 
     expect(reset.playerName).toBe('Аня');
-    expect(reset.pet.name).toBe('Кекс');
-    expect(reset.pet.species).toBe('capybara');
-    expect(reset.pet.color).toBe('mint');
-    expect(reset.pet.pattern).toBe('stripes');
+    expect(reset.robot.name).toBe('Кекс');
   });
 
   it('keeps what the grown-up configured', () => {
@@ -111,7 +93,7 @@ describe('resetUser', () => {
     expect(reset.settings.isDemoMode).toBe(true);
   });
 
-  it('clears the progress: wallet, savings, home, history and the period', () => {
+  it('clears the progress: wallet, savings, items, history and the period', () => {
     const reset = resetUser(playedProfile());
 
     // Not empty: a reset gives the wallet back its one named credit, the
@@ -131,11 +113,10 @@ describe('resetUser', () => {
     expect(reset.savings.goals.every((goal) => goal.saved === 0)).toBe(true);
     expect(reset.savings.depositsThisPeriod).toBe(0);
     expect(reset.history).toEqual([]);
-    expect(reset.home.insulationIds).toEqual([]);
-    expect(reset.home.lastBilledPeriod).toBe(0);
+    expect(reset.ownedItemIds).toEqual([]);
     expect(reset.period.index).toBe(1);
     expect(reset.period.phase).toBe('planning');
-    expect(reset.pet.stage).toBe('baby');
+    expect(reset.robot.stage).toBe('basic');
   });
 
   it('does not mutate the user it was given', () => {

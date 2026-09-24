@@ -14,8 +14,8 @@ in `screens/ui-kit/model/use-playground.ts`.
 ## Principles carried into the code
 
 - **No alarming red.** A low meter is `tone="low"`: it keeps the warm color and
-  gains a border plus a darker caption. Worry is expressed by the pet's line,
-  not by the palette.
+  gains a border plus a darker caption. Worry is expressed by the robot's clip
+  and words, not by the palette.
 - **State reads by shape and text, not by color alone.** Needs are a blue
   circle, wants an orange diamond — see `Chip` and `Shape`.
 - **One press mechanic.** Every pressable drops onto its own shadow
@@ -54,7 +54,7 @@ the mockups is still to be designed.
 | `CoinBadge` | `amount`, `variant` (balance/delta/plain), `label` | balance pill, `+15` reward |
 | `ProgressBar` | `value`, `color`, `height` | goals, meters, weekly budget |
 | `MeterCard` | `label`, `value`, `color`, `tone` (default/low/idle), `icon` | the five needs row |
-| `ListRow` + `ListRow.Icon` | `title`, `subtitle`, `icon`, `trailing`, `isSelected`, `isDone` | chores, traits, shop and insulation rows |
+| `ListRow` + `ListRow.Icon` | `title`, `subtitle`, `icon`, `trailing`, `isSelected`, `isDone` | chores and shop rows |
 | `Toast` | `variant` (dark/warning), `icon`, `onPress` | "coins saved", offline banner |
 | `toast()` + `<Toaster />` | `toast(message, { variant, duration })`, `dismissToast`, `clearToasts` | queue, stacking, swipe-up and tap to dismiss — mechanics from `sonner-native`, the card is our own `Toast` passed through `toast.custom`; the host is mounted once in `_app/providers` |
 | `Sheet` + `.Title` `.Description` `.Actions` | `isGrabberVisible` | the sheet card itself |
@@ -65,7 +65,7 @@ the mockups is still to be designed.
 | `Collapsible` + `.Trigger` `.Content` | `isOpen` / `isDefaultOpen`, `onOpenChange` | управляемый и неуправляемый режимы |
 | `Slider` | `value`, `min`, `max`, `step`, `onChange` | терморегулятор, уровни |
 | `Switch` | `isChecked`, `onChange`, `isDisabled` | переключатели раздела для взрослого |
-| `Input` | `hint`, `isCounterVisible`, `maxLength` | имя питомца и игровое имя |
+| `Input` | `hint`, `isCounterVisible`, `maxLength` | имя робота и игровое имя |
 | `HintRow` + `.Title` `.Hint` | — | «заголовок слева, значение справа» |
 | `Screen` + `.Header` `.Back` | `variant`, `gap`, `isTabBarVisible` | рамка экрана: фон, safe area, скролл, колонка |
 
@@ -87,9 +87,9 @@ without putting it on that screen is incomplete work, see
   `FONTS.sans` / `FONTS.rounded` at it.
 - **Icons** are geometric placeholders (`Shape`). The final set is 24×24, 2px
   stroke, always with a text label.
-- **Питомец** (слои, стадии роста, матрица состояний) — отдельная задача волны 1;
-  до выбора источника арта проверить лицензию, см. [licenses.md](./licenses.md).
-- **`SpeechBubble`** удалён из кита; реплика питомца будет собрана заново вместе
-  с самим питомцем.
+- **Робопёс** живёт на 3D-сцене, не в ките: окрасы, клипы и стадии — см.
+  [robot-dog.md](./robot-dog.md) и [scene.md](./scene.md).
+- **`SpeechBubble`** удалён из кита; реплики персонажей будут собраны заново
+  вместе со знакомством.
 - **Night theme** and the parents' neutral screens use the tokens above but have
   no dedicated components yet.

@@ -11,12 +11,11 @@ import { toast } from '@/shared/ui';
 // ═══════════════════════════════════════════
 
 /**
- * Deleting the profile and walking onboarding again — 2.5.12.
+ * Deleting the profile and starting over from the bottom of the pit — 2.5.12.
  *
- * It is the delete, not the reset: a reset keeps the name, the looks and the
- * settings, so the child never sees onboarding again. Erasing the key is the
- * only honest way back to the first screen, which is also why it asks first
- * wherever it is used.
+ * It is the delete, not the reset: a reset keeps the names and the settings.
+ * Erasing the key is the only honest way back to a first launch, which is
+ * also why it asks first wherever it is used.
  */
 export const useProfileRestart = () => {
   const { t } = useTranslation();
@@ -33,9 +32,10 @@ export const useProfileRestart = () => {
 
     restart: () => {
       deleteUser();
-      // `EntryScreen` would send us there anyway, but replacing right here
-      // keeps the empty home screen from flashing between the two.
-      router.replace(STATIC_ROUTES.ONBOARDING);
+      // The entry screen makes the fresh guest profile, exactly as on a
+      // first launch — replacing right here keeps a profile-less home screen
+      // from flashing in between.
+      router.replace(STATIC_ROUTES.ENTRY);
       toast(t('profileRestart.toastDeleted'));
     },
   };
