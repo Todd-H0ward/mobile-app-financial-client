@@ -1,0 +1,5 @@
+# pnpm settings live here, not in package.json: pnpm 11 ignores the "pnpm"
+# field there, and a lockfile written without these overrides fails CI's
+# `pnpm install --frozen-lockfile` on pnpm 10. Both versions read this file.
+overrides:
+  react-native-svg: 15.15.4
