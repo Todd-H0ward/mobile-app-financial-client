@@ -1,1 +1,0 @@
-export { anchorsFor } from './anchors';

@@ -1,10 +1,11 @@
 import {
   BUDGET_DIRECTIONS,
   PERIOD_HISTORY_LIMIT,
+  PERIOD_NEED_DECAY,
   REGULARITY_BONUS,
   WALLET_SOURCES,
 } from '@/entities/economy';
-import { type GrowthFacts, growPet, needDecayFor } from '@/entities/pet';
+import { type GrowthFacts, growRobotDog } from '@/entities/robot-dog';
 import { nextTaskId } from '@/entities/task';
 
 import { clamp } from '@/shared/utils';
@@ -12,9 +13,7 @@ import { clamp } from '@/shared/utils';
 // The types module, not the slice barrel: the barrel carries the store,
 // and with it `expo-sqlite`, which the node test runner cannot parse.
 import type { PeriodRecord, UserSave } from '../../model';
-import { creditWallet, debitWallet } from '../wallet';
-
-import { buildBill } from './build-bill';
+import { creditWallet } from '../wallet';
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -121,9 +120,8 @@ export const finishPeriod = (user: UserSave, at?: number): UserSave => {
  *
  * One action-driven step — no wall clock, no offline catch-up:
  *
- * 1. Heating bill (once per period index).
- * 2. Need decay for comfort / spirit (table, not a tick).
- * 3. History row, regularity bonus, growth, wipe plan/fact/tasks, index++.
+ * 1. Need decay for charge / spirit (table, not a tick).
+ * 2. History row, regularity bonus, stage, wipe plan/fact/tasks, index++.
  *
  * @throws {Error} If the current phase is not `summary`.
  */
@@ -135,44 +133,7 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
   }
 
   const endedAt = stampAt(user, at);
-  let working: UserSave = user;
-  let fact = { ...user.period.fact };
-
-  // ── Heating bill (docs/house.md) ──────────────────────────────
-  if (working.home.lastBilledPeriod !== working.period.index) {
-    const bill = buildBill(
-      working.home.temperature,
-      working.home.insulationIds,
-    );
-    if (bill.total > 0) {
-      const charge = Math.min(bill.total, working.wallet.balance);
-      if (charge > 0) {
-        const debit = debitWallet(working.wallet, {
-          source: WALLET_SOURCES.heatingBill,
-          amount: charge,
-          direction: 'needs',
-          periodIndex: working.period.index,
-          at: endedAt,
-        });
-        if (debit.ok) {
-          working = { ...working, wallet: debit.wallet };
-          fact = { ...fact, needs: fact.needs + charge };
-        }
-      }
-    }
-    working = {
-      ...working,
-      home: {
-        ...working.home,
-        lastBilledPeriod: working.period.index,
-      },
-      period: { ...working.period, fact },
-    };
-  } else {
-    working = { ...working, period: { ...working.period, fact } };
-  }
-
-  const { period, savings } = working;
+  const { period, savings } = user;
 
   const isPlanKept = BUDGET_DIRECTIONS.every(
     (direction) => period.fact[direction] <= period.plan[direction],
@@ -184,9 +145,9 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
 
   // Facts are counted on the full append first: trimming must not shrink the
   // counters that just earned a stage (goals that aged out of the window stay
-  // reflected in `pet.stage`, which never goes backwards).
+  // reflected in `robot.stage`, which never goes backwards).
   const history: PeriodRecord[] = [
-    ...working.history,
+    ...user.history,
     {
       index: period.index,
       plan: period.plan,
@@ -196,7 +157,7 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
       endedAt,
     },
   ];
-  const stage = growPet(working.pet.stage, growthFacts(history));
+  const stage = growRobotDog(user.robot.stage, growthFacts(history));
   const trimmedHistory =
     history.length > PERIOD_HISTORY_LIMIT
       ? history.slice(-PERIOD_HISTORY_LIMIT)
@@ -204,24 +165,23 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
 
   const wallet =
     savings.depositsThisPeriod > 0
-      ? creditWallet(working.wallet, {
+      ? creditWallet(user.wallet, {
           source: WALLET_SOURCES.regularityBonus,
           amount: REGULARITY_BONUS,
           direction: null,
           periodIndex: period.index,
           at: endedAt,
         })
-      : working.wallet;
+      : user.wallet;
 
-  const decay = needDecayFor(working.pet.traitIds);
-  const comfort = clamp(working.pet.comfort - decay.comfort, 0, 1);
-  const spirit = clamp(working.pet.spirit - decay.spirit, 0, 1);
+  const charge = clamp(user.robot.charge - PERIOD_NEED_DECAY.charge, 0, 1);
+  const spirit = clamp(user.robot.spirit - PERIOD_NEED_DECAY.spirit, 0, 1);
 
   return {
-    ...working,
-    pet: {
-      ...working.pet,
-      comfort,
+    ...user,
+    robot: {
+      ...user.robot,
+      charge,
       spirit,
       stage,
     },

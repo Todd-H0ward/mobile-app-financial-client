@@ -16,7 +16,6 @@ import type { PeriodRecord, UserSave, WalletEntry } from '../../model';
 type WalletSourceRef =
   | { kind: 'startingWallet' }
   | { kind: 'regularityBonus' }
-  | { kind: 'heatingBill' }
   | { kind: 'gamePuzzle' }
   | { kind: 'gameSpacewar' }
   | { kind: 'gameSnake' }
@@ -60,9 +59,6 @@ export const describeWalletSource = (source: string): WalletSourceRef => {
   }
   if (source === WALLET_SOURCES.regularityBonus) {
     return { kind: 'regularityBonus' };
-  }
-  if (source === WALLET_SOURCES.heatingBill) {
-    return { kind: 'heatingBill' };
   }
   if (source === WALLET_SOURCES.gamePuzzle) {
     return { kind: 'gamePuzzle' };

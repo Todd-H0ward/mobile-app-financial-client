@@ -1,19 +1,34 @@
+import { useEffect } from 'react';
+
 import { Redirect } from 'expo-router';
 
-import { useUser } from '@/entities/user';
+import { useCreateUser, useUser } from '@/entities/user';
 
 import { STATIC_ROUTES } from '@/shared/constants';
+import { useTimeSource } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
 // COMPONENT
 // ═══════════════════════════════════════════
 
+/**
+ * Where every launch lands: sends the child on to the right screen.
+ *
+ * A first launch gets a guest profile on the spot — local, nameless, no
+ * sign-up (2.5.1 / docs/privacy.md) — and goes straight down into the pit.
+ * The introduction and the robot's name are asked for from inside the game,
+ * not by a wall of screens in front of it.
+ */
 export const EntryScreen = () => {
   const user = useUser();
+  const createUser = useCreateUser();
+  const time = useTimeSource();
 
-  if (!user) {
-    return <Redirect href={STATIC_ROUTES.ONBOARDING} />;
-  }
+  useEffect(() => {
+    if (!user) createUser({ createdAt: time.now() });
+  }, [user, createUser, time]);
+
+  if (!user) return null;
 
   if (user.period.phase === 'summary') {
     return <Redirect href={STATIC_ROUTES.PERIOD_SUMMARY} />;

@@ -85,14 +85,14 @@ describe('createDemoProfile', () => {
 describe('enterDemoMode', () => {
   const user = createInitialUser({
     playerName: 'Аня',
-    pet: { name: 'Барсик', species: 'dog' },
+    robot: { name: 'Болтик' },
     settings: {
       isParentGateEnabled: true,
       isSoundEnabled: false,
       isAnimationEnabled: true,
       isDemoMode: false,
-      petSkin: 'arctic',
-      petAction: 'walk',
+      robotSkin: 'arctic',
+      robotAction: 'walk',
     },
   });
 
@@ -115,7 +115,7 @@ describe('enterDemoMode', () => {
 
   it("does not play under the child's name", () => {
     expect(profile.playerName).not.toBe('Аня');
-    expect(profile.pet.name).not.toBe('Барсик');
+    expect(profile.robot.name).not.toBe('Болтик');
   });
 
   it("parks the child's save untouched", () => {
@@ -130,10 +130,10 @@ describe('enterDemoMode', () => {
 describe('exitDemoMode', () => {
   const user = createInitialUser({
     playerName: 'Аня',
-    pet: { name: 'Барсик', species: 'dog' },
+    robot: { name: 'Болтик' },
   });
 
-  it('gives the parked save back, name, pet and progress included', () => {
+  it('gives the parked save back, name, robot and progress included', () => {
     const played = {
       ...user,
       wallet: { ...user.wallet, balance: 137 },
@@ -144,7 +144,7 @@ describe('exitDemoMode', () => {
     const restored = exitDemoMode(parked, profile);
 
     expect(restored.playerName).toBe('Аня');
-    expect(restored.pet.name).toBe('Барсик');
+    expect(restored.robot.name).toBe('Болтик');
     expect(restored.wallet.balance).toBe(137);
     expect(restored.period.index).toBe(4);
     expect(restored.settings.isDemoMode).toBe(false);
@@ -165,7 +165,7 @@ describe('exitDemoMode', () => {
     const restored = exitDemoMode(null, demo);
 
     expect(restored.playerName).not.toBe(demo.playerName);
-    expect(restored.pet.name).not.toBe(demo.pet.name);
+    expect(restored.robot.name).not.toBe(demo.robot.name);
     expect(restored.settings.isDemoMode).toBe(false);
     expect(hasValidShape(restored)).toBe(true);
   });

@@ -1,5 +1,5 @@
 export const STORAGE_KEYS = {
-  /** The whole profile: pet, wallet, savings, period, history, home. */
+  /** The whole profile: robot, wallet, savings, period, history, bought items. */
   USER: '@app:user',
   /** Device preferences: theme and language. Neither profile nor game state. */
   PREFERENCES: '@app:preferences',

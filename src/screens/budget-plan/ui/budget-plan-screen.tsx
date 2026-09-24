@@ -19,7 +19,7 @@ import { DirectionRow } from './direction-row';
 
 /**
  * The real plan screen — three directions, remainder always visible, confirm
- * starts the period. Same rules the onboarding rehearsal already taught.
+ * starts the period.
  */
 export const BudgetPlanScreen = () => {
   const { t } = useTranslation();

@@ -85,7 +85,7 @@ interface SceneModel {
   /** What a tap ray is tested against — `null` until the model has loaded. */
   characterRoot: () => Object3D | null;
   /**
-   * Turns the pet to face the camera, in radians.
+   * Turns the robot to face the camera, in radians.
    *
    * It stands on the axis with three segments around it, so there is no
    * direction it could face that is right from all of them: it faces the
@@ -626,7 +626,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   }
 
   /**
-   * The platform: the floor the pet stands on.
+   * The platform: the floor the robot stands on.
    *
    * The character and the dust hang off it rather than off the arena, so the
    * whole cargo climbs together and nothing has to be moved twice.
@@ -634,7 +634,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   const platform = new Group();
   root.add(platform);
   // The floor of the bowl is a flat disc at zero — the ramps around it are
-  // what reach 46, not the ground the pet walks on.
+  // what reach 46, not the ground the robot walks on.
   platform.add(characterMount);
 
   const sharedNodes = nodesOf(SCENE_SHARED_SEGMENT, SCENE_FLAT_STEP);
@@ -837,7 +837,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   const axles = gears.map(axleOf);
 
   const setLevelProgress = (progress: number) => {
-    // The pit sinks around the pet rather than lifting them out of it: each
+    // The pit sinks around the robot rather than lifting them out of it: each
     // level swallows one more ring into the floor, and the skyline the child
     // is counting drops by one.
     terraces.forEach((terrace, index) => {

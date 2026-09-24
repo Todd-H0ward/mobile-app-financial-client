@@ -27,7 +27,7 @@ interface ShopScreenProps {
 // ═══════════════════════════════════════════
 
 /**
- * One street shopfront — grocery, clothes, furniture or toys (2.5.6).
+ * One shopfront — grocery, clothes, decor or toys (2.5.6).
  *
  * Toys hint that mini-games will land later; for now they are still just
  * purchases that update the period fact.

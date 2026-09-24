@@ -69,8 +69,8 @@ export const HintButton = ({ screen, isPulsing = false }: HintButtonProps) => {
   });
   const body = Array.isArray(rawBody) ? (rawBody as string[]) : hint.body;
 
-  // There is no profile yet during onboarding, and the grown-up's switch is
-  // still the authority once there is one — 3.6, weak devices.
+  // The grown-up's switch and the system Reduce Motion decide — 3.6, weak
+  // devices.
   const isMotionEnabled = useIsMotionEnabled();
 
   const scale = useSharedValue(1);

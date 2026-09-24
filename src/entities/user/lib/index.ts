@@ -5,7 +5,6 @@ export {
   exitDemoMode,
   runDemoPeriods,
 } from './demo';
-export { celebrateStage, hasPendingGrowth } from './growth';
 export type { WalletHistoryRow, WalletSourceRef } from './history';
 export {
   describeWalletSource,
@@ -13,24 +12,15 @@ export {
   listPeriodHistory,
   listWalletHistory,
 } from './history';
-export type {
-  EndPeriodStatus,
-  HeatingBill,
-  HeatingBillLine,
-  InsulationPayback,
-} from './period';
+export type { EndPeriodStatus } from './period';
 export {
   acknowledgeSummary,
   areNeedsMet,
-  buildBill,
   canFinishPeriod,
   endPeriod,
   endPeriodStatus,
   finishPeriod,
   growthFacts,
-  insulationPayback,
-  insulationSavingHint,
-  setTemperature,
   startPeriod,
 } from './period';
 export type { PlayerNameStatus } from './player-name';

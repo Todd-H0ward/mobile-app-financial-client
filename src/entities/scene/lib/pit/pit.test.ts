@@ -66,7 +66,7 @@ describe('terraceSinkY', () => {
     }
   });
 
-  it('never drops a ring below the floor the pet stands on', () => {
+  it('never drops a ring below the floor the robot stands on', () => {
     for (let i = 0; i <= 20; i += 1) {
       for (let terrace = 0; terrace < SCENE_TERRACE_COUNT; terrace += 1) {
         expect(topOf(terrace, i / 20)).toBeGreaterThanOrEqual(-1e-6);
@@ -77,7 +77,7 @@ describe('terraceSinkY', () => {
   it('swallows the rings from the inside out', () => {
     const progress = levelProgress(2);
 
-    // The ring nearest the pet settles before the one behind it.
+    // The ring nearest the robot settles before the one behind it.
     expect(topOf(1, progress)).toBeLessThan(topOf(3, progress));
   });
 });

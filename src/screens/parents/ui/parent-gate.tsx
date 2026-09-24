@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
-import { type GateChallenge, isGateAnswerCorrect } from '@/entities/settings';
+import type { GateChallenge } from '@/entities/settings';
 
-import { SPACING } from '@/shared/constants';
+import { FONTS, SPACING } from '@/shared/constants';
+import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { Card, Input, Screen, Text } from '@/shared/ui';
+import { Screen, Text } from '@/shared/ui';
+
+import { applyGateInput } from '../lib';
+
+import { Terminal } from './terminal';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -28,68 +33,118 @@ interface ParentGateProps {
 /**
  * The arithmetic barrier — 2.5.12, docs/parents.md.
  *
- * A multiplication rather than a PIN: there is nothing to forget and nothing to
- * store. A wrong answer only clears the field — no lockout, no timer, no
- * frightening wording, because this stops a child wandering in rather than
- * defending an account (there is nothing behind it worth stealing,
- * docs/privacy.md).
+ * Dressed as the service terminal of the scene's AI monitor, but it behaves
+ * exactly like before: a multiplication rather than a PIN, nothing to forget
+ * and nothing to store. A wrong answer only clears the field and prints a calm
+ * line — no lockout, no attempt counter, no "warning", because this stops a
+ * child wandering in rather than defending an account (docs/privacy.md). The
+ * retro-terminal reference is borrowed for the look only, never its threats.
  */
 export const ParentGate = ({ challenge, onPass, onMiss }: ParentGateProps) => {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const inputRef = useRef<TextInput>(null);
   const [typed, setTyped] = useState('');
+  const [isMissed, setIsMissed] = useState(false);
+
+  const question = t('parents.gate.question', {
+    left: challenge.left,
+    right: challenge.right,
+  });
 
   const handleChange = (next: string) => {
-    setTyped(next);
+    const result = applyGateInput(challenge, next);
+    setTyped(result.typed);
+    setIsMissed(result.isMissed);
 
-    if (isGateAnswerCorrect(challenge, next)) {
+    if (result.didPass) {
       onPass();
       return;
     }
 
-    // Only a full-width answer counts as a try: clearing the field on every
-    // keystroke would make a two-digit product impossible to type.
-    if (next.length >= String(challenge.answer).length) {
-      setTyped('');
+    if (result.didMiss) {
       onMiss();
     }
   };
 
   return (
-    <Screen gap="three" isTabBarVisible={false}>
+    <Screen gap="three" isTabBarVisible={false} variant="arcadeDpad">
       <Screen.Header>
-        <Screen.Back />
+        <Screen.Back tone="arcadeScreen" color="arcadeLcd" />
         <Screen.Heading>
-          <Screen.Title>{t('parents.gate.title')}</Screen.Title>
+          <Screen.Title themeColor="arcadeLcd" style={styles.title}>
+            {t('parents.gate.title')}
+          </Screen.Title>
         </Screen.Heading>
       </Screen.Header>
 
-      <Card tone="surfaceSoft">
-        <Card.Content style={styles.content}>
-          <Text variant="title" style={styles.question}>
-            {t('parents.gate.question', {
-              left: challenge.left,
-              right: challenge.right,
-            })}
+      <Terminal label={t('parents.terminal.label')}>
+        <Terminal.Line isPrompt order={0}>
+          {t('parents.gate.bootAccess')}
+        </Terminal.Line>
+        <Terminal.Line isPrompt tone="dim" order={1}>
+          {t('parents.gate.subtitle')}
+        </Terminal.Line>
+
+        <Terminal.Rule />
+
+        {/* The whole row focuses the field: a thumb aimed at the sum still
+            reaches the keyboard, not only a 2-digit-wide box. */}
+        <Pressable
+          onPress={() => inputRef.current?.focus()}
+          style={styles.sum}
+          accessible={false}
+        >
+          <Text
+            themeColor="arcadeLcd"
+            style={styles.sumText}
+            importantForAccessibility="no"
+            accessibilityElementsHidden
+          >
+            {`${challenge.left} × ${challenge.right} =`}
           </Text>
 
-          <Input
+          <TextInput
+            ref={inputRef}
             value={typed}
             onChangeText={handleChange}
             keyboardType="number-pad"
             maxLength={2}
             autoFocus
-            accessibilityLabel={t('parents.gate.question', {
-              left: challenge.left,
-              right: challenge.right,
-            })}
-            hint={t('parents.gate.hint')}
-            containerStyle={styles.field}
+            caretHidden
+            selectionColor={theme.arcadeLcd}
+            placeholder="__"
+            placeholderTextColor={theme.arcadeLcdDim}
+            accessibilityLabel={question}
+            accessibilityHint={t('parents.gate.prompt')}
+            style={[
+              styles.answer,
+              { borderColor: theme.arcadeLcdDim, color: theme.arcadeLcd },
+            ]}
           />
-        </Card.Content>
-      </Card>
+
+          <Terminal.Cursor />
+        </Pressable>
+
+        <View
+          style={styles.feedback}
+          accessibilityLiveRegion="polite"
+          accessibilityRole="text"
+        >
+          {isMissed ? (
+            <Terminal.Line isPrompt tone="alert">
+              {t('parents.gate.miss')}
+            </Terminal.Line>
+          ) : (
+            <Terminal.Line isPrompt tone="dim">
+              {t('parents.gate.prompt')}
+            </Terminal.Line>
+          )}
+        </View>
+      </Terminal>
 
       <View style={styles.note}>
-        <Text variant="small" themeColor="textSecondary">
+        <Text variant="small" themeColor="arcadeDpadFace">
           {t('parents.gate.note')}
         </Text>
       </View>
@@ -102,18 +157,36 @@ export const ParentGate = ({ challenge, onPass, onMiss }: ParentGateProps) => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  content: {
-    alignItems: 'center',
-    gap: SPACING.three,
+  answer: {
+    borderBottomWidth: 2,
+    fontFamily: FONTS.mono,
+    fontSize: 32,
+    lineHeight: 40,
+    minWidth: 64,
+    paddingHorizontal: SPACING.one,
+    paddingVertical: SPACING.one,
+    textAlign: 'center',
   },
-  field: {
-    maxWidth: 140,
+  feedback: {
+    justifyContent: 'center',
+    minHeight: 48,
   },
   note: {
     paddingHorizontal: SPACING.two,
   },
-  question: {
-    textAlign: 'center',
+  sum: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: SPACING.two,
+    minHeight: 64,
+  },
+  sumText: {
+    fontFamily: FONTS.mono,
+    fontSize: 32,
+    lineHeight: 40,
+  },
+  title: {
+    fontFamily: FONTS.mono,
   },
 });
 

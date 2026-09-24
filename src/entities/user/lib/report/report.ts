@@ -1,8 +1,8 @@
 import {
   type GrowthProgress,
-  type PetStage,
   progressToNextStage,
-} from '@/entities/pet';
+  type RobotDogStage,
+} from '@/entities/robot-dog';
 import { getTaskById, TASK_THEMES, type TaskTheme } from '@/entities/task';
 
 import type { PeriodRecord, UserSave } from '../../model';
@@ -29,9 +29,9 @@ interface ThemeTally {
   done: number;
 }
 
-/** Where the pet is and what the next stage still asks for. */
+/** Where the robot's build is and what the next stage still asks for. */
 interface GrowthReport {
-  stage: PetStage;
+  stage: RobotDogStage;
   /** `null` at the last stage — there is nothing left to reach. */
   progress: GrowthProgress | null;
 }
@@ -129,8 +129,11 @@ export const buildParentsReport = (user: UserSave): ParentsReport => {
     tasksByTheme: themes,
     tasksDone: themes.reduce((total, row) => total + row.done, 0),
     growth: {
-      stage: user.pet.stage,
-      progress: progressToNextStage(user.pet.stage, growthFacts(user.history)),
+      stage: user.robot.stage,
+      progress: progressToNextStage(
+        user.robot.stage,
+        growthFacts(user.history),
+      ),
     },
   };
 };

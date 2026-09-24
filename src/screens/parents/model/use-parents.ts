@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+
+import { useFocusEffect } from 'expo-router';
 
 import {
   type BudgetComparison,
@@ -18,6 +20,17 @@ import {
 // TYPES
 // ═══════════════════════════════════════════
 
+/** One glance at where the child is — the terminal readout on top. */
+interface ParentsStatus {
+  playerName: string;
+  /** Name the child gave the robot; empty until it is asked for. */
+  robotName: string;
+  /** The period being played now, from 1. */
+  periodIndex: number;
+  finishedPeriods: number;
+  tasksDone: number;
+}
+
 interface ParentsController {
   isLocked: boolean;
   /** The question on the barrier. Replaced after every wrong answer. */
@@ -27,6 +40,8 @@ interface ParentsController {
   refreshChallenge: () => void;
   /** The four answers of docs/parents.md, or `null` with no profile. */
   report: ParentsReport | null;
+  /** Readout for the terminal, or `null` with no profile. */
+  status: ParentsStatus | null;
   /** Plan against fact for the last finished period. */
   lastRows: BudgetComparison[];
   /** Which story explains that distribution, for the line under the bars. */
@@ -55,6 +70,18 @@ export const useParents = (): ParentsController => {
   );
   const [isUnlocked, setIsUnlocked] = useState(false);
 
+  // Leaving the section must close the door again — docs/parents.md. The flag
+  // is screen state only; a blur cleanup covers both a pop and a soft freeze
+  // where the route stays mounted in the stack.
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setIsUnlocked(false);
+        setChallenge(makeGateChallenge());
+      };
+    }, []),
+  );
+
   const report = user ? buildParentsReport(user) : null;
   const lastRows = report?.lastPeriod
     ? compare(report.lastPeriod.plan, report.lastPeriod.fact)
@@ -66,6 +93,16 @@ export const useParents = (): ParentsController => {
     unlock: () => setIsUnlocked(true),
     refreshChallenge: () => setChallenge(makeGateChallenge()),
     report,
+    status:
+      user && report
+        ? {
+            playerName: user.playerName,
+            robotName: user.robot.name,
+            periodIndex: user.period.index,
+            finishedPeriods: user.history.length,
+            tasksDone: report.tasksDone,
+          }
+        : null,
     lastRows,
     lastExplain: lastRows.length > 0 ? explainSummary(lastRows) : null,
     barMax: Math.max(
@@ -75,4 +112,4 @@ export const useParents = (): ParentsController => {
   };
 };
 
-export type { ParentsController };
+export type { ParentsController, ParentsStatus };

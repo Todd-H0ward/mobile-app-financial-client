@@ -3,8 +3,8 @@
  * length capped.
  *
  * The rule is the same wherever a child invents a name — for themselves, for
- * the pet — so it lives here once and each slice brings only its own limit.
- * Framework-agnostic and domain-free: it knows about strings, not about pets.
+ * the robot — so it lives here once and each slice brings only its own limit.
+ * Framework-agnostic and domain-free: it knows about strings, not about robots.
  *
  * @param raw raw input string
  * @param maxLength longest result, in characters

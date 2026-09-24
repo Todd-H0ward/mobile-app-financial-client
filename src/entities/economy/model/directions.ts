@@ -6,8 +6,8 @@
  * The three budget directions, see docs/budget.md.
  *
  * They live in `economy` rather than next to the save because everything that
- * is not the save needs them too: the onboarding content is validated against
- * this tuple, and the shop and the summary screens speak the same three words.
+ * is not the save needs them too: the budget rules, the plan screen, the shop
+ * and the summary all speak the same three words.
  * A runtime tuple, not a bare union — a save is JSON, and `isUserSave` has to
  * check membership.
  */

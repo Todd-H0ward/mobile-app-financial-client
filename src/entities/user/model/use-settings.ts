@@ -35,15 +35,15 @@ export const useIsParentGateEnabled = () =>
   useUserStore((state) => state.user?.settings.isParentGateEnabled ?? true);
 
 /** The coat the robot dog wears on the home screen. */
-export const usePetSkin = (): RobotDogSkin =>
+export const useRobotSkin = (): RobotDogSkin =>
   useUserStore(
-    (state) => state.user?.settings.petSkin ?? DEFAULT_ROBOT_DOG_SKIN,
+    (state) => state.user?.settings.robotSkin ?? DEFAULT_ROBOT_DOG_SKIN,
   );
 
 /** What the dog does when nothing interrupts it. */
-export const usePetAction = (): RobotDogAction =>
+export const useRobotAction = (): RobotDogAction =>
   useUserStore(
-    (state) => state.user?.settings.petAction ?? DEFAULT_ROBOT_DOG_ACTION,
+    (state) => state.user?.settings.robotAction ?? DEFAULT_ROBOT_DOG_ACTION,
   );
 
 // ═══════════════════════════════════════════
@@ -58,6 +58,6 @@ export const useSettings = () => ({
   isSoundEnabled: useIsSoundEnabled(),
   isDemoMode: useIsDemoMode(),
   isParentGateEnabled: useIsParentGateEnabled(),
-  petSkin: usePetSkin(),
-  petAction: usePetAction(),
+  robotSkin: useRobotSkin(),
+  robotAction: useRobotAction(),
 });

@@ -7,6 +7,6 @@ export {
   useSetDemoMode,
   useUpdateUser,
   useUser,
-  useUserPet,
+  useUserRobot,
   useUserStore,
 } from './store';

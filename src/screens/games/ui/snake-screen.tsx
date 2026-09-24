@@ -39,8 +39,8 @@ export const SnakeScreen = () => {
   const submitSnake = useArcadeScoresStore((state) => state.submitSnake);
   const snakeScores = useArcadeScoresStore((state) => state.snake);
 
-  const furnitureIds = user?.home.furnitureIds ?? [];
-  const isOwned = isConsoleOwned(furnitureIds);
+  const ownedItemIds = user?.ownedItemIds ?? [];
+  const isOwned = isConsoleOwned(ownedItemIds);
   const [isPlaying, setIsPlaying] = useState(false);
   const [reward, setReward] = useState<number | null>(null);
   const [runId, setRunId] = useState(0);

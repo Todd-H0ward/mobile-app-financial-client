@@ -27,7 +27,7 @@ What is left, and why:
 
 - **key, fill** (directional), **hemisphere**, **ambient** — effectively free.
   They have no position, so there is nothing to attenuate from.
-- **centre** (point) — the pool of light the pet stands in. The one light here
+- **centre** (point) — the pool of light the robot stands in. The one light here
   that costs anything, and the one worth it.
 
 What went, and why it was not missed:
@@ -150,7 +150,7 @@ node scripts/fbx-to-scene.mjs
 
 Главная механика сцены — **подъём уровня**. Чаша модели это ступенчатый конус:
 **пять террас**, каждая на 40 единиц выше и шире предыдущей (радиусы
-133 → 400). Питомец стоит в центре на платформе.
+133 → 400). Робопёс стоит в центре на платформе.
 
 - **Уровень 0** — платформа внизу, ребёнок видит все пять террас.
 - **Каждый подъём** поднимает платформу ровно на одну террасу, и вместе с ней
@@ -160,7 +160,7 @@ node scripts/fbx-to-scene.mjs
 - **Уровень 5** — вся чаша сошлась в одну плоскость.
 
 Террасы обязаны подниматься вместе с платформой: иначе платформа уезжает
-вверх одна и питомец висит в воздухе.
+вверх одна и робопёс висит в воздухе.
 
 Вся математика — в `entities/scene/lib/pit`, чистая и покрытая тестами:
 `platformLiftY`, `terraceLiftY`, `terracesInView`, `gearAngle`.
@@ -254,7 +254,7 @@ JS-поток каждый кадр меняет **одно** число `uTime`
 
 ## Робопёс в центре арены
 
-В центре стоит питомец — робопёс (`assets/pet/robot-dog/`). Это отдельная
+В центре стоит робопёс (`assets/robot-dog/`). Это отдельная
 модель, не часть арены: `widgets/room-scene/lib/center-character.ts` грузит её
 асинхронно, чтобы арена успела отрисоваться раньше.
 
@@ -269,13 +269,13 @@ JS-поток каждый кадр меняет **одно** число `uTime`
 Поэтому:
 
 - геометрия и клипы — один `robot-dog.glb` (3.4 МБ) **без встроенных картинок**;
-- окрасы — обычные PNG в `assets/pet/robot-dog/skins/<скин>/`, которые
+- окрасы — обычные PNG в `assets/robot-dog/skins/<скин>/`, которые
   `expo-asset` кладёт на диск (`downloadAsync`), а `Texture.image` получает
   `{ localUri, width, height }`;
 - вырезает картинки из GLB скрипт:
 
 ```bash
-node scripts/strip-glb-textures.mjs исходник.glb assets/pet/robot-dog/robot-dog.glb
+node scripts/strip-glb-textures.mjs исходник.glb assets/robot-dog/robot-dog.glb
 ```
 
 Все семь окрасов — одна и та же сетка и одни и те же клипы, поэтому смена
@@ -296,10 +296,10 @@ environment map, и `metalness = 1` рисуется чёрным силуэто
 В модели четыре клипа — `Idle_Pokoy`, `Walk_Hodba`, `Joy_Radost`, `Sad_Grust`.
 Имена живут в одном месте, `entities/robot-dog`, там же идентификаторы окрасов.
 
-- **Настроение питомца решает, что пёс делает.** Таблица — в
-  `screens/home/lib/pet-action`: гордый радуется, скучающий ходит, обоим
-  несчастным настроениям достаётся грусть. Пока питомца нет, работает
-  переключатель из настроек.
+- **Настроение робота решает, что пёс делает.** Таблица — `actionForMood` в
+  `entities/robot-dog`: гордый радуется, скучающий ходит, обоим несчастным
+  настроениям достаётся грусть. Пока профиля нет, работает переключатель из
+  настроек. Подробнее — [robot-dog.md](./robot-dog.md).
 - **Тап по псу** — разовая реакция с возвратом в своё состояние. Луч
   проверяется по самой модели, а не по половине экрана: камера крутится, и тап
   по полу рядом не должен вызывать виляние.

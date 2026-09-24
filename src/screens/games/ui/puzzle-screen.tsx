@@ -39,8 +39,8 @@ export const PuzzleScreen = ({ puzzleId }: PuzzleScreenProps) => {
   const updateUser = useUserStore((state) => state.updateUser);
 
   const puzzle = puzzleById(puzzleId);
-  const furnitureIds = user?.home.furnitureIds ?? [];
-  const isOwned = puzzle != null && isPuzzleOwned(furnitureIds, puzzle.id);
+  const ownedItemIds = user?.ownedItemIds ?? [];
+  const isOwned = puzzle != null && isPuzzleOwned(ownedItemIds, puzzle.id);
   const [reward, setReward] = useState<number | null>(null);
   const didPay = useRef(false);
 

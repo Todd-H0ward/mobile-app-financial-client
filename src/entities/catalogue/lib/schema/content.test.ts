@@ -6,7 +6,6 @@ import {
   getCatalogueItem,
   listCatalogue,
   listCatalogueByShop,
-  listOwnedToys,
   SHOP_IDS,
 } from '../..';
 
@@ -60,25 +59,12 @@ describe('content/catalogue.json', () => {
     }
   });
 
-  it('stocks at least one insulation upgrade — house.md payback needs it', () => {
-    const insulation = listCatalogue().filter((item) => item.insulationId);
-    expect(insulation.length).toBeGreaterThan(0);
-    for (const item of insulation) {
-      expect(item.insulationId).toBeTruthy();
-    }
-  });
-
-  it('lists toys unlocked by furniture ids', () => {
-    expect(listOwnedToys([])).toEqual([]);
-    const owned = listOwnedToys([
-      'toy-car',
-      'rooms-living',
-      'rug',
-      'game-console',
-    ]);
-    expect(owned.map((item) => item.id).sort()).toEqual(
-      ['game-console', 'puzzle-living', 'toy-car'].sort(),
-    );
+  it('marks the arcade unlocks with an owned id', () => {
+    const owned = listCatalogue()
+      .filter((item) => item.ownedId)
+      .map((item) => item.ownedId);
+    expect(owned).toContain('game-console');
+    expect(owned).toContain('rooms-living');
   });
 
   it('maps kinds onto budget directions', () => {

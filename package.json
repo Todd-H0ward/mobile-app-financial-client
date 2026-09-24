@@ -62,10 +62,5 @@
     "format": "biome check --write",
     "lint": "biome check"
   },
-  "private": true,
-  "pnpm": {
-    "overrides": {
-      "react-native-svg": "15.15.4"
-    }
-  }
+  "private": true
 }

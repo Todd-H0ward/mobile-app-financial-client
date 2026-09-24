@@ -7,8 +7,8 @@ import type { RobotDogAction, RobotDogSkin } from '@/entities/robot-dog';
 import {
   useIsAnimationEnabled,
   useIsSoundEnabled,
-  usePetAction,
-  usePetSkin,
+  useRobotAction,
+  useRobotSkin,
   useUpdateUser,
 } from '@/entities/user';
 
@@ -17,7 +17,7 @@ import { useTranslation } from '@/shared/i18n';
 import type { LanguagePreference } from '@/shared/types';
 import { Button, Card, ListRow, Screen, Switch, Text } from '@/shared/ui';
 
-import { PetCard } from './pet-card';
+import { RobotCard } from './robot-card';
 
 // ═══════════════════════════════════════════
 // CONSTANTS
@@ -40,16 +40,16 @@ export const SettingsScreen = () => {
   const updateUser = useUpdateUser();
   const isAnimationEnabled = useIsAnimationEnabled();
   const isSoundEnabled = useIsSoundEnabled();
-  const petSkin = usePetSkin();
-  const petAction = usePetAction();
+  const robotSkin = useRobotSkin();
+  const robotAction = useRobotAction();
 
   const setPetSkin = (skin: RobotDogSkin) =>
-    updateUser((u) => ({ ...u, settings: { ...u.settings, petSkin: skin } }));
+    updateUser((u) => ({ ...u, settings: { ...u.settings, robotSkin: skin } }));
 
   const setPetAction = (action: RobotDogAction) =>
     updateUser((u) => ({
       ...u,
-      settings: { ...u.settings, petAction: action },
+      settings: { ...u.settings, robotAction: action },
     }));
 
   const setAnimation = (isEnabled: boolean) =>
@@ -120,9 +120,9 @@ export const SettingsScreen = () => {
         </Card.Content>
       </Card>
 
-      <PetCard
-        skin={petSkin}
-        action={petAction}
+      <RobotCard
+        skin={robotSkin}
+        action={robotAction}
         onSkinChange={setPetSkin}
         onActionChange={setPetAction}
       />

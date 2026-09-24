@@ -21,7 +21,7 @@ import type { UserSave } from '../types';
 
 /** What goes to storage. Actions and startup flags never reach it. */
 interface UserPersistedState {
-  /** The whole save, or `null` — no profile yet, the app goes to onboarding. */
+  /** The whole save, or `null` — no profile yet; the entry screen makes one. */
   user: UserSave | null;
   /**
    * The child's save, parked while demo mode runs; `null` whenever demo mode is
@@ -32,7 +32,7 @@ interface UserPersistedState {
 }
 
 interface UserStore extends UserPersistedState {
-  /** Creates the profile during onboarding. Overwrites an existing one. */
+  /** Creates the guest profile. Overwrites an existing one. */
   createUser: (input: CreateUserInput) => void;
   /**
    * The only way to change the save. It takes a pure function because the rules
@@ -154,15 +154,15 @@ export const useUserStore = create<UserStore>()(
 // SELECTORS
 // ═══════════════════════════════════════════
 
-/** The whole save, or `null` before onboarding finishes. */
+/** The whole save, or `null` before the first profile exists. */
 export const useUser = () => useUserStore((state) => state.user);
 
-/** The pet slice of the save, or `undefined` before there is a profile. */
-export const useUserPet = () => useUserStore((state) => state.user?.pet);
+/** The robot slice of the save, or `undefined` before there is a profile. */
+export const useUserRobot = () => useUserStore((state) => state.user?.robot);
 
 /**
- * Home HUD fields only — wallet balance ticks must not rebuild pet appearance
- * when comfort / spirit did not change, and vice versa.
+ * Home HUD fields only — wallet balance ticks must not rebuild the robot's
+ * mood when charge / spirit did not change, and vice versa.
  */
 export const useHomeHudSource = () =>
   useUserStore(
@@ -171,7 +171,7 @@ export const useHomeHudSource = () =>
       if (!user) return null;
 
       return {
-        pet: user.pet,
+        robot: user.robot,
         balance: user.wallet.balance,
         /** Newest earn — 2.5.4 on home; spends must not steal the badge. */
         lastEarn:
@@ -184,7 +184,7 @@ export const useHomeHudSource = () =>
     }),
   );
 
-/** Creates the profile during onboarding. Overwrites an existing one. */
+/** Creates the guest profile. Overwrites an existing one. */
 export const useCreateUser = () => useUserStore((state) => state.createUser);
 
 /** The only way to change the save — takes a pure update function. */
