@@ -50,3 +50,6 @@ example
 credentials/
 *.keystore
 /build
+
+# Local generated artifacts and planning snapshots
+/output/
