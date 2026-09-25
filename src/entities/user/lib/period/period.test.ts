@@ -89,6 +89,17 @@ describe('phase transitions — illegal paths throw', () => {
     expect(() => startPeriod(emptyPlan)).toThrow();
   });
 
+  it.each([-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY, 1000])(
+    'rejects invalid allocation %s without mutating the save',
+    (needs) => {
+      const user = makeUser();
+      user.period.plan = { needs, wants: 1, savings: 0 };
+      const before = structuredClone(user);
+      expect(() => startPeriod(user)).toThrow('whole coins');
+      expect(user).toEqual(before);
+    },
+  );
+
   it('startPeriod allows an empty plan when the wallet is empty', () => {
     const broke = makeUser({
       wallet: { balance: 0, history: [], entryCount: 0 },

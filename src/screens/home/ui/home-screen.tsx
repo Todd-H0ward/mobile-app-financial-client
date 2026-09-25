@@ -1,136 +1,48 @@
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
-import { Redirect, useRouter } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { type Href, Redirect, useFocusEffect, useRouter } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { HintButton } from '@/widgets/hint-button';
+import { RobotSetup } from '@/widgets/robot-setup';
 import { RoomScene, type SceneView } from '@/widgets/room-scene';
 
+import { PLATFORM_GOAL_ID } from '@/entities/economy';
+import { getGoalById } from '@/entities/goal';
 import { useDoneCells } from '@/entities/lesson';
 import { actionForMood } from '@/entities/robot-dog';
 import { cellKey, SCENE_LEVEL_COUNT } from '@/entities/scene';
-import { useRobotAction, useRobotSkin } from '@/entities/user';
+import {
+  applyPlatformUpgrade,
+  useRobotAction,
+  useRobotSkin,
+  useUpdateUser,
+  useUser,
+} from '@/entities/user';
 import type { WatcherId } from '@/entities/watcher';
 
 import {
   CONTENT_PADDING,
   DYNAMIC_ROUTES,
+  MAX_CONTENT_WIDTH,
   RADII,
   SPACING,
   STATIC_ROUTES,
 } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { Button, SettingsIcon, Text, ThemedView } from '@/shared/ui';
-import { hitSlopFor } from '@/shared/utils';
+import { useTimeSource } from '@/shared/lib';
+import { Button, SettingsIcon, Sheet, Text, ThemedView } from '@/shared/ui';
+import { formatMoney } from '@/shared/utils';
 
 import { useHomeHud } from '../model';
-
-// ═══════════════════════════════════════════
-// CONSTANTS
-// ═══════════════════════════════════════════
-
-/** Visual size of the settings button; hitSlop expands it to 48dp. */
-const GEAR_SIZE = 40;
-
-/**
- * Vertical travel for the five tiers. Kept short so the rail fits between the
- * gear and the room buttons without spilling past the safe area.
- */
-const _STEP_SLIDER_HEIGHT = 168;
-
-/** Room-button strip under the scene — keep the rail clear of it. */
-const ROOM_CONTROLS_CLEARANCE = 56;
-
-// ═══════════════════════════════════════════
-// COMPONENTS
-// ═══════════════════════════════════════════
-
-/**
- * Settings: the child's own switches — sound, animations, language.
- *
- * Reachable without the barrier on purpose. Turning the sound off on a bus is
- * an accessibility need (3.6), and an accessibility switch a child cannot
- * reach without solving 7 × 8 is not an accessible switch. The grown-up's
- * section sits behind its own quiet door inside.
- */
-const SettingsButton = ({ onPress }: { onPress: () => void }) => {
-  const { t } = useTranslation();
-  const theme = useTheme();
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={t('home.settingsA11y')}
-      hitSlop={hitSlopFor(GEAR_SIZE)}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.gear,
-        {
-          backgroundColor: theme.surface,
-          borderColor: theme.border,
-          opacity: pressed ? 0.7 : 1,
-        },
-      ]}
-    >
-      <SettingsIcon color={theme.textSecondary} />
-    </Pressable>
-  );
-};
-
-/**
- * What a screen is saying while the child stands in front of it.
- *
- * Bottom of the frame rather than beside the face: the camera has flown in
- * close, and the head fills the middle of the window. A tap anywhere on the
- * world also walks away — the button is the visible way out, not the only
- * one, which is 3.6.
- */
-const WatcherCard = ({
-  watcher,
-  onLeave,
-}: {
-  watcher: WatcherId;
-  onLeave: () => void;
-}) => {
-  const { t } = useTranslation();
-  const theme = useTheme();
-
-  return (
-    <View
-      style={[
-        styles.watcherCard,
-        { backgroundColor: theme.surface, borderColor: theme.border },
-      ]}
-    >
-      <Text variant="label" themeColor="textMuted">
-        {t(`scene.watchers.${watcher}.name`)}
-      </Text>
-      <Text variant="body">{t(`scene.watchers.${watcher}.line`)}</Text>
-      <Button size="s" variant="secondary" onPress={onLeave}>
-        {t('scene.watcherLeave')}
-      </Button>
-    </View>
-  );
-};
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * The world: one model with three rooms on it, turning under the camera.
- *
- * Not a `Screen`: the scene is edge to edge and runs under the status bar,
- * while `Screen` is a padded scrolling column. What `Screen` gave — the safe
- * area — is taken directly here, so the model keeps the whole window and only
- * the controls step inside the inset.
- *
- * The HUD is off while the scene is being built: the coins, the goal and the
- * task have to be placed against the 3D world, and half-placed they would
- * only get in the way. The robot dog already stands on the platform and
- * shows its mood through its clip.
- */
+/** HUD occupies its own space so essential controls never cover the robot. */
 export const HomeScreen = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -139,115 +51,350 @@ export const HomeScreen = () => {
   const hud = useHomeHud();
   const robotSkin = useRobotSkin();
   const chosenAction = useRobotAction();
-
-  /** Opens over the first segment, not on the map: a place, not a menu. */
+  const user = useUser();
+  const updateUser = useUpdateUser();
+  const time = useTimeSource();
   const [view, setView] = useState<SceneView>(0);
-  /**
-   * How far out of the pit the game has climbed, `0 … SCENE_LEVEL_COUNT`.
-   *
-   * Starts at the bottom: the child opens the game standing on the floor of
-   * the pit with the walls above them, and every level lifts the platform a
-   * ring higher until it clears the rim. Local state for now — the real game
-   * will read this off the period the player has finished.
-   */
-  const [level, setLevel] = useState(0);
-  /** At the top the button turns into a way back down, not a dead end. */
-  const isOutOfPit = level >= SCENE_LEVEL_COUNT;
-  /**
-   * The screen overhead the child has tapped, if any.
-   *
-   * Owned here rather than inside the widget: the camera flight is the
-   * widget's, but what the machine says is the game's, and the level card has
-   * to stand down while somebody is talking.
-   */
+  const [targetLevel, setTargetLevel] = useState<number | null>(null);
   const [talkingTo, setTalkingTo] = useState<WatcherId | null>(null);
-  /** Tiles the child has already learnt on; the scene sinks them. */
+  const [isMenuVisible, setMenuVisible] = useState(false);
+  const isNavigating = useRef(false);
   const doneCells = useDoneCells();
 
-  if (hud.isSummary) {
-    return <Redirect href={STATIC_ROUTES.PERIOD_SUMMARY} />;
-  }
+  useFocusEffect(
+    useCallback(() => {
+      isNavigating.current = false;
+    }, []),
+  );
+
+  // A ref closes the double-tap window before React can render the next frame.
+  const navigate = (href: Href) => {
+    if (isNavigating.current) return;
+    isNavigating.current = true;
+    setMenuVisible(false);
+    router.push(href);
+  };
+
+  const level = user?.platform.level ?? 0;
+  const isOutOfPit = level >= SCENE_LEVEL_COUNT;
+  const price = getGoalById(PLATFORM_GOAL_ID)?.price ?? 0;
+  const saved =
+    user?.savings.goals.find((row) => row.goalId === PLATFORM_GOAL_ID)?.saved ??
+    0;
+  const canUpgrade = hud.isActive && saved >= price && price > 0;
+  const confirmUpgrade = () => {
+    if (targetLevel === null) return;
+    updateUser((current) => {
+      const result = applyPlatformUpgrade(current, targetLevel, time);
+      return result.ok ? result.user : current;
+    });
+    setTargetLevel(null);
+  };
+
+  if (!user) return <Redirect href={STATIC_ROUTES.ENTRY} />;
+  if (hud.isSummary) return <Redirect href={STATIC_ROUTES.PERIOD_SUMMARY} />;
 
   return (
-    <ThemedView variant="background" style={styles.root}>
-      <RoomScene
-        view={view}
-        onViewChange={setView}
-        level={level}
-        robotSkin={robotSkin}
-        robotAction={actionForMood(hud.robot?.moodName ?? null, chosenAction)}
-        focusedWatcher={talkingTo}
-        onWatcherFocus={setTalkingTo}
-        doneCells={doneCells}
-        onCellPress={(cell) =>
-          router.push(DYNAMIC_ROUTES.lesson(cellKey(cell)))
-        }
-        isAnimated={hud.isAnimationEnabled}
-      />
-
-      {/* box-none: the scene keeps every touch the controls do not want, so a
-          swipe started next to the gear still turns the world. */}
-      <View
-        pointerEvents="box-none"
-        style={[styles.top, { paddingTop: insets.top + SPACING.two }]}
-      >
-        <SettingsButton onPress={() => router.push(STATIC_ROUTES.SETTINGS)} />
+    <ThemedView
+      variant="background"
+      style={[
+        styles.root,
+        { paddingTop: insets.top, paddingBottom: insets.bottom },
+      ]}
+    >
+      <View style={styles.header}>
+        <View style={styles.stats}>
+          <View style={styles.stat}>
+            <Text variant="body" themeColor="textSecondary">
+              {t('home.balance')}
+            </Text>
+            <Text variant="bodyBold">{formatMoney(hud.balance)}</Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('home.savings')}
+            onPress={() => navigate(STATIC_ROUTES.SAVINGS)}
+            style={styles.stat}
+          >
+            <Text variant="body" themeColor="textSecondary">
+              {t('home.savings')}
+            </Text>
+            <Text variant="bodyBold">{formatMoney(hud.savingsTotal)}</Text>
+          </Pressable>
+          <HintButton screen="home" />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('home.settingsA11y')}
+            onPress={() => navigate(STATIC_ROUTES.SETTINGS)}
+            style={styles.iconButton}
+          >
+            <SettingsIcon color={theme.textSecondary} />
+          </Pressable>
+        </View>
+        <Text variant="bodyBold">
+          {user.robot.name || t('robot.unnamed')} ·{' '}
+          {t('home.charge', { value: Math.round(user.robot.charge * 100) })}
+        </Text>
+        <Text
+          variant="body"
+          themeColor="textSecondary"
+          accessibilityLabel={hud.robot?.accessibilityLabel}
+        >
+          {hud.robot?.moodLabel}: {hud.robot?.moodReasonLabel}
+        </Text>
       </View>
 
-      {talkingTo ? (
-        <View
-          pointerEvents="box-none"
-          style={[
-            styles.watcherDock,
-            {
-              paddingBottom:
-                insets.bottom + ROOM_CONTROLS_CLEARANCE + SPACING.three,
-            },
-          ]}
-        >
-          <WatcherCard watcher={talkingTo} onLeave={() => setTalkingTo(null)} />
-        </View>
-      ) : null}
+      <View style={styles.world}>
+        <RoomScene
+          view={view}
+          onViewChange={setView}
+          level={level}
+          robotSkin={robotSkin}
+          robotAction={actionForMood(hud.robot?.moodName ?? null, chosenAction)}
+          focusedWatcher={talkingTo}
+          onWatcherFocus={setTalkingTo}
+          doneCells={doneCells}
+          onCellPress={(cell) => navigate(DYNAMIC_ROUTES.lesson(cellKey(cell)))}
+          isAnimated={hud.isAnimationEnabled}
+        />
+        {!talkingTo && (
+          <View style={styles.levelDock} pointerEvents="box-none">
+            <Button
+              size="s"
+              variant="secondary"
+              onPress={() => {
+                if (isOutOfPit) navigate(STATIC_ROUTES.HISTORY);
+                else if (canUpgrade) setTargetLevel(level + 1);
+                else
+                  navigate(
+                    hud.isPlanning
+                      ? STATIC_ROUTES.BUDGET_PLAN
+                      : DYNAMIC_ROUTES.goal(PLATFORM_GOAL_ID),
+                  );
+              }}
+            >
+              {t('scene.level', { level, total: SCENE_LEVEL_COUNT })} ·{' '}
+              {t(
+                isOutOfPit
+                  ? 'home.progress'
+                  : canUpgrade
+                    ? 'scene.levelUp'
+                    : 'home.liftShort',
+                { saved, price },
+              )}
+            </Button>
+          </View>
+        )}
+      </View>
 
-      {/* The level knob stands down mid-conversation: it belongs to the
-          arena, and the camera is not on the arena. */}
       <View
-        pointerEvents="box-none"
         style={[
-          styles.stepsRail,
-          talkingTo ? styles.hidden : null,
-          {
-            paddingBottom:
-              insets.bottom + ROOM_CONTROLS_CLEARANCE + SPACING.three,
-            paddingTop: insets.top + GEAR_SIZE + SPACING.four,
-          },
+          styles.footer,
+          { backgroundColor: theme.surface, borderColor: theme.border },
         ]}
       >
-        <View
-          style={[
-            styles.levelCard,
-            {
-              backgroundColor: theme.surface,
-              borderColor: theme.border,
-            },
-          ]}
-        >
-          <Text variant="label" themeColor="textMuted">
-            {t('scene.level', { level, total: SCENE_LEVEL_COUNT })}
-          </Text>
-          <Button
-            size="s"
-            variant={isOutOfPit ? 'secondary' : 'primary'}
-            onPress={() =>
-              setLevel((current) =>
-                current >= SCENE_LEVEL_COUNT ? 0 : current + 1,
-              )
-            }
-          >
-            {t(isOutOfPit ? 'scene.levelReset' : 'scene.levelUp')}
-          </Button>
-        </View>
+        {talkingTo ? (
+          <>
+            <Text variant="bodyBold">
+              {t(`scene.watchers.${talkingTo}.name`)}
+            </Text>
+            <Text>{t(`scene.watchers.${talkingTo}.line`)}</Text>
+            <View style={styles.actions}>
+              <Button
+                style={styles.action}
+                onPress={() =>
+                  navigate(
+                    talkingTo === 'overseer'
+                      ? STATIC_ROUTES.TASKS
+                      : hud.isPlanning
+                        ? STATIC_ROUTES.BUDGET_PLAN
+                        : STATIC_ROUTES.END_PERIOD,
+                  )
+                }
+              >
+                {t(
+                  talkingTo === 'overseer'
+                    ? 'home.tasksAction'
+                    : hud.isPlanning
+                      ? 'home.planBannerAction'
+                      : 'home.endBannerTitle',
+                )}
+              </Button>
+              <Button
+                style={styles.action}
+                variant="secondary"
+                onPress={() => setTalkingTo(null)}
+              >
+                {t('scene.watcherLeave')}
+              </Button>
+            </View>
+          </>
+        ) : (
+          <>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => navigate(STATIC_ROUTES.SAVINGS)}
+              style={styles.infoRow}
+            >
+              <Text variant="bodyBold">
+                {hud.goal?.title ?? t('home.goal.none')}
+              </Text>
+              <Text variant="body" themeColor="textSecondary">
+                {hud.goal?.progressLabel ?? t('home.goal.noneHint')}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() =>
+                navigate(
+                  user.tasks.activeTaskId
+                    ? DYNAMIC_ROUTES.task(user.tasks.activeTaskId)
+                    : STATIC_ROUTES.TASKS,
+                )
+              }
+              style={styles.infoRow}
+            >
+              <Text variant="bodyBold">{hud.taskTitle}</Text>
+            </Pressable>
+            <View style={styles.actions}>
+              <Button
+                style={styles.action}
+                onPress={() =>
+                  navigate(
+                    hud.isPlanning
+                      ? STATIC_ROUTES.BUDGET_PLAN
+                      : STATIC_ROUTES.END_PERIOD,
+                  )
+                }
+              >
+                {t(
+                  hud.isPlanning
+                    ? 'home.planBannerAction'
+                    : 'home.endBannerTitle',
+                )}
+              </Button>
+              <Button
+                style={styles.action}
+                variant="secondary"
+                onPress={() => navigate(STATIC_ROUTES.SHOP)}
+              >
+                {t('home.shopAction')}
+              </Button>
+            </View>
+            <View style={styles.actions}>
+              <Button
+                size="s"
+                style={styles.action}
+                variant="secondary"
+                onPress={() => navigate(STATIC_ROUTES.TASKS)}
+              >
+                {t('home.tasksAction')}
+              </Button>
+              <Button
+                size="s"
+                style={styles.action}
+                variant="secondary"
+                onPress={() => setMenuVisible(true)}
+              >
+                {t('home.moreAction')}
+              </Button>
+            </View>
+          </>
+        )}
       </View>
+
+      {(!user.playerName || !user.robot.name) && (
+        <RobotSetup isIntroduction onClose={() => {}} />
+      )}
+      <Sheet.Modal
+        isVisible={isMenuVisible}
+        onClose={() => setMenuVisible(false)}
+        isAnimated={hud.isAnimationEnabled}
+      >
+        <Sheet.Title>{t('home.moreAction')}</Sheet.Title>
+        <ScrollView contentContainerStyle={styles.menu}>
+          {hud.lastCredit && (
+            <Text>
+              {t('home.lastCredit')}: +{formatMoney(hud.lastCredit.amount)} ·{' '}
+              {hud.lastCredit.reasonLabel}
+            </Text>
+          )}
+          <Button
+            variant="secondary"
+            onPress={() => navigate(STATIC_ROUTES.SAVINGS)}
+          >
+            {t('home.savings')}
+          </Button>
+          {hud.isPlanning ? (
+            <Button
+              variant="secondary"
+              onPress={() => navigate(STATIC_ROUTES.BUDGET_PLAN)}
+            >
+              {t('home.budgetAction')}
+            </Button>
+          ) : (
+            <View style={styles.menu}>
+              <Text variant="bodyBold">{t('home.budgetAction')}</Text>
+              {(['needs', 'wants', 'savings'] as const).map((direction) => (
+                <Text key={direction}>
+                  {t(`budgetPlan.directions.${direction}.title`)}:{' '}
+                  {t('history.planFact', {
+                    plan: user.period.plan[direction],
+                    fact: user.period.fact[direction],
+                  })}
+                </Text>
+              ))}
+            </View>
+          )}
+          <Button
+            variant="secondary"
+            onPress={() => navigate(STATIC_ROUTES.HISTORY)}
+          >
+            {t('home.progress')}
+          </Button>
+          <Button
+            variant="secondary"
+            onPress={() => navigate(STATIC_ROUTES.GAMES)}
+          >
+            {t('home.gamesAction')}
+          </Button>
+          <Button
+            variant="secondary"
+            onPress={() => navigate(STATIC_ROUTES.GLOSSARY)}
+          >
+            {t('home.glossaryAction')}
+          </Button>
+          <Button
+            variant="secondary"
+            onPress={() => navigate(STATIC_ROUTES.PARENTS)}
+          >
+            {t('home.parentsA11y')}
+          </Button>
+        </ScrollView>
+      </Sheet.Modal>
+      <Sheet.Modal
+        isVisible={targetLevel !== null}
+        onClose={() => setTargetLevel(null)}
+        isAnimated={hud.isAnimationEnabled}
+      >
+        <Sheet.Title>
+          {t('scene.confirmLiftTitle', { level: targetLevel })}
+        </Sheet.Title>
+        <Sheet.Description>
+          {t('scene.confirmLiftBody', {
+            price,
+            remaining: Math.max(0, saved - price),
+          })}
+        </Sheet.Description>
+        <Sheet.Actions>
+          <Button variant="secondary" onPress={() => setTargetLevel(null)}>
+            {t('scene.cancelLift')}
+          </Button>
+          <Button disabled={!canUpgrade} onPress={confirmUpgrade}>
+            {t('scene.confirmLift')}
+          </Button>
+        </Sheet.Actions>
+      </Sheet.Modal>
     </ThemedView>
   );
 };
@@ -257,60 +404,43 @@ export const HomeScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  gear: {
-    alignItems: 'center',
-    borderRadius: RADII.m,
-    borderWidth: 1,
-    height: GEAR_SIZE,
-    justifyContent: 'center',
-    width: GEAR_SIZE,
-  },
-  top: {
-    alignItems: 'flex-end',
-    left: 0,
-    paddingHorizontal: CONTENT_PADDING,
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-  watcherCard: {
-    alignItems: 'flex-start',
-    borderRadius: RADII.l,
-    borderWidth: 1,
-    gap: SPACING.two,
-    padding: SPACING.three,
-  },
-  watcherDock: {
-    bottom: 0,
-    justifyContent: 'flex-end',
-    left: 0,
-    paddingHorizontal: CONTENT_PADDING,
-    pointerEvents: 'box-none',
-    position: 'absolute',
-    right: 0,
-  },
-  stepsRail: {
-    bottom: 0,
-    justifyContent: 'center',
-    paddingRight: CONTENT_PADDING,
-    pointerEvents: 'box-none',
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-  hidden: {
-    display: 'none',
-  },
-  levelCard: {
-    alignItems: 'center',
-    alignSelf: 'flex-end',
-    borderRadius: RADII.l,
-    borderWidth: 1,
+  action: { flex: 1 },
+  actions: { flexDirection: 'row', gap: SPACING.two },
+  footer: {
+    alignSelf: 'center',
+    borderTopWidth: 1,
+    borderTopLeftRadius: RADII.l,
+    borderTopRightRadius: RADII.l,
     gap: SPACING.one,
-    paddingHorizontal: SPACING.two,
+    maxWidth: MAX_CONTENT_WIDTH,
+    paddingHorizontal: CONTENT_PADDING,
     paddingVertical: SPACING.two,
+    width: '100%',
   },
+  header: {
+    alignSelf: 'center',
+    maxWidth: MAX_CONTENT_WIDTH,
+    paddingHorizontal: CONTENT_PADDING,
+    paddingBottom: SPACING.one,
+    width: '100%',
+  },
+  iconButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 48,
+    minWidth: 48,
+  },
+  infoRow: { justifyContent: 'center', minHeight: 48 },
+  levelDock: {
+    alignItems: 'center',
+    left: CONTENT_PADDING,
+    position: 'absolute',
+    right: CONTENT_PADDING,
+    top: SPACING.one,
+  },
+  menu: { gap: SPACING.two },
+  root: { flex: 1 },
+  stat: { flex: 1, justifyContent: 'center', minHeight: 48 },
+  stats: { alignItems: 'center', flexDirection: 'row', gap: SPACING.two },
+  world: { flex: 1, minHeight: 120 },
 });

@@ -19,9 +19,9 @@ import { Button, Card, ListRow, Text } from '@/shared/ui';
 
 interface RobotCardProps {
   skin: RobotDogSkin;
-  action: RobotDogAction;
+  action?: RobotDogAction;
   onSkinChange: (skin: RobotDogSkin) => void;
-  onActionChange: (action: RobotDogAction) => void;
+  onActionChange?: (action: RobotDogAction) => void;
 }
 
 interface SkinTileProps {
@@ -91,7 +91,7 @@ const SkinTile = ({ skin, isSelected, onPress }: SkinTileProps) => {
         transition={120}
       />
       <Text
-        variant={isSelected ? 'smallBold' : 'small'}
+        variant={isSelected ? 'bodyBold' : 'body'}
         themeColor={isSelected ? 'primaryStrong' : 'textSecondary'}
       >
         {label}
@@ -141,23 +141,26 @@ export const RobotCard = ({
           ))}
         </ScrollView>
 
-        <ListRow
-          title={t('settings.robotAction')}
-          subtitle={t('settings.petActionSubtitle')}
-        />
-        <View style={styles.actions}>
-          {ROBOT_DOG_ACTIONS.map((value) => (
-            <Button
-              key={value}
-              size="s"
-              variant={value === action ? 'primary' : 'secondary'}
-              onPress={() => onActionChange(value)}
-            >
-              {t(`settings.action.${value}`)}
-            </Button>
-          ))}
-        </View>
-
+        {onActionChange && (
+          <>
+            <ListRow
+              title={t('settings.robotAction')}
+              subtitle={t('settings.petActionSubtitle')}
+            />
+            <View style={styles.actions}>
+              {ROBOT_DOG_ACTIONS.map((value) => (
+                <Button
+                  key={value}
+                  size="s"
+                  variant={value === action ? 'primary' : 'secondary'}
+                  onPress={() => onActionChange(value)}
+                >
+                  {t(`settings.action.${value}`)}
+                </Button>
+              ))}
+            </View>
+          </>
+        )}
         <Text variant="small" themeColor="textMuted">
           {t('settings.petTapHint')}
         </Text>

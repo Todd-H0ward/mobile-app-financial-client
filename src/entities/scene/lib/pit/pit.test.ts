@@ -37,7 +37,7 @@ describe('levelProgress', () => {
 });
 
 // ═══════════════════════════════════════════
-// 2. The bowl sinks, one ring per level
+// 2. The bowl sinks across all five stages
 // ═══════════════════════════════════════════
 
 /** Where a ring's top surface ends up, in world units. */
@@ -88,13 +88,14 @@ describe('terracesInView', () => {
     expect(terracesInView(1)).toBe(1);
   });
 
-  it('takes one step out of the skyline on every level', () => {
-    let previous = terracesInView(0);
-
-    for (let level = 1; level < SCENE_LEVEL_COUNT; level += 1) {
-      const now = terracesInView(levelProgress(level));
-
-      expect(now).toBe(previous - 1);
+  it('keeps a visible height change through all five required stages', () => {
+    expect(SCENE_LEVEL_COUNT).toBe(5);
+    let previous = topOf(SCENE_TERRACE_COUNT - 1, 0);
+    for (let level = 1; level <= 5; level += 1) {
+      const now = topOf(SCENE_TERRACE_COUNT - 1, levelProgress(level));
+      expect(now).toBeLessThan(previous);
+      if (level < 5) expect(now).toBeGreaterThan(0);
+      else expect(now).toBe(0);
       previous = now;
     }
   });

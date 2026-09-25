@@ -3,6 +3,7 @@ export { createInitialUser, USER_SAVE_VERSION } from './initial-user';
 export { isUserSave, migrateUser } from './migrations';
 export type { UserPersistedState, UserStore } from './store';
 export {
+  useCommitUser,
   useCreateUser,
   useDeleteUser,
   useHomeHudSource,

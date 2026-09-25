@@ -1,11 +1,9 @@
+export { durablePersist } from './durable-persist';
 export {
   MotionEnabledProvider,
   useMotionEnabled,
 } from './motion-enabled';
-export {
-  createPersistStorage,
-  flushPersistWrites,
-} from './persist-storage';
+export { createPersistStorage } from './persist-storage';
 export type {
   PreferencesPersistedState,
   PreferencesStore,

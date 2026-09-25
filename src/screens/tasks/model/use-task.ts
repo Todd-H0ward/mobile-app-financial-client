@@ -11,7 +11,7 @@ import {
 import {
   applyCompleteTask,
   selectTask,
-  useUpdateUser,
+  useCommitUser,
   useUser,
 } from '@/entities/user';
 
@@ -54,7 +54,7 @@ interface TasksListController {
 /** Showcase of every catalogue chore for the period. */
 export const useTasksList = (): TasksListController => {
   const user = useUser();
-  const updateUser = useUpdateUser();
+  const commitUser = useCommitUser();
   const canPlay = user?.period.phase === 'active';
 
   const rows: TasksListRow[] =
@@ -74,7 +74,7 @@ export const useTasksList = (): TasksListController => {
       if (!user) return;
       if (user.period.phase === 'active') {
         const result = selectTask(user, taskId);
-        if (result.ok) updateUser(() => result.user);
+        if (result.ok) commitUser(user, result.user);
       }
     },
   };
@@ -83,7 +83,7 @@ export const useTasksList = (): TasksListController => {
 /** One chore play session — mechanic scores, then `applyCompleteTask`. */
 export const useTaskPlay = (taskId: string): TaskPlayController | null => {
   const user = useUser();
-  const updateUser = useUpdateUser();
+  const commitUser = useCommitUser();
   const time = useTimeSource();
   const showFeedback = useShowFeedback();
   const task = getTaskById(taskId);
@@ -110,7 +110,7 @@ export const useTaskPlay = (taskId: string): TaskPlayController | null => {
       if (!canPlay) return false;
 
       const outcome = applyCompleteTask(user, task.id, time, rewardShare);
-      if (!outcome.ok) return false;
+      if (!outcome.ok || !commitUser(user, outcome.user)) return false;
 
       hapticSuccess();
       showFeedback({
@@ -120,7 +120,6 @@ export const useTaskPlay = (taskId: string): TaskPlayController | null => {
         whyText: task.explanation,
         params: { reward: outcome.reward },
       });
-      updateUser(() => outcome.user);
       return true;
     },
 

@@ -29,7 +29,7 @@ import {
   ROBOT_DOG_MODEL,
   ROBOT_DOG_TEXTURES,
   type RobotDogTextureSlot,
-} from './robot-dog-assets';
+} from '../robot-dog-assets';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -132,14 +132,23 @@ const loadSkinTextures = async (
   skin: RobotDogSkin,
 ): Promise<Map<RobotDogTextureSlot, Texture>> => {
   const slots: RobotDogTextureSlot[] = ['body', 'dark', 'mid'];
-  const loaded = await Promise.all(
+  const results = await Promise.allSettled(
     slots.map(async (slot) => {
       const texture = await loadTexture(ROBOT_DOG_TEXTURES[skin][slot]);
       return [slot, texture] as const;
     }),
   );
 
-  return new Map(loaded);
+  const textures = new Map<RobotDogTextureSlot, Texture>();
+  for (const result of results) {
+    if (result.status === 'fulfilled') textures.set(...result.value);
+  }
+  const failure = results.find((result) => result.status === 'rejected');
+  if (failure?.status === 'rejected') {
+    for (const texture of textures.values()) texture.dispose();
+    throw failure.reason;
+  }
+  return textures;
 };
 
 /**
@@ -151,7 +160,7 @@ const loadSkinTextures = async (
  * the first-stage budget (docs/design-brief-3d.md).
  */
 const tameMaterials = (root: Object3D): MeshStandardMaterial[] => {
-  const painted: MeshStandardMaterial[] = [];
+  const painted = new Set<MeshStandardMaterial>();
 
   root.traverse((object) => {
     const material = (object as Mesh).material;
@@ -166,11 +175,11 @@ const tameMaterials = (root: Object3D): MeshStandardMaterial[] => {
 
       // A material with no coat of its own keeps the flat colour the artist
       // gave it — `Glow` and `Accent` were never painted.
-      if (ROBOT_DOG_MATERIAL_SLOTS[entry.name]) painted.push(entry);
+      if (ROBOT_DOG_MATERIAL_SLOTS[entry.name]) painted.add(entry);
     }
   });
 
-  return painted;
+  return [...painted];
 };
 
 /** Hangs a freshly loaded coat on the materials that wear one. */
@@ -188,18 +197,21 @@ const dressMaterials = (
 };
 
 const disposeTree = (root: Object3D) => {
+  const geometries = new Set<Mesh['geometry']>();
+  const materials = new Set<MeshStandardMaterial>();
   root.traverse((object) => {
     const mesh = object as Mesh;
-    mesh.geometry?.dispose();
-
-    const material = mesh.material;
-    if (!material) return;
-    for (const entry of Array.isArray(material) ? material : [material]) {
-      const textured = entry as MeshStandardMaterial;
-      textured.map?.dispose();
-      entry.dispose();
+    if (mesh.geometry) geometries.add(mesh.geometry);
+    if (!mesh.material) return;
+    for (const entry of Array.isArray(mesh.material)
+      ? mesh.material
+      : [mesh.material]) {
+      materials.add(entry as MeshStandardMaterial);
     }
   });
+  // Coat textures have one owner below; shared meshes must not dispose them twice.
+  for (const geometry of geometries) geometry.dispose();
+  for (const material of materials) material.dispose();
 };
 
 const loadGlbBuffer = async (): Promise<ArrayBuffer> => {
@@ -225,16 +237,35 @@ const loadGlbBuffer = async (): Promise<ArrayBuffer> => {
  * Loads async so the GL context can paint the arena first — the model is five
  * megabytes and parsing it on the first frame would cost the cold start.
  */
-const attachCenterCharacter = async (
+export const attachCenterCharacter = async (
   mount: Group,
   skin: RobotDogSkin,
   action: RobotDogAction,
 ): Promise<CenterCharacter> => {
-  const [buffer, textures] = await Promise.all([
-    loadGlbBuffer(),
+  const results = await Promise.allSettled([
+    loadGlbBuffer().then((buffer) => new GLTFLoader().parseAsync(buffer, '')),
     loadSkinTextures(skin),
   ]);
-  const gltf = await new GLTFLoader().parseAsync(buffer, '');
+  const [modelResult, textureResult] = results;
+  if (
+    modelResult.status === 'rejected' ||
+    textureResult.status === 'rejected'
+  ) {
+    if (modelResult.status === 'fulfilled')
+      disposeTree(modelResult.value.scene);
+    if (textureResult.status === 'fulfilled') {
+      for (const texture of textureResult.value.values()) texture.dispose();
+    }
+    throw modelResult.status === 'rejected'
+      ? modelResult.reason
+      : textureResult.status === 'rejected'
+        ? textureResult.reason
+        : new Error('Robot loading failed');
+  }
+  const gltf = modelResult.value;
+  const textures = textureResult.value;
+  let isDisposed = false;
+  let skinRequest = 0;
 
   const root = gltf.scene;
   fitOnPlatform(root);
@@ -255,6 +286,7 @@ const attachCenterCharacter = async (
   let settleInto: RobotDogAction | null = null;
 
   const start = (next: RobotDogAction, isOnce: boolean) => {
+    if (isDisposed) return;
     const clip = clips.get(next);
     if (!clip) return;
 
@@ -295,10 +327,16 @@ const attachCenterCharacter = async (
   return {
     root,
     tick: (deltaSec) => {
-      mixer.update(deltaSec);
+      if (!isDisposed) mixer.update(deltaSec);
     },
     setSkin: async (next) => {
+      if (isDisposed) return;
+      const request = ++skinRequest;
       const loaded = await loadSkinTextures(next);
+      if (isDisposed || request !== skinRequest) {
+        for (const texture of loaded.values()) texture.dispose();
+        return;
+      }
       const previous = coat;
       coat = loaded;
       dressMaterials(painted, loaded);
@@ -308,6 +346,9 @@ const attachCenterCharacter = async (
     play,
     playOnce,
     dispose: () => {
+      if (isDisposed) return;
+      isDisposed = true;
+      skinRequest += 1;
       mixer.stopAllAction();
       mixer.uncacheRoot(root);
       mount.remove(root);
@@ -318,4 +359,3 @@ const attachCenterCharacter = async (
 };
 
 export type { CenterCharacter };
-export { attachCenterCharacter };

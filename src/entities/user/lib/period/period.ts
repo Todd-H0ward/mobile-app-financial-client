@@ -2,6 +2,7 @@ import {
   BUDGET_DIRECTIONS,
   PERIOD_HISTORY_LIMIT,
   PERIOD_NEED_DECAY,
+  PLATFORM_GOAL_ID,
   REGULARITY_BONUS,
   WALLET_SOURCES,
 } from '@/entities/economy';
@@ -67,6 +68,21 @@ export const startPeriod = (user: UserSave, at?: number): UserSave => {
   if (user.period.phase !== 'planning') {
     throw new Error(
       `startPeriod: expected phase 'planning', got '${user.period.phase}'`,
+    );
+  }
+
+  const allocations = BUDGET_DIRECTIONS.map(
+    (direction) => user.period.plan[direction],
+  );
+  if (
+    !allocations.every(
+      (amount) => Number.isSafeInteger(amount) && amount >= 0,
+    ) ||
+    allocations.reduce((total, amount) => total + amount, 0) >
+      user.wallet.balance
+  ) {
+    throw new Error(
+      'startPeriod: plan must contain whole coins within the wallet balance',
     );
   }
 
@@ -142,6 +158,17 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
   const reachedGoalIds = savings.goals
     .filter((g) => g.reachedInPeriod === period.index)
     .map((g) => g.goalId);
+
+  // Spending the completed jar buys permanent progress; it must not erase
+  // the goal achievement used for this period's growth calculation.
+  if (
+    user.platform.receipts.some(
+      (receipt) => receipt.periodIndex === period.index,
+    ) &&
+    !reachedGoalIds.includes(PLATFORM_GOAL_ID)
+  ) {
+    reachedGoalIds.push(PLATFORM_GOAL_ID);
+  }
 
   // Facts are counted on the full append first: trimming must not shrink the
   // counters that just earned a stage (goals that aged out of the window stay

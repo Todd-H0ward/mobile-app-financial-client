@@ -164,13 +164,20 @@ describe('the balance table: spending instead of saving', () => {
   it('is at least two periods behind on the first goal', () => {
     const diligent = simulate(DILIGENT);
 
-    expect(run.goalsReachedIn.paints).toBeGreaterThanOrEqual(
-      diligent.goalsReachedIn.paints + 2,
-    );
+    expect(
+      run.goalsReachedIn.paints ?? Number.POSITIVE_INFINITY,
+    ).toBeGreaterThanOrEqual(diligent.goalsReachedIn.paints + 2);
   });
 
-  it('counts as a kept plan — spending inside a plan is not a mistake', () => {
-    expect(run.periods.every((period) => period.isPlanKept)).toBe(true);
+  it('reports spending newly earned coins beyond the opening plan', () => {
+    expect(run.periods[0].isPlanKept).toBe(false);
+    for (const record of run.user.history) {
+      expect(record.isPlanKept).toBe(
+        record.fact.needs <= record.plan.needs &&
+          record.fact.wants <= record.plan.wants &&
+          record.fact.savings <= record.plan.savings,
+      );
+    }
   });
 });
 

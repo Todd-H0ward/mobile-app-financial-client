@@ -838,8 +838,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
 
   const setLevelProgress = (progress: number) => {
     // The pit sinks around the robot rather than lifting them out of it: each
-    // level swallows one more ring into the floor, and the skyline the child
-    // is counting drops by one.
+    // paid stage lowers the rim; the fifth stage finally flattens the bowl.
     terraces.forEach((terrace, index) => {
       terrace.position.y = terraceSinkY(index, progress);
     });

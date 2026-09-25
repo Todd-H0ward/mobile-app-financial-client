@@ -32,15 +32,20 @@ export type {
   WalletSourceRef,
 } from './lib';
 export {
+  ARCADE_PAID_SITTINGS,
   acknowledgeSummary,
   applyCompleteTask,
   applyDeposit,
+  applyIdentity,
   applyPurchase,
   applyWithdraw,
+  arcadePaidRemaining,
   areNeedsMet,
+  beginArcadeSession,
   buildParentsReport,
   canAfford,
   canFinishPeriod,
+  completeArcadeSession,
   createDemoProfile,
   creditWallet,
   DEMO_RUN_PERIODS,
@@ -68,6 +73,7 @@ export {
   startPeriod,
   validatePlayerName,
 } from './lib';
+export { applyPlatformUpgrade } from './lib/platform';
 export type {
   BudgetFact,
   BudgetPlan,
@@ -92,6 +98,7 @@ export {
   migrateUser,
   PERIOD_PHASES,
   USER_SAVE_VERSION,
+  useCommitUser,
   useCreateUser,
   useDeleteUser,
   useHomeHudSource,

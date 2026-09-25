@@ -135,3 +135,20 @@ Actions:
 | `No such file or directory` в aapt2 / hermesc / cxx | мусор от прерванной или параллельной сборки. `cd android && ./gradlew --stop`, затем `rm -rf android/app/build android/app/.cxx` и `npm run build:apk` |
 | `CMAKE_C_COMPILER not set` / `ninja: error: loading 'build.ninja'` | испорченный кеш CMake или кончилось место на диске: `rm -rf android/app/.cxx`, проверьте `df -h` (полная сборка требует ~10 ГБ) |
 | `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | на телефоне лежит сборка с другим ключом — удалить приложение |
+
+## Android App Bundle
+
+`pnpm build:bundle` собирает подписанные APK и AAB одним ключом из одного
+checkout. AAB находится в `build/mobile-hackathon-<version>.aab` и предназначен
+для загрузки в магазин; на телефон устанавливается APK. Оба скрипта создают
+рядом файлы SHA-256. APK проходит `apksigner verify`, AAB — `jarsigner -verify`.
+Сборка использует `NODE_ENV=production`.
+
+25.09.2026 локально создан release keystore в игнорируемом каталоге
+`credentials/`. Его и env-файл нужно сохранить в надёжной резервной копии:
+для дальнейших обновлений нужен тот же ключ. Секреты не входят в исходники
+и не должны отправляться вместе с APK или AAB.
+
+В конфигурации убраны ненужные игре разрешения внешнего хранилища и наложения
+поверх приложений. Профиль хранится во внутренней SQLite; Android auto-backup
+отключён. Изменение этих параметров проверяется по итоговому merged manifest.

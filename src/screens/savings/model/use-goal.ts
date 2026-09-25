@@ -9,7 +9,7 @@ import { progressFor, remainingFor } from '@/entities/savings';
 import {
   applyDeposit,
   setActiveGoal,
-  useUpdateUser,
+  useCommitUser,
   useUser,
 } from '@/entities/user';
 
@@ -62,7 +62,7 @@ interface GoalController {
  */
 export const useGoal = (goalId: string): GoalController | null => {
   const user = useUser();
-  const updateUser = useUpdateUser();
+  const commitUser = useCommitUser();
   const time = useTimeSource();
   const router = useRouter();
   const showFeedback = useShowFeedback();
@@ -114,7 +114,7 @@ export const useGoal = (goalId: string): GoalController | null => {
 
     makeActive: () => {
       const result = setActiveGoal(user, goalId);
-      if (result.ok) updateUser(() => result.user);
+      if (result.ok) commitUser(user, result.user);
     },
 
     deposit: () => {
@@ -124,14 +124,13 @@ export const useGoal = (goalId: string): GoalController | null => {
       }
       if (amount <= 0 || amount > maxDeposit) return;
       const result = applyDeposit(user, goalId, amount, time);
-      if (result.ok) {
+      if (result.ok && commitUser(user, result.user)) {
         showFeedback({
           before: user,
           after: result.user,
           action: 'deposit',
           params: { goal: goal.title, amount },
         });
-        updateUser(() => result.user);
         setAmount(0);
       }
     },

@@ -1,10 +1,11 @@
+import { Redirect } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
 import { BUDGET_DIRECTIONS } from '@/entities/economy';
 
-import { SPACING } from '@/shared/constants';
+import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, ProgressBar, Screen, Sheet, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
@@ -27,6 +28,8 @@ export const BudgetPlanScreen = () => {
 
   const laidOut =
     plan.available > 0 ? (plan.available - plan.planLeft) / plan.available : 0;
+
+  if (!plan.isPlanning) return <Redirect href={STATIC_ROUTES.HOME} />;
 
   return (
     <Screen gap="three" isTabBarVisible={false}>

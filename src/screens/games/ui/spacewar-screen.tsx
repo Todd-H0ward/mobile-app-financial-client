@@ -10,18 +10,17 @@ import {
 } from '@/widgets/minigame/console';
 import { SpacewarScene } from '@/widgets/minigame/spacewar';
 
-import { WALLET_SOURCES } from '@/entities/economy';
-import { payoutFor } from '@/entities/minigame';
+import { useArcadeSession } from '@/features/arcade-session';
+
 import {
   isConsoleOwned,
   useArcadeScoresStore,
 } from '@/entities/minigame/console';
-import { creditWallet, useUser, useUserStore } from '@/entities/user';
+import { useUser } from '@/entities/user';
 
 import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { useTimeSource } from '@/shared/lib';
 import { Button, Screen, Sheet, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
@@ -33,9 +32,9 @@ export const SpacewarScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
   const router = useRouter();
-  const time = useTimeSource();
   const user = useUser();
-  const updateUser = useUserStore((state) => state.updateUser);
+  const session = useArcadeSession('spacewar');
+  const [rewardReason, setRewardReason] = useState('paid');
   const submitSpacewar = useArcadeScoresStore((state) => state.submitSpacewar);
   const spacewarMs = useArcadeScoresStore((state) => state.spacewarMs);
 
@@ -51,21 +50,16 @@ export const SpacewarScreen = () => {
       if (didPay.current || !user) return;
       didPay.current = true;
 
+      const result = session.complete();
+      if (!result) {
+        didPay.current = false;
+        return;
+      }
       submitSpacewar(elapsedMs);
-      const coins = payoutFor({ gameId: 'spacewar', isCorrect: true });
-      updateUser((current) => ({
-        ...current,
-        wallet: creditWallet(current.wallet, {
-          source: WALLET_SOURCES.gameSpacewar,
-          amount: coins,
-          direction: null,
-          periodIndex: current.period.index,
-          at: time.now(),
-        }),
-      }));
-      setReward(coins);
+      setRewardReason(result.reason);
+      setReward(result.coins);
     },
-    [submitSpacewar, time, updateUser, user],
+    [submitSpacewar, session.complete, user],
   );
 
   if (!isOwned) {
@@ -80,6 +74,14 @@ export const SpacewarScreen = () => {
           <Screen.Title>{t('games.spacewar.title')}</Screen.Title>
         </Screen.Heading>
       </Screen.Header>
+      <Text themeColor="textSecondary">
+        {t(
+          session.paidRemaining > 0
+            ? 'games.paidRemaining'
+            : 'games.practiceAvailable',
+          { count: session.paidRemaining },
+        )}
+      </Text>
 
       {isPlaying ? (
         <SpacewarScene key={runId} onComplete={onComplete} />
@@ -91,6 +93,7 @@ export const SpacewarScreen = () => {
               <ConsoleVolumeButton
                 accessibilityLabel={t('games.spacewar.start')}
                 onPress={() => {
+                  if (!session.start()) return;
                   didPay.current = false;
                   setRunId((id) => id + 1);
                   setIsPlaying(true);
@@ -138,9 +141,14 @@ export const SpacewarScreen = () => {
       >
         <Sheet.Title>{t('games.spacewar.completeTitle')}</Sheet.Title>
         <Text themeColor="textSecondary">
-          {t('games.spacewar.completeBody', {
-            reward: formatMoney(reward ?? 0),
-          })}
+          {t(
+            rewardReason === 'paid'
+              ? 'games.spacewar.completeBody'
+              : `games.practice.${rewardReason}`,
+            {
+              reward: formatMoney(reward ?? 0),
+            },
+          )}
         </Text>
         <Button
           isFullWidth
