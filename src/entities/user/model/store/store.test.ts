@@ -264,6 +264,63 @@ describe('useUserStore', () => {
     expect(user?.settings.isDemoMode).toBe(false);
   });
 
+  it('isolates completed lessons and records between the child and demo', () => {
+    const actions = useUserStore.getState();
+    actions.createUser({ playerName: 'Player' });
+    actions.completeLesson('0-0-0');
+    actions.completeLesson('0-0-0');
+    actions.completeLesson('bad-key');
+    actions.updateUser((user) => ({
+      ...user,
+      arcade: { ...user.arcade, scores: { snake: [9], spacewarMs: [4000] } },
+    }));
+    actions.setDemoMode(true);
+    expect(useUserStore.getState().user?.completedLessonCells).toEqual([]);
+    expect(useUserStore.getState().user?.arcade.scores.snake).toEqual([]);
+    actions.completeLesson('1-1-1');
+    actions.setDemoMode(false);
+    expect(useUserStore.getState().user?.completedLessonCells).toEqual([
+      '0-0-0',
+    ]);
+    expect(useUserStore.getState().user?.arcade.scores.snake).toEqual([9]);
+    actions.resetUser();
+    expect(useUserStore.getState().user?.completedLessonCells).toEqual([]);
+    expect(useUserStore.getState().user?.arcade.scores.snake).toEqual([]);
+  });
+
+  it('imports pre-v9 lesson and score keys once, then reset survives rehydration', () => {
+    storage.set(
+      STORAGE_KEYS.LESSONS,
+      JSON.stringify({ state: { doneCells: ['0-1-2'] } }),
+    );
+    storage.set(
+      STORAGE_KEYS.ARCADE_SCORES,
+      JSON.stringify({ state: { snake: [12], spacewarMs: [1000] } }),
+    );
+    storage.set(
+      STORAGE_KEYS.USER,
+      JSON.stringify({
+        version: 8,
+        state: {
+          user: { ...createInitialUser(), version: 8 },
+          demoBackup: null,
+        },
+      }),
+    );
+    useUserStore.persist.rehydrate();
+    expect(useUserStore.getState().user?.completedLessonCells).toEqual([
+      '0-1-2',
+    ]);
+    expect(useUserStore.getState().user?.arcade.scores.snake).toEqual([12]);
+    useUserStore.getState().resetUser();
+    useUserStore.persist.rehydrate();
+    expect(useUserStore.getState().user?.completedLessonCells).toEqual([]);
+    expect(useUserStore.getState().user?.arcade.scores.snake).toEqual([]);
+    useUserStore.getState().deleteUser();
+    expect(storage.has(STORAGE_KEYS.LESSONS)).toBe(false);
+    expect(storage.has(STORAGE_KEYS.ARCADE_SCORES)).toBe(false);
+  });
+
   it('ignores a demo toggle that changes nothing', () => {
     useUserStore.getState().createUser({ playerName: 'Аня' });
     useUserStore.getState().setDemoMode(false);

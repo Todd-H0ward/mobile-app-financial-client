@@ -20,7 +20,14 @@ import {
   Vector3,
 } from 'three';
 
-import type { RobotDogAction, RobotDogSkin } from '@/entities/robot-dog';
+import { lessonAccess } from '@/entities/lesson';
+import {
+  DEFAULT_ROBOT_ASSEMBLY,
+  type RobotAssembly,
+  type RobotDogAction,
+  type RobotDogSkin,
+  type RobotDogStage,
+} from '@/entities/robot-dog';
 import {
   cellKey,
   cellOfFace,
@@ -48,6 +55,7 @@ import type { WatcherAction, WatcherId } from '@/entities/watcher';
 
 import { clamp } from '@/shared/utils';
 
+import { statusMarker } from './cell-status-marker';
 import type { CenterCharacter } from './center-character';
 import { createHazeBackdrop } from './haze-backdrop';
 import { createLiftEffects, type LiftEffects } from './lift-effects';
@@ -77,6 +85,8 @@ interface SceneModel {
    * Swaps the dog's coat. Every skin is the same mesh and the same clips, but
    * each lives in its own GLB, so this reloads and remounts the character.
    */
+  /** Current module assembly and earned visual growth stage. */
+  setCharacterAssembly: (assembly: RobotAssembly, stage: RobotDogStage) => void;
   setCharacterSkin: (skin: RobotDogSkin) => void;
   /** What the dog settles into whenever nothing interrupts it. */
   playCharacterAction: (action: RobotDogAction) => void;
@@ -105,6 +115,8 @@ interface SceneModel {
    * what a scene being built for a child who learnt this yesterday needs,
    * against a tile sinking in front of them, which is the reward.
    */
+  /** Refreshes shape-coded availability markers across all ninety cells. */
+  setCellAccess: (doneKeys: readonly string[], level: number) => void;
   setCellsDone: (doneKeys: readonly string[], isImmediate?: boolean) => void;
   /** Same, for one of the two screens overhead. */
   watcherRoot: (watcher: WatcherId) => Object3D | null;
@@ -446,6 +458,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   let characterRequest = 0;
   let characterSkin = skin;
   let characterAction = action;
+  let characterAssembly = DEFAULT_ROBOT_ASSEMBLY;
+  let characterStage: RobotDogStage = 'basic';
 
   const loadCharacter = () => {
     characterRequest += 1;
@@ -471,6 +485,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         if (characterSkin !== loadingSkin) {
           void loaded.setSkin(characterSkin).catch(warnCoat);
         }
+        loaded.setAssembly(characterAssembly, characterStage);
         loaded.play(characterAction);
       })
       .catch((error: unknown) => {
@@ -508,6 +523,10 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   const frames: LineBasicMaterial[] = [];
   /** The fifteen tile buffers a tap ray is tested against. */
   const cellMeshes: Mesh[] = [];
+  const markers = new Map<
+    string,
+    { geometry: BufferGeometry; from: number; center: Vector3; ordinal: number }
+  >();
   /** Everything belonging to one segment, so a segment view can hide the rest. */
   const segmentParts: Object3D[][] = [[], [], []];
   /** Every cell's own outline, kept for the selection to borrow. */
@@ -599,6 +618,43 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         cellOutlines.set(cellKey({ segment, step: terrace, cell }), edges);
       });
 
+      const markerGeometries = outlines.map((edges, cell) => {
+        edges.computeBoundingBox();
+        const center =
+          edges.boundingBox?.getCenter(new Vector3()) ?? new Vector3();
+        center.y = (edges.boundingBox?.max.y ?? center.y) + 3;
+        const ordinal = segment * 30 + terrace * 6 + cell;
+        const marker = new BufferGeometry();
+        marker.setAttribute(
+          'position',
+          new BufferAttribute(
+            new Float32Array(
+              statusMarker(
+                lessonAccess(ordinal, [], 0).status,
+                center.x,
+                center.y,
+                center.z,
+              ),
+            ),
+            3,
+          ),
+        );
+        return { marker, center, ordinal };
+      });
+      const markerBuffer = mergeEdges(
+        markerGeometries.map(({ marker }) => marker),
+      );
+      geometries.push(markerBuffer);
+      markerGeometries.forEach(({ marker, center, ordinal }, cell) => {
+        marker.dispose();
+        markers.set(cellKey({ segment, step: terrace, cell }), {
+          geometry: markerBuffer,
+          from: cell * 48,
+          center,
+          ordinal,
+        });
+      });
+      terraces[terrace].add(new LineSegments(markerBuffer, frames[segment]));
       const frame = mergeEdges(outlines);
       geometries.push(frame);
 
@@ -617,6 +673,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
           parts: [
             { geometry, ...tileRanges[cell] },
             { geometry: frame, ...frameRanges[cell] },
+            { geometry: markerBuffer, from: cell * 48, to: (cell + 1) * 48 },
           ],
           offset: 0,
           target: 0,
@@ -928,6 +985,11 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     burstLift,
     platformHeight,
     tick,
+    setCharacterAssembly: (assembly, stage) => {
+      characterAssembly = assembly;
+      characterStage = stage;
+      character?.setAssembly(assembly, stage);
+    },
     setCharacterSkin,
     playCharacterAction,
     reactCharacter,
@@ -936,6 +998,21 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     cellTargets,
     cellAt,
     selectCell,
+    setCellAccess: (doneKeys, level) => {
+      for (const [key, marker] of markers) {
+        const { center, geometry, from, ordinal } = marker;
+        const attribute = geometry.getAttribute('position') as BufferAttribute;
+        const values = statusMarker(
+          lessonAccess(ordinal, doneKeys, level).status,
+          center.x,
+          center.y - (sinkables.get(key)?.offset ?? 0),
+          center.z,
+        );
+        (attribute.array as Float32Array).set(values, from);
+        attribute.needsUpdate = true;
+        geometry.computeBoundingSphere();
+      }
+    },
     setCellsDone,
     watcherRoot: (watcher) => watchers?.root(watcher) ?? null,
     watcherFocus: (watcher) => watchers?.focus(watcher) ?? null,

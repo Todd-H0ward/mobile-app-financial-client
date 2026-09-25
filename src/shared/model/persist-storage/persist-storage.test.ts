@@ -14,7 +14,7 @@ const native = vi.hoisted(() => {
 
 vi.mock('expo-sqlite/kv-store', () => ({ default: native }));
 
-import { createPersistStorage } from './persist-storage';
+import { createPersistStorage, quarantineStorage } from './persist-storage';
 
 const storage = createPersistStorage<{ balance: number }>();
 const snapshot = (balance: number) => ({ state: { balance }, version: 1 });
@@ -65,4 +65,16 @@ describe('persist storage durability', () => {
     expect(() => storage?.removeItem('profile')).toThrow('disk unavailable');
     expect(storage?.getItem('profile')).toEqual(snapshot(50));
   });
+});
+
+it('keeps corrupt data intact when the recovery copy cannot be written', () => {
+  native.disk.set('broken', '{bad json');
+  native.setItemSync.mockImplementationOnce(() => {
+    throw new Error('full');
+  });
+  expect(() => quarantineStorage('broken')).toThrow('full');
+  expect(native.disk.get('broken')).toBe('{bad json');
+  quarantineStorage('broken');
+  expect(native.disk.has('broken')).toBe(false);
+  expect([...native.disk.values()]).toContain('{bad json');
 });

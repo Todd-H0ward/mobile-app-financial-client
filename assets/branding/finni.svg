@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs><linearGradient id="shell" x2="0" y2="1"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#C5DCE8"/></linearGradient></defs>
+  <path d="M296 414 260 252Q258 222 291 239L413 312M728 414 764 252Q766 222 733 239L611 312" fill="#2EC4C8" stroke="#17394C" stroke-width="26" stroke-linejoin="round"/>
+  <rect x="286" y="318" width="452" height="374" rx="116" fill="url(#shell)" stroke="#17394C" stroke-width="26"/>
+  <rect x="325" y="374" width="374" height="181" rx="65" fill="#17394C"/>
+  <path d="M382 465Q415 420 448 465M576 465Q609 420 642 465" fill="none" stroke="#65E5D7" stroke-width="23" stroke-linecap="round"/>
+  <path d="M479 584H545L512 617Z" fill="#17394C" stroke="#17394C" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M478 639Q512 661 546 639" fill="none" stroke="#17394C" stroke-width="13" stroke-linecap="round"/>
+  <circle cx="699" cy="672" r="88" fill="#E8C547" stroke="#17394C" stroke-width="16"/>
+  <path d="M699 715V633M670 661 699 632 728 661" fill="none" stroke="#17394C" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

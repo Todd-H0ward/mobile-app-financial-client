@@ -8,10 +8,11 @@ import { RobotSetup } from '@/widgets/robot-setup';
 import { RoomScene, type SceneView } from '@/widgets/room-scene';
 import { WatcherDialog } from '@/widgets/watcher-dialog';
 
-import { useDoneCells } from '@/entities/lesson';
+import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
 import { actionForMood, moodFor } from '@/entities/robot-dog';
 import { cellKey } from '@/entities/scene';
 import {
+  useDoneCells,
   useIsMotionEnabled,
   useRobotAction,
   useRobotSkin,
@@ -105,11 +106,25 @@ export const HomeScreen = () => {
           onViewChange={setView}
           level={user.platform.level}
           robotSkin={robotSkin}
+          robotAssembly={user.robot.assembly}
+          robotStage={user.robot.stage}
           robotAction={actionForMood(mood.name, chosenAction)}
           focusedWatcher={talkingTo}
           onWatcherFocus={setTalkingTo}
           doneCells={doneCells}
-          onCellPress={(cell) => navigate(DYNAMIC_ROUTES.lesson(cellKey(cell)))}
+          onCellPress={(cell) => {
+            const key = cellKey(cell);
+            const ordinal = lessonOrdinalForKey(key);
+            if (
+              ordinal !== null &&
+              lessonAccess(ordinal, doneCells, user.platform.level).status !==
+                'LOCKED'
+            ) {
+              navigate(DYNAMIC_ROUTES.lesson(key));
+              return;
+            }
+            navigate(STATIC_ROUTES.LESSON_MAP);
+          }}
           isAnimated={isMotionEnabled}
         />
 

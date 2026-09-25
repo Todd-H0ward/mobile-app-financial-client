@@ -7,7 +7,9 @@ import { lessonAt, listLessons } from './catalogue';
 // ═══════════════════════════════════════════
 
 describe('lessonAt', () => {
-  const count = listLessons().length;
+  it('has a distinct exercise for every cell', () => {
+    expect(new Set(listLessons().map((lesson) => lesson.id)).size).toBe(90);
+  });
 
   it('gives a different lesson to each cell of a terrace', () => {
     const row = Array.from({ length: 6 }, (_, cell) => lessonAt(cell).id);
@@ -19,10 +21,12 @@ describe('lessonAt', () => {
     expect(lessonAt(17)).toBe(lessonAt(17));
   });
 
-  it('wraps rather than running out', () => {
-    expect(lessonAt(count)).toBe(lessonAt(0));
-    expect(lessonAt(count * 7 + 3)).toBe(lessonAt(3));
-  });
+  it.each([-1, 90, 900, 0.5, NaN, Infinity])(
+    'rejects an invalid cell %s',
+    (ordinal) => {
+      expect(() => lessonAt(ordinal)).toThrow(RangeError);
+    },
+  );
 
   it('answers for every cell of the arena', () => {
     for (let ordinal = 0; ordinal < 90; ordinal += 1) {

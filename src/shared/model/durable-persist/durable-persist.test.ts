@@ -96,3 +96,40 @@ describe('durable persistence', () => {
     expect(read()?.state.balance).toBe(65);
   });
 });
+
+describe('recoverable write failure', () => {
+  it('exposes a retry that commits the rejected snapshot exactly once', () => {
+    let retry: (() => void) | undefined;
+    let fail = true;
+    const write = vi.fn(() => {
+      if (fail) throw new Error('full');
+    });
+    const store = createStore<State>()(
+      durablePersist(
+        (set) => ({
+          balance: 50,
+          earn: (amount) => set((s) => ({ balance: s.balance + amount })),
+        }),
+        {
+          name: 'retry',
+          storage: {
+            getItem: () => null,
+            setItem: write,
+            removeItem: () => {},
+          },
+          partialize: ({ balance }) => ({ balance }),
+          onWriteError: (_error, next) => {
+            retry = next;
+          },
+        },
+      ),
+    );
+    store.getState().earn(8);
+    expect(store.getState().balance).toBe(50);
+    fail = false;
+    retry?.();
+    expect(store.getState().balance).toBe(58);
+    expect(() => retry?.()).toThrow('Save changed');
+    expect(store.getState().balance).toBe(58);
+  });
+});

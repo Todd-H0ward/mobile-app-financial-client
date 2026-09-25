@@ -3,7 +3,7 @@ export {
   MotionEnabledProvider,
   useMotionEnabled,
 } from './motion-enabled';
-export { createPersistStorage } from './persist-storage';
+export { createPersistStorage, quarantineStorage } from './persist-storage';
 export type {
   PreferencesPersistedState,
   PreferencesStore,
@@ -15,3 +15,4 @@ export {
   useSetThemePreference,
   useThemePreference,
 } from './preferences-store';
+export { reportStorageIssue, useStorageHealth } from './storage-health';

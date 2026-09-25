@@ -2,6 +2,7 @@ export type { BudgetDirection, TaskDifficulty } from './model';
 export {
   BUDGET_DIRECTIONS,
   BUDGET_TOLERANCE,
+  MODULE_PRICE,
   PERIOD_HISTORY_LIMIT,
   PERIOD_NEED_DECAY,
   PLATFORM_GOAL_ID,

@@ -1,6 +1,7 @@
 export type { TaskDifficulty } from './balance';
 export {
   BUDGET_TOLERANCE,
+  MODULE_PRICE,
   PERIOD_HISTORY_LIMIT,
   PERIOD_NEED_DECAY,
   PLATFORM_GOAL_ID,

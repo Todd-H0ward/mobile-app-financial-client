@@ -16,6 +16,7 @@ type DurableOptions<State, Saved> = Omit<
   'storage' | 'partialize'
 > & {
   storage: SyncStorage<Saved>;
+  onWriteError?: (error: unknown, retry: () => void) => void;
   partialize: (state: State) => Saved;
 };
 
@@ -37,10 +38,19 @@ export const durablePersist =
       const next = replace
         ? (update as State)
         : Object.assign({}, current, update);
-      options.storage.setItem(options.name, {
-        state: options.partialize(next),
-        version: options.version ?? 0,
-      });
+      try {
+        options.storage.setItem(options.name, {
+          state: options.partialize(next),
+          version: options.version ?? 0,
+        });
+      } catch (error) {
+        if (!options.onWriteError) throw error;
+        options.onWriteError(error, () => {
+          if (get() !== current) throw new Error('Save changed before retry');
+          commit(next, true);
+        });
+        return;
+      }
       // Always publish the snapshot that was just committed, including actions.
       set(next, true);
     };

@@ -6,7 +6,7 @@ import {
   type RecoveryDestination,
   type RecoveryOption,
 } from '@/entities/budget';
-import { endPeriod, useUpdateUser, useUser } from '@/entities/user';
+import { endPeriod, useCommitUser, useUser } from '@/entities/user';
 
 import { STATIC_ROUTES } from '@/shared/constants';
 
@@ -42,7 +42,7 @@ const routeFor = (destination: RecoveryDestination) => {
 export const useRecovery = (): RecoveryController | null => {
   const router = useRouter();
   const user = useUser();
-  const updateUser = useUpdateUser();
+  const commitUser = useCommitUser();
 
   if (user?.period.phase !== 'summary') return null;
 
@@ -50,7 +50,7 @@ export const useRecovery = (): RecoveryController | null => {
   const options = pickRecoveryOptions(rows);
 
   const settleAndGo = (destination: RecoveryDestination) => {
-    updateUser(endPeriod);
+    if (!commitUser(user, endPeriod(user))) return;
 
     const next = routeFor(destination);
 

@@ -112,6 +112,16 @@
       "category": "toy",
       "ownedId": "rooms-living",
       "note": "Купи — пазл откроется в мини-играх."
+    },
+    {
+      "id": "game-console",
+      "title": "Игровая консоль",
+      "price": 14,
+      "kind": "want",
+      "shop": "workshop",
+      "category": "toy",
+      "ownedId": "game-console",
+      "note": "Купи — в мини-играх откроются Spacewar и змейка."
     }
   ]
 }

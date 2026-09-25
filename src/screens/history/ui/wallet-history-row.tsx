@@ -33,6 +33,14 @@ const sourceLabel = (
       return t('wallet.source.gamePuzzle');
     case 'gameSpacewar':
       return t('wallet.source.gameSpacewar');
+    case 'gameMarket':
+      return t('financeGame.market');
+    case 'gameWeekly':
+      return t('financeGame.weekly');
+    case 'module':
+      return t('wallet.source.purchase', {
+        title: t(`setup.modules.${source.part}.${source.variant}`),
+      });
     case 'gameSnake':
       return t('wallet.source.gameSnake');
     case 'task':

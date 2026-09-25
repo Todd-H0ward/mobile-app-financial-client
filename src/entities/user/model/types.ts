@@ -41,6 +41,8 @@ type PeriodPhase = (typeof PERIOD_PHASES)[number];
 
 /** The robot dog: what it is called, how far it is built, how it feels. */
 interface RobotSave {
+  /** Three independently selected modules, each indexed 0…2. */
+  assembly: import('@/entities/robot-dog').RobotAssembly;
   /**
    * Name the child gave it. Empty until the introduction asks for one — the
    * only free-text field besides the player's name, see privacy.md.
@@ -222,6 +224,13 @@ interface PlatformSave {
  * see docs/privacy.md.
  */
 interface ArcadeSave {
+  /** Personal high scores; reset and demo isolation follow the profile. */
+  scores: {
+    /** Five highest apple counts, descending. */
+    snake: number[];
+    /** Five fastest clear times in ms, ascending. */
+    spacewarMs: number[];
+  };
   /** Monotonic session counter; never reused after a completion or restart. */
   sequence: number;
   /** Currently open session; null once consumed, even for an unpaid practice. */
@@ -229,10 +238,12 @@ interface ArcadeSave {
     /** Counter captured by the game screen when it starts. */
     id: number;
     /** Which game may claim this session. */
-    gameId: 'puzzle' | 'snake' | 'spacewar';
+    gameId: 'puzzle' | 'snake' | 'spacewar' | 'market' | 'weekly';
   } | null;
   /** UTC day of the most recent paid sitting, -1 before the first reward. */
   paidDay: number;
+  /** Last paid Monday-based UTC week; rollback never refreshes this limit. */
+  paidWeek: number;
   /** Paid sittings on paidDay, 0…3 across all arcade games together. */
   paidCount: number;
 }
@@ -252,6 +263,8 @@ interface UserSave {
   platform: PlatformSave;
   /** Shared arcade payout limit and durable session identity. */
   arcade: ArcadeSave;
+  /** Completed arena cells, each segment-step-cell key recorded at most once. */
+  completedLessonCells: string[];
   /** The child's in-game name. Empty until the introduction asks for it. */
   playerName: string;
   /** Epoch ms the profile was created. For the grown-up's section. */

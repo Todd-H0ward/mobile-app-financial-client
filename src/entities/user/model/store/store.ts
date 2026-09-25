@@ -1,10 +1,21 @@
 import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 
+import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
+
 import { STORAGE_KEYS } from '@/shared/constants';
-import { createPersistStorage, durablePersist } from '@/shared/model';
+import {
+  createPersistStorage,
+  durablePersist,
+  reportStorageIssue,
+  useStorageHealth,
+} from '@/shared/model';
 
 import { enterDemoMode, exitDemoMode } from '../../lib/demo';
+import {
+  importLegacyProgress,
+  isCompletedCellKey,
+} from '../../lib/legacy-progress';
 import { resetUser } from '../../lib/reset';
 import {
   type CreateUserInput,
@@ -31,6 +42,8 @@ interface UserPersistedState {
 }
 
 interface UserStore extends UserPersistedState {
+  /** Marks one arena cell complete inside the current profile, idempotently. */
+  completeLesson: (cellKey: string) => void;
   /** Creates the guest profile. Overwrites an existing one. */
   createUser: (input: CreateUserInput) => void;
   /**
@@ -75,6 +88,27 @@ export const useUserStore = create<UserStore>()(
       user: null,
       demoBackup: null,
 
+      completeLesson: (cellKey) => {
+        const { user } = get();
+        if (
+          !user ||
+          !isCompletedCellKey(cellKey) ||
+          user.completedLessonCells.includes(cellKey) ||
+          lessonAccess(
+            lessonOrdinalForKey(cellKey) ?? 0,
+            user.completedLessonCells,
+            user.platform.level,
+          ).status === 'LOCKED'
+        )
+          return;
+        set({
+          user: {
+            ...user,
+            completedLessonCells: [...user.completedLessonCells, cellKey],
+          },
+        });
+      },
+
       createUser: (input) =>
         set({ user: createInitialUser(input), demoBackup: null }),
 
@@ -88,7 +122,7 @@ export const useUserStore = create<UserStore>()(
       commitUser: (before, after) => {
         if (get().user !== before || before === after) return false;
         set({ user: after });
-        return true;
+        return get().user === after;
       },
 
       setDemoMode: (isOn) => {
@@ -116,11 +150,21 @@ export const useUserStore = create<UserStore>()(
         // only then `clearStorage` removes the key. The other way around would
         // leave a key holding an empty profile instead of a clean device.
         set({ user: null, demoBackup: null });
+        if (get().user !== null) return;
         useUserStore.persist.clearStorage();
+        const legacy = createPersistStorage();
+        legacy.removeItem(STORAGE_KEYS.LESSONS);
+        legacy.removeItem(STORAGE_KEYS.ARCADE_SCORES);
       },
     }),
     {
       name: STORAGE_KEYS.USER,
+      onWriteError: (_error, retry) =>
+        reportStorageIssue({ kind: 'write', retry }),
+      onRehydrateStorage: () => (_state, error) => {
+        if (error) reportStorageIssue({ kind: 'read' });
+        else useStorageHealth.getState().clear();
+      },
       storage: createPersistStorage<UserPersistedState>(),
       version: USER_SAVE_VERSION,
       // Actions stay in memory: only the save goes to disk.
@@ -131,18 +175,51 @@ export const useUserStore = create<UserStore>()(
       migrate: (persisted, version) => {
         const saved = persisted as Partial<UserPersistedState> | undefined;
 
-        return {
+        if (!saved || typeof saved !== 'object' || !('user' in saved))
+          throw new Error('Invalid saved envelope');
+        const migrated = {
           user: migrateUser(saved?.user, version),
           demoBackup: migrateUser(saved?.demoBackup, version),
         };
+        if (
+          (saved?.user != null && !migrated.user) ||
+          (saved?.demoBackup != null && !migrated.demoBackup)
+        )
+          throw new Error('Cannot migrate save');
+        if (version < 9) {
+          const readLegacy = (key: string): unknown => {
+            try {
+              return createPersistStorage<unknown>().getItem(key)?.state;
+            } catch {
+              return undefined;
+            }
+          };
+          const target = migrated.demoBackup ? 'demoBackup' : 'user';
+          const profile = migrated[target];
+          if (profile)
+            migrated[target] = importLegacyProgress(
+              profile,
+              readLegacy(STORAGE_KEYS.LESSONS),
+              readLegacy(STORAGE_KEYS.ARCADE_SCORES),
+            );
+        }
+        return migrated;
       },
       // `migrate` only runs when the version changed, `merge` always does, so
       // the shape is checked here: a save of the current version can be broken
       // too.
       merge: (persisted, current) => {
         const saved = persisted as Partial<UserPersistedState> | undefined;
-        const readSave = (value: unknown): UserSave | null =>
-          isUserSave(value) ? value : null;
+        if (
+          persisted !== undefined &&
+          (!saved || typeof saved !== 'object' || !('user' in saved))
+        )
+          throw new Error('Invalid saved envelope');
+        const readSave = (value: unknown): UserSave | null => {
+          if (value == null) return null;
+          if (!isUserSave(value)) throw new Error('Invalid user save');
+          return value;
+        };
 
         return {
           ...current,
@@ -162,6 +239,16 @@ export const useUserStore = create<UserStore>()(
 
 /** The whole save, or `null` before the first profile exists. */
 export const useUser = () => useUserStore((state) => state.user);
+
+const EMPTY_COMPLETED_CELLS: string[] = [];
+
+/** Arena progress belongs to the current profile, including its demo backup. */
+export const useDoneCells = () =>
+  useUserStore(
+    (state) => state.user?.completedLessonCells ?? EMPTY_COMPLETED_CELLS,
+  );
+export const useCompleteLesson = () =>
+  useUserStore((state) => state.completeLesson);
 
 /** The robot slice of the save, or `undefined` before there is a profile. */
 export const useUserRobot = () => useUserStore((state) => state.user?.robot);

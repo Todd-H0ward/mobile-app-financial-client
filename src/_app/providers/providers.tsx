@@ -18,6 +18,8 @@ import { MotionEnabledProvider } from '@/shared/model';
 import { Toaster } from '@/shared/ui';
 
 import '@/shared/i18n';
+import { GameAudio } from './game-audio';
+import { StorageRecovery } from './storage-recovery';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -58,10 +60,13 @@ export const Providers = ({ children }: ProvidersProps) => {
       <SafeAreaProvider>
         <TimeSourceContext.Provider value={realTimeSource}>
           <AccessibilityBridge>
-            {children}
+            <StorageRecovery>
+              {children}
 
-            <FeedbackHost />
-            <Toaster />
+              <GameAudio />
+              <FeedbackHost />
+              <Toaster />
+            </StorageRecovery>
           </AccessibilityBridge>
         </TimeSourceContext.Provider>
       </SafeAreaProvider>

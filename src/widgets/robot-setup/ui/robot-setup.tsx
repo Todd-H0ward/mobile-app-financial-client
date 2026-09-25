@@ -11,8 +11,10 @@ import {
 } from 'react-native';
 
 import {
+  DEFAULT_ROBOT_ASSEMBLY,
   isRobotNameValid,
   ROBOT_NAME_MAX_LENGTH,
+  type RobotAssembly,
   type RobotDogSkin,
 } from '@/entities/robot-dog';
 import {
@@ -63,12 +65,15 @@ export const RobotSetup = ({
   const [skin, setSkin] = useState<RobotDogSkin>(
     user?.settings.robotSkin ?? 'factory',
   );
+  const [assembly, setAssembly] = useState<RobotAssembly>(
+    user?.robot.assembly ?? DEFAULT_ROBOT_ASSEMBLY,
+  );
   const isValid = isPlayerNameValid(playerName) && isRobotNameValid(robotName);
 
   const save = () => {
     if (!isValid) return;
     updateUser((current) =>
-      applyIdentity(current, { playerName, robotName, skin }),
+      applyIdentity(current, { playerName, robotName, skin, assembly }),
     );
     Keyboard.dismiss();
     onClose();
@@ -125,6 +130,33 @@ export const RobotSetup = ({
                 autoCorrect={false}
               />
               <RobotCard skin={skin} onSkinChange={setSkin} />
+              {isIntroduction &&
+                (['head', 'body', 'legs'] as const).map((part) => (
+                  <View key={part} style={styles.actions}>
+                    <Text variant="bodyBold">
+                      {t(`setup.modules.${part}.title`)}
+                    </Text>
+                    {[0, 1, 2].map((choice) => (
+                      <Button
+                        key={choice}
+                        variant={
+                          assembly[part] === choice ? 'primary' : 'secondary'
+                        }
+                        accessibilityState={{
+                          selected: assembly[part] === choice,
+                        }}
+                        onPress={() =>
+                          setAssembly((current) => ({
+                            ...current,
+                            [part]: choice,
+                          }))
+                        }
+                      >
+                        {t(`setup.modules.${part}.${choice}`)}
+                      </Button>
+                    ))}
+                  </View>
+                ))}
               {!isValid && (
                 <Text accessibilityLiveRegion="polite">
                   {t('setup.emptyName')}

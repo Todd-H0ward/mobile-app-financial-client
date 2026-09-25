@@ -30,6 +30,18 @@ export const GamesScreen = () => {
         </Screen.Heading>
       </Screen.Header>
 
+      <Button onPress={() => router.push(STATIC_ROUTES.GAMES_MARKET)}>
+        {t('financeGame.market')}
+      </Button>
+      <Button onPress={() => router.push(STATIC_ROUTES.GAMES_WEEKLY)}>
+        {t('financeGame.weekly')}
+      </Button>
+      <Button
+        variant="secondary"
+        onPress={() => router.push(STATIC_ROUTES.GAMES_CONSOLE)}
+      >
+        {t('financeGame.console')}
+      </Button>
       <Text variant="subtitle">{t('games.puzzle.title')}</Text>
 
       {levels.length === 0 ? (

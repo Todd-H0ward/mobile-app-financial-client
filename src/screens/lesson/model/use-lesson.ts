@@ -6,12 +6,13 @@ import {
   type Lesson,
   type LessonAction,
   type LessonStage,
+  lessonAccess,
   lessonAt,
   passMark,
   transitionLesson,
-  useCompleteLesson,
 } from '@/entities/lesson';
 import { cellFromKey, cellKey, cellOrdinal } from '@/entities/scene';
+import { useCompleteLesson, useUser } from '@/entities/user';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -66,11 +67,21 @@ interface LessonState {
  */
 export const useLesson = (cellId: string): LessonState => {
   const completeCell = useCompleteLesson();
+  const user = useUser();
 
   const cell = useMemo(() => cellFromKey(cellId), [cellId]);
   const lesson = useMemo(
-    () => (cell ? lessonAt(cellOrdinal(cell)) : null),
-    [cell],
+    () =>
+      cell &&
+      user &&
+      lessonAccess(
+        cellOrdinal(cell),
+        user.completedLessonCells,
+        user.platform.level,
+      ).status !== 'LOCKED'
+        ? lessonAt(cellOrdinal(cell))
+        : null,
+    [cell, user],
   );
 
   const [session, dispatch] = useReducer(

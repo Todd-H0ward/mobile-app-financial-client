@@ -2,7 +2,7 @@
 // TYPES
 // ═══════════════════════════════════════════
 
-type GameId = 'puzzle' | 'spacewar' | 'snake';
+type GameId = 'puzzle' | 'spacewar' | 'snake' | 'market' | 'weekly';
 
 interface PayoutInput {
   gameId: GameId;
@@ -22,6 +22,8 @@ interface PayoutInput {
  * must out-earn games (AGENTS.md arcade rules).
  */
 export const GAME_REWARDS: Record<GameId, number> = {
+  market: 8,
+  weekly: 8,
   puzzle: 8,
   spacewar: 7,
   snake: 7,

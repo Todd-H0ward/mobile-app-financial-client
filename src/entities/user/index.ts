@@ -79,6 +79,7 @@ export {
   startPeriod,
   validatePlayerName,
 } from './lib';
+export { hasModule, installModule, moduleId } from './lib/workshop';
 export type {
   BudgetFact,
   BudgetPlan,
@@ -105,8 +106,10 @@ export {
   PERIOD_PHASES,
   USER_SAVE_VERSION,
   useCommitUser,
+  useCompleteLesson,
   useCreateUser,
   useDeleteUser,
+  useDoneCells,
   useHomeHudSource,
   useIsAnimationEnabled,
   useIsDemoMode,
