@@ -1,3 +1,11 @@
+export type {
+  WatcherDialogAction,
+  WatcherGameState,
+  WatcherLine,
+  WatcherLineCondition,
+} from './dialogue';
+export { KEEPER_LINES } from './keeper-lines';
+export { OVERSEER_LINES } from './overseer-lines';
 export type { WatcherAction, WatcherId } from './watchers';
 export {
   DEFAULT_WATCHER_ACTION,
