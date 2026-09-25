@@ -1,7 +1,9 @@
 import { PLATFORM_GOAL_ID, PLATFORM_LEVEL_COUNT } from '@/entities/economy';
 import {
+  DEFAULT_ROBOT_ASSEMBLY,
   DEFAULT_ROBOT_DOG_ACTION,
   DEFAULT_ROBOT_DOG_SKIN,
+  isRobotAssembly,
   isRobotDogAction,
   isRobotDogSkin,
   ROBOT_DOG_STAGES,
@@ -44,6 +46,46 @@ const STAGE_FROM_PET: Record<string, RobotDogStage> = {
  * version cannot do that.
  */
 const MIGRATIONS: Record<number, MigrationStep> = {
+  11: (save) => ({
+    ...save,
+    version: 12,
+    arcade: { ...(isRecord(save.arcade) ? save.arcade : {}), paidWeek: -1 },
+  }),
+  10: (save) => ({
+    ...save,
+    version: 11,
+    robot: {
+      ...(isRecord(save.robot) ? save.robot : {}),
+      assembly: { ...DEFAULT_ROBOT_ASSEMBLY },
+    },
+  }),
+  // The old arena repeated the first 30 lessons in every sector. Preserve
+  // that learned content without marking new practice exercises completed.
+  9: (save) => ({
+    ...save,
+    version: 10,
+    completedLessonCells: Array.isArray(save.completedLessonCells)
+      ? [
+          ...new Set(
+            save.completedLessonCells
+              .filter(
+                (key): key is string =>
+                  typeof key === 'string' && /^[0-2]-[0-4]-[0-5]$/.test(key),
+              )
+              .map((key) => `0${key.slice(1)}`),
+          ),
+        ]
+      : [],
+  }),
+  8: (save) => ({
+    ...save,
+    version: 9,
+    completedLessonCells: [],
+    arcade: {
+      ...(isRecord(save.arcade) ? save.arcade : {}),
+      scores: { snake: [], spacewarMs: [] },
+    },
+  }),
   7: (save) => ({
     ...save,
     version: 8,
@@ -213,6 +255,7 @@ const isBudget = (value: unknown): boolean =>
 const isRobot = (value: unknown): boolean =>
   isRecord(value) &&
   typeof value.name === 'string' &&
+  isRobotAssembly(value.assembly) &&
   isOneOf(value.stage, ROBOT_DOG_STAGES) &&
   isFiniteNumber(value.charge) &&
   isFiniteNumber(value.spirit);
@@ -258,10 +301,20 @@ const isTasks = (value: unknown): boolean =>
   Array.isArray(value.completedThisPeriod) &&
   value.completedThisPeriod.every((id) => typeof id === 'string');
 
+const isScores = (value: unknown): boolean =>
+  Array.isArray(value) &&
+  value.length <= 5 &&
+  value.every((score) => Number.isSafeInteger(score) && score > 0);
+
 const isArcade = (value: unknown): boolean =>
   isRecord(value) &&
+  isRecord(value.scores) &&
+  isScores(value.scores.snake) &&
+  isScores(value.scores.spacewarMs) &&
   Number.isSafeInteger(value.sequence) &&
   Number(value.sequence) >= 0 &&
+  Number.isSafeInteger(value.paidWeek) &&
+  Number(value.paidWeek) >= -1 &&
   Number.isSafeInteger(value.paidDay) &&
   Number(value.paidDay) >= -1 &&
   Number.isInteger(value.paidCount) &&
@@ -271,7 +324,9 @@ const isArcade = (value: unknown): boolean =>
     (isRecord(value.active) &&
       value.active.id === value.sequence &&
       Number(value.active.id) > 0 &&
-      ['puzzle', 'snake', 'spacewar'].includes(String(value.active.gameId))));
+      ['puzzle', 'snake', 'spacewar', 'market', 'weekly'].includes(
+        String(value.active.gameId),
+      )));
 
 /**
  * Checks the shape of the save, not its meaning: passing means no screen will
@@ -286,6 +341,13 @@ export const isUserSave = (value: unknown): value is UserSave =>
   isRobot(value.robot) &&
   isPlatform(value.platform) &&
   isArcade(value.arcade) &&
+  Array.isArray(value.completedLessonCells) &&
+  value.completedLessonCells.length <= 90 &&
+  value.completedLessonCells.every(
+    (key) => typeof key === 'string' && /^[0-2]-[0-4]-[0-5]$/.test(key),
+  ) &&
+  new Set(value.completedLessonCells).size ===
+    value.completedLessonCells.length &&
   isWallet(value.wallet) &&
   isSavings(value.savings) &&
   isTasks(value.tasks) &&

@@ -29,6 +29,17 @@ const legacySave = (): Record<string, unknown> => {
 // ═══════════════════════════════════════════
 
 describe('migrateUser', () => {
+  it('keeps learned foundations when repeated sectors become new exercises', () => {
+    const save = {
+      ...createInitialUser(),
+      version: 9,
+      completedLessonCells: ['0-0-0', '1-0-0', '2-4-5'],
+    };
+    const migrated = migrateUser(save, 9);
+    expect(migrated?.completedLessonCells).toEqual(['0-0-0', '0-4-5']);
+    expect(migrated?.wallet).toEqual(save.wallet);
+    expect(migrated?.platform).toEqual(save.platform);
+  });
   it('leaves a save of the current version as it is', () => {
     const save = createInitialUser({ playerName: 'Аня', createdAt: 42 });
 
@@ -163,6 +174,7 @@ describe('isUserSave', () => {
     const migrated = migrateUser(v5, 5);
 
     expect(migrated?.robot).toEqual({
+      assembly: { head: 0, body: 0, legs: 0 },
       name: 'Кекс',
       stage: 'upgraded',
       charge: 0.4,

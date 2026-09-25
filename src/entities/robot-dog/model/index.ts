@@ -7,6 +7,8 @@ export {
   ROBOT_DOG_FADE_SEC,
   ROBOT_DOG_REACTION_SEC,
 } from './actions';
+export type { RobotAssembly } from './assembly';
+export { DEFAULT_ROBOT_ASSEMBLY, isRobotAssembly } from './assembly';
 export type {
   RobotDogAxes,
   RobotDogMood,

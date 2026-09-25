@@ -1,6 +1,6 @@
 import type { Lesson } from '../../model';
 
-type LessonStage = 'theory' | 'test' | 'result';
+type LessonStage = 'theory' | 'scenario' | 'test' | 'result';
 interface LessonSession {
   stage: LessonStage;
   index: number;
@@ -28,6 +28,15 @@ export const transitionLesson = (
   if (action.type === 'reset') return INITIAL_LESSON_SESSION;
   if (!lesson || state.index !== action.index) return state;
   if (action.type === 'answer') {
+    if (state.stage === 'scenario') {
+      const choice = lesson.scenario?.actions[action.option];
+      if (state.verdict || !Number.isInteger(action.option) || !choice)
+        return state;
+      return {
+        ...state,
+        verdict: { chosen: action.option, isRight: choice.isRecommended },
+      };
+    }
     const question = lesson.questions[state.index];
     if (
       state.stage !== 'test' ||
@@ -49,9 +58,11 @@ export const transitionLesson = (
   if (state.stage === 'theory') {
     return state.index + 1 < lesson.theory.length
       ? { ...state, index: state.index + 1 }
-      : { ...state, stage: 'test', index: 0 };
+      : { ...state, stage: lesson.scenario ? 'scenario' : 'test', index: 0 };
   }
   if (!state.verdict) return state;
+  if (state.stage === 'scenario')
+    return { ...state, stage: 'test', index: 0, verdict: null };
   return state.index + 1 < lesson.questions.length
     ? { ...state, index: state.index + 1, verdict: null }
     : { ...state, stage: 'result' };

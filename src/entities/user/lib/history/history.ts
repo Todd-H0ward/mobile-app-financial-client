@@ -19,6 +19,9 @@ type WalletSourceRef =
   | { kind: 'gamePuzzle' }
   | { kind: 'gameSpacewar' }
   | { kind: 'gameSnake' }
+  | { kind: 'gameMarket' }
+  | { kind: 'gameWeekly' }
+  | { kind: 'module'; part: string; variant: string }
   | { kind: 'task'; taskId: string; title: string }
   | { kind: 'purchase'; itemId: string; title: string }
   | { kind: 'savingsDeposit'; goalId: string; title: string }
@@ -66,6 +69,10 @@ export const describeWalletSource = (source: string): WalletSourceRef => {
   if (source === WALLET_SOURCES.gameSpacewar) {
     return { kind: 'gameSpacewar' };
   }
+  if (source === 'game:market') return { kind: 'gameMarket' };
+  if (source === 'game:weekly') return { kind: 'gameWeekly' };
+  const module = /^purchase:module:(head|body|legs):([0-2])$/.exec(source);
+  if (module) return { kind: 'module', part: module[1], variant: module[2] };
   if (source === WALLET_SOURCES.gameSnake) {
     return { kind: 'gameSnake' };
   }

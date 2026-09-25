@@ -13,3 +13,10 @@ export const createPersistStorage = <State>(): SyncStorage<State> => ({
     Store.removeItemSync(name);
   },
 });
+
+/** Preserve raw evidence before an explicitly requested new profile. A failed copy never erases the source. */
+export const quarantineStorage = (name: string): void => {
+  const raw = Store.getItemSync(name);
+  if (raw !== null) Store.setItemSync(`${name}:recovery:${Date.now()}`, raw);
+  Store.removeItemSync(name);
+};

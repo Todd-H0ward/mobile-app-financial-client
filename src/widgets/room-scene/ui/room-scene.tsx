@@ -14,10 +14,13 @@ import {
 } from 'three';
 
 import {
+  DEFAULT_ROBOT_ASSEMBLY,
   DEFAULT_ROBOT_DOG_ACTION,
   DEFAULT_ROBOT_DOG_SKIN,
+  type RobotAssembly,
   type RobotDogAction,
   type RobotDogSkin,
+  type RobotDogStage,
 } from '@/entities/robot-dog';
 import {
   CAMERA_FAR,
@@ -65,6 +68,10 @@ interface RoomSceneProps {
   level?: number;
   /** The coat the dog wears. Swapping it reloads the model. */
   robotSkin?: RobotDogSkin;
+  /** Independent modules selected in the introduction. */
+  robotAssembly?: RobotAssembly;
+  /** Equipment earned by progressing through the game. */
+  robotStage?: RobotDogStage;
   /** What the dog does when nothing interrupts it — its state. */
   robotAction?: RobotDogAction;
   /**
@@ -222,6 +229,8 @@ export const RoomScene = ({
   onViewChange,
   level = 0,
   robotSkin = DEFAULT_ROBOT_DOG_SKIN,
+  robotAssembly = DEFAULT_ROBOT_ASSEMBLY,
+  robotStage = 'basic',
   robotAction = DEFAULT_ROBOT_DOG_ACTION,
   petTapAction = 'joy',
   focusedWatcher = null,
@@ -280,6 +289,11 @@ export const RoomScene = ({
    * `onContextCreate` runs once and closes over what it saw; these refs are
    * how a skin chosen later still reaches a scene built earlier.
    */
+  const assemblyRef = useRef({ assembly: robotAssembly, stage: robotStage });
+  useEffect(() => {
+    assemblyRef.current = { assembly: robotAssembly, stage: robotStage };
+    model.current?.setCharacterAssembly(robotAssembly, robotStage);
+  }, [robotAssembly, robotStage]);
   const robotSkinRef = useRef(robotSkin);
   const robotActionRef = useRef(robotAction);
   /** False until the sunk cells have been placed once, without animating. */
@@ -377,8 +391,9 @@ export const RoomScene = ({
 
     if (!model.current) return;
     model.current.setCellsDone(doneCells, !hasSunkOnce.current);
+    model.current.setCellAccess(doneCells, level);
     hasSunkOnce.current = true;
-  }, [doneCells]);
+  }, [doneCells, level]);
 
   /**
    * The loop reads a ref, and the screen it is aimed at starts talking.
@@ -444,12 +459,17 @@ export const RoomScene = ({
       webgl.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight, false);
 
       const built = buildScene(robotSkinRef.current, robotActionRef.current);
+      built.setCharacterAssembly(
+        assemblyRef.current.assembly,
+        assemblyRef.current.stage,
+      );
       built.setPlatformY(tuneRef.current.platformY);
       // The effect below has already run by now and found no scene to talk
       // to: `onContextCreate` waits for the surface to be measured, which is
       // a render later. Without this the tiles a child sank yesterday come
       // back up every time the app is opened.
       built.setCellsDone(doneCellsRef.current, true);
+      built.setCellAccess(doneCellsRef.current, level);
       hasSunkOnce.current = true;
       const lens = new PerspectiveCamera(
         tuneRef.current.fov,

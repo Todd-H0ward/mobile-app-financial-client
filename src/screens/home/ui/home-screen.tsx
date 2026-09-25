@@ -10,11 +10,12 @@ import { RoomScene, type SceneView } from '@/widgets/room-scene';
 
 import { PLATFORM_GOAL_ID } from '@/entities/economy';
 import { getGoalById } from '@/entities/goal';
-import { useDoneCells } from '@/entities/lesson';
+import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
 import { actionForMood } from '@/entities/robot-dog';
 import { cellKey, SCENE_LEVEL_COUNT } from '@/entities/scene';
 import {
   applyPlatformUpgrade,
+  useDoneCells,
   useRobotAction,
   useRobotSkin,
   useUpdateUser,
@@ -144,17 +145,50 @@ export const HomeScreen = () => {
         </Text>
       </View>
 
+      <View
+        style={{
+          flexDirection: 'row',
+          gap: SPACING.one,
+          justifyContent: 'center',
+        }}
+      >
+        <Button
+          variant="ghost"
+          onPress={() => navigate(STATIC_ROUTES.LESSON_MAP)}
+        >
+          {t('lessonMap.title')}
+        </Button>
+        <Button
+          variant="ghost"
+          onPress={() => navigate(STATIC_ROUTES.WORKSHOP)}
+        >
+          {t('workshop.title')}
+        </Button>
+      </View>
       <View style={styles.world}>
         <RoomScene
           view={view}
           onViewChange={setView}
           level={level}
           robotSkin={robotSkin}
+          robotAssembly={user?.robot.assembly}
+          robotStage={user?.robot.stage}
           robotAction={actionForMood(hud.robot?.moodName ?? null, chosenAction)}
           focusedWatcher={talkingTo}
           onWatcherFocus={setTalkingTo}
           doneCells={doneCells}
-          onCellPress={(cell) => navigate(DYNAMIC_ROUTES.lesson(cellKey(cell)))}
+          onCellPress={(cell) => {
+            const key = cellKey(cell);
+            const ordinal = lessonOrdinalForKey(key);
+            if (
+              user &&
+              ordinal !== null &&
+              lessonAccess(ordinal, doneCells, user.platform.level).status !==
+                'LOCKED'
+            )
+              navigate(DYNAMIC_ROUTES.lesson(key));
+            else navigate(STATIC_ROUTES.LESSON_MAP);
+          }}
           isAnimated={hud.isAnimationEnabled}
         />
         {!talkingTo && (

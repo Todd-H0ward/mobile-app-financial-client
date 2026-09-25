@@ -71,6 +71,27 @@ describe('durable arcade payouts', () => {
     expect(duplicate.coins).toBe(0);
   });
 
+  it('records the score and reward in one consumed session, never twice', () => {
+    const user = beginArcadeSession(activeUser(), 'snake');
+    const result = completeArcadeSession(
+      user,
+      user.arcade.sequence,
+      'snake',
+      { now: () => DAY },
+      7,
+    );
+    expect(result.user.arcade.scores.snake).toEqual([7]);
+    const repeat = completeArcadeSession(
+      result.user,
+      user.arcade.sequence,
+      'snake',
+      { now: () => DAY },
+      99,
+    );
+    expect(repeat.user.arcade.scores.snake).toEqual([7]);
+    expect(repeat.user.wallet).toBe(result.user.wallet);
+  });
+
   it('does not let a callback from an abandoned game claim the new session', () => {
     const first = beginArcadeSession(activeUser(), 'snake');
     const second = beginArcadeSession(first, 'spacewar');
@@ -115,7 +136,35 @@ describe('durable arcade payouts', () => {
       sequence: 0,
       active: null,
       paidDay: -1,
+      paidWeek: -1,
       paidCount: 0,
+      scores: { snake: [], spacewarMs: [] },
     });
+  });
+});
+
+describe('weekly arcade calendar', () => {
+  it('pays a partial reward on mistakes, once per week across restarts and clock rollback', () => {
+    const monday = Date.UTC(2026, 8, 21);
+    const started = beginArcadeSession(activeUser(), 'weekly');
+    const result = completeArcadeSession(
+      started,
+      started.arcade.sequence,
+      'weekly',
+      { now: () => monday },
+      undefined,
+      false,
+    );
+    expect(result.coins).toBe(4);
+    const reloaded = JSON.parse(JSON.stringify(result.user));
+    expect(play(reloaded, 'weekly', monday + DAY).reason).toBe('weekly');
+    expect(play(reloaded, 'weekly', monday - DAY).reason).toBe('weekly');
+    expect(play(reloaded, 'weekly', monday + 7 * DAY).coins).toBe(8);
+  });
+  it('uses the same daily limit as the other four games', () => {
+    let user = activeUser();
+    for (const game of ['market', 'snake', 'weekly'] as const)
+      user = play(user, game).user;
+    expect(play(user, 'spacewar').reason).toBe('limit');
   });
 });

@@ -1,4 +1,9 @@
 import { type GameId, payoutFor } from '@/entities/minigame';
+import {
+  recordSnakeScore,
+  recordSpacewarTime,
+} from '@/entities/minigame/console';
+import { financeWeek } from '@/entities/minigame/finance';
 
 import type { TimeSource } from '@/shared/lib/time-source';
 
@@ -35,10 +40,12 @@ export const completeArcadeSession = (
   id: number,
   gameId: GameId,
   time: TimeSource,
+  score?: number,
+  isCorrect = true,
 ): {
   user: UserSave;
   coins: number;
-  reason: 'paid' | 'limit' | 'planning' | 'duplicate';
+  reason: 'paid' | 'limit' | 'planning' | 'duplicate' | 'weekly';
 } => {
   if (user.arcade.active?.id !== id || user.arcade.active.gameId !== gameId) {
     return { user, coins: 0, reason: 'duplicate' };
@@ -50,10 +57,12 @@ export const completeArcadeSession = (
   const reason =
     user.period.phase !== 'active'
       ? 'planning'
-      : paidCount >= ARCADE_PAID_SITTINGS
-        ? 'limit'
-        : 'paid';
-  const coins = reason === 'paid' ? payoutFor({ gameId, isCorrect: true }) : 0;
+      : gameId === 'weekly' && financeWeek(at) <= user.arcade.paidWeek
+        ? 'weekly'
+        : paidCount >= ARCADE_PAID_SITTINGS
+          ? 'limit'
+          : 'paid';
+  const coins = reason === 'paid' ? payoutFor({ gameId, isCorrect }) : 0;
   const wallet =
     coins > 0
       ? creditWallet(user.wallet, {
@@ -73,7 +82,21 @@ export const completeArcadeSession = (
       arcade: {
         ...user.arcade,
         active: null,
+        scores: {
+          snake:
+            gameId === 'snake' && score !== undefined
+              ? recordSnakeScore(user.arcade.scores.snake, score)
+              : user.arcade.scores.snake,
+          spacewarMs:
+            gameId === 'spacewar' && score !== undefined
+              ? recordSpacewarTime(user.arcade.scores.spacewarMs, score)
+              : user.arcade.scores.spacewarMs,
+        },
         paidDay: day,
+        paidWeek:
+          gameId === 'weekly' && coins > 0
+            ? Math.max(user.arcade.paidWeek, financeWeek(at))
+            : user.arcade.paidWeek,
         paidCount: paidCount + (coins > 0 ? 1 : 0),
       },
     },

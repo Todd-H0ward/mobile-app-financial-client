@@ -2,85 +2,85 @@
   "items": [
     {
       "id": "bread",
-      "title": "Хлеб и молоко",
+      "title": "Заряд аккумулятора",
       "price": 8,
       "kind": "need",
       "shop": "grocery",
       "category": "food",
       "chargeDelta": 0.08,
-      "note": "Еда на период — обязательный расход."
+      "note": "Энергия для работы робота в этом периоде."
     },
     {
       "id": "porridge",
-      "title": "Каша",
+      "title": "Обслуживание приводов",
       "price": 10,
       "kind": "need",
       "shop": "grocery",
       "category": "food",
       "chargeDelta": 0.1,
-      "note": "Сытный завтрак — нужное, а не роскошь."
+      "note": "Необходимая проверка и смазка движущихся деталей."
     },
     {
       "id": "soap",
-      "title": "Мыло",
+      "title": "Очистка датчиков",
       "price": 6,
       "kind": "need",
       "shop": "grocery",
       "category": "hygiene",
       "chargeDelta": 0.05,
-      "note": "Чистота — тоже нужное, не роскошь."
+      "note": "Чистые датчики помогают ориентироваться на арене."
     },
     {
       "id": "sweater",
-      "title": "Свитер",
+      "title": "Защитная накладка",
       "price": 40,
       "kind": "want",
       "shop": "clothes",
       "category": "clothes",
       "chargeDelta": 0.06,
       "ownedId": "sweater",
-      "note": "Красивый свитер. Дорогой — стоит сначала накопить."
+      "note": "Дополнительная защита корпуса. Сначала учти обязательные расходы."
     },
     {
       "id": "scarf",
-      "title": "Шарф",
+      "title": "Световой ободок",
       "price": 14,
       "kind": "want",
       "shop": "clothes",
       "category": "clothes",
       "chargeDelta": 0.04,
       "ownedId": "scarf",
-      "note": "Тёплый шарф — хочется, а не обязательно."
+      "note": "Необязательное украшение робота."
     },
     {
       "id": "rug",
-      "title": "Коврик",
+      "title": "Коврик для сборки",
       "price": 20,
       "kind": "want",
       "shop": "furniture",
       "category": "decor",
       "ownedId": "rug",
-      "note": "Мягкий коврик — украшение, не нужное."
+      "note": "Удобное дополнение рабочего места."
     },
     {
       "id": "lamp",
-      "title": "Ночник",
+      "title": "Лампа мастерской",
       "price": 18,
       "kind": "want",
       "shop": "furniture",
       "category": "decor",
       "ownedId": "lamp",
-      "note": "Тёплый свет вечером — украшение, не нужное."
+      "note": "Дополнительный свет для сборки."
     },
     {
       "id": "stickers",
-      "title": "Наклейки",
+      "title": "Наклейки команды",
       "price": 5,
       "kind": "want",
       "shop": "furniture",
       "category": "decor",
       "ownedId": "stickers",
-      "note": "Украсят стену. Можно и в следующий период."
+      "note": "Украшение корпуса. Покупку можно отложить."
     },
     {
       "id": "toy-car",
@@ -104,13 +104,13 @@
     },
     {
       "id": "puzzle-living",
-      "title": "Пазл «Гостиная»",
+      "title": "Пазл «Сборочная зона»",
       "price": 10,
       "kind": "want",
       "shop": "toys",
       "category": "toy",
       "ownedId": "rooms-living",
-      "note": "Купи — пазл откроется в мини-играх."
+      "note": "Открывает дополнительный пазл в аркаде."
     },
     {
       "id": "game-console",

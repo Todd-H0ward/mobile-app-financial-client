@@ -4,7 +4,7 @@ import {
   areNeedsMet,
   canFinishPeriod,
   finishPeriod,
-  useUpdateUser,
+  useCommitUser,
   useUser,
 } from '@/entities/user';
 
@@ -37,7 +37,7 @@ interface EndPeriodConfirmController {
 export const useEndPeriodConfirm = (): EndPeriodConfirmController | null => {
   const router = useRouter();
   const user = useUser();
-  const updateUser = useUpdateUser();
+  const commitUser = useCommitUser();
 
   if (!user || !canFinishPeriod(user)) return null;
 
@@ -48,7 +48,7 @@ export const useEndPeriodConfirm = (): EndPeriodConfirmController | null => {
     isNeedsShort: !areNeedsMet(user),
     needsGap,
     confirm: () => {
-      updateUser((current) => finishPeriod(current));
+      if (!commitUser(user, finishPeriod(user))) return;
       router.replace(STATIC_ROUTES.PERIOD_SUMMARY);
     },
   };

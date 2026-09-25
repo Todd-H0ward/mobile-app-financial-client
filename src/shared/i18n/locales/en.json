@@ -428,16 +428,16 @@
     "goPlan": "Make a plan",
     "stores": {
       "grocery": {
-        "title": "Grocery",
-        "subtitle": "Food and soap"
+        "title": "Maintenance",
+        "subtitle": "Robot energy and upkeep"
       },
       "clothes": {
-        "title": "Clothes",
-        "subtitle": "What you want to wear"
+        "title": "Equipment",
+        "subtitle": "Optional details and decoration"
       },
       "furniture": {
-        "title": "Decor",
-        "subtitle": "Nice to have, not required"
+        "title": "Workbench",
+        "subtitle": "Workshop comforts"
       },
       "toys": {
         "title": "Toys",
@@ -446,7 +446,7 @@
     },
     "toys": {
       "gamesTitle": "Games for the shelf",
-      "gamesBody": "Buy a puzzle or the console here — they appear on the living-room shelf. Tap the shelf to play."
+      "gamesBody": "Purchased puzzles and console are available in Games from the tasks screen."
     },
     "items": {
       "bread": {
@@ -840,6 +840,81 @@
     "emptyName": "Fill in both names. Spaces do not count.",
     "start": "Start the adventure",
     "save": "Save",
-    "edit": "Names and appearance"
+    "edit": "Names and appearance",
+    "modules": {
+      "head": {
+        "0": "Scout ears",
+        "1": "Radar",
+        "2": "Twin antennae",
+        "title": "Head and antennae"
+      },
+      "body": {
+        "0": "Light panel",
+        "1": "Cargo rack",
+        "2": "Protective armour",
+        "title": "Chassis"
+      },
+      "legs": {
+        "0": "Light pads",
+        "1": "Traction shoes",
+        "2": "Wide stabilisers",
+        "title": "Feet"
+      }
+    }
+  },
+  "workshop": {
+    "title": "Workshop",
+    "balance": "Wallet: {{amount}} coins",
+    "rule": "Your starting assembly is free. New modules cost {{amount}} coins from wants. Owned modules can be swapped for free.",
+    "equipped": "Equipped",
+    "install": "Equip",
+    "price": "Buy for {{amount}}",
+    "confirm": "Equip module?",
+    "effect": "Changes appearance. Savings and platform progress stay intact.",
+    "free": "You own this module. No charge.",
+    "cost": "Cost {{amount}}. Wallet: {{before}} → {{after}}. Insufficient funds means no purchase.",
+    "installed": "Module equipped.",
+    "purchased": "Module purchased and equipped.",
+    "funds": "Not enough coins yet. Complete a task or postpone the purchase.",
+    "planning": "Confirm your budget first.",
+    "invalid": "Module unavailable."
+  },
+  "lessonMap": {
+    "title": "Lesson map",
+    "rule": "The first row is open. Complete six lessons in the preceding row of this sector and pay for the next platform lift to unlock the next row.",
+    "LOCKED": "Locked",
+    "AVAILABLE": "Available",
+    "CURRENT": "Next",
+    "COMPLETED": "Completed",
+    "requires": "requires lift {{level}}, lessons remaining: {{count}}"
+  },
+  "financeGame": {
+    "market": "Smart basket",
+    "weekly": "Weekly plan",
+    "console": "Console: Snake and Spacewar",
+    "round": "Round {{round}} of 3",
+    "check": "Check decision",
+    "debrief": "Review the decision",
+    "comparison": "Your answer: {{chosen}} · Calculated: {{correct}}",
+    "understood": "Continue",
+    "remaining": "Paid games remaining today: {{count}}. After that, practice stays open without coins.",
+    "noPenalty": "Mistakes never remove coins. A completed game with mistakes earns half the usual reward when payment is available.",
+    "weeklyPractice": "This week’s reward has been paid. This is free practice. A new week starts on Monday UTC.",
+    "result": {
+      "paid": "Earned {{coins}} coins.",
+      "limit": "Practice complete. Today’s three paid games are used.",
+      "planning": "Practice complete. Confirm a budget to earn rewards.",
+      "weekly": "Practice complete. This week’s reward has already been paid.",
+      "duplicate": "This session was already counted."
+    }
+  },
+  "storageRecovery": {
+    "title": "Could not save or load the game",
+    "write": "The last action has not been saved. Previous progress is unchanged. Free device storage and retry.",
+    "read": "The profile could not be read. It has not been replaced with a new game. You can retry loading.",
+    "retry": "Retry",
+    "backup": "Only you can choose a new game. The original record is copied first for recovery. If copying fails, it remains untouched.",
+    "newProfile": "Keep a copy and start again",
+    "confirm": "Confirm new game"
   }
 }

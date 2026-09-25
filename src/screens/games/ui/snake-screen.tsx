@@ -12,10 +12,7 @@ import { SnakeScene } from '@/widgets/minigame/snake';
 
 import { useArcadeSession } from '@/features/arcade-session';
 
-import {
-  isConsoleOwned,
-  useArcadeScoresStore,
-} from '@/entities/minigame/console';
+import { isConsoleOwned } from '@/entities/minigame/console';
 import { useUser } from '@/entities/user';
 
 import { SPACING, STATIC_ROUTES } from '@/shared/constants';
@@ -35,8 +32,7 @@ export const SnakeScreen = () => {
   const user = useUser();
   const session = useArcadeSession('snake');
   const [rewardReason, setRewardReason] = useState('paid');
-  const submitSnake = useArcadeScoresStore((state) => state.submitSnake);
-  const snakeScores = useArcadeScoresStore((state) => state.snake);
+  const snakeScores = user?.arcade.scores.snake ?? [];
 
   const ownedItemIds = user?.ownedItemIds ?? [];
   const isOwned = isConsoleOwned(ownedItemIds);
@@ -50,16 +46,15 @@ export const SnakeScreen = () => {
       if (didPay.current || !user) return;
       didPay.current = true;
 
-      const result = session.complete();
+      const result = session.complete(apples);
       if (!result) {
         didPay.current = false;
         return;
       }
-      submitSnake(apples);
       setRewardReason(result.reason);
       setReward(result.coins);
     },
-    [submitSnake, session.complete, user],
+    [session.complete, user],
   );
 
   if (!isOwned) {

@@ -12,10 +12,7 @@ import { SpacewarScene } from '@/widgets/minigame/spacewar';
 
 import { useArcadeSession } from '@/features/arcade-session';
 
-import {
-  isConsoleOwned,
-  useArcadeScoresStore,
-} from '@/entities/minigame/console';
+import { isConsoleOwned } from '@/entities/minigame/console';
 import { useUser } from '@/entities/user';
 
 import { SPACING, STATIC_ROUTES } from '@/shared/constants';
@@ -35,8 +32,7 @@ export const SpacewarScreen = () => {
   const user = useUser();
   const session = useArcadeSession('spacewar');
   const [rewardReason, setRewardReason] = useState('paid');
-  const submitSpacewar = useArcadeScoresStore((state) => state.submitSpacewar);
-  const spacewarMs = useArcadeScoresStore((state) => state.spacewarMs);
+  const spacewarMs = user?.arcade.scores.spacewarMs ?? [];
 
   const ownedItemIds = user?.ownedItemIds ?? [];
   const isOwned = isConsoleOwned(ownedItemIds);
@@ -50,16 +46,15 @@ export const SpacewarScreen = () => {
       if (didPay.current || !user) return;
       didPay.current = true;
 
-      const result = session.complete();
+      const result = session.complete(elapsedMs);
       if (!result) {
         didPay.current = false;
         return;
       }
-      submitSpacewar(elapsedMs);
       setRewardReason(result.reason);
       setReward(result.coins);
     },
-    [submitSpacewar, session.complete, user],
+    [session.complete, user],
   );
 
   if (!isOwned) {

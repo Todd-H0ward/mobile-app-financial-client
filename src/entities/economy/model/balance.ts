@@ -87,3 +87,6 @@ export const PLATFORM_LEVEL_COUNT = 5;
 
 /** Savings jar dedicated to the next tier; its price lives in goals content. */
 export const PLATFORM_GOAL_ID = 'lift';
+
+/** One-time optional workshop module price, charged to wants. */
+export const MODULE_PRICE = 24;

@@ -24,15 +24,25 @@ export const useArcadeSession = (gameId: GameId) => {
     setSessionId(next.arcade.sequence);
     return true;
   }, [gameId]);
-  const complete = useCallback(() => {
-    const { user, commitUser } = useUserStore.getState();
-    if (!user || sessionId === null) return null;
-    const result = completeArcadeSession(user, sessionId, gameId, time);
-    if (result.reason === 'duplicate' || !commitUser(user, result.user))
-      return null;
-    setSessionId(null);
-    return result;
-  }, [gameId, sessionId, time]);
+  const complete = useCallback(
+    (score?: number, isCorrect = true) => {
+      const { user, commitUser } = useUserStore.getState();
+      if (!user || sessionId === null) return null;
+      const result = completeArcadeSession(
+        user,
+        sessionId,
+        gameId,
+        time,
+        score,
+        isCorrect,
+      );
+      if (result.reason === 'duplicate' || !commitUser(user, result.user))
+        return null;
+      setSessionId(null);
+      return result;
+    },
+    [gameId, sessionId, time],
+  );
   return {
     start,
     complete,

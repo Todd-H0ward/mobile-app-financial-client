@@ -74,6 +74,11 @@ export {
   validatePlayerName,
 } from './lib';
 export { applyPlatformUpgrade } from './lib/platform';
+export {
+  hasModule,
+  installModule,
+  moduleId,
+} from './lib/workshop';
 export type {
   BudgetFact,
   BudgetPlan,
@@ -99,8 +104,10 @@ export {
   PERIOD_PHASES,
   USER_SAVE_VERSION,
   useCommitUser,
+  useCompleteLesson,
   useCreateUser,
   useDeleteUser,
+  useDoneCells,
   useHomeHudSource,
   useIsAnimationEnabled,
   useIsDemoMode,

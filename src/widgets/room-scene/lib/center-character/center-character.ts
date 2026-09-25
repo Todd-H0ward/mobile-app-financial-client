@@ -18,10 +18,13 @@ import {
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {
+  DEFAULT_ROBOT_ASSEMBLY,
   ROBOT_DOG_CLIPS,
   ROBOT_DOG_FADE_SEC,
+  type RobotAssembly,
   type RobotDogAction,
   type RobotDogSkin,
+  type RobotDogStage,
 } from '@/entities/robot-dog';
 
 import {
@@ -30,6 +33,7 @@ import {
   ROBOT_DOG_TEXTURES,
   type RobotDogTextureSlot,
 } from '../robot-dog-assets';
+import { attachRobotModules } from '../robot-modules';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -56,6 +60,8 @@ interface CenterCharacter {
    * state says it should be doing.
    */
   playOnce: (action: RobotDogAction, fallback: RobotDogAction) => void;
+  /** Rebuilds only attached modules; animation and textures stay alive. */
+  setAssembly: (assembly: RobotAssembly, stage: RobotDogStage) => void;
   dispose: () => void;
 }
 
@@ -273,6 +279,7 @@ export const attachCenterCharacter = async (
   let coat = textures;
   dressMaterials(painted, coat);
   mount.add(root);
+  let modules = attachRobotModules(root, DEFAULT_ROBOT_ASSEMBLY, 'basic');
 
   const mixer = new AnimationMixer(root);
   const clips = new Map<RobotDogAction, AnimationClip>();
@@ -326,6 +333,11 @@ export const attachCenterCharacter = async (
 
   return {
     root,
+    setAssembly: (assembly, stage) => {
+      if (isDisposed) return;
+      modules.dispose();
+      modules = attachRobotModules(root, assembly, stage);
+    },
     tick: (deltaSec) => {
       if (!isDisposed) mixer.update(deltaSec);
     },
@@ -352,6 +364,7 @@ export const attachCenterCharacter = async (
       mixer.stopAllAction();
       mixer.uncacheRoot(root);
       mount.remove(root);
+      modules.dispose();
       disposeTree(root);
       for (const texture of coat.values()) texture.dispose();
     },

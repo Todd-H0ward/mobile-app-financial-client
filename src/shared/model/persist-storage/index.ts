@@ -1,1 +1,1 @@
-export { createPersistStorage } from './persist-storage';
+export { createPersistStorage, quarantineStorage } from './persist-storage';

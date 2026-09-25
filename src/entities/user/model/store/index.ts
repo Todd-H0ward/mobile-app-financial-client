@@ -1,8 +1,10 @@
 export type { UserPersistedState, UserStore } from './store';
 export {
   useCommitUser,
+  useCompleteLesson,
   useCreateUser,
   useDeleteUser,
+  useDoneCells,
   useHomeHudSource,
   useResetUser,
   useSetDemoMode,
