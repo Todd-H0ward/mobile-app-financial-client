@@ -68,8 +68,8 @@ import type { WatcherFocus, Watchers } from './watchers';
 interface SceneModel {
   /** Ready to render — lights included. */
   scene: Scene;
-  /** Highlights one room and mutes the other two; `null` mutes none. */
-  highlight: (segment: number | null) => void;
+  /** Highlights one bay; the others and the gears ease out. `null` shows all. */
+  highlight: (segment: number | null, isImmediate?: boolean) => void;
   /**
    * Where the platform stands on its way out of the pit: `0` on the floor,
    * `1` clear of the rim. Turns the gear train to match.
@@ -200,6 +200,17 @@ const CELL_FRAME_LIFT = 1;
 
 /** How solid a resting frame is drawn; the selected one is opaque. */
 const CELL_FRAME_OPACITY = 0.5;
+
+/**
+ * Share of a highlight fade still left after a second.
+ *
+ * Matched to the camera ease so the unused bays and gears melt out while the
+ * orbit is still settling, rather than popping or lingering after the shot.
+ */
+const HIGHLIGHT_SMOOTHING = 0.002;
+
+/** Below this a faded piece is dropped from the draw and the raycast. */
+const HIGHLIGHT_EPSILON = 0.02;
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -417,6 +428,11 @@ const roomMaterial = (hex: string): MeshPhongMaterial =>
     // The wedges are thin shells in places; a missing back face reads as a
     // hole in the floor.
     side: DoubleSide,
+    // Segment and gear fades write opacity every frame; without this the
+    // material ignores it and pops instead of melting.
+    transparent: true,
+    opacity: 1,
+    depthWrite: true,
   });
 
 // ═══════════════════════════════════════════
@@ -776,31 +792,100 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     new AmbientLight(new Color(SCENE_PALETTE.ambientLight), AMBIENT_INTENSITY),
   );
 
-  const highlight = (segment: number | null) => {
+  /**
+   * How present each bay and the gear train are: `1` solid, `0` gone.
+   *
+   * `highlight` only writes the targets; `tick` walks the live values so a
+   * cut between map and bay melts instead of popping.
+   */
+  const segmentPresence = [1, 1, 1];
+  const segmentPresenceTarget = [1, 1, 1];
+  let gearPresence = 1;
+  let gearPresenceTarget = 1;
+
+  const applyPresence = () => {
     rooms.forEach((material, index) => {
-      const isLit = segment === null || segment === index;
-      const hex = isLit
-        ? SCENE_PALETTE.segments[index]
-        : SCENE_PALETTE.segmentsMuted[index];
+      const presence = segmentPresence[index];
+      material.opacity = presence;
+      // Transparent shells with depthWrite still punch holes while they fade;
+      // drop it once they are see-through so the kept bay reads cleanly.
+      material.depthWrite = presence > 1 - HIGHLIGHT_EPSILON;
+      frames[index].opacity = presence * CELL_FRAME_OPACITY;
+
+      const isShown = presence > HIGHLIGHT_EPSILON;
+      for (const part of segmentParts[index]) part.visible = isShown;
+    });
+
+    gearMaterial.opacity = gearPresence;
+    gearMaterial.depthWrite = gearPresence > 1 - HIGHLIGHT_EPSILON;
+    const areGearsShown = gearPresence > HIGHLIGHT_EPSILON;
+    for (const gear of gears) gear.visible = areGearsShown;
+  };
+
+  const highlight = (segment: number | null, isImmediate = false) => {
+    rooms.forEach((material, index) => {
+      const isShown = segment === null || segment === index;
+      // Keep each bay on its own colour while it fades — muting then melting
+      // read as two different transitions stacked on top of each other.
+      const hex = SCENE_PALETTE.segments[index];
       material.color.set(hex);
       material.emissive.set(hex);
-      material.emissiveIntensity = isLit ? 0.22 : 0.1;
+      material.emissiveIntensity = 0.22;
+      segmentPresenceTarget[index] = isShown ? 1 : 0;
+      frames[index].color.set(SCENE_PALETTE.cellFrame);
+      // Fading in has to be drawable on the first frame of the ease.
+      if (isShown) {
+        for (const part of segmentParts[index]) part.visible = true;
+      }
     });
 
-    frames.forEach((material, index) => {
-      const isLit = segment === null || segment === index;
-      material.color.set(
-        isLit ? SCENE_PALETTE.cellFrame : SCENE_PALETTE.cellFrameMuted,
+    gearPresenceTarget = segment === null ? 1 : 0;
+    if (gearPresenceTarget > 0) {
+      for (const gear of gears) gear.visible = true;
+    }
+
+    if (!isImmediate) return;
+
+    for (let index = 0; index < SCENE_SEGMENT_COUNT; index += 1) {
+      segmentPresence[index] = segmentPresenceTarget[index];
+    }
+    gearPresence = gearPresenceTarget;
+    applyPresence();
+  };
+
+  const tickHighlight = (deltaSec: number) => {
+    let didChange = false;
+
+    for (let index = 0; index < SCENE_SEGMENT_COUNT; index += 1) {
+      const target = segmentPresenceTarget[index];
+      let next = damp(
+        segmentPresence[index],
+        target,
+        HIGHLIGHT_SMOOTHING,
+        deltaSec,
       );
-      material.opacity = isLit ? CELL_FRAME_OPACITY : CELL_FRAME_OPACITY * 0.45;
-    });
+      if (Math.abs(next - target) < HIGHLIGHT_EPSILON) next = target;
+      if (next !== segmentPresence[index]) {
+        segmentPresence[index] = next;
+        didChange = true;
+      }
+    }
 
-    segmentParts.forEach((parts, index) => {
-      const isShown = segment === null || segment === index;
-      for (const part of parts) part.visible = isShown;
-    });
+    let nextGear = damp(
+      gearPresence,
+      gearPresenceTarget,
+      HIGHLIGHT_SMOOTHING,
+      deltaSec,
+    );
+    if (Math.abs(nextGear - gearPresenceTarget) < HIGHLIGHT_EPSILON) {
+      nextGear = gearPresenceTarget;
+    }
+    if (nextGear !== gearPresence) {
+      gearPresence = nextGear;
+      didChange = true;
+    }
 
-    for (const gear of gears) gear.visible = segment === null;
+    if (didChange) applyPresence();
   };
 
   /**
@@ -825,8 +910,13 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     return { segment: data.segment, step: data.step, cell };
   };
 
-  /** The tile buffers, and nothing else, for a tap ray to be tested against. */
-  const cellTargets = () => cellMeshes;
+  /** The tile buffers still solid enough to mean a tap, nothing else. */
+  const cellTargets = () =>
+    cellMeshes.filter((mesh) => {
+      const material = mesh.material;
+      if (Array.isArray(material)) return mesh.visible;
+      return mesh.visible && material.opacity > 0.5;
+    });
 
   /**
    * Picks one cell out of its row, or clears the pick.
@@ -937,6 +1027,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     watchers?.tick(deltaSec);
     effects.tick(deltaSec);
     tickCellSinks(deltaSec);
+    tickHighlight(deltaSec);
   };
 
   const setCharacterSkin = (next: RobotDogSkin) => {

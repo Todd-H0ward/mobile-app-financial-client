@@ -525,7 +525,7 @@ export const RoomScene = ({
 
         if (appliedHighlight.current !== highlight.current) {
           appliedHighlight.current = highlight.current;
-          built.highlight(highlight.current);
+          built.highlight(highlight.current, !isAnimatedRef.current);
         }
 
         const fov = tuneRef.current.fov;
