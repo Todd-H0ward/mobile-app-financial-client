@@ -1,6 +1,6 @@
 import { listGoals } from '@/entities/goal';
 import { progressFor, remainingFor } from '@/entities/savings';
-import { setActiveGoal, useUpdateUser, useUser } from '@/entities/user';
+import { setActiveGoal, useCommitUser, useUser } from '@/entities/user';
 
 import { formatMoney } from '@/shared/utils';
 
@@ -38,7 +38,7 @@ interface SavingsController {
 /** Showcase of every savings goal with progress — 2.5.7. */
 export const useSavings = (): SavingsController => {
   const user = useUser();
-  const updateUser = useUpdateUser();
+  const commitUser = useCommitUser();
 
   const balance = user?.wallet.balance ?? 0;
   const totalSaved =
@@ -67,7 +67,7 @@ export const useSavings = (): SavingsController => {
     setActive: (goalId) => {
       if (!user) return;
       const result = setActiveGoal(user, goalId);
-      if (result.ok) updateUser(() => result.user);
+      if (result.ok) commitUser(user, result.user);
     },
   };
 };

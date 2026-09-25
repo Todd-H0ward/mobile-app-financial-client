@@ -5,11 +5,11 @@ import { useRouter } from 'expo-router';
 import { useShowFeedback } from '@/features/feedback';
 
 import { getGoalById } from '@/entities/goal';
-import { progressFor, remainingFor } from '@/entities/savings';
+import { isLiquid, progressFor, remainingFor } from '@/entities/savings';
 import {
   applyDeposit,
   setActiveGoal,
-  useUpdateUser,
+  useCommitUser,
   useUser,
 } from '@/entities/user';
 
@@ -62,7 +62,7 @@ interface GoalController {
  */
 export const useGoal = (goalId: string): GoalController | null => {
   const user = useUser();
-  const updateUser = useUpdateUser();
+  const commitUser = useCommitUser();
   const time = useTimeSource();
   const router = useRouter();
   const showFeedback = useShowFeedback();
@@ -77,7 +77,8 @@ export const useGoal = (goalId: string): GoalController | null => {
   const balance = user?.wallet.balance ?? 0;
   const remaining = goal ? remainingFor(saved, goal.price) : 0;
   const maxDeposit = Math.min(balance, remaining);
-  const maxWithdraw = saved;
+  // Lift jar is non-liquid — coins stay until spent on a tier.
+  const maxWithdraw = isLiquid(goalId) ? saved : 0;
   const canTransfer = user?.period.phase === 'active';
 
   if (!goal || !user || !row) return null;
@@ -114,7 +115,7 @@ export const useGoal = (goalId: string): GoalController | null => {
 
     makeActive: () => {
       const result = setActiveGoal(user, goalId);
-      if (result.ok) updateUser(() => result.user);
+      if (result.ok) commitUser(user, result.user);
     },
 
     deposit: () => {
@@ -124,14 +125,13 @@ export const useGoal = (goalId: string): GoalController | null => {
       }
       if (amount <= 0 || amount > maxDeposit) return;
       const result = applyDeposit(user, goalId, amount, time);
-      if (result.ok) {
+      if (result.ok && commitUser(user, result.user)) {
         showFeedback({
           before: user,
           after: result.user,
           action: 'deposit',
           params: { goal: goal.title, amount },
         });
-        updateUser(() => result.user);
         setAmount(0);
       }
     },
