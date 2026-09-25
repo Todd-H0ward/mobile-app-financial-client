@@ -68,6 +68,7 @@ export type {
 export { explainShortage } from './shortage';
 export type { SimOptions, SimPeriod, SimProfile, SimRun } from './simulate';
 export { simulate } from './simulate';
+export { hasSeenStory, markStorySeen } from './story';
 export type { TaskFail, TaskOk, TaskResult } from './tasks';
 export {
   applyCompleteTask,

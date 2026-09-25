@@ -50,7 +50,8 @@ content/
 ├── catalogue.json    # позиции покупок: цена, тип, направление, влияние
 ├── goals.json        # цели накопления: название, стоимость, картинка
 ├── lessons.json      # уроки за клетками сцены
-└── glossary.json     # справочник терминов (2.5.11)
+├── glossary.json     # справочник терминов (2.5.11)
+└── story.json        # intro / finale cutscenes (captions + asset names)
 ```
 
 Правила:

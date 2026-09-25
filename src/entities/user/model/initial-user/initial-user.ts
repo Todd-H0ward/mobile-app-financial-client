@@ -13,7 +13,7 @@ import type { UserSave } from '../types';
 // ═══════════════════════════════════════════
 
 /** Save schema version. Bumped on every incompatible change. */
-const USER_SAVE_VERSION = 14;
+const USER_SAVE_VERSION = 15;
 
 /** Player name before the introduction asks for one. */
 const DEFAULT_PLAYER_NAME = '';
@@ -64,6 +64,11 @@ export const createInitialUser = ({
   },
   completedLessonCells: [],
   completedLessonIds: [],
+  /**
+   * Cutscene ids the child has finished or skipped (`intro`, `finale`).
+   * Empty on a fresh profile — setup then plays the walk/fall stub.
+   */
+  seenStoryIds: [],
   platform: { level: 0, receipts: [] },
   playerName,
   createdAt,

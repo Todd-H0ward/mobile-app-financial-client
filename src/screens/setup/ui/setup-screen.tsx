@@ -26,7 +26,7 @@ import {
   useUser,
 } from '@/entities/user';
 
-import { SPACING, STATIC_ROUTES } from '@/shared/constants';
+import { DYNAMIC_ROUTES, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Input, Screen, Text } from '@/shared/ui';
 
@@ -39,6 +39,7 @@ import { Button, Input, Screen, Text } from '@/shared/ui';
  *
  * Lived in a sheet on `/home`, but the form needs a full screen — the modal
  * clipped the module choices and the story into a 70% height scroll.
+ * After save the walk/fall cutscene plays before the arena.
  */
 export const SetupScreen = () => {
   const { t } = useTranslation();
@@ -71,7 +72,7 @@ export const SetupScreen = () => {
       applyIdentity(current, { playerName, robotName, skin, assembly }),
     );
     Keyboard.dismiss();
-    router.replace(STATIC_ROUTES.HOME);
+    router.replace(DYNAMIC_ROUTES.story('intro'));
   };
 
   return (

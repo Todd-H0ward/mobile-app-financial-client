@@ -47,6 +47,20 @@ const STAGE_FROM_PET: Record<string, RobotDogStage> = {
  * version cannot do that.
  */
 const MIGRATIONS: Record<number, MigrationStep> = {
+  14: (save) => {
+    // Named profiles already passed setup — do not force the intro stub on them.
+    const robot = isRecord(save.robot) ? save.robot : {};
+    const hasNames =
+      typeof save.playerName === 'string' &&
+      save.playerName.trim().length > 0 &&
+      typeof robot.name === 'string' &&
+      robot.name.trim().length > 0;
+    return {
+      ...save,
+      version: 15,
+      seenStoryIds: hasNames ? ['intro'] : [],
+    };
+  },
   13: (save) => ({
     ...save,
     version: 14,
@@ -404,6 +418,9 @@ export const isUserSave = (value: unknown): value is UserSave =>
   Array.isArray(value.completedLessonIds) &&
   value.completedLessonIds.every((id) => typeof id === 'string') &&
   new Set(value.completedLessonIds).size === value.completedLessonIds.length &&
+  Array.isArray(value.seenStoryIds) &&
+  value.seenStoryIds.every((id) => typeof id === 'string') &&
+  new Set(value.seenStoryIds).size === value.seenStoryIds.length &&
   isWallet(value.wallet) &&
   isSavings(value.savings) &&
   isTasks(value.tasks) &&

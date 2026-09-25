@@ -10,6 +10,7 @@ import { isLiquid, progressFor, remainingFor } from '@/entities/savings';
 import {
   applyDeposit,
   applyPlatformUpgrade,
+  hasSeenStory,
   setActiveGoal,
   useCommitUser,
   useUser,
@@ -180,7 +181,12 @@ export const useGoal = (goalId: string): GoalController | null => {
       }
       if (commitUser(user, result.user)) {
         setSheet(null);
-        router.replace(STATIC_ROUTES.HOME);
+        const climbedOut =
+          result.user.platform.level >= PLATFORM_LEVEL_COUNT &&
+          !hasSeenStory(result.user, 'finale');
+        router.replace(
+          climbedOut ? DYNAMIC_ROUTES.story('finale') : STATIC_ROUTES.HOME,
+        );
       }
     },
 

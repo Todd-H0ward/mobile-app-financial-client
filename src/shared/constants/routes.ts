@@ -28,6 +28,11 @@ export type RoutePath = (typeof STATIC_ROUTES)[keyof typeof STATIC_ROUTES];
 
 export const DYNAMIC_ROUTES = {
   shop: (shopId: string) => `${STATIC_ROUTES.SHOP}/${shopId}` as const,
+  story: (cutsceneId: string) =>
+    ({
+      pathname: '/story/[cutsceneId]' as const,
+      params: { cutsceneId },
+    }) as const,
   goal: (goalId: string) =>
     ({
       pathname: '/savings/[goalId]' as const,

@@ -878,6 +878,26 @@
       }
     }
   },
+  "story": {
+    "skip": "Continue",
+    "placeholder": "Video comes later. For now — the story in words.",
+    "videoReady": "Video is wired.",
+    "intro": {
+      "title": "The walk",
+      "beats": {
+        "walk": "The robot dog walks with its friend. An ordinary day, an ordinary road.",
+        "event": "Something happens — the ground gives way.",
+        "fall": "It falls into the pit. The friend stays at the rim. Now they must climb out."
+      }
+    },
+    "finale": {
+      "title": "Out",
+      "beats": {
+        "climb": "The last tier is behind. The rim is close.",
+        "reunion": "They are together again. The story is not over — more adventures wait."
+      }
+    }
+  },
   "action": {
     "tasks": "Open chores",
     "games": "Open arcade",

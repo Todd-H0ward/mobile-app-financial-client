@@ -280,6 +280,11 @@ interface UserSave {
    * cell key list is derived when every layer on a disc is done.
    */
   completedLessonIds: string[];
+  /**
+   * Story cutscene ids already finished or skipped (`intro`, `finale`).
+   * Drives whether `/story/[id]` still fires after setup or a full climb.
+   */
+  seenStoryIds: string[];
   /** The child's in-game name. Empty until the introduction asks for it. */
   playerName: string;
   /** Epoch ms the profile was created. For the grown-up's section. */

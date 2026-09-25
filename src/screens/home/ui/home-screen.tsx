@@ -7,10 +7,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RoomScene, type SceneView } from '@/widgets/room-scene';
 import { WatcherDialog } from '@/widgets/watcher-dialog';
 
+import { PLATFORM_LEVEL_COUNT } from '@/entities/economy';
 import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
 import { actionForMood, moodFor } from '@/entities/robot-dog';
 import { cellKey, SCENE_TERRACE_COUNT } from '@/entities/scene';
 import {
+  hasSeenStory,
   useDoneCells,
   useDoneLessonIds,
   useIsCameraRigEnabled,
@@ -78,6 +80,15 @@ export const HomeScreen = () => {
   if (!user) return <Redirect href={STATIC_ROUTES.ENTRY} />;
   if (!user.playerName || !user.robot.name) {
     return <Redirect href={STATIC_ROUTES.SETUP} />;
+  }
+  if (!hasSeenStory(user, 'intro')) {
+    return <Redirect href={DYNAMIC_ROUTES.story('intro')} />;
+  }
+  if (
+    user.platform.level >= PLATFORM_LEVEL_COUNT &&
+    !hasSeenStory(user, 'finale')
+  ) {
+    return <Redirect href={DYNAMIC_ROUTES.story('finale')} />;
   }
   if (user.period.phase === 'summary') {
     return <Redirect href={STATIC_ROUTES.PERIOD_SUMMARY} />;

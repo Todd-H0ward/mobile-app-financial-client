@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 
 import { Redirect } from 'expo-router';
 
-import { useCreateUser, useUser } from '@/entities/user';
+import { hasSeenStory, useCreateUser, useUser } from '@/entities/user';
 
-import { STATIC_ROUTES } from '@/shared/constants';
+import { DYNAMIC_ROUTES, STATIC_ROUTES } from '@/shared/constants';
 import { useTimeSource } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
@@ -16,7 +16,8 @@ import { useTimeSource } from '@/shared/lib';
  *
  * A first launch gets a guest profile on the spot — local, nameless, no
  * sign-up (2.5.1 / docs/privacy.md) — then the introduction on `/setup`
- * before the arena. Names empty means the intro is still owed.
+ * before the walk/fall cutscene and the arena. Names empty means the intro
+ * is still owed.
  */
 export const EntryScreen = () => {
   const user = useUser();
@@ -35,6 +36,10 @@ export const EntryScreen = () => {
 
   if (!user.playerName || !user.robot.name) {
     return <Redirect href={STATIC_ROUTES.SETUP} />;
+  }
+
+  if (!hasSeenStory(user, 'intro')) {
+    return <Redirect href={DYNAMIC_ROUTES.story('intro')} />;
   }
 
   return <Redirect href={STATIC_ROUTES.HOME} />;
