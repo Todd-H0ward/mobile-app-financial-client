@@ -20,7 +20,7 @@ import {
   Vector3,
 } from 'three';
 
-import { lessonAccess } from '@/entities/lesson';
+import { type LessonStatus, lessonAccess } from '@/entities/lesson';
 import {
   DEFAULT_ROBOT_ASSEMBLY,
   type RobotAssembly,
@@ -55,7 +55,7 @@ import type { WatcherAction, WatcherId } from '@/entities/watcher';
 
 import { clamp } from '@/shared/utils';
 
-import { statusMarker } from './cell-status-marker';
+import { cellNumberLines, colorForLabelStatus } from './cell-number-marker';
 import type { CenterCharacter } from './center-character';
 import { createHazeBackdrop } from './haze-backdrop';
 import { createLiftEffects, type LiftEffects } from './lift-effects';
@@ -115,7 +115,7 @@ interface SceneModel {
    * what a scene being built for a child who learnt this yesterday needs,
    * against a tile sinking in front of them, which is the reward.
    */
-  /** Refreshes shape-coded availability markers across all ninety cells. */
+  /** Refreshes availability colour for each cell's top-face caption. */
   setCellAccess: (doneKeys: readonly string[], level: number) => void;
   setCellsDone: (doneKeys: readonly string[], isImmediate?: boolean) => void;
   /** Same, for one of the two screens overhead. */
@@ -141,6 +141,21 @@ interface CellSink {
   target: number;
 }
 
+interface CellLabelRecord {
+  /** Stable cell key — sinkables look the number buffer up by this. */
+  key: string;
+  /** Bay index — presence hides numbers with their bay. */
+  segment: number;
+  /** Arena ordinal `0…89`. */
+  ordinal: number;
+  /** Availability — drives the number colour. */
+  status: LessonStatus;
+  /** Stroke mesh for the lesson number. */
+  mesh: LineSegments;
+  /** Own material so status colour does not share state with frames. */
+  material: LineBasicMaterial;
+}
+
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
@@ -160,6 +175,14 @@ const CELL_SINK_SMOOTHING = 0.004;
 
 /** Below this the drop is over and the cell stops being written to. */
 const CELL_SINK_EPSILON = 0.05;
+
+/**
+ * How dark a locked tile reads against its bay.
+ *
+ * Multiplies the vertex colour; diffuse takes the hit, emissive stays soft
+ * so the locked tiles sink without going black.
+ */
+const LOCKED_CELL_TINT = 0.28;
 
 /** Key light sits above and in front, so the wedges keep a readable top face. */
 const KEY_LIGHT_POSITION = [0.6, 1, 0.45];
@@ -258,6 +281,7 @@ const mergeNodes = (nodes: SceneNode[]): BufferGeometry => {
   const merged = new BufferGeometry();
   merged.setAttribute('position', new BufferAttribute(position, 3));
   merged.setAttribute('normal', new BufferAttribute(normal, 3));
+  fillVertexColors(merged);
   return merged;
 };
 
@@ -385,6 +409,22 @@ const faceStarts = (nodes: SceneNode[]): number[] => {
 };
 
 /**
+ * Where a lesson number sits on a cell: top centre, same spot the old status
+ * markers used. `cellNumberLines` then lays the strokes flat on that plane.
+ */
+const frontAnchorOf = (edges: BufferGeometry): Vector3 => {
+  edges.computeBoundingBox();
+  const box = edges.boundingBox;
+  if (!box) return new Vector3();
+
+  const center = box.getCenter(new Vector3());
+  // Lift clear of the tile — same daylight gap the cell frames use — so the
+  // strokes do not z-fight the floor into a dashed crawl.
+  center.y = box.max.y + 3;
+  return center;
+};
+
+/**
  * The outline of one cell, lifted clear of the tile it traces.
  *
  * An edge sits exactly on the surface it came from, which on a phone GPU is a
@@ -415,14 +455,42 @@ const mergeEdges = (parts: BufferGeometry[]): BufferGeometry => {
 
   const merged = new BufferGeometry();
   merged.setAttribute('position', new BufferAttribute(position, 3));
+  fillVertexColors(merged);
   return merged;
+};
+
+/**
+ * White vertex colours so a locked cell can be tinted later without splitting
+ * the terrace into six meshes.
+ */
+const fillVertexColors = (geometry: BufferGeometry) => {
+  const count = geometry.getAttribute('position').count;
+  const colors = new Float32Array(count * 3);
+  colors.fill(1);
+  geometry.setAttribute('color', new BufferAttribute(colors, 3));
+};
+
+/** Paints one sink slice's vertices a uniform grey factor. */
+const tintSlice = (
+  part: { geometry: BufferGeometry; from: number; to: number },
+  tint: number,
+) => {
+  const colors = part.geometry.getAttribute('color');
+  if (!colors) return;
+  const values = colors.array as Float32Array;
+  for (let i = part.from; i < part.to; i += 1) {
+    values[i] = tint;
+  }
+  colors.needsUpdate = true;
 };
 
 const roomMaterial = (hex: string): MeshPhongMaterial =>
   new MeshPhongMaterial({
     color: new Color(hex),
     emissive: new Color(hex),
-    emissiveIntensity: 0.22,
+    // Soft — locked tiles darken via vertex colours, and a strong emissive
+    // would light them back up through the tint.
+    emissiveIntensity: 0.08,
     shininess: 40,
     specular: new Color(SCENE_PALETTE.specular),
     // The wedges are thin shells in places; a missing back face reads as a
@@ -433,6 +501,7 @@ const roomMaterial = (hex: string): MeshPhongMaterial =>
     transparent: true,
     opacity: 1,
     depthWrite: true,
+    vertexColors: true,
   });
 
 // ═══════════════════════════════════════════
@@ -539,10 +608,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   const frames: LineBasicMaterial[] = [];
   /** The fifteen tile buffers a tap ray is tested against. */
   const cellMeshes: Mesh[] = [];
-  const markers = new Map<
-    string,
-    { geometry: BufferGeometry; from: number; center: Vector3; ordinal: number }
-  >();
+  /** Top-face lesson captions, one per cell. */
+  const cellLabelRecords: CellLabelRecord[] = [];
   /** Everything belonging to one segment, so a segment view can hide the rest. */
   const segmentParts: Object3D[][] = [[], [], []];
   /** Every cell's own outline, kept for the selection to borrow. */
@@ -594,6 +661,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         color: new Color(SCENE_PALETTE.cellFrame),
         transparent: true,
         opacity: CELL_FRAME_OPACITY,
+        vertexColors: true,
       }),
     );
 
@@ -628,59 +696,52 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       segmentParts[segment].push(tiles);
 
       // Every cell keeps its own outline, so the selected one can be picked
-      // out of the row without rebuilding anything.
+      // out of the row without rebuilding anything. Lesson numbers are drawn
+      // as line strokes on the cell top — the same path the old status
+      // markers used, which this GL stack actually shows.
       const outlines = cells.map((node) => cellEdges(node));
+      const numberGeometries: BufferGeometry[] = [];
       outlines.forEach((edges, cell) => {
-        cellOutlines.set(cellKey({ segment, step: terrace, cell }), edges);
-      });
-
-      const markerGeometries = outlines.map((edges, cell) => {
-        edges.computeBoundingBox();
-        const center =
-          edges.boundingBox?.getCenter(new Vector3()) ?? new Vector3();
-        center.y = (edges.boundingBox?.max.y ?? center.y) + 3;
+        const key = cellKey({ segment, step: terrace, cell });
+        cellOutlines.set(key, edges);
         const ordinal = segment * 30 + terrace * 6 + cell;
-        const marker = new BufferGeometry();
-        marker.setAttribute(
+        const status = lessonAccess(ordinal, [], 0).status;
+        const floats = cellNumberLines(ordinal, frontAnchorOf(edges));
+        const numberGeometry = new BufferGeometry();
+        numberGeometry.setAttribute(
           'position',
-          new BufferAttribute(
-            new Float32Array(
-              statusMarker(
-                lessonAccess(ordinal, [], 0).status,
-                center.x,
-                center.y,
-                center.z,
-              ),
-            ),
-            3,
-          ),
+          new BufferAttribute(new Float32Array(floats), 3),
         );
-        return { marker, center, ordinal };
-      });
-      const markerBuffer = mergeEdges(
-        markerGeometries.map(({ marker }) => marker),
-      );
-      geometries.push(markerBuffer);
-      markerGeometries.forEach(({ marker, center, ordinal }, cell) => {
-        marker.dispose();
-        markers.set(cellKey({ segment, step: terrace, cell }), {
-          geometry: markerBuffer,
-          from: cell * 48,
-          center,
+        geometries.push(numberGeometry);
+        numberGeometries.push(numberGeometry);
+
+        const numberMaterial = new LineBasicMaterial({
+          color: new Color(colorForLabelStatus(status)),
+          transparent: true,
+          opacity: 1,
+          depthTest: false,
+        });
+        const numberLines = new LineSegments(numberGeometry, numberMaterial);
+        numberLines.renderOrder = 2;
+        terraces[terrace].add(numberLines);
+        segmentParts[segment].push(numberLines);
+
+        cellLabelRecords.push({
+          key,
+          segment,
           ordinal,
+          status,
+          mesh: numberLines,
+          material: numberMaterial,
         });
       });
-      const markerLines = new LineSegments(markerBuffer, frames[segment]);
-
-      terraces[terrace].add(markerLines);
-      segmentParts[segment].push(markerLines);
 
       const frame = mergeEdges(outlines);
 
       geometries.push(frame);
 
-      // A sunk cell takes its outline down with it, so both buffers are
-      // sliced the same way and moved together.
+      // A sunk cell takes its outline and number down with it, so both
+      // buffers are sliced the same way and moved together.
       const tileRanges = rangesOf(
         cells.map(
           (node) => SCENE_SOURCE.geometries[node.geometry].position.length,
@@ -690,11 +751,16 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         outlines.map((edges) => edges.getAttribute('position').array.length),
       );
       cells.forEach((_node, cell) => {
+        const numberGeometry = numberGeometries[cell];
         sinkables.set(cellKey({ segment, step: terrace, cell }), {
           parts: [
             { geometry, ...tileRanges[cell] },
             { geometry: frame, ...frameRanges[cell] },
-            { geometry: markerBuffer, from: cell * 48, to: (cell + 1) * 48 },
+            {
+              geometry: numberGeometry,
+              from: 0,
+              to: numberGeometry.getAttribute('position').array.length,
+            },
           ],
           offset: 0,
           target: 0,
@@ -816,6 +882,14 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       for (const part of segmentParts[index]) part.visible = isShown;
     });
 
+    // Numbers ride with their bay — visible whenever the bay is, including
+    // the overhead map, so the lesson ordinal is never a hidden gesture.
+    for (const record of cellLabelRecords) {
+      const isShown = segmentPresence[record.segment] > HIGHLIGHT_EPSILON;
+      record.mesh.visible = isShown;
+      record.material.opacity = isShown ? 1 : 0;
+    }
+
     gearMaterial.opacity = gearPresence;
     gearMaterial.depthWrite = gearPresence > 1 - HIGHLIGHT_EPSILON;
     const areGearsShown = gearPresence > HIGHLIGHT_EPSILON;
@@ -830,7 +904,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       const hex = SCENE_PALETTE.segments[index];
       material.color.set(hex);
       material.emissive.set(hex);
-      material.emissiveIntensity = 0.22;
+      material.emissiveIntensity = 0.08;
       segmentPresenceTarget[index] = isShown ? 1 : 0;
       frames[index].color.set(SCENE_PALETTE.cellFrame);
       // Fading in has to be drawable on the first frame of the ease.
@@ -1070,6 +1144,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     for (const material of rooms) material.dispose();
     gearMaterial.dispose();
     for (const material of frames) material.dispose();
+    for (const record of cellLabelRecords) record.material.dispose();
     for (const edges of cellOutlines.values()) edges.dispose();
     cellOutlines.clear();
     selectionMaterial.dispose();
@@ -1097,18 +1172,29 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     cellAt,
     selectCell,
     setCellAccess: (doneKeys, level) => {
-      for (const [key, marker] of markers) {
-        const { center, geometry, from, ordinal } = marker;
-        const attribute = geometry.getAttribute('position') as BufferAttribute;
-        const values = statusMarker(
-          lessonAccess(ordinal, doneKeys, level).status,
-          center.x,
-          center.y - (sinkables.get(key)?.offset ?? 0),
-          center.z,
-        );
-        (attribute.array as Float32Array).set(values, from);
-        attribute.needsUpdate = true;
-        geometry.computeBoundingSphere();
+      for (const record of cellLabelRecords) {
+        record.status = lessonAccess(record.ordinal, doneKeys, level).status;
+        record.material.color.set(colorForLabelStatus(record.status));
+        record.material.opacity = record.status === 'LOCKED' ? 0.45 : 1;
+
+        const sink = sinkables.get(record.key);
+        if (!sink) continue;
+        const tint = record.status === 'LOCKED' ? LOCKED_CELL_TINT : 1;
+        // Tile + outline share the sink; numbers keep their own material tint.
+        tintSlice(sink.parts[0], tint);
+        tintSlice(sink.parts[1], tint);
+      }
+
+      // A locked cell must not keep the selection ring — it is not a target.
+      if (selected) {
+        const key = cellKey(selected);
+        if (
+          cellLabelRecords.some(
+            (record) => record.key === key && record.status === 'LOCKED',
+          )
+        ) {
+          selectCell(null);
+        }
       }
     },
     setCellsDone,

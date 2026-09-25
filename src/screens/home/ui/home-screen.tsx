@@ -115,15 +115,14 @@ export const HomeScreen = () => {
           onCellPress={(cell) => {
             const key = cellKey(cell);
             const ordinal = lessonOrdinalForKey(key);
+            if (ordinal === null) return;
             if (
-              ordinal !== null &&
-              lessonAccess(ordinal, doneCells, user.platform.level).status !==
-                'LOCKED'
+              lessonAccess(ordinal, doneCells, user.platform.level).status ===
+              'LOCKED'
             ) {
-              navigate(DYNAMIC_ROUTES.lesson(key));
               return;
             }
-            navigate(STATIC_ROUTES.LESSON_MAP);
+            navigate(DYNAMIC_ROUTES.lesson(key));
           }}
           isAnimated={isMotionEnabled}
         />

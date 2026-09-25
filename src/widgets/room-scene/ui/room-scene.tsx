@@ -13,6 +13,7 @@ import {
   WebGLRenderer,
 } from 'three';
 
+import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
 import {
   DEFAULT_ROBOT_ASSEMBLY,
   DEFAULT_ROBOT_DOG_ACTION,
@@ -25,6 +26,7 @@ import {
 import {
   CAMERA_FAR,
   CAMERA_NEAR,
+  cellKey,
   damp,
   levelProgress,
   orbitPosition,
@@ -304,6 +306,7 @@ export const RoomScene = ({
    * props first arrive — this is how the scene it builds learns about them.
    */
   const doneCellsRef = useRef<readonly string[]>([]);
+  const levelRef = useRef(level);
   /** Which screen the loop is flying towards, `null` for back to the arena. */
   const focusRef = useRef<WatcherId | null>(focusedWatcher);
   /** `0` on the arena, `1` parked in front of a face; damped in between. */
@@ -390,6 +393,7 @@ export const RoomScene = ({
   useEffect(() => {
     if (!doneCells) return;
     doneCellsRef.current = doneCells;
+    levelRef.current = level;
 
     if (!model.current) return;
     model.current.setCellsDone(doneCells, !hasSunkOnce.current);
@@ -707,6 +711,16 @@ export const RoomScene = ({
       if (view !== cell.segment) {
         built.selectCell(null);
         onViewChange('top');
+        return;
+      }
+
+      const ordinal = lessonOrdinalForKey(cellKey(cell));
+      if (
+        ordinal === null ||
+        lessonAccess(ordinal, doneCellsRef.current, levelRef.current).status ===
+          'LOCKED'
+      ) {
+        built.selectCell(null);
         return;
       }
 
