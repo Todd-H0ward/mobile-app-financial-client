@@ -9,7 +9,13 @@ export const OVERSEER_LINES: WatcherLine[] = [
     textKey: 'watcher.overseer.challenge',
     priority: 10,
     condition: { phases: ['planning'] },
-    actions: [{ labelKey: 'action.tasks', route: '/tasks' }],
+    actions: [
+      {
+        kind: 'page',
+        page: 'trials',
+        labelKey: 'watcher.terminal.menu.trials',
+      },
+    ],
   },
   {
     id: 'overseer-active-task',
@@ -17,8 +23,16 @@ export const OVERSEER_LINES: WatcherLine[] = [
     priority: 30,
     condition: { phases: ['active'], hasActiveTask: true },
     actions: [
-      { labelKey: 'action.tasks', route: '/tasks' },
-      { labelKey: 'action.games', route: '/games' },
+      {
+        kind: 'page',
+        page: 'trials',
+        labelKey: 'watcher.terminal.menu.trials',
+      },
+      {
+        kind: 'page',
+        page: 'arcade',
+        labelKey: 'watcher.terminal.menu.arcade',
+      },
     ],
   },
   {
@@ -27,8 +41,16 @@ export const OVERSEER_LINES: WatcherLine[] = [
     priority: 20,
     condition: { phases: ['active'], hasActiveTask: false },
     actions: [
-      { labelKey: 'action.tasks', route: '/tasks' },
-      { labelKey: 'action.games', route: '/games' },
+      {
+        kind: 'page',
+        page: 'trials',
+        labelKey: 'watcher.terminal.menu.trials',
+      },
+      {
+        kind: 'page',
+        page: 'arcade',
+        labelKey: 'watcher.terminal.menu.arcade',
+      },
     ],
   },
   {
@@ -36,7 +58,13 @@ export const OVERSEER_LINES: WatcherLine[] = [
     textKey: 'watcher.overseer.low_charge',
     priority: 40,
     condition: { maxCharge: 0.3 },
-    actions: [{ labelKey: 'action.tasks', route: '/tasks' }],
+    actions: [
+      {
+        kind: 'page',
+        page: 'trials',
+        labelKey: 'watcher.terminal.menu.trials',
+      },
+    ],
   },
   {
     id: 'default',
@@ -44,8 +72,16 @@ export const OVERSEER_LINES: WatcherLine[] = [
     priority: 0,
     condition: {},
     actions: [
-      { labelKey: 'action.tasks', route: '/tasks' },
-      { labelKey: 'action.games', route: '/games' },
+      {
+        kind: 'page',
+        page: 'trials',
+        labelKey: 'watcher.terminal.menu.trials',
+      },
+      {
+        kind: 'page',
+        page: 'arcade',
+        labelKey: 'watcher.terminal.menu.arcade',
+      },
     ],
   },
 ];

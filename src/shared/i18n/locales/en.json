@@ -911,7 +911,70 @@
   },
   "watcher": {
     "terminal": {
-      "label": "{{name}} · TERMINAL"
+      "label": "{{name}} · TERMINAL",
+      "onAir": "{{name}} on the line",
+      "leave": "[ return to the pit ]",
+      "back": "back",
+      "subtitle": {
+        "keeper": "let’s make a plan for the period",
+        "overseer": "trials and coins",
+        "plan": "three budget boxes",
+        "shop": "charge · modules · looks",
+        "jar": "jar for the next tier",
+        "report": "totals and history",
+        "trials": "pick a trial",
+        "arcade": "Overseer mini-games"
+      },
+      "menu": {
+        "plan": "make a plan",
+        "shop": "workshop",
+        "jar": "savings jar",
+        "report": "totals",
+        "trials": "trials",
+        "arcade": "arcade"
+      },
+      "plan": {
+        "youHave": "you have",
+        "coinsForPlan": "coins for this plan",
+        "needs": "charge",
+        "needsHint": "needed every period",
+        "wants": "modules",
+        "wantsHint": "can buy later",
+        "savings": "jar",
+        "savingsHint": "for the next tier",
+        "remainder": "not allocated yet: {{count}} coins",
+        "save": "save plan",
+        "notPlanning": "The plan is already locked. Come back next period.",
+        "minus": "Remove 10",
+        "plus": "Add 10"
+      },
+      "shop": {
+        "balance": "wallet: {{count}}",
+        "planFirst": "Confirm the period plan first.",
+        "shortage": "Short by {{shortfall}}. Earn more or pick cheaper.",
+        "confirm": "Buy “{{item}}” for {{price}}?",
+        "buy": "buy",
+        "bought": "Bought: {{item}}",
+        "failed": "Purchase failed. Try again."
+      },
+      "jar": {
+        "empty": "No jar goal selected.",
+        "progress": "{{saved}} of {{price}} ({{percent}}%)",
+        "remaining": "{{count}} left",
+        "open": "open the jar"
+      },
+      "report": {
+        "summaryReady": "Period totals are ready. Read them, then move on.",
+        "historyHint": "Here is the history of plans and facts."
+      },
+      "trials": {
+        "planFirst": "Make a plan with the Keeper first — then trials.",
+        "pick": "Pick a trial. Right and wrong both pay."
+      },
+      "arcade": {
+        "paidLeft": "Paid games today: {{left}} of {{total}}",
+        "hint": "After the limit, arcade stays open without coins."
+      }
     },
     "overseer": {
       "default": "I am watching. Every coin has a place — or it does not.",

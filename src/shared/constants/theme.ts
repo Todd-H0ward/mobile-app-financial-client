@@ -70,6 +70,11 @@ export const COLORS = {
     /** On-LCD glyphs and score. */
     arcadeLcd: '#7CFF9A',
     arcadeLcdDim: '#3D8F5A',
+    /** Overseer phosphor — red CRT, paired with label text for a11y. */
+    overseerLcd: '#FF6B6B',
+    overseerLcdDim: '#8F3D3D',
+    overseerScreen: '#241010',
+    overseerScreenGlow: '#3F1C1C',
     /** Face buttons on the shell. */
     arcadeButtonA: '#FF8F2A',
     arcadeButtonB: '#E85D75',
@@ -145,6 +150,11 @@ export const COLORS = {
     /** On-LCD glyphs and score. */
     arcadeLcd: '#7CFF9A',
     arcadeLcdDim: '#2F6B48',
+    /** Overseer phosphor — red CRT, paired with label text for a11y. */
+    overseerLcd: '#FF7A7A',
+    overseerLcdDim: '#6B2F2F',
+    overseerScreen: '#180A0A',
+    overseerScreenGlow: '#301414',
     /** Face buttons on the shell. */
     arcadeButtonA: '#EE9A44',
     arcadeButtonB: '#D4566C',

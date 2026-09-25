@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { DYNAMIC_ROUTES, SPACING, STATIC_ROUTES } from '@/shared/constants';
+import { DYNAMIC_ROUTES, SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, ListRow, Screen, TasksIcon, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
@@ -39,7 +39,9 @@ export const TasksScreen = () => {
           <Button
             variant="secondary"
             isFullWidth
-            onPress={() => router.push(STATIC_ROUTES.BUDGET_PLAN)}
+            onPress={() =>
+              router.push(DYNAMIC_ROUTES.watcher('keeper', 'plan'))
+            }
           >
             {t('tasks.goPlan')}
           </Button>

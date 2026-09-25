@@ -6,6 +6,9 @@ export type {
   WatcherId,
   WatcherLine,
   WatcherLineCondition,
+  WatcherPageAction,
+  WatcherPageId,
+  WatcherRouteAction,
 } from './model';
 export {
   DEFAULT_WATCHER_ACTION,
@@ -15,7 +18,9 @@ export {
   WATCHER_CLIPS,
   WATCHER_FADE_SEC,
   WATCHER_FOCUS_ACTION,
+  WATCHER_FOCUS_AIM_DOWN,
   WATCHER_FOCUS_DISTANCE,
+  WATCHER_FOCUS_LIFT,
   WATCHER_HIDDEN_MATERIALS,
   WATCHER_IDS,
   WATCHER_PLACEMENT,

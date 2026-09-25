@@ -477,11 +477,13 @@ export const RoomScene = ({
    */
   useEffect(() => {
     focusRef.current = focusedWatcher;
+    model.current?.setWatcherLifted(focusedWatcher);
     if (!focusedWatcher) return;
 
     model.current?.playWatcher(focusedWatcher, WATCHER_FOCUS_ACTION);
     return () => {
       model.current?.playWatcher(focusedWatcher, DEFAULT_WATCHER_ACTION);
+      model.current?.setWatcherLifted(null);
     };
   }, [focusedWatcher]);
 

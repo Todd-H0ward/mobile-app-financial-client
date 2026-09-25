@@ -1,11 +1,17 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { type Href, Redirect, useFocusEffect, useRouter } from 'expo-router';
+import {
+  type Href,
+  Redirect,
+  useFocusEffect,
+  useLocalSearchParams,
+  useRouter,
+} from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { RoomScene, type SceneView } from '@/widgets/room-scene';
-import { WatcherDialog } from '@/widgets/watcher-dialog';
+import { WatcherTerminal } from '@/widgets/watcher-terminal';
 
 import { PLATFORM_LEVEL_COUNT } from '@/entities/economy';
 import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
@@ -25,8 +31,10 @@ import {
   KEEPER_LINES,
   OVERSEER_LINES,
   pickLine,
+  WATCHER_IDS,
   type WatcherGameState,
   type WatcherId,
+  type WatcherPageId,
 } from '@/entities/watcher';
 
 import {
@@ -40,20 +48,41 @@ import { useTranslation } from '@/shared/i18n';
 import { SettingsIcon, ThemedView } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
+const isWatcherId = (value: unknown): value is WatcherId =>
+  typeof value === 'string' &&
+  (WATCHER_IDS as readonly string[]).includes(value);
+
+const isWatcherPage = (value: unknown): value is WatcherPageId =>
+  value === 'greeting' ||
+  value === 'plan' ||
+  value === 'shop' ||
+  value === 'jar' ||
+  value === 'report' ||
+  value === 'trials' ||
+  value === 'arcade';
+
+// ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
 /**
  * The arena is the home screen: the map, the robot, the two AIs.
  *
- * Plan, jar and reports live on the Keeper; chores live on the Overseer. On the
- * overhead map three boards in the 3D scene show coins, tier and charge.
+ * Plan, jar and shop live on the Keeper terminal; trials and arcade on the
+ * Overseer. On the overhead map three boards show coins, tier and charge.
  */
 export const HomeScreen = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const { t } = useTranslation();
+  const params = useLocalSearchParams<{
+    watcher?: string;
+    page?: string;
+  }>();
   const robotSkin = useRobotSkin();
   const chosenAction = useRobotAction();
   const user = useUser();
@@ -61,6 +90,7 @@ export const HomeScreen = () => {
   const isCameraRigEnabled = useIsCameraRigEnabled();
   const [view, setView] = useState<SceneView>(0);
   const [talkingTo, setTalkingTo] = useState<WatcherId | null>(null);
+  const [terminalPage, setTerminalPage] = useState<WatcherPageId>('greeting');
   const isNavigating = useRef(false);
   const doneCells = useDoneCells();
   const doneLessonIds = useDoneLessonIds();
@@ -71,10 +101,22 @@ export const HomeScreen = () => {
     }, []),
   );
 
+  // Deep-link from /shop or /budget-plan redirects.
+  useEffect(() => {
+    if (!isWatcherId(params.watcher)) return;
+    setTalkingTo(params.watcher);
+    setTerminalPage(isWatcherPage(params.page) ? params.page : 'greeting');
+  }, [params.watcher, params.page]);
+
   const navigate = (href: Href) => {
     if (isNavigating.current) return;
     isNavigating.current = true;
     router.push(href);
+  };
+
+  const leaveTerminal = () => {
+    setTalkingTo(null);
+    setTerminalPage('greeting');
   };
 
   if (!user) return <Redirect href={STATIC_ROUTES.ENTRY} />;
@@ -126,7 +168,10 @@ export const HomeScreen = () => {
           robotStage={user.robot.stage}
           robotAction={actionForMood(mood.name, chosenAction)}
           focusedWatcher={talkingTo}
-          onWatcherFocus={setTalkingTo}
+          onWatcherFocus={(watcher) => {
+            setTalkingTo(watcher);
+            setTerminalPage('greeting');
+          }}
           doneCells={doneCells}
           doneLessonIds={doneLessonIds}
           mapHud={{
@@ -164,21 +209,15 @@ export const HomeScreen = () => {
           <SettingsIcon color={theme.textSecondary} />
         </Pressable>
 
-        {talkingTo && currentLine && (
-          <View
-            style={[
-              styles.dialogDock,
-              { paddingBottom: insets.bottom + SPACING.two },
-            ]}
-            pointerEvents="box-none"
-          >
-            <WatcherDialog
-              watcher={talkingTo}
-              line={currentLine}
-              onLeave={() => setTalkingTo(null)}
-            />
-          </View>
-        )}
+        {talkingTo && currentLine ? (
+          <WatcherTerminal
+            key={`${talkingTo}-${terminalPage}`}
+            watcher={talkingTo}
+            line={currentLine}
+            initialPage={terminalPage}
+            onLeave={leaveTerminal}
+          />
+        ) : null}
       </View>
     </ThemedView>
   );
@@ -189,12 +228,6 @@ export const HomeScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  dialogDock: {
-    bottom: 0,
-    left: CONTENT_PADDING,
-    position: 'absolute',
-    right: CONTENT_PADDING,
-  },
   root: { flex: 1 },
   settings: {
     alignItems: 'center',

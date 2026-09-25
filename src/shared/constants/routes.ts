@@ -28,6 +28,12 @@ export type RoutePath = (typeof STATIC_ROUTES)[keyof typeof STATIC_ROUTES];
 
 export const DYNAMIC_ROUTES = {
   shop: (shopId: string) => `${STATIC_ROUTES.SHOP}/${shopId}` as const,
+  /** Opens home focused on a watcher terminal page. */
+  watcher: (watcher: 'keeper' | 'overseer', page?: string) =>
+    ({
+      pathname: '/home' as const,
+      params: page ? { watcher, page } : { watcher },
+    }) as const,
   story: (cutsceneId: string) =>
     ({
       pathname: '/story/[cutsceneId]' as const,

@@ -1,5 +1,19 @@
 import type { PeriodPhase } from '@/entities/user';
 
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+
+/** Pages inside the watcher terminal session. */
+type WatcherPageId =
+  | 'greeting'
+  | 'plan'
+  | 'shop'
+  | 'jar'
+  | 'report'
+  | 'trials'
+  | 'arcade';
+
 interface WatcherLineCondition {
   /** Period phases where this line is shown. Empty = any phase. */
   phases?: PeriodPhase[];
@@ -13,12 +27,25 @@ interface WatcherLineCondition {
   areNeedsMet?: boolean;
 }
 
-interface WatcherDialogAction {
-  /** i18n key for button text. */
+/** Opens a page inside the terminal panel. */
+interface WatcherPageAction {
+  kind: 'page';
+  /** Which terminal page to open. */
+  page: Exclude<WatcherPageId, 'greeting'>;
+  /** i18n key for the menu row. */
   labelKey: string;
-  /** Route to navigate to. */
-  route: string;
 }
+
+/** Rare escape hatch to a full screen (period summary, history). */
+interface WatcherRouteAction {
+  kind: 'route';
+  /** expo-router path. */
+  route: string;
+  /** i18n key for the menu row. */
+  labelKey: string;
+}
+
+type WatcherDialogAction = WatcherPageAction | WatcherRouteAction;
 
 interface WatcherLine {
   /** Unique line id. */
@@ -59,4 +86,7 @@ export type {
   WatcherGameState,
   WatcherLine,
   WatcherLineCondition,
+  WatcherPageAction,
+  WatcherPageId,
+  WatcherRouteAction,
 };

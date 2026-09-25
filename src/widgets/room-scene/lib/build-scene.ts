@@ -140,6 +140,8 @@ interface SceneModel {
   watcherFocus: (watcher: WatcherId) => WatcherFocus | null;
   /** Puts one of the screens into a state — talking, idling, reacting. */
   playWatcher: (watcher: WatcherId, action: WatcherAction) => void;
+  /** Raises the focused watcher so the terminal panel fits under the face. */
+  setWatcherLifted: (watcher: WatcherId | null) => void;
   /** Shows or hides the watcher models */
   setWatchersVisible: (isVisible: boolean) => void;
   /**
@@ -1335,6 +1337,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     watcherRoot: (watcher) => watchers?.root(watcher) ?? null,
     watcherFocus: (watcher) => watchers?.focus(watcher) ?? null,
     playWatcher: (watcher, action) => watchers?.play(watcher, action),
+    setWatcherLifted: (watcher) => watchers?.setLifted(watcher),
     setWatchersVisible: (isVisible) => {
       watchersVisible = isVisible;
       watchers?.setVisible(isVisible);

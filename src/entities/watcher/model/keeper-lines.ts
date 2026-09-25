@@ -3,7 +3,7 @@ import type { WatcherLine } from './dialogue';
 /**
  * The Keeper — plan, jar, workshop, day close and the report.
  *
- * Chores and the arcade belong to the Overseer.
+ * Actions open terminal pages; chores and the arcade belong to the Overseer.
  */
 export const KEEPER_LINES: WatcherLine[] = [
   {
@@ -12,8 +12,8 @@ export const KEEPER_LINES: WatcherLine[] = [
     priority: 40,
     condition: { phases: ['planning'] },
     actions: [
-      { labelKey: 'action.budget_plan', route: '/budget-plan' },
-      { labelKey: 'action.savings', route: '/savings' },
+      { kind: 'page', page: 'plan', labelKey: 'watcher.terminal.menu.plan' },
+      { kind: 'page', page: 'jar', labelKey: 'watcher.terminal.menu.jar' },
     ],
   },
   {
@@ -22,9 +22,13 @@ export const KEEPER_LINES: WatcherLine[] = [
     priority: 20,
     condition: { phases: ['active'] },
     actions: [
-      { labelKey: 'action.shop', route: '/shop' },
-      { labelKey: 'action.savings', route: '/savings' },
-      { labelKey: 'action.end_period', route: '/end-period' },
+      { kind: 'page', page: 'shop', labelKey: 'watcher.terminal.menu.shop' },
+      { kind: 'page', page: 'jar', labelKey: 'watcher.terminal.menu.jar' },
+      {
+        kind: 'route',
+        route: '/end-period',
+        labelKey: 'action.end_period',
+      },
     ],
   },
   {
@@ -33,9 +37,13 @@ export const KEEPER_LINES: WatcherLine[] = [
     priority: 35,
     condition: { phases: ['active'], maxCharge: 0.3 },
     actions: [
-      { labelKey: 'action.shop', route: '/shop' },
-      { labelKey: 'action.savings', route: '/savings' },
-      { labelKey: 'action.end_period', route: '/end-period' },
+      { kind: 'page', page: 'shop', labelKey: 'watcher.terminal.menu.shop' },
+      { kind: 'page', page: 'jar', labelKey: 'watcher.terminal.menu.jar' },
+      {
+        kind: 'route',
+        route: '/end-period',
+        labelKey: 'action.end_period',
+      },
     ],
   },
   {
@@ -44,9 +52,13 @@ export const KEEPER_LINES: WatcherLine[] = [
     priority: 30,
     condition: { phases: ['active'], areNeedsMet: false },
     actions: [
-      { labelKey: 'action.shop', route: '/shop' },
-      { labelKey: 'action.savings', route: '/savings' },
-      { labelKey: 'action.end_period', route: '/end-period' },
+      { kind: 'page', page: 'shop', labelKey: 'watcher.terminal.menu.shop' },
+      { kind: 'page', page: 'jar', labelKey: 'watcher.terminal.menu.jar' },
+      {
+        kind: 'route',
+        route: '/end-period',
+        labelKey: 'action.end_period',
+      },
     ],
   },
   {
@@ -55,8 +67,16 @@ export const KEEPER_LINES: WatcherLine[] = [
     priority: 50,
     condition: { phases: ['summary'] },
     actions: [
-      { labelKey: 'action.period_summary', route: '/period-summary' },
-      { labelKey: 'action.history', route: '/history' },
+      {
+        kind: 'page',
+        page: 'report',
+        labelKey: 'watcher.terminal.menu.report',
+      },
+      {
+        kind: 'route',
+        route: '/history',
+        labelKey: 'action.history',
+      },
     ],
   },
   {
@@ -65,9 +85,14 @@ export const KEEPER_LINES: WatcherLine[] = [
     priority: 0,
     condition: {},
     actions: [
-      { labelKey: 'action.budget_plan', route: '/budget-plan' },
-      { labelKey: 'action.savings', route: '/savings' },
-      { labelKey: 'action.history', route: '/history' },
+      { kind: 'page', page: 'plan', labelKey: 'watcher.terminal.menu.plan' },
+      { kind: 'page', page: 'shop', labelKey: 'watcher.terminal.menu.shop' },
+      { kind: 'page', page: 'jar', labelKey: 'watcher.terminal.menu.jar' },
+      {
+        kind: 'page',
+        page: 'report',
+        labelKey: 'watcher.terminal.menu.report',
+      },
     ],
   },
 ];
