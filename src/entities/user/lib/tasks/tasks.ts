@@ -1,3 +1,4 @@
+import { computeEffectiveBonus } from '@/entities/catalogue';
 import {
   getTaskById,
   isTaskAvailable,
@@ -111,7 +112,8 @@ export const applyCompleteTask = (
 
   const share = clamp(rewardShare, 0, 1);
   const fullReward = rewardForTask(task);
-  const reward = Math.max(1, Math.round(fullReward * share));
+  const { rewardMultiplier } = computeEffectiveBonus(user.modules.owned);
+  const reward = Math.max(1, Math.round(fullReward * share * rewardMultiplier));
 
   const wallet = creditWallet(user.wallet, {
     source: `task:${task.id}`,

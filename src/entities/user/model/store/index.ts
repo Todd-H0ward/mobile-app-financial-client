@@ -1,5 +1,6 @@
 export type { UserPersistedState, UserStore } from './store';
 export {
+  useCommitUser,
   useCreateUser,
   useDeleteUser,
   useHomeHudSource,

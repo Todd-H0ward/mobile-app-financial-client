@@ -9,6 +9,10 @@ import {
 
 import { createInitialUser } from '../../model/initial-user';
 import type { UserSave } from '../../model/types';
+import {
+  BUDGET_FAIL_PENALTY_RATE,
+  BUDGET_SUCCESS_BONUS,
+} from '../period-report';
 
 import {
   areNeedsMet,
@@ -89,6 +93,17 @@ describe('phase transitions — illegal paths throw', () => {
     expect(() => startPeriod(emptyPlan)).toThrow();
   });
 
+  it.each([-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY, 1000])(
+    'rejects invalid allocation %s without mutating the save',
+    (needs) => {
+      const user = makeUser();
+      user.period.plan = { needs, wants: 1, savings: 0 };
+      const before = structuredClone(user);
+      expect(() => startPeriod(user)).toThrow('whole coins');
+      expect(user).toEqual(before);
+    },
+  );
+
   it('startPeriod allows an empty plan when the wallet is empty', () => {
     const broke = makeUser({
       wallet: { balance: 0, history: [], entryCount: 0 },
@@ -145,8 +160,15 @@ describe('endPeriod — regularity bonus', () => {
     });
     const before = user.wallet.balance;
     const next = endPeriod(finishPeriod(startPeriod(user)));
-    expect(next.wallet.balance).toBe(before + REGULARITY_BONUS);
-    expect(next.wallet.history[0]?.source).toBe(WALLET_SOURCES.regularityBonus);
+    // Plan kept (fact still zero) → regularity + budget-met bonus.
+    expect(next.wallet.balance).toBe(
+      before + REGULARITY_BONUS + BUDGET_SUCCESS_BONUS,
+    );
+    expect(
+      next.wallet.history.some(
+        (entry) => entry.source === WALLET_SOURCES.regularityBonus,
+      ),
+    ).toBe(true);
   });
 });
 
@@ -163,6 +185,55 @@ describe('isPlanKept', () => {
     };
     const result = endPeriod(finishPeriod(overspent));
     expect(result.history[0]?.isPlanKept).toBe(false);
+  });
+});
+
+describe('endPeriod — budget adjustment', () => {
+  it('awards a success bonus when the plan is kept', () => {
+    const user = makeUser();
+    const before = user.wallet.balance;
+    const next = endPeriod(finishPeriod(startPeriod(user)));
+    expect(next.history[0]?.isPlanKept).toBe(true);
+    expect(next.history[0]?.adjustment).toBe(BUDGET_SUCCESS_BONUS);
+    expect(next.wallet.balance).toBe(before + BUDGET_SUCCESS_BONUS);
+  });
+
+  it('takes 10% of the liquid balance when the plan is broken', () => {
+    const active = startPeriod(makeUser());
+    const overspent: UserSave = {
+      ...active,
+      period: {
+        ...active.period,
+        plan: { needs: 10, wants: 0, savings: 0 },
+        fact: { needs: 10, wants: 5, savings: 0 },
+      },
+    };
+    const before = overspent.wallet.balance;
+    const expectedPenalty = -Math.floor(before * BUDGET_FAIL_PENALTY_RATE);
+    const next = endPeriod(finishPeriod(overspent));
+
+    expect(next.history[0]?.isPlanKept).toBe(false);
+    expect(next.history[0]?.adjustment).toBe(expectedPenalty);
+    expect(next.wallet.balance).toBe(before + expectedPenalty);
+  });
+
+  it('stores earned, charge and spirit on the history row', () => {
+    const user = makeUser({
+      robot: {
+        ...createInitialUser().robot,
+        charge: 0.8,
+        spirit: 0.6,
+      },
+    });
+    const next = endPeriod(finishPeriod(startPeriod(user)));
+    const row = next.history[0];
+    expect(row?.earned).toBe(0);
+    expect(row?.robotCharge).toBeCloseTo(
+      clampDecay(0.8, PERIOD_NEED_DECAY.charge),
+    );
+    expect(row?.robotSpirit).toBeCloseTo(
+      clampDecay(0.6, PERIOD_NEED_DECAY.spirit),
+    );
   });
 });
 

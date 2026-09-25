@@ -128,4 +128,20 @@ describe('applyCompleteTask', () => {
     if (!result.ok) return;
     expect(result.reward).toBeGreaterThanOrEqual(1);
   });
+
+  it('applies the module reward multiplier', () => {
+    const time = makeDemoTimeSource();
+    const task = listTasks()[0];
+    expect(task).toBeDefined();
+    if (!task) return;
+
+    const withModule: UserSave = {
+      ...makeActive(),
+      modules: { owned: ['module-sensor'], tier: 1 },
+    };
+    const result = applyCompleteTask(withModule, task.id, time);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.reward).toBe(Math.round(rewardForTask(task) * 1.1));
+  });
 });

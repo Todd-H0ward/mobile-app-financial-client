@@ -146,6 +146,14 @@ interface PeriodRecord {
   reachedGoalIds: string[];
   /** Epoch ms of the ending, from `TimeSource.now()`. */
   endedAt: number;
+  /** Coins earned during the period (tasks, games, bonuses before settlement). */
+  earned: number;
+  /** Bonus (positive) or penalty (negative) applied at settlement. */
+  adjustment: number;
+  /** Robot charge after settlement decay, 0…1. */
+  robotCharge: number;
+  /** Robot spirit after settlement decay, 0…1. */
+  robotSpirit: number;
 }
 
 /** Progress on chores for the current period — 2.5.8 / roadmap 1.16. */
@@ -183,14 +191,67 @@ interface SettingsSave {
   robotAction: RobotDogAction;
 }
 
+/** One irreversible purchase of a tier, saved with the progress it bought. */
+interface PlatformReceipt {
+  /** Idempotency key: platform:<target level>, never reused in this profile. */
+  id: string;
+  /** Purchased tier, 1…5. */
+  level: number;
+  /** Coins consumed from the dedicated savings jar, above zero. */
+  amount: number;
+  /** Coins in the jar immediately before the purchase. */
+  savingsBefore: number;
+  /** Coins in the jar immediately after the purchase, never below zero. */
+  savingsAfter: number;
+  /** Period in which the child confirmed the purchase. */
+  periodIndex: number;
+  /** Epoch ms, for the purchase history only. */
+  at: number;
+}
+
+interface PlatformSave {
+  /** Permanent purchased tier, 0…5; animations derive their position from it. */
+  level: number;
+  /** One receipt per purchased tier, oldest first; at most five entries. */
+  receipts: PlatformReceipt[];
+}
+
 /**
  * One save for the whole app. Written in full on every change, read once at
  * startup. The profile is local and guest-only — no account, no sign-up,
  * see docs/privacy.md.
  */
+interface ArcadeSave {
+  /** Monotonic session counter; never reused after a completion or restart. */
+  sequence: number;
+  /** Currently open session; null once consumed, even for an unpaid practice. */
+  active: {
+    /** Counter captured by the game screen when it starts. */
+    id: number;
+    /** Which game may claim this session. */
+    gameId: 'puzzle' | 'snake' | 'spacewar';
+  } | null;
+  /** UTC day of the most recent paid sitting, -1 before the first reward. */
+  paidDay: number;
+  /** Paid sittings on paidDay, 0…3 across all arcade games together. */
+  paidCount: number;
+}
+
+/** Robot modules that give gameplay bonuses (reward multiplier, extra hints). */
+interface ModulesSave {
+  /** IDs of purchased modules, ordered by acquisition. */
+  owned: string[];
+  /** Current module tier: 0 (none), 1, 2, or 3. Derived from owned count. */
+  tier: 0 | 1 | 2 | 3;
+}
+
 interface UserSave {
   /** Schema version. Bumped on every incompatible change. */
   version: number;
+  /** Purchased platform progress and its savings transactions. */
+  platform: PlatformSave;
+  /** Shared arcade payout limit and durable session identity. */
+  arcade: ArcadeSave;
   /** The child's in-game name. Empty until the introduction asks for it. */
   playerName: string;
   /** Epoch ms the profile was created. For the grown-up's section. */
@@ -212,16 +273,22 @@ interface UserSave {
    * puzzles. Never shrinks; the arcade unlocks games off it.
    */
   ownedItemIds: string[];
+  /** Robot modules: purchased modules and their combined tier. */
+  modules: ModulesSave;
   /** What the grown-up configured: gate, sound, animations, demo mode. */
   settings: SettingsSave;
 }
 
 export type {
+  ArcadeSave,
   BudgetFact,
   BudgetPlan,
+  ModulesSave,
   PeriodPhase,
   PeriodRecord,
   PeriodSave,
+  PlatformReceipt,
+  PlatformSave,
   RobotSave,
   SavingsGoalSave,
   SavingsSave,

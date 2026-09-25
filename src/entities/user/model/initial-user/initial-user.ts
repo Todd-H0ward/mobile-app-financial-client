@@ -13,7 +13,7 @@ import type { UserSave } from '../types';
 // ═══════════════════════════════════════════
 
 /** Save schema version. Bumped on every incompatible change. */
-const USER_SAVE_VERSION = 6;
+const USER_SAVE_VERSION = 9;
 
 /** Player name before the introduction asks for one. */
 const DEFAULT_PLAYER_NAME = '';
@@ -54,6 +54,8 @@ export const createInitialUser = ({
   settings,
 }: CreateUserInput = {}): UserSave => ({
   version: USER_SAVE_VERSION,
+  arcade: { sequence: 0, active: null, paidDay: -1, paidCount: 0 },
+  platform: { level: 0, receipts: [] },
   playerName,
   createdAt,
   robot: {
@@ -91,6 +93,7 @@ export const createInitialUser = ({
   },
   history: [],
   ownedItemIds: [],
+  modules: { owned: [], tier: 0 },
   settings: settings ?? {
     isParentGateEnabled: true,
     isSoundEnabled: true,

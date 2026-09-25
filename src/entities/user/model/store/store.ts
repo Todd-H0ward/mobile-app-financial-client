@@ -1,9 +1,8 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
 import { STORAGE_KEYS } from '@/shared/constants';
-import { createPersistStorage } from '@/shared/model';
+import { createPersistStorage, durablePersist } from '@/shared/model';
 
 import { enterDemoMode, exitDemoMode } from '../../lib/demo';
 import { resetUser } from '../../lib/reset';
@@ -40,6 +39,8 @@ interface UserStore extends UserPersistedState {
    * holds the result and writes it to disk.
    */
   updateUser: (update: (user: UserSave) => UserSave) => void;
+  /** Commits a reviewed action only if its source snapshot is still current. */
+  commitUser: (before: UserSave, after: UserSave) => boolean;
   /**
    * Turns demo mode on and off, 2.5.13. Switching on parks the child's save in
    * `demoBackup` and plays a demo profile; switching off gives the parked save
@@ -59,10 +60,9 @@ interface UserStore extends UserPersistedState {
 /**
  * One save for the whole app, see docs/game-state.md.
  *
- * There is no explicit "save": `persist` queues a write on every `set`. Disk
- * I/O is debounced and async so a burst of updates does not block input
- * (`docs/performance.md`); a crash can still lose only the last debounce
- * window.
+ * There is no explicit "save": `persist` writes synchronously on every `set`.
+ * Once an action returns, its snapshot is committed; no debounce window can
+ * lose a reward when the process is killed immediately afterwards.
  *
  * Reads stay synchronous (`createPersistStorage`), so the save is already
  * there on the first render: `user === null` always means "no profile", never
@@ -70,7 +70,7 @@ interface UserStore extends UserPersistedState {
  * startup is deliberate.
  */
 export const useUserStore = create<UserStore>()(
-  persist(
+  durablePersist(
     (set, get) => ({
       user: null,
       demoBackup: null,
@@ -83,6 +83,12 @@ export const useUserStore = create<UserStore>()(
         if (!user) return;
 
         set({ user: update(user) });
+      },
+
+      commitUser: (before, after) => {
+        if (get().user !== before || before === after) return false;
+        set({ user: after });
+        return true;
       },
 
       setDemoMode: (isOn) => {
@@ -189,6 +195,9 @@ export const useCreateUser = () => useUserStore((state) => state.createUser);
 
 /** The only way to change the save — takes a pure update function. */
 export const useUpdateUser = () => useUserStore((state) => state.updateUser);
+
+/** Rejects stale confirmations and repeat taps before displaying success. */
+export const useCommitUser = () => useUserStore((state) => state.commitUser);
 
 /** Turns demo mode on and off, parking and restoring the child's save. */
 export const useSetDemoMode = () => useUserStore((state) => state.setDemoMode);

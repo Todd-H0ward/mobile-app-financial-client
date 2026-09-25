@@ -28,7 +28,7 @@ const makeActive = (): UserSave => startPeriod(makeUser());
 describe('applyPurchase', () => {
   it('debits the wallet and bumps fact for the item direction', () => {
     const time = makeDemoTimeSource();
-    const result = applyPurchase(makeActive(), 'bread', time);
+    const result = applyPurchase(makeActive(), 'charge-small', time);
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -36,7 +36,7 @@ describe('applyPurchase', () => {
     expect(result.user.wallet.balance).toBe(50 - 8);
     expect(result.user.wallet.history[0]).toMatchObject({
       kind: 'spend',
-      source: 'purchase:bread',
+      source: 'purchase:charge-small',
       direction: 'needs',
       amount: 8,
     });
@@ -51,29 +51,29 @@ describe('applyPurchase', () => {
       wallet: { ...active.wallet, balance: 3 },
     };
 
-    const result = applyPurchase(poor, 'sweater', time);
+    const result = applyPurchase(poor, 'module-core', time);
 
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.reason).toBe('insufficient_funds');
-    expect(result.shortfall).toBe(37);
+    expect(result.shortfall).toBe(47);
     expect(poor.wallet.balance).toBe(3);
   });
 
   it('refuses outside the active phase', () => {
     const time = makeDemoTimeSource();
-    const result = applyPurchase(makeUser(), 'bread', time);
+    const result = applyPurchase(makeUser(), 'charge-small', time);
     expect(result).toEqual({ ok: false, reason: 'wrong_phase' });
   });
 
   it('reports how far fact went over plan', () => {
     const time = makeDemoTimeSource();
     const active = makeActive();
-    // Plan wants = 15; lamp = 18 → over by 3.
-    const result = applyPurchase(active, 'lamp', time);
+    // Plan wants = 15; module-sensor = 20 → over by 5.
+    const result = applyPurchase(active, 'module-sensor', time);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.overPlanBy).toBe(3);
+    expect(result.overPlanBy).toBe(5);
   });
 
   it('can bump charge when the item carries a delta', () => {
@@ -83,7 +83,7 @@ describe('applyPurchase', () => {
       ...active,
       robot: { ...active.robot, charge: 0.4 },
     };
-    const result = applyPurchase(drained, 'bread', time);
+    const result = applyPurchase(drained, 'charge-small', time);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.user.robot.charge).toBeGreaterThan(0.4);
@@ -91,16 +91,26 @@ describe('applyPurchase', () => {
 
   it('keeps an owned id — the arcade unlocks off it', () => {
     const time = makeDemoTimeSource();
-    const result = applyPurchase(makeActive(), 'game-console', time);
+    const result = applyPurchase(makeActive(), 'puzzle-arena', time);
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.user.ownedItemIds).toContain('game-console');
+    expect(result.user.ownedItemIds).toContain('rooms-living');
+  });
+
+  it('records a bought module on ModulesSave', () => {
+    const time = makeDemoTimeSource();
+    const result = applyPurchase(makeActive(), 'module-sensor', time);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.user.modules.owned).toContain('module-sensor');
+    expect(result.user.modules.tier).toBe(1);
   });
 
   it('charges the catalogue price as is', () => {
     const time = makeDemoTimeSource();
-    const result = applyPurchase(makeActive(), 'bread', time);
+    const result = applyPurchase(makeActive(), 'charge-small', time);
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;

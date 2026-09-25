@@ -156,6 +156,10 @@ describe('growth', () => {
             isPlanKept: true,
             reachedGoalIds: ['paints'],
             endedAt: 1,
+            earned: 0,
+            adjustment: 5,
+            robotCharge: 0.9,
+            robotSpirit: 0.9,
           },
         ],
         period: { ...base.period, index: 2 },
@@ -200,6 +204,10 @@ describe('the last period', () => {
       isPlanKept: true,
       reachedGoalIds: [],
       endedAt: index,
+      earned: 0,
+      adjustment: 5,
+      robotCharge: 1,
+      robotSpirit: 1,
     });
 
     const report = buildParentsReport(

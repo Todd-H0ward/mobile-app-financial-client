@@ -1,6 +1,6 @@
 import { getCatalogueItem } from '@/entities/catalogue';
 import { getGoalById } from '@/entities/goal';
-import { listTasks, rewardForTask } from '@/entities/task';
+import { listTasks } from '@/entities/task';
 
 import { makeDemoTimeSource, type TimeSource } from '@/shared/lib/time-source';
 
@@ -99,27 +99,7 @@ const choresFor = (profile: SimProfile): readonly string[] => {
     .map((t) => t.id);
 };
 
-/**
- * What the chores the child means to do will pay.
- *
- * Part of what they have to allocate: the coins are not in the wallet yet when
- * the plan is written, but a plan that ignores them would budget only the
- * leftovers of the last period.
- */
-const expectedIncome = (profile: SimProfile): number =>
-  choresFor(profile)
-    .map((id) => listTasks().find((task) => task.id === id))
-    .reduce((sum, task) => sum + (task ? rewardForTask(task) : 0), 0);
-
-/**
- * The plan this profile writes down, out of what docs/budget.md calls
- * "доступно к плану" — the balance on entering the planning phase, plus what
- * the period's chores are going to pay.
- *
- * `buys` is the intent, so its cost is the needs and wants lines. Whatever is
- * left over goes on the savings line at the profile's rate. A profile whose shopping
- * outgrows its plan is the one that breaks it — see `impulsive` in the tests.
- */
+/** Plans only coins already owned, with needs taking priority over wants. */
 const planFor = (
   user: UserSave,
   profile: SimProfile,
@@ -134,7 +114,9 @@ const planFor = (
     else wants += item.price;
   }
 
-  const available = user.wallet.balance + expectedIncome(profile);
+  const available = user.wallet.balance;
+  needs = Math.min(needs, available);
+  wants = Math.min(wants, available - needs);
   const spare = Math.max(0, available - needs - wants);
 
   return { needs, wants, savings: Math.floor(spare * profile.saveShare) };
@@ -263,7 +245,10 @@ export const simulate = (
 
     const put = putAside(
       user,
-      Math.floor(user.wallet.balance * profile.saveShare),
+      Math.min(
+        user.period.plan.savings,
+        Math.floor(user.wallet.balance * profile.saveShare),
+      ),
       time,
     );
     user = put.user;

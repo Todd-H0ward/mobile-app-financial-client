@@ -28,6 +28,10 @@ const withHistory = (): UserSave => {
         isPlanKept: false,
         reachedGoalIds: [],
         endedAt: 1000,
+        earned: 0,
+        adjustment: -5,
+        robotCharge: 0.7,
+        robotSpirit: 0.7,
       },
       {
         index: 2,
@@ -36,6 +40,10 @@ const withHistory = (): UserSave => {
         isPlanKept: true,
         reachedGoalIds: ['paints'],
         endedAt: 2000,
+        earned: 18,
+        adjustment: 5,
+        robotCharge: 0.8,
+        robotSpirit: 0.8,
       },
     ],
     wallet: {

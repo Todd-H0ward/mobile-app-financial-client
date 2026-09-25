@@ -1,4 +1,10 @@
 export {
+  ARCADE_PAID_SITTINGS,
+  arcadePaidRemaining,
+  beginArcadeSession,
+  completeArcadeSession,
+} from './arcade';
+export {
   createDemoProfile,
   DEMO_RUN_PERIODS,
   enterDemoMode,
@@ -12,6 +18,7 @@ export {
   listPeriodHistory,
   listWalletHistory,
 } from './history';
+export { applyIdentity } from './identity';
 export type { EndPeriodStatus } from './period';
 export {
   acknowledgeSummary,
@@ -23,6 +30,14 @@ export {
   growthFacts,
   startPeriod,
 } from './period';
+export type { PeriodReport } from './period-report';
+export {
+  BUDGET_FAIL_PENALTY_RATE,
+  BUDGET_SUCCESS_BONUS,
+  buildPeriodReport,
+  computeAdjustment,
+} from './period-report';
+export { applyPlatformUpgrade } from './platform';
 export type { PlayerNameStatus } from './player-name';
 export {
   isPlayerNameValid,

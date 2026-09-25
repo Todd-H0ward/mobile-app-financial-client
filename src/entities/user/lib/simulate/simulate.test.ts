@@ -9,13 +9,16 @@ import { type SimProfile, simulate } from './simulate';
 // ═══════════════════════════════════════════
 
 /**
- * Everything the shop calls mandatory, read from content rather than listed
- * here: a need added to the catalogue must raise the bar these runs clear,
- * not slip past a hardcoded basket.
+ * One charge pack per period — the workshop offers tiers, not a basket of
+ * three mandatory packs. Profiles pick among the cheapest / mid / dearest
+ * need so the balance table still answers for realistic spending.
  */
-const NEEDS = listCatalogue()
+const NEED_PACKS = [...listCatalogue()]
   .filter((item) => item.kind === 'need')
-  .map((item) => item.id);
+  .sort((a, b) => a.price - b.price);
+
+const CHEAPEST_NEED = NEED_PACKS[0].id;
+const MID_NEED = NEED_PACKS[Math.min(1, NEED_PACKS.length - 1)].id;
 
 /** The cheapest optional thing — what a saving child treats themselves to. */
 const CHEAPEST_WANT = [...listCatalogue()]
@@ -27,11 +30,11 @@ const DEAREST_WANT = [...listCatalogue()]
   .filter((item) => item.kind === 'want')
   .sort((a, b) => b.price - a.price)[0].id;
 
-/** Does every chore, covers the needs, treats themselves once, saves the rest. */
+/** Does every chore, covers a charge, treats themselves once, saves the rest. */
 const DILIGENT: SimProfile = {
   id: 'diligent',
   taskShare: 1,
-  buys: [...NEEDS, CHEAPEST_WANT],
+  buys: [CHEAPEST_NEED, CHEAPEST_WANT],
   saveShare: 0.8,
 };
 
@@ -39,7 +42,7 @@ const DILIGENT: SimProfile = {
 const TYPICAL: SimProfile = {
   id: 'typical',
   taskShare: 0.5,
-  buys: NEEDS,
+  buys: [MID_NEED],
   saveShare: 0.5,
 };
 
@@ -47,15 +50,17 @@ const TYPICAL: SimProfile = {
 const BUSY: SimProfile = {
   id: 'busy',
   taskShare: 0.15,
-  buys: NEEDS,
-  saveShare: 0.5,
+  buys: [MID_NEED],
+  // Low save share: without chores there is little left — and what is left
+  // mostly stays in the wallet, so goals stay out of reach (docs/economy.md).
+  saveShare: 0.15,
 };
 
 /** Earns plenty and spends it on wants — planned spending, almost no saving. */
 const IMPULSIVE: SimProfile = {
   id: 'impulsive',
   taskShare: 1,
-  buys: [...NEEDS, DEAREST_WANT],
+  buys: [CHEAPEST_NEED, DEAREST_WANT],
   saveShare: 0.2,
 };
 
@@ -79,14 +84,10 @@ describe('the balance table: a child who does every chore', () => {
   const run = simulate(DILIGENT);
 
   it('covers the mandatory basket every period', () => {
+    const needPrice =
+      listCatalogue().find((item) => item.id === CHEAPEST_NEED)?.price ?? 0;
     for (const period of run.periods) {
-      expect(period.spentNeeds).toBe(
-        NEEDS.reduce(
-          (sum, id) =>
-            sum + (listCatalogue().find((item) => item.id === id)?.price ?? 0),
-          0,
-        ),
-      );
+      expect(period.spentNeeds).toBe(needPrice);
       expect(period.refusals).toBe(0);
     }
   });
@@ -164,13 +165,20 @@ describe('the balance table: spending instead of saving', () => {
   it('is at least two periods behind on the first goal', () => {
     const diligent = simulate(DILIGENT);
 
-    expect(run.goalsReachedIn.paints).toBeGreaterThanOrEqual(
-      diligent.goalsReachedIn.paints + 2,
-    );
+    expect(
+      run.goalsReachedIn.paints ?? Number.POSITIVE_INFINITY,
+    ).toBeGreaterThanOrEqual(diligent.goalsReachedIn.paints + 2);
   });
 
-  it('counts as a kept plan — spending inside a plan is not a mistake', () => {
-    expect(run.periods.every((period) => period.isPlanKept)).toBe(true);
+  it('reports spending newly earned coins beyond the opening plan', () => {
+    expect(run.periods[0].isPlanKept).toBe(false);
+    for (const record of run.user.history) {
+      expect(record.isPlanKept).toBe(
+        record.fact.needs <= record.plan.needs &&
+          record.fact.wants <= record.plan.wants &&
+          record.fact.savings <= record.plan.savings,
+      );
+    }
   });
 });
 
