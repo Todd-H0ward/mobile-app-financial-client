@@ -27,7 +27,7 @@ interface ShopScreenProps {
 // ═══════════════════════════════════════════
 
 /**
- * One shopfront — grocery, clothes, decor or toys (2.5.6).
+ * One shopfront — the workshop (charge, modules, looks).
  *
  * Toys hint that mini-games will land later; for now they are still just
  * purchases that update the period fact.
@@ -82,7 +82,7 @@ export const ShopScreen = ({ shopId }: ShopScreenProps) => {
         <Text themeColor="textSecondary">{t('shop.planFirstBanner')}</Text>
       )}
 
-      {shopId === 'toys' && (
+      {shopId === 'workshop' && (
         <Card tone="surfaceSoft">
           <Card.Content>
             <Text variant="bodyBold">{t('shop.toys.gamesTitle')}</Text>

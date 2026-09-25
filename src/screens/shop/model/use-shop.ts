@@ -13,7 +13,7 @@ import {
   canAfford,
   explainShortage,
   type ShortageExplain,
-  useUpdateUser,
+  useCommitUser,
   useUser,
 } from '@/entities/user';
 
@@ -68,7 +68,7 @@ interface ShopController {
  */
 export const useShop = (shopId: ShopId): ShopController => {
   const user = useUser();
-  const updateUser = useUpdateUser();
+  const commitUser = useCommitUser();
   const time = useTimeSource();
   const showFeedback = useShowFeedback();
 
@@ -167,12 +167,13 @@ export const useShop = (shopId: ShopId): ShopController => {
         return;
       }
 
+      if (!commitUser(user, result.user)) return;
+
       // Close the confirm Modal before feedback — two stacked RN Modals
       // freeze touch handling after purchase.
       setSheet(null);
       setSelected(null);
       setShortage(null);
-      updateUser(() => result.user);
       hapticSuccess();
 
       const feedback = {

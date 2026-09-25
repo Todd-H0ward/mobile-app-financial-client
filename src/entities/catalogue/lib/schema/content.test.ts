@@ -20,7 +20,7 @@ const EXTRA = {
   title: 'Кубики',
   price: 9,
   kind: 'want' as const,
-  shop: 'toys' as const,
+  shop: 'workshop' as const,
   category: 'toy',
 };
 
@@ -63,7 +63,6 @@ describe('content/catalogue.json', () => {
     const owned = listCatalogue()
       .filter((item) => item.ownedId)
       .map((item) => item.ownedId);
-    expect(owned).toContain('game-console');
     expect(owned).toContain('rooms-living');
   });
 

@@ -119,6 +119,12 @@ describe('canConfirm / zeroDirections', () => {
     expect(canConfirm({ needs: 0, wants: 1, savings: 0 })).toBe(true);
   });
 
+  it.each([-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY, 51])(
+    'cannot confirm invalid allocation %s',
+    (needs) =>
+      expect(canConfirm({ needs, wants: 1, savings: 0 }, 50)).toBe(false),
+  );
+
   it('zero on a direction is allowed and listed', () => {
     const plan = { needs: 0, wants: 10, savings: 0 };
     expect(isValidPlan(plan, 50)).toBe(true);

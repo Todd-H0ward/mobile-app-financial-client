@@ -63,6 +63,14 @@ const assertItem = (item: unknown, path: string): CatalogueItem => {
   if (item.ownedId !== undefined && !isNonEmptyString(item.ownedId)) {
     throw new Error(`${path}.ownedId: non-empty string when present`);
   }
+  if (
+    item.moduleTier !== undefined &&
+    item.moduleTier !== 1 &&
+    item.moduleTier !== 2 &&
+    item.moduleTier !== 3
+  ) {
+    throw new Error(`${path}.moduleTier: must be 1, 2, or 3 when present`);
+  }
   if (item.note !== undefined && !isNonEmptyString(item.note)) {
     throw new Error(`${path}.note: non-empty string when present`);
   }

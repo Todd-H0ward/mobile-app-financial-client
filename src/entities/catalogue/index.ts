@@ -10,6 +10,14 @@ export type {
   CatalogueFile,
   CatalogueItem,
   CatalogueKind,
+  ModuleBonus,
   ShopId,
 } from './model';
-export { SHOP_IDS } from './model';
+export {
+  computeEffectiveBonus,
+  getModuleBonus,
+  isModuleItem,
+  MODULE_BONUSES,
+  MODULE_IDS,
+  SHOP_IDS,
+} from './model';
