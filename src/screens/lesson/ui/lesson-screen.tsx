@@ -325,7 +325,9 @@ export const LessonScreen = () => {
               onRetry={lessonState.retry}
               onLeave={leave}
             />
-          ) : null}
+          ) : (
+            <Terminal.Key onPress={leave}>{t('lesson.back')}</Terminal.Key>
+          )}
         </ScrollView>
       </Animated.View>
 

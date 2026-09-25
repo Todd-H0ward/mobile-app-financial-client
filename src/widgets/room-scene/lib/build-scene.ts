@@ -1,5 +1,6 @@
 import {
   AmbientLight,
+  BoxGeometry,
   BufferAttribute,
   BufferGeometry,
   Color,
@@ -13,6 +14,7 @@ import {
   Matrix3,
   Matrix4,
   Mesh,
+  MeshBasicMaterial,
   MeshPhongMaterial,
   type Object3D,
   PointLight,
@@ -109,6 +111,15 @@ interface SceneModel {
   /** Picks one cell out of its row, or clears the pick with `null`. */
   selectCell: (cell: SceneCell | null) => void;
   /**
+   * Starts the hold-to-enter fill on a cell — a translucent block that will
+   * rise with `setCellHoldProgress` so the child sees the press is landing.
+   */
+  beginCellHold: (cell: SceneCell) => void;
+  /** `0…1` how full the hold fill is. */
+  setCellHoldProgress: (progress: number) => void;
+  /** Hides the hold fill and clears the selection ring. */
+  endCellHold: () => void;
+  /**
    * Sinks the cells whose lesson has been passed, and raises the rest.
    *
    * `isImmediate` puts them where they belong without the drop — which is
@@ -183,6 +194,9 @@ const CELL_SINK_EPSILON = 0.05;
  * so the locked tiles sink without going black.
  */
 const LOCKED_CELL_TINT = 0.28;
+
+/** Opacity of the hold-to-enter fill at full charge. */
+const HOLD_FILL_OPACITY = 0.62;
 
 /** Key light sits above and in front, so the wedges keep a readable top face. */
 const KEY_LIGHT_POSITION = [0.6, 1, 0.45];
@@ -632,6 +646,28 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   let selected: SceneCell | null = null;
 
   /**
+   * Rising fill shown while the child holds a cell to open its lesson.
+   *
+   * A short tap on a crowded bay is too easy to miss; the block growing
+   * inside the tile is what tells them the press is counting.
+   */
+  const holdMaterial = new MeshBasicMaterial({
+    color: new Color(SCENE_PALETTE.cellFrameActive),
+    transparent: true,
+    opacity: 0,
+    depthTest: false,
+    depthWrite: false,
+    side: DoubleSide,
+  });
+  const holdMesh = new Mesh(new BoxGeometry(1, 1, 1), holdMaterial);
+  holdMesh.visible = false;
+  holdMesh.renderOrder = 3;
+  let holdBaseY = 0;
+  let holdFullHeight = 1;
+  let holdWidth = 1;
+  let holdDepth = 1;
+
+  /**
    * The three wheels standing around the bowl — the machine that lifts the
    * floor.
    *
@@ -1057,6 +1093,47 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     terraces[next.step]?.add(selection);
   };
 
+  const beginCellHold = (cell: SceneCell) => {
+    const edges = cellOutlines.get(cellKey(cell));
+    if (!edges) return;
+
+    edges.computeBoundingBox();
+    const box = edges.boundingBox;
+    if (!box) return;
+
+    holdWidth = Math.max(box.max.x - box.min.x, 1) * 0.9;
+    holdDepth = Math.max(box.max.z - box.min.z, 1) * 0.9;
+    holdFullHeight = Math.max(box.max.y - box.min.y, 12);
+    holdBaseY = box.min.y;
+    holdMesh.position.set(
+      (box.min.x + box.max.x) / 2,
+      holdBaseY,
+      (box.min.z + box.max.z) / 2,
+    );
+    holdMesh.scale.set(holdWidth, 0.02, holdDepth);
+    holdMaterial.opacity = 0;
+    holdMesh.visible = true;
+    terraces[cell.step]?.add(holdMesh);
+    selectCell(cell);
+    setCellHoldProgress(0);
+  };
+
+  const setCellHoldProgress = (progress: number) => {
+    if (!holdMesh.visible) return;
+    const amount = clamp(progress, 0, 1);
+    const height = Math.max(0.02, holdFullHeight * amount);
+    holdMesh.scale.set(holdWidth, height, holdDepth);
+    // BoxGeometry is centred — sit the block on the cell floor as it grows.
+    holdMesh.position.y = holdBaseY + height / 2;
+    holdMaterial.opacity = HOLD_FILL_OPACITY * (0.35 + 0.65 * amount);
+  };
+
+  const endCellHold = () => {
+    holdMesh.visible = false;
+    holdMaterial.opacity = 0;
+    selectCell(null);
+  };
+
   /** Axle of a wheel: horizontal and tangential, so it rolls around the bowl. */
   const axleOf = (gear: Group) => {
     const radial = new Vector3(gear.position.x, 0, gear.position.z);
@@ -1148,6 +1225,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     for (const edges of cellOutlines.values()) edges.dispose();
     cellOutlines.clear();
     selectionMaterial.dispose();
+    holdMaterial.dispose();
+    holdMesh.geometry.dispose();
     sharedMaterial.dispose();
   };
 
@@ -1171,6 +1250,9 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     cellTargets,
     cellAt,
     selectCell,
+    beginCellHold,
+    setCellHoldProgress,
+    endCellHold,
     setCellAccess: (doneKeys, level) => {
       for (const record of cellLabelRecords) {
         record.status = lessonAccess(record.ordinal, doneKeys, level).status;
