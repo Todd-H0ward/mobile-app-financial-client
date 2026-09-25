@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
-import { GAME_REWARDS } from '@/entities/minigame';
+import { GAME_REWARDS, PLAYKIT_GAME_IDS } from '@/entities/minigame';
 import { ownedPuzzles } from '@/entities/minigame/puzzle';
 import { useUser } from '@/entities/user';
 
@@ -30,6 +30,21 @@ export const GamesScreen = () => {
         </Screen.Heading>
       </Screen.Header>
 
+      <Text variant="subtitle">{t('playkit.section')}</Text>
+      {PLAYKIT_GAME_IDS.map((gameId) => (
+        <ListRow
+          key={gameId}
+          title={t(`playkit.games.${gameId}.title`)}
+          subtitle={t(`playkit.games.${gameId}.blurb`)}
+          onPress={() => router.push(DYNAMIC_ROUTES.play(gameId))}
+          trailing={
+            <Text variant="smallBold">
+              +{formatMoney(GAME_REWARDS[gameId])}
+            </Text>
+          }
+        />
+      ))}
+
       <Button onPress={() => router.push(STATIC_ROUTES.GAMES_MARKET)}>
         {t('financeGame.market')}
       </Button>
@@ -50,7 +65,9 @@ export const GamesScreen = () => {
           <Button
             variant="secondary"
             isFullWidth
-            onPress={() => router.push(DYNAMIC_ROUTES.shop('workshop'))}
+            onPress={() =>
+              router.push(DYNAMIC_ROUTES.watcher('keeper', 'shop'))
+            }
           >
             {t('games.puzzle.goToys')}
           </Button>

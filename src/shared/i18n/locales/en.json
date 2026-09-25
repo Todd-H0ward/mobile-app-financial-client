@@ -761,6 +761,92 @@
       "owned": "Things you keep"
     }
   },
+  "playkit": {
+    "section": "Overseer trials",
+    "ok": "Right",
+    "miss": "Close",
+    "ui": {
+      "abort": "< ABORT",
+      "channel": "CHANNEL {{title}}",
+      "debrief": "// DEBRIEF",
+      "noPenalty": "// ERRORS STILL PAY"
+    },
+    "bins": {
+      "needs": "Needs",
+      "wants": "Wants",
+      "savings": "Jar"
+    },
+    "conveyor": { "dragHint": "Pick a bin for the item" },
+    "scales": { "hint": "Match both pans to the targets" },
+    "cashier": {
+      "brief": "Price {{price}}, paid {{paid}}. Make exact change.",
+      "change": "Change: {{count}}",
+      "reset": "Reset"
+    },
+    "jar": {
+      "hint": "Tap real coins — skip the fakes",
+      "picked": "Picked: {{count}}"
+    },
+    "pinball": {
+      "hint": "Swipe left, centre or right toward a pocket",
+      "swipe": "Swipe here",
+      "target": "Target: pocket {{pocket}}"
+    },
+    "memory": { "hint": "Open pairs: price and item" },
+    "path": {
+      "hint": "Tap safe cells from bottom to top",
+      "reset": "Reset path"
+    },
+    "assemble": { "hint": "Pick a part, then a slot" },
+    "laser": { "hint": "Mark waste lines on the receipt" },
+    "orbit": {
+      "hint": "Drag the coin and release over the jar",
+      "ready": "Release now!",
+      "spin": "Keep spinning…"
+    },
+    "games": {
+      "conveyor": {
+        "title": "Conveyor",
+        "blurb": "Sort needs, wants and jar"
+      },
+      "scales": {
+        "title": "Budget scales",
+        "blurb": "Balance charge and modules"
+      },
+      "cashier": {
+        "title": "Cashier",
+        "blurb": "Tap coins for exact change"
+      },
+      "jar": {
+        "title": "Jar catch",
+        "blurb": "Catch the real coins"
+      },
+      "pinball": {
+        "title": "Pit pinball",
+        "blurb": "Send the gear into a pocket"
+      },
+      "memory": {
+        "title": "Price memory",
+        "blurb": "Match price and item pairs"
+      },
+      "path": {
+        "title": "Climb path",
+        "blurb": "Trace a safe path upward"
+      },
+      "assemble": {
+        "title": "Module build",
+        "blurb": "Seat parts into slots"
+      },
+      "laser": {
+        "title": "Receipt scan",
+        "blurb": "Mark waste spending"
+      },
+      "orbit": {
+        "title": "Coin orbit",
+        "blurb": "Release the coin over the jar"
+      }
+    }
+  },
   "games": {
     "title": "Arcade",
     "subtitle": "Short sittings — coins under a chore",
@@ -973,7 +1059,8 @@
       },
       "arcade": {
         "paidLeft": "Paid games today: {{left}} of {{total}}",
-        "hint": "After the limit, arcade stays open without coins."
+        "hint": "After the limit, arcade stays open without coins.",
+        "trialsTitle": "Overseer trials"
       }
     },
     "overseer": {

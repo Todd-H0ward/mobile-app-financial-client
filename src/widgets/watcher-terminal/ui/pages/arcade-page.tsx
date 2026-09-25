@@ -1,7 +1,7 @@
 import { type Href, useRouter } from 'expo-router';
 import { ScrollView, StyleSheet } from 'react-native';
 
-import { GAME_REWARDS } from '@/entities/minigame';
+import { GAME_REWARDS, PLAYKIT_GAME_IDS } from '@/entities/minigame';
 import { ownedPuzzles } from '@/entities/minigame/puzzle';
 import {
   ARCADE_PAID_SITTINGS,
@@ -45,6 +45,15 @@ export const ArcadePage = ({ onBack }: ArcadePageProps) => {
         })}
       </TerminalText>
       <TerminalText isDim>{t('watcher.terminal.arcade.hint')}</TerminalText>
+      <TerminalRule />
+      <TerminalText>{t('watcher.terminal.arcade.trialsTitle')}</TerminalText>
+      {PLAYKIT_GAME_IDS.map((gameId) => (
+        <TerminalMenuRow
+          key={gameId}
+          label={`${t(`playkit.games.${gameId}.title`)} · +${formatMoney(GAME_REWARDS[gameId])}`}
+          onPress={() => router.push(DYNAMIC_ROUTES.play(gameId))}
+        />
+      ))}
       <TerminalRule />
       <TerminalMenuRow
         label={t('financeGame.market')}

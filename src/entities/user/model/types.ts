@@ -245,7 +245,22 @@ interface ArcadeSave {
     /** Counter captured by the game screen when it starts. */
     id: number;
     /** Which game may claim this session. */
-    gameId: 'puzzle' | 'snake' | 'spacewar' | 'market' | 'weekly';
+    gameId:
+      | 'puzzle'
+      | 'snake'
+      | 'spacewar'
+      | 'market'
+      | 'weekly'
+      | 'conveyor'
+      | 'scales'
+      | 'cashier'
+      | 'jar'
+      | 'pinball'
+      | 'memory'
+      | 'path'
+      | 'assemble'
+      | 'laser'
+      | 'orbit';
   } | null;
   /** UTC day of the most recent paid sitting, -1 before the first reward. */
   paidDay: number;

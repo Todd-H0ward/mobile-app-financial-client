@@ -382,9 +382,23 @@ const isArcade = (value: unknown): boolean =>
     (isRecord(value.active) &&
       value.active.id === value.sequence &&
       Number(value.active.id) > 0 &&
-      ['puzzle', 'snake', 'spacewar', 'market', 'weekly'].includes(
-        String(value.active.gameId),
-      )));
+      [
+        'puzzle',
+        'snake',
+        'spacewar',
+        'market',
+        'weekly',
+        'conveyor',
+        'scales',
+        'cashier',
+        'jar',
+        'pinball',
+        'memory',
+        'path',
+        'assemble',
+        'laser',
+        'orbit',
+      ].includes(String(value.active.gameId))));
 
 const isModules = (value: unknown): boolean =>
   isRecord(value) &&

@@ -64,4 +64,9 @@ export const DYNAMIC_ROUTES = {
       pathname: '/games/puzzle/[puzzleId]' as const,
       params: { puzzleId },
     }) as const,
+  play: (gameId: string) =>
+    ({
+      pathname: '/games/play/[gameId]' as const,
+      params: { gameId },
+    }) as const,
 };
