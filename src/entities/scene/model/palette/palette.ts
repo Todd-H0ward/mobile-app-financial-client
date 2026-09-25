@@ -28,6 +28,8 @@ const SCENE_PALETTE = {
   cellFrameActive: '#FFE8A3',
   /** Map-HUD panel face — light board under the overhead shot. */
   hudPanel: '#F7FBFD',
+  /** Map-HUD panel thickness — a shade cooler so the slab reads in volume. */
+  hudPanelSide: '#D5E2EA',
   /** Map-HUD panel rim. */
   hudPanelEdge: '#FFFFFF',
   /** Map-HUD ink for digits and icons. */

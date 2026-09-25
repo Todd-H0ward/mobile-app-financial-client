@@ -50,6 +50,7 @@ describe('the scene palette', () => {
       SCENE_PALETTE.cellFrameMuted,
       SCENE_PALETTE.cellFrameActive,
       SCENE_PALETTE.hudPanel,
+      SCENE_PALETTE.hudPanelSide,
       SCENE_PALETTE.hudPanelEdge,
       SCENE_PALETTE.hudInk,
       SCENE_PALETTE.hudBattery,
