@@ -27,7 +27,7 @@ export const StoryScreen = () => {
   }
 
   return (
-    <Screen gap="three" isTabBarVisible={false}>
+    <Screen gap="three">
       <Screen.Header>
         <Screen.Heading>
           <Screen.Title>

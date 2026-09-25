@@ -37,7 +37,7 @@ export const PeriodSummaryScreen = () => {
   const { report, keeperLine, goal } = summary;
 
   return (
-    <Screen gap="three" isTabBarVisible={false}>
+    <Screen gap="three">
       <Screen.Header>
         <Screen.Heading>
           <Screen.Title>

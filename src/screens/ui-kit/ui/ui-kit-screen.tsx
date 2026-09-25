@@ -134,7 +134,7 @@ export const UiKitScreen = () => {
 
   return (
     <>
-      <Screen gap="three" isTabBarVisible={false}>
+      <Screen gap="three">
         <Screen.Header>
           <Screen.Back />
           <Screen.Heading>

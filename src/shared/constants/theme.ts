@@ -280,5 +280,3 @@ export const RADII = {
 /** Horizontal gutter every screen keeps between its content and the edge. */
 export const CONTENT_PADDING = SPACING.three;
 export const MAX_CONTENT_WIDTH = 560;
-
-export const BOTTOM_TAB_INSET = Platform.select({ ios: 50, android: 80 }) ?? 0;

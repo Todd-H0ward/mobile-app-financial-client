@@ -110,7 +110,7 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
   const amountMax = Math.max(goal.maxDeposit, goal.maxWithdraw);
 
   return (
-    <Screen gap="three" isTabBarVisible={false}>
+    <Screen gap="three">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -221,7 +221,7 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
         </Button>
         {goal.canLift && goal.nextTier !== null ? (
           <Button variant="primary" isFullWidth onPress={goal.requestLift}>
-            {t('home.confirmLift')}
+            {t('scene.confirmLift')}
           </Button>
         ) : null}
       </View>
@@ -254,20 +254,20 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
         onClose={goal.dismissSheet}
       >
         <Sheet.Title>
-          {t('home.confirmLiftTitle', { level: goal.nextTier ?? 0 })}
+          {t('scene.confirmLiftTitle', { level: goal.nextTier ?? 0 })}
         </Sheet.Title>
         <Sheet.Description>
-          {t('home.confirmLiftBody', {
+          {t('scene.confirmLiftBody', {
             price: formatMoney(goal.price),
             remaining: formatMoney(Math.max(0, goal.saved - goal.price)),
           })}
         </Sheet.Description>
         <Sheet.Actions>
           <Button variant="ghost" isFullWidth onPress={goal.dismissSheet}>
-            {t('home.cancelLift')}
+            {t('scene.cancelLift')}
           </Button>
           <Button variant="primary" isFullWidth onPress={goal.confirmLift}>
-            {t('home.confirmLift')}
+            {t('scene.confirmLift')}
           </Button>
         </Sheet.Actions>
       </Sheet.Modal>

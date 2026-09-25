@@ -165,7 +165,7 @@ export const HistoryScreen = () => {
   );
 
   return (
-    <Screen gap="three" isTabBarVisible={false} isScrollable={false}>
+    <Screen gap="three" isScrollable={false}>
       <FlatList
         data={history.walletRows}
         keyExtractor={keyExtractor}

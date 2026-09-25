@@ -5,9 +5,8 @@ export const STATIC_ROUTES = {
   END_PERIOD: '/end-period',
   PERIOD_SUMMARY: '/period-summary',
   RECOVERY: '/recovery',
+  /** Deep-link alias — redirects into the Keeper terminal shop page. */
   SHOP: '/shop',
-  WORKSHOP: '/workshop',
-  LESSON_MAP: '/lesson-map',
   GAMES_MARKET: '/games/market',
   GAMES_WEEKLY: '/games/weekly',
   SAVINGS: '/savings',

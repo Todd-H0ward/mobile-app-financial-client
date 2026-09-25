@@ -16,7 +16,6 @@ import {
 } from 'react-native-safe-area-context';
 
 import {
-  BOTTOM_TAB_INSET,
   CONTENT_PADDING,
   MAX_CONTENT_WIDTH,
   RADII,
@@ -39,8 +38,6 @@ interface ScreenRootProps {
   children?: ReactNode;
   variant?: ThemeColor;
   gap?: Spacing;
-  /** Leaves room for the tab bar. Off for pushed screens. */
-  isTabBarVisible?: boolean;
   /**
    * When false, the screen does not wrap children in a `ScrollView` — use this
    * when a child owns scrolling (`FlatList`), so lists stay virtualized.
@@ -167,16 +164,14 @@ const ScreenRoot = ({
   children,
   variant = 'background',
   gap = 'two',
-  isTabBarVisible = true,
   isScrollable = true,
   style,
 }: ScreenRootProps) => {
   // The bottom edge stays off `SafeAreaView` on purpose: padding it there would
   // clip the scroll view instead of letting content scroll past the indicator.
-  // It goes on the scroll content, together with the tab-bar inset.
+  // It goes on the scroll content with the home-indicator inset.
   const insets = useSafeAreaInsets();
-  const bottomPad =
-    (isTabBarVisible ? BOTTOM_TAB_INSET : insets.bottom) + SPACING.four;
+  const bottomPad = insets.bottom + SPACING.four;
 
   const column = (
     <View

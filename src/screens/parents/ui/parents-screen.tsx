@@ -45,7 +45,7 @@ export const ParentsScreen = () => {
   const report = parents.report;
 
   return (
-    <Screen gap="three" isTabBarVisible={false}>
+    <Screen gap="three">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

@@ -62,7 +62,7 @@ export const SnakeScreen = () => {
   }
 
   return (
-    <Screen isTabBarVisible={false} isScrollable={false}>
+    <Screen isScrollable={false}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

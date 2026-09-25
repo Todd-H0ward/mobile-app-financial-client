@@ -5,9 +5,6 @@
     "cancel": "Cancel",
     "understood": "Got it"
   },
-  "tabs": {
-    "home": "Home"
-  },
   "settings": {
     "title": "Settings",
     "language": "Language",
@@ -87,46 +84,15 @@
   },
   "home": {
     "settingsA11y": "Settings",
-    "balance": "Balance",
-    "savings": "Savings jar",
-    "planBannerTitle": "Make a budget plan",
-    "planBannerBody": "Decide where the coins go first — then you can spend.",
-    "planBannerAction": "Make a plan",
-    "endBannerTitle": "End the day",
-    "endBannerBody": "See where the coins went — plan next to fact.",
-    "endBannerWarnTitle": "End the day?",
-    "endBannerWarnBody": "Needs are still under plan — you can finish anyway; the totals will show the gap.",
-    "endBannerDisabledTitle": "End the day",
-    "endBannerDisabledBody": "First make a budget plan — then you can finish the day.",
-    "endBannerDisabledAction": "Make a plan",
-    "endBannerAction": "End day",
     "goal": {
-      "none": "No goal chosen",
-      "noneHint": "Open the savings jar and pick what to save for",
       "progress": "{{saved}} of {{price}}",
       "progressA11y": "Goal progress: {{percent}} percent"
     },
-    "lastCredit": "Latest credit",
     "task": {
       "title": "Task",
       "comingSoon": "Tasks will show up here very soon",
       "allDone": "Every chore this period is done — well done"
-    },
-    "parentsA11y": "Grown-ups",
-    "charge": "Charge {{value}}%",
-    "chargeLabel": "Charge",
-    "chargeValue": "{{value}}%",
-    "tierLabel": "Tier",
-    "tier": "{{level}} / {{total}}",
-    "tierA11y": "Platform tier {{level}} of {{total}}",
-    "progress": "Progress and history",
-    "liftShort": "{{saved}} / {{price}}",
-    "tasksAction": "Tasks",
-    "shopAction": "Workshop",
-    "moreAction": "More",
-    "budgetAction": "My budget",
-    "gamesAction": "Arcade",
-    "glossaryAction": "Glossary"
+    }
   },
   "parents": {
     "title": "Grown-ups",
@@ -460,10 +426,6 @@
         "subtitle": "Charge, modules and looks for the robot"
       }
     },
-    "toys": {
-      "gamesTitle": "Games for the shelf",
-      "gamesBody": "Buy a puzzle here — it unlocks in the mini-games."
-    },
     "items": {
       "charge-small": {
         "title": "Small charge",
@@ -776,8 +738,12 @@
       "wants": "Wants",
       "savings": "Jar"
     },
-    "conveyor": { "dragHint": "Pick a bin for the item" },
-    "scales": { "hint": "Match both pans to the targets" },
+    "conveyor": {
+      "dragHint": "Pick a bin for the item"
+    },
+    "scales": {
+      "hint": "Match both pans to the targets"
+    },
     "cashier": {
       "brief": "Price {{price}}, paid {{paid}}. Make exact change.",
       "change": "Change: {{count}}",
@@ -792,13 +758,19 @@
       "swipe": "Swipe here",
       "target": "Target: pocket {{pocket}}"
     },
-    "memory": { "hint": "Open pairs: price and item" },
+    "memory": {
+      "hint": "Open pairs: price and item"
+    },
     "path": {
       "hint": "Tap safe cells from bottom to top",
       "reset": "Reset path"
     },
-    "assemble": { "hint": "Pick a part, then a slot" },
-    "laser": { "hint": "Mark waste lines on the receipt" },
+    "assemble": {
+      "hint": "Pick a part, then a slot"
+    },
+    "laser": {
+      "hint": "Mark waste lines on the receipt"
+    },
     "orbit": {
       "hint": "Drag the coin and release over the jar",
       "ready": "Release now!",
@@ -898,7 +870,7 @@
       "levels": {
         "rooms-living": "Living room"
       },
-      "empty": "No puzzles on the shelf yet. Buy one in the toys shop on the street.",
+      "empty": "No puzzles on the shelf yet.",
       "goToys": "Go to toys"
     },
     "practice": {
@@ -1087,32 +1059,6 @@
       "recovery": "A miss is not the end. We rebuild the plan together.",
       "glossary": "Words matter. Open the glossary if a word is new."
     }
-  },
-  "workshop": {
-    "title": "Workshop",
-    "balance": "Wallet: {{amount}} coins",
-    "rule": "Your starting assembly is free. New modules cost {{amount}} coins from wants. Owned modules can be swapped for free.",
-    "equipped": "Equipped",
-    "install": "Equip",
-    "price": "Buy for {{amount}}",
-    "confirm": "Equip module?",
-    "effect": "Changes appearance. Savings and platform progress stay intact.",
-    "free": "You own this module. No charge.",
-    "cost": "Cost {{amount}}. Wallet: {{before}} → {{after}}. Insufficient funds means no purchase.",
-    "installed": "Module equipped.",
-    "purchased": "Module purchased and equipped.",
-    "funds": "Not enough coins yet. Complete a task or postpone the purchase.",
-    "planning": "Confirm your budget first.",
-    "invalid": "Module unavailable."
-  },
-  "lessonMap": {
-    "title": "Lesson map",
-    "rule": "The first row is open. Complete six lessons in the preceding row of this sector and pay for the next platform lift to unlock the next row.",
-    "LOCKED": "Locked",
-    "AVAILABLE": "Available",
-    "CURRENT": "Next",
-    "COMPLETED": "Completed",
-    "requires": "requires lift {{level}}, lessons remaining: {{count}}"
   },
   "financeGame": {
     "market": "Smart basket",

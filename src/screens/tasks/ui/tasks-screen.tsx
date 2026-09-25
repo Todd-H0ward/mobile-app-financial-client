@@ -23,7 +23,7 @@ export const TasksScreen = () => {
   const list = useTasksList();
 
   return (
-    <Screen gap="three" isTabBarVisible={false}>
+    <Screen gap="three">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

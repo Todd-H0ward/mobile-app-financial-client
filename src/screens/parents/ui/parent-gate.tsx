@@ -68,7 +68,7 @@ export const ParentGate = ({ challenge, onPass, onMiss }: ParentGateProps) => {
   };
 
   return (
-    <Screen gap="three" isTabBarVisible={false} variant="arcadeDpad">
+    <Screen gap="three" variant="arcadeDpad">
       <Screen.Header>
         <Screen.Back tone="arcadeScreen" color="arcadeLcd" />
         <Screen.Heading>

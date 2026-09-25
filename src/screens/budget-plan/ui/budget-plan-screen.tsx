@@ -32,7 +32,7 @@ export const BudgetPlanScreen = () => {
   if (!plan.isPlanning) return <Redirect href={STATIC_ROUTES.HOME} />;
 
   return (
-    <Screen gap="three" isTabBarVisible={false}>
+    <Screen gap="three">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

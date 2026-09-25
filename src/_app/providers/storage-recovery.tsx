@@ -49,7 +49,7 @@ export const StorageRecovery = ({ children }: StorageRecoveryProps) => {
     }
   };
   return (
-    <Screen gap="three" isTabBarVisible={false}>
+    <Screen gap="three">
       <Screen.Title>{t('storageRecovery.title')}</Screen.Title>
       <Text>{t(`storageRecovery.${issue.kind}`)}</Text>
       <Button
