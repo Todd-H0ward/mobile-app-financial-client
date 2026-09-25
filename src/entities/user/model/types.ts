@@ -265,6 +265,14 @@ interface UserSave {
   arcade: ArcadeSave;
   /** Completed arena cells, each segment-step-cell key recorded at most once. */
   completedLessonCells: string[];
+  /**
+   * Lesson ids finished on the arena.
+   *
+   * Cells are fixed at ninety discs; `lessons.json` may grow past that. Extra
+   * lessons stack on the same discs, so progress is keyed by lesson id — the
+   * cell key list is derived when every layer on a disc is done.
+   */
+  completedLessonIds: string[];
   /** The child's in-game name. Empty until the introduction asks for it. */
   playerName: string;
   /** Epoch ms the profile was created. For the grown-up's section. */

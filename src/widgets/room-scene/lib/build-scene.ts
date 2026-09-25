@@ -22,7 +22,11 @@ import {
   Vector3,
 } from 'three';
 
-import { type LessonStatus, lessonAccess } from '@/entities/lesson';
+import {
+  displayNumberForCell,
+  type LessonStatus,
+  lessonAccess,
+} from '@/entities/lesson';
 import {
   DEFAULT_ROBOT_ASSEMBLY,
   type RobotAssembly,
@@ -127,8 +131,8 @@ interface SceneModel {
    * what a scene being built for a child who learnt this yesterday needs,
    * against a tile sinking in front of them, which is the reward.
    */
-  /** Refreshes availability colour for each cell's top-face caption. */
-  setCellAccess: (doneKeys: readonly string[], level: number) => void;
+  /** Refreshes availability colour and the lesson number on each cell. */
+  setCellAccess: (completedLessonIds: readonly string[], level: number) => void;
   setCellsDone: (doneKeys: readonly string[], isImmediate?: boolean) => void;
   /** Same, for one of the two screens overhead. */
   watcherRoot: (watcher: WatcherId) => Object3D | null;
@@ -171,6 +175,8 @@ interface CellLabelRecord {
   segment: number;
   /** Arena ordinal `0…89`. */
   ordinal: number;
+  /** Top-centre of the tile — where the number strokes are rebuilt. */
+  anchor: Vector3;
   /** Availability — drives the number colour. */
   status: LessonStatus;
   /** Stroke mesh for the lesson number. */
@@ -754,7 +760,11 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         cellOutlines.set(key, edges);
         const ordinal = segment * 30 + terrace * 6 + cell;
         const status = lessonAccess(ordinal, [], 0).status;
-        const floats = cellNumberLines(ordinal, frontAnchorOf(edges));
+        const anchor = frontAnchorOf(edges);
+        const floats = cellNumberLines(
+          displayNumberForCell(ordinal, []) - 1,
+          anchor,
+        );
         const numberGeometry = new BufferGeometry();
         numberGeometry.setAttribute(
           'position',
@@ -778,6 +788,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
           key,
           segment,
           ordinal,
+          anchor,
           status,
           mesh: numberLines,
           material: numberMaterial,
@@ -1270,11 +1281,29 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     beginCellHold,
     setCellHoldProgress,
     endCellHold,
-    setCellAccess: (doneKeys, level) => {
+    setCellAccess: (completedLessonIds, level) => {
       for (const record of cellLabelRecords) {
-        record.status = lessonAccess(record.ordinal, doneKeys, level).status;
+        record.status = lessonAccess(
+          record.ordinal,
+          completedLessonIds,
+          level,
+        ).status;
         record.material.color.set(colorForLabelStatus(record.status));
         record.material.opacity = record.status === 'LOCKED' ? 0.45 : 1;
+
+        const display = displayNumberForCell(
+          record.ordinal,
+          completedLessonIds,
+        );
+        const floats = cellNumberLines(display - 1, record.anchor);
+        const previous = record.mesh.geometry;
+        const geometry = new BufferGeometry();
+        geometry.setAttribute(
+          'position',
+          new BufferAttribute(new Float32Array(floats), 3),
+        );
+        record.mesh.geometry = geometry;
+        previous.dispose();
 
         const sink = sinkables.get(record.key);
         if (!sink) continue;
@@ -1282,6 +1311,12 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         // Tile + outline share the sink; numbers keep their own material tint.
         tintSlice(sink.parts[0], tint);
         tintSlice(sink.parts[1], tint);
+        // Number buffer moved — retarget the sink slice to the new geometry.
+        sink.parts[2] = {
+          geometry,
+          from: 0,
+          to: floats.length,
+        };
       }
 
       // A locked cell must not keep the selection ring — it is not a target.

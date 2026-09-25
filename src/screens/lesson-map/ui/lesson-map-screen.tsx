@@ -2,7 +2,14 @@ import { useCallback, useRef } from 'react';
 
 import { useFocusEffect, useRouter } from 'expo-router';
 
-import { lessonAccess, lessonCellKey, listLessons } from '@/entities/lesson';
+import {
+  activeLessonIndexForCell,
+  cellOrdinalForLessonIndex,
+  type LessonStatus,
+  lessonAccess,
+  lessonCellKey,
+  listLessons,
+} from '@/entities/lesson';
 import { useUser } from '@/entities/user';
 
 import { DYNAMIC_ROUTES } from '@/shared/constants';
@@ -40,28 +47,38 @@ export const LessonMapScreen = () => {
         <Screen.Title>{t('lessonMap.title')}</Screen.Title>
       </Screen.Header>
       <Text>{t('lessonMap.rule')}</Text>
-      {listLessons().map((lesson, ordinal) => {
-        const access = lessonAccess(
-          ordinal,
-          user.completedLessonCells,
+      {listLessons().map((lesson, index) => {
+        const cellOrdinal = cellOrdinalForLessonIndex(index);
+        const cellAccess = lessonAccess(
+          cellOrdinal,
+          user.completedLessonIds,
           user.platform.level,
         );
+        const isDone = user.completedLessonIds.includes(lesson.id);
+        const isActive =
+          activeLessonIndexForCell(cellOrdinal, user.completedLessonIds) ===
+          index;
+        const status: LessonStatus = isDone
+          ? 'COMPLETED'
+          : cellAccess.status === 'LOCKED' || !isActive
+            ? 'LOCKED'
+            : cellAccess.status;
         return (
           <Button
             key={lesson.id}
-            variant={access.status === 'CURRENT' ? 'primary' : 'secondary'}
-            disabled={access.status === 'LOCKED'}
-            accessibilityLabel={`${ordinal + 1}. ${lesson.title}. ${t(`lessonMap.${access.status}`)}`}
+            variant={status === 'CURRENT' ? 'primary' : 'secondary'}
+            disabled={status === 'LOCKED'}
+            accessibilityLabel={`${index + 1}. ${lesson.title}. ${t(`lessonMap.${status}`)}`}
             onPress={() => {
               if (isNavigating.current) return;
               isNavigating.current = true;
-              router.push(DYNAMIC_ROUTES.lesson(lessonCellKey(ordinal)));
+              router.push(DYNAMIC_ROUTES.lesson(lessonCellKey(cellOrdinal)));
             }}
           >
-            {STATUS_ICON[access.status]} {ordinal + 1}. {lesson.title} ·{' '}
-            {t(`lessonMap.${access.status}`)}
-            {access.status === 'LOCKED'
-              ? ` · ${t('lessonMap.requires', { level: access.requiredLevel, count: access.missing })}`
+            {STATUS_ICON[status]} {index + 1}. {lesson.title} ·{' '}
+            {t(`lessonMap.${status}`)}
+            {status === 'LOCKED'
+              ? ` · ${t('lessonMap.requires', { level: cellAccess.requiredLevel, count: cellAccess.missing })}`
               : ''}
           </Button>
         );

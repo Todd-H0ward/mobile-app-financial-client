@@ -4,7 +4,6 @@ import { type Href, Redirect, useFocusEffect, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { RobotSetup } from '@/widgets/robot-setup';
 import { RoomScene, type SceneView } from '@/widgets/room-scene';
 import { WatcherDialog } from '@/widgets/watcher-dialog';
 
@@ -13,6 +12,7 @@ import { actionForMood, moodFor } from '@/entities/robot-dog';
 import { cellKey, SCENE_TERRACE_COUNT } from '@/entities/scene';
 import {
   useDoneCells,
+  useDoneLessonIds,
   useIsMotionEnabled,
   useRobotAction,
   useRobotSkin,
@@ -59,6 +59,7 @@ export const HomeScreen = () => {
   const [talkingTo, setTalkingTo] = useState<WatcherId | null>(null);
   const isNavigating = useRef(false);
   const doneCells = useDoneCells();
+  const doneLessonIds = useDoneLessonIds();
 
   useFocusEffect(
     useCallback(() => {
@@ -73,6 +74,9 @@ export const HomeScreen = () => {
   };
 
   if (!user) return <Redirect href={STATIC_ROUTES.ENTRY} />;
+  if (!user.playerName || !user.robot.name) {
+    return <Redirect href={STATIC_ROUTES.SETUP} />;
+  }
   if (user.period.phase === 'summary') {
     return <Redirect href={STATIC_ROUTES.PERIOD_SUMMARY} />;
   }
@@ -111,6 +115,7 @@ export const HomeScreen = () => {
           focusedWatcher={talkingTo}
           onWatcherFocus={setTalkingTo}
           doneCells={doneCells}
+          doneLessonIds={doneLessonIds}
           mapHud={{
             balance: user.wallet.balance,
             tier: user.platform.level,
@@ -122,8 +127,8 @@ export const HomeScreen = () => {
             const ordinal = lessonOrdinalForKey(key);
             if (ordinal === null) return;
             if (
-              lessonAccess(ordinal, doneCells, user.platform.level).status ===
-              'LOCKED'
+              lessonAccess(ordinal, doneLessonIds, user.platform.level)
+                .status === 'LOCKED'
             ) {
               return;
             }
@@ -161,10 +166,6 @@ export const HomeScreen = () => {
           </View>
         )}
       </View>
-
-      {(!user.playerName || !user.robot.name) && (
-        <RobotSetup isIntroduction onClose={() => {}} />
-      )}
     </ThemedView>
   );
 };

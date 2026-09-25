@@ -13,7 +13,7 @@ import type { UserSave } from '../types';
 // ═══════════════════════════════════════════
 
 /** Save schema version. Bumped on every incompatible change. */
-const USER_SAVE_VERSION = 12;
+const USER_SAVE_VERSION = 13;
 
 /** Player name before the introduction asks for one. */
 const DEFAULT_PLAYER_NAME = '';
@@ -63,6 +63,7 @@ export const createInitialUser = ({
     scores: { snake: [], spacewarMs: [] },
   },
   completedLessonCells: [],
+  completedLessonIds: [],
   platform: { level: 0, receipts: [] },
   playerName,
   createdAt,

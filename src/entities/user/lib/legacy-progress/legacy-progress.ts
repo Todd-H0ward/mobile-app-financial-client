@@ -1,3 +1,5 @@
+import { lessonOrdinalForKey, listLessons } from '@/entities/lesson';
+
 import { isRecord } from '@/shared/utils';
 
 import type { UserSave } from '../../model/types';
@@ -28,11 +30,23 @@ export const importLegacyProgress = (
           .sort((a, b) => direction * (a - b))
           .slice(0, 5)
       : [];
+  const completedLessonCells = [
+    ...new Set([...user.completedLessonCells, ...cells]),
+  ];
+  const fromCells = completedLessonCells.map((key) => {
+    const ordinal = lessonOrdinalForKey(key);
+    return ordinal === null ? null : listLessons()[ordinal]?.id;
+  });
+  const completedLessonIds = [
+    ...new Set([
+      ...user.completedLessonIds,
+      ...fromCells.filter((id): id is string => typeof id === 'string'),
+    ]),
+  ];
   return {
     ...user,
-    completedLessonCells: [
-      ...new Set([...user.completedLessonCells, ...cells]),
-    ],
+    completedLessonCells,
+    completedLessonIds,
     arcade: {
       ...user.arcade,
       scores: {

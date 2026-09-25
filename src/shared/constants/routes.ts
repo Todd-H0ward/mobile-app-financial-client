@@ -19,6 +19,7 @@ export const STATIC_ROUTES = {
   HISTORY: '/history',
   GLOSSARY: '/glossary',
   SETTINGS: '/settings',
+  SETUP: '/setup',
   PARENTS: '/parents',
   UI_KIT: '/ui-kit',
 } as const;

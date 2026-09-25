@@ -1,4 +1,5 @@
 import { PLATFORM_GOAL_ID, PLATFORM_LEVEL_COUNT } from '@/entities/economy';
+import { listLessons } from '@/entities/lesson';
 import {
   DEFAULT_ROBOT_ASSEMBLY,
   DEFAULT_ROBOT_DOG_ACTION,
@@ -46,6 +47,27 @@ const STAGE_FROM_PET: Record<string, RobotDogStage> = {
  * version cannot do that.
  */
 const MIGRATIONS: Record<number, MigrationStep> = {
+  12: (save) => {
+    const cells = Array.isArray(save.completedLessonCells)
+      ? save.completedLessonCells.filter(
+          (key): key is string =>
+            typeof key === 'string' && /^[0-2]-[0-4]-[0-5]$/.test(key),
+        )
+      : [];
+    // Layer 0 only — extras in lessons.json were never reachable before.
+    const completedLessonIds = cells
+      .map((key) => {
+        const [sector, level, index] = key.split('-').map(Number);
+        const ordinal = sector * 30 + level * 6 + index;
+        return listLessons()[ordinal]?.id;
+      })
+      .filter((id): id is string => typeof id === 'string');
+    return {
+      ...save,
+      version: 13,
+      completedLessonIds: [...new Set(completedLessonIds)],
+    };
+  },
   11: (save) => ({
     ...save,
     version: 12,
@@ -370,6 +392,9 @@ export const isUserSave = (value: unknown): value is UserSave =>
   ) &&
   new Set(value.completedLessonCells).size ===
     value.completedLessonCells.length &&
+  Array.isArray(value.completedLessonIds) &&
+  value.completedLessonIds.every((id) => typeof id === 'string') &&
+  new Set(value.completedLessonIds).size === value.completedLessonIds.length &&
   isWallet(value.wallet) &&
   isSavings(value.savings) &&
   isTasks(value.tasks) &&

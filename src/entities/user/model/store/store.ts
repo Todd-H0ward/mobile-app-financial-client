@@ -1,7 +1,13 @@
 import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 
-import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
+import {
+  activeLessonIndexForCell,
+  completedCellKeysFromLessons,
+  lessonAccess,
+  lessonAt,
+  lessonOrdinalForKey,
+} from '@/entities/lesson';
 
 import { STORAGE_KEYS } from '@/shared/constants';
 import {
@@ -90,21 +96,28 @@ export const useUserStore = create<UserStore>()(
 
       completeLesson: (cellKey) => {
         const { user } = get();
+        const ordinal = lessonOrdinalForKey(cellKey);
+        if (!user || ordinal === null || !isCompletedCellKey(cellKey)) return;
         if (
-          !user ||
-          !isCompletedCellKey(cellKey) ||
-          user.completedLessonCells.includes(cellKey) ||
-          lessonAccess(
-            lessonOrdinalForKey(cellKey) ?? 0,
-            user.completedLessonCells,
-            user.platform.level,
-          ).status === 'LOCKED'
-        )
+          lessonAccess(ordinal, user.completedLessonIds, user.platform.level)
+            .status === 'LOCKED'
+        ) {
           return;
+        }
+        const active = activeLessonIndexForCell(
+          ordinal,
+          user.completedLessonIds,
+        );
+        if (active === null) return;
+        const lesson = lessonAt(active);
+        if (user.completedLessonIds.includes(lesson.id)) return;
+        const completedLessonIds = [...user.completedLessonIds, lesson.id];
         set({
           user: {
             ...user,
-            completedLessonCells: [...user.completedLessonCells, cellKey],
+            completedLessonIds,
+            completedLessonCells:
+              completedCellKeysFromLessons(completedLessonIds),
           },
         });
       },
@@ -241,11 +254,17 @@ export const useUserStore = create<UserStore>()(
 export const useUser = () => useUserStore((state) => state.user);
 
 const EMPTY_COMPLETED_CELLS: string[] = [];
+const EMPTY_COMPLETED_LESSONS: string[] = [];
 
 /** Arena progress belongs to the current profile, including its demo backup. */
 export const useDoneCells = () =>
   useUserStore(
     (state) => state.user?.completedLessonCells ?? EMPTY_COMPLETED_CELLS,
+  );
+/** Lesson ids finished — cells may host more than one when content grows. */
+export const useDoneLessonIds = () =>
+  useUserStore(
+    (state) => state.user?.completedLessonIds ?? EMPTY_COMPLETED_LESSONS,
   );
 export const useCompleteLesson = () =>
   useUserStore((state) => state.completeLesson);

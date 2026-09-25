@@ -6,8 +6,13 @@ import type { Lesson, LessonFile, LessonQuestion } from '../../model';
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** Three sectors, five terraces and six distinct exercises per terrace. */
+/** Three sectors, five terraces and six discs — the FBX floor. */
 const MIN_LESSONS = 90;
+
+/**
+ * Content may outgrow the discs: extras stack as further layers on the same
+ * cells (`lessonIndicesForCell`). Geometry stays fixed; only the JSON grows.
+ */
 
 /** Two would be a coin toss; three is a choice. */
 const MIN_OPTIONS = 3;

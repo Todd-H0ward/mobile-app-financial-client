@@ -16,11 +16,11 @@ export const getLessonById = (id: string): Lesson | undefined =>
   LESSONS.find((lesson) => lesson.id === id);
 
 /** Stable arena order: foundations, savings practice, purchase decisions. */
-export const lessonAt = (ordinal: number): Lesson => {
-  if (!Number.isInteger(ordinal) || ordinal < 0 || ordinal >= 90) {
+export const lessonAt = (index: number): Lesson => {
+  if (!Number.isInteger(index) || index < 0 || index >= LESSONS.length) {
     throw new RangeError(
-      'Lesson ordinal must identify one of the 90 arena cells',
+      `Lesson index must be 0…${LESSONS.length - 1} (content/lessons.json)`,
     );
   }
-  return LESSONS[ordinal];
+  return LESSONS[index];
 };

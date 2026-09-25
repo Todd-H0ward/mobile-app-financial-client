@@ -109,6 +109,13 @@ interface RoomSceneProps {
    */
   doneCells?: readonly string[];
   /**
+   * Lesson ids finished on the arena.
+   *
+   * Drives lock colour and the number on each tile when `lessons.json` stacks
+   * more than one exercise on a disc.
+   */
+  doneLessonIds?: readonly string[];
+  /**
    * Coins / tier / charge for the three boards on the overhead map.
    *
    * `null` or omitted hides them. The boards live in the 3D scene — not as
@@ -263,6 +270,7 @@ export const RoomScene = ({
   onWatcherFocus,
   onCellPress,
   doneCells,
+  doneLessonIds = [],
   mapHud = null,
   isAnimated = true,
   isCameraRig = __DEV__,
@@ -332,6 +340,7 @@ export const RoomScene = ({
    * props first arrive — this is how the scene it builds learns about them.
    */
   const doneCellsRef = useRef<readonly string[]>([]);
+  const doneLessonIdsRef = useRef<readonly string[]>([]);
   const levelRef = useRef(level);
   const mapHudRef = useRef(mapHud);
   mapHudRef.current = mapHud;
@@ -443,13 +452,14 @@ export const RoomScene = ({
   useEffect(() => {
     if (!doneCells) return;
     doneCellsRef.current = doneCells;
+    doneLessonIdsRef.current = doneLessonIds;
     levelRef.current = level;
 
     if (!model.current) return;
     model.current.setCellsDone(doneCells, !hasSunkOnce.current);
-    model.current.setCellAccess(doneCells, level);
+    model.current.setCellAccess(doneLessonIds, level);
     hasSunkOnce.current = true;
-  }, [doneCells, level]);
+  }, [doneCells, doneLessonIds, level]);
 
   useEffect(() => {
     const built = model.current;
@@ -533,7 +543,7 @@ export const RoomScene = ({
       // a render later. Without this the tiles a child sank yesterday come
       // back up every time the app is opened.
       built.setCellsDone(doneCellsRef.current, true);
-      built.setCellAccess(doneCellsRef.current, level);
+      built.setCellAccess(doneLessonIdsRef.current, level);
       hasSunkOnce.current = true;
       const lens = new PerspectiveCamera(
         tuneRef.current.fov,
@@ -738,8 +748,8 @@ export const RoomScene = ({
     const ordinal = lessonOrdinalForKey(cellKey(cell));
     if (ordinal === null) return false;
     return (
-      lessonAccess(ordinal, doneCellsRef.current, levelRef.current).status !==
-      'LOCKED'
+      lessonAccess(ordinal, doneLessonIdsRef.current, levelRef.current)
+        .status !== 'LOCKED'
     );
   };
 

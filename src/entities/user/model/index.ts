@@ -8,6 +8,7 @@ export {
   useCreateUser,
   useDeleteUser,
   useDoneCells,
+  useDoneLessonIds,
   useHomeHudSource,
   useResetUser,
   useSetDemoMode,

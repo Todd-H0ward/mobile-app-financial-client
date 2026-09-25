@@ -110,6 +110,7 @@ export {
   useCreateUser,
   useDeleteUser,
   useDoneCells,
+  useDoneLessonIds,
   useHomeHudSource,
   useIsAnimationEnabled,
   useIsDemoMode,
