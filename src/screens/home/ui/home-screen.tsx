@@ -44,7 +44,7 @@ import { SettingsIcon, ThemedView } from '@/shared/ui';
 /**
  * The arena is the home screen: the map, the robot, the two AIs.
  *
- * Plan and workshop live on the Keeper; chores live on the Overseer. On the
+ * Plan, jar and reports live on the Keeper; chores live on the Overseer. On the
  * overhead map three boards in the 3D scene show coins, tier and charge.
  */
 export const HomeScreen = () => {

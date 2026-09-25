@@ -1,7 +1,9 @@
 import type { WatcherLine } from './dialogue';
 
 /**
- * The Keeper — plan, workshop and closing the day. Chores belong to the Overseer.
+ * The Keeper — plan, jar, workshop, day close and the report.
+ *
+ * Chores and the arcade belong to the Overseer.
  */
 export const KEEPER_LINES: WatcherLine[] = [
   {
@@ -9,7 +11,10 @@ export const KEEPER_LINES: WatcherLine[] = [
     textKey: 'watcher.keeper.plan',
     priority: 40,
     condition: { phases: ['planning'] },
-    actions: [{ labelKey: 'action.budget_plan', route: '/budget-plan' }],
+    actions: [
+      { labelKey: 'action.budget_plan', route: '/budget-plan' },
+      { labelKey: 'action.savings', route: '/savings' },
+    ],
   },
   {
     id: 'keeper-active',
@@ -18,6 +23,7 @@ export const KEEPER_LINES: WatcherLine[] = [
     condition: { phases: ['active'] },
     actions: [
       { labelKey: 'action.shop', route: '/shop' },
+      { labelKey: 'action.savings', route: '/savings' },
       { labelKey: 'action.end_period', route: '/end-period' },
     ],
   },
@@ -28,6 +34,7 @@ export const KEEPER_LINES: WatcherLine[] = [
     condition: { phases: ['active'], maxCharge: 0.3 },
     actions: [
       { labelKey: 'action.shop', route: '/shop' },
+      { labelKey: 'action.savings', route: '/savings' },
       { labelKey: 'action.end_period', route: '/end-period' },
     ],
   },
@@ -38,6 +45,7 @@ export const KEEPER_LINES: WatcherLine[] = [
     condition: { phases: ['active'], areNeedsMet: false },
     actions: [
       { labelKey: 'action.shop', route: '/shop' },
+      { labelKey: 'action.savings', route: '/savings' },
       { labelKey: 'action.end_period', route: '/end-period' },
     ],
   },
@@ -46,7 +54,10 @@ export const KEEPER_LINES: WatcherLine[] = [
     textKey: 'watcher.keeper.report',
     priority: 50,
     condition: { phases: ['summary'] },
-    actions: [{ labelKey: 'action.period_summary', route: '/period-summary' }],
+    actions: [
+      { labelKey: 'action.period_summary', route: '/period-summary' },
+      { labelKey: 'action.history', route: '/history' },
+    ],
   },
   {
     id: 'default',
@@ -55,7 +66,8 @@ export const KEEPER_LINES: WatcherLine[] = [
     condition: {},
     actions: [
       { labelKey: 'action.budget_plan', route: '/budget-plan' },
-      { labelKey: 'action.shop', route: '/shop' },
+      { labelKey: 'action.savings', route: '/savings' },
+      { labelKey: 'action.history', route: '/history' },
     ],
   },
 ];

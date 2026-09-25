@@ -1,7 +1,7 @@
 import type { WatcherLine } from './dialogue';
 
 /**
- * The Overseer — chores and the arcade. Plan and workshop belong to the Keeper.
+ * The Overseer — chores and the arcade. Soft help lives with the Keeper.
  */
 export const OVERSEER_LINES: WatcherLine[] = [
   {
@@ -43,6 +43,9 @@ export const OVERSEER_LINES: WatcherLine[] = [
     textKey: 'watcher.overseer.default',
     priority: 0,
     condition: {},
-    actions: [{ labelKey: 'action.tasks', route: '/tasks' }],
+    actions: [
+      { labelKey: 'action.tasks', route: '/tasks' },
+      { labelKey: 'action.games', route: '/games' },
+    ],
   },
 ];

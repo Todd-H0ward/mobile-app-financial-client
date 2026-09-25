@@ -4,16 +4,18 @@ import { useRouter } from 'expo-router';
 
 import { useShowFeedback } from '@/features/feedback';
 
+import { PLATFORM_GOAL_ID, PLATFORM_LEVEL_COUNT } from '@/entities/economy';
 import { getGoalById } from '@/entities/goal';
 import { isLiquid, progressFor, remainingFor } from '@/entities/savings';
 import {
   applyDeposit,
+  applyPlatformUpgrade,
   setActiveGoal,
   useCommitUser,
   useUser,
 } from '@/entities/user';
 
-import { DYNAMIC_ROUTES } from '@/shared/constants';
+import { DYNAMIC_ROUTES, STATIC_ROUTES } from '@/shared/constants';
 import { useTimeSource } from '@/shared/lib';
 import { formatMoney } from '@/shared/utils';
 
@@ -21,7 +23,7 @@ import { formatMoney } from '@/shared/utils';
 // TYPES
 // ═══════════════════════════════════════════
 
-type GoalSheet = 'planning' | null;
+type GoalSheet = 'planning' | 'lift' | null;
 
 interface GoalController {
   goalId: string;
@@ -37,6 +39,12 @@ interface GoalController {
   balance: number;
   /** True only while the period is `active`. */
   canTransfer: boolean;
+  /**
+   * Lift jar is full enough to pay the next tier — only for `PLATFORM_GOAL_ID`.
+   */
+  canLift: boolean;
+  /** Next platform level the jar would buy, or `null`. */
+  nextTier: number | null;
   /** Coins staged for deposit or withdraw. */
   amount: number;
   maxDeposit: number;
@@ -50,6 +58,8 @@ interface GoalController {
   makeActive: () => void;
   deposit: () => void;
   requestWithdraw: () => void;
+  requestLift: () => void;
+  confirmLift: () => void;
   dismissSheet: () => void;
 }
 
@@ -59,6 +69,7 @@ interface GoalController {
 
 /**
  * One goal's jar — deposit here; withdraw goes to its own confirm screen.
+ * The lift jar also pays the next platform tier after a confirm.
  */
 export const useGoal = (goalId: string): GoalController | null => {
   const user = useUser();
@@ -80,6 +91,14 @@ export const useGoal = (goalId: string): GoalController | null => {
   // Lift jar is non-liquid — coins stay until spent on a tier.
   const maxWithdraw = isLiquid(goalId) ? saved : 0;
   const canTransfer = user?.period.phase === 'active';
+  const nextTier = user ? user.platform.level + 1 : null;
+  const canLift =
+    goalId === PLATFORM_GOAL_ID &&
+    Boolean(canTransfer) &&
+    Boolean(goal) &&
+    saved >= (goal?.price ?? Number.POSITIVE_INFINITY) &&
+    nextTier !== null &&
+    nextTier <= PLATFORM_LEVEL_COUNT;
 
   if (!goal || !user || !row) return null;
 
@@ -98,6 +117,8 @@ export const useGoal = (goalId: string): GoalController | null => {
     isReached: row.reachedInPeriod != null || saved >= goal.price,
     balance,
     canTransfer: Boolean(canTransfer),
+    canLift,
+    nextTier,
     amount,
     maxDeposit,
     maxWithdraw,
@@ -143,6 +164,24 @@ export const useGoal = (goalId: string): GoalController | null => {
       }
       if (amount <= 0 || amount > maxWithdraw) return;
       router.push(DYNAMIC_ROUTES.withdraw(goalId, amount));
+    },
+
+    requestLift: () => {
+      if (!canLift) return;
+      setSheet('lift');
+    },
+
+    confirmLift: () => {
+      if (nextTier === null) return;
+      const result = applyPlatformUpgrade(user, nextTier, time);
+      if (!result.ok) {
+        setSheet(null);
+        return;
+      }
+      if (commitUser(user, result.user)) {
+        setSheet(null);
+        router.replace(STATIC_ROUTES.HOME);
+      }
     },
 
     dismissSheet: () => setSheet(null),
