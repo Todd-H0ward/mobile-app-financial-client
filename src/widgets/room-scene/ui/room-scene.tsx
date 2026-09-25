@@ -108,6 +108,18 @@ interface RoomSceneProps {
    * the child — `firstDone` is what tells the two apart.
    */
   doneCells?: readonly string[];
+  /**
+   * Coins / tier / charge for the three boards on the overhead map.
+   *
+   * `null` or omitted hides them. The boards live in the 3D scene — not as
+   * React overlays — so the child reads them as part of the arena.
+   */
+  mapHud?: {
+    balance: number;
+    tier: number;
+    tierTotal: number;
+    charge: number;
+  } | null;
   /** Off when the grown-up disables animations — the camera then cuts. */
   isAnimated?: boolean;
   /**
@@ -251,6 +263,7 @@ export const RoomScene = ({
   onWatcherFocus,
   onCellPress,
   doneCells,
+  mapHud = null,
   isAnimated = true,
   isCameraRig = __DEV__,
 }: RoomSceneProps) => {
@@ -320,6 +333,8 @@ export const RoomScene = ({
    */
   const doneCellsRef = useRef<readonly string[]>([]);
   const levelRef = useRef(level);
+  const mapHudRef = useRef(mapHud);
+  mapHudRef.current = mapHud;
   /** Which screen the loop is flying towards, `null` for back to the arena. */
   const focusRef = useRef<WatcherId | null>(focusedWatcher);
   /** `0` on the arena, `1` parked in front of a face; damped in between. */
@@ -436,6 +451,14 @@ export const RoomScene = ({
     hasSunkOnce.current = true;
   }, [doneCells, level]);
 
+  useEffect(() => {
+    const built = model.current;
+    if (!built) return;
+    const isMap = view === 'top' && focusedWatcher === null;
+    built.setMapHudVisible(isMap);
+    if (mapHud) built.setMapHudStats(mapHud);
+  }, [view, focusedWatcher, mapHud]);
+
   /**
    * The loop reads a ref, and the screen it is aimed at starts talking.
    *
@@ -535,6 +558,9 @@ export const RoomScene = ({
           : viewRef.current;
       built.highlight(segment, true);
       appliedHighlight.current = segment;
+      const isMap = viewRef.current === 'top' && focusRef.current === null;
+      built.setMapHudVisible(isMap);
+      if (mapHudRef.current) built.setMapHudStats(mapHudRef.current);
 
       renderer.current = webgl;
       model.current = built;

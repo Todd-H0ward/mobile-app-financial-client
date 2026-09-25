@@ -26,6 +26,16 @@ const SCENE_PALETTE = {
   cellFrameMuted: '#E6EEF2',
   /** The cell under the child's finger, picked out of its row. */
   cellFrameActive: '#FFE8A3',
+  /** Map-HUD panel face — light board under the overhead shot. */
+  hudPanel: '#F7FBFD',
+  /** Map-HUD panel rim. */
+  hudPanelEdge: '#FFFFFF',
+  /** Map-HUD ink for digits and icons. */
+  hudInk: '#3F332C',
+  /** Battery fill when the charge is healthy. */
+  hudBattery: '#2EC4C8',
+  /** Battery fill when the charge is low — warm, never alarming red. */
+  hudBatteryLow: '#E8C547',
   /** Grit thrown off the rim when the platform climbs out of the pit. */
   dust: '#C9B08A',
   /** The gear train straining — brief, bright, drawn additively. */

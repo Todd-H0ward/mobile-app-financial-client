@@ -34,7 +34,7 @@ interface CameraTune {
 const DEFAULT_CAMERA_TUNE: CameraTune = {
   roomElevation: 13.5,
   topElevation: 30,
-  topAzimuth: 315,
+  topAzimuth: 285,
   roomFit: 0.47,
   topFit: 0.765,
   platformY: -120,

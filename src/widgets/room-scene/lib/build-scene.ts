@@ -61,6 +61,7 @@ import { cellNumberLines, colorForLabelStatus } from './cell-number-marker';
 import type { CenterCharacter } from './center-character';
 import { createHazeBackdrop } from './haze-backdrop';
 import { createLiftEffects, type LiftEffects } from './lift-effects';
+import { createMapHud } from './map-hud';
 import type { WatcherFocus, Watchers } from './watchers';
 
 // ═══════════════════════════════════════════
@@ -137,6 +138,17 @@ interface SceneModel {
   playWatcher: (watcher: WatcherId, action: WatcherAction) => void;
   /** Shows or hides the watcher models */
   setWatchersVisible: (isVisible: boolean) => void;
+  /**
+   * The three map boards (coins / tier / battery). Visible only on the
+   * overhead shot — `setMapHudVisible` and `setMapHudStats` keep them in sync.
+   */
+  setMapHudVisible: (isVisible: boolean) => void;
+  setMapHudStats: (stats: {
+    balance: number;
+    tier: number;
+    tierTotal: number;
+    charge: number;
+  }) => void;
   /** Moves the arena under the look-at point (camera-rig knob). */
   setPlatformY: (y: number) => void;
   /** Frees every buffer the GL context is holding. */
@@ -821,6 +833,10 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   // what reach 46, not the ground the robot walks on.
   platform.add(characterMount);
 
+  const mapHud = createMapHud();
+  // Hang off the outer ring so the boards ride under its rim as it sinks.
+  terraces[SCENE_TERRACE_COUNT - 1]?.add(mapHud.root);
+
   const sharedNodes = nodesOf(SCENE_SHARED_SEGMENT, SCENE_FLAT_STEP);
   const sharedMaterial = roomMaterial(SCENE_PALETTE.shared);
   if (sharedNodes.length > 0) {
@@ -1217,6 +1233,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     character = null;
     haze.dispose();
     effects.dispose();
+    mapHud.dispose();
     for (const geometry of geometries) geometry.dispose();
     for (const material of rooms) material.dispose();
     gearMaterial.dispose();
@@ -1286,6 +1303,12 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     setWatchersVisible: (isVisible) => {
       watchersVisible = isVisible;
       watchers?.setVisible(isVisible);
+    },
+    setMapHudVisible: (isVisible) => {
+      mapHud.setVisible(isVisible);
+    },
+    setMapHudStats: (stats) => {
+      mapHud.setStats(stats);
     },
     setPlatformY,
     dispose,

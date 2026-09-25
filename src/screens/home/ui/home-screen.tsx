@@ -10,7 +10,7 @@ import { WatcherDialog } from '@/widgets/watcher-dialog';
 
 import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
 import { actionForMood, moodFor } from '@/entities/robot-dog';
-import { cellKey } from '@/entities/scene';
+import { cellKey, SCENE_TERRACE_COUNT } from '@/entities/scene';
 import {
   useDoneCells,
   useIsMotionEnabled,
@@ -43,9 +43,8 @@ import { SettingsIcon, ThemedView } from '@/shared/ui';
 /**
  * The arena is the home screen: the map, the robot, the two AIs.
  *
- * Plan and workshop live on the Keeper; chores live on the Overseer. Balance,
- * jar, charge and lift stay off this screen until they earn a place on the
- * 3D world — no HUD, no chrome menus.
+ * Plan and workshop live on the Keeper; chores live on the Overseer. On the
+ * overhead map three boards in the 3D scene show coins, tier and charge.
  */
 export const HomeScreen = () => {
   const router = useRouter();
@@ -112,6 +111,12 @@ export const HomeScreen = () => {
           focusedWatcher={talkingTo}
           onWatcherFocus={setTalkingTo}
           doneCells={doneCells}
+          mapHud={{
+            balance: user.wallet.balance,
+            tier: user.platform.level,
+            tierTotal: SCENE_TERRACE_COUNT,
+            charge: user.robot.charge,
+          }}
           onCellPress={(cell) => {
             const key = cellKey(cell);
             const ordinal = lessonOrdinalForKey(key);

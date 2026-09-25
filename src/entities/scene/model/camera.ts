@@ -17,8 +17,11 @@ const TOP_ELEVATION = 30;
  * Fixed rather than inherited: the shot is a composition — the gears fall
  * where they fall and the watchers frame the corners — and arriving on it
  * from three different rooms would give three different pictures.
+ *
+ * Nudged CCW from the old 315° so the HUD boards on the near bay rim
+ * sit more squarely in frame instead of tucked beside a gear.
  */
-const TOP_AZIMUTH = 315;
+const TOP_AZIMUTH = 285;
 
 /**
  * Level with the rim of the pit, near enough to be standing on it.
