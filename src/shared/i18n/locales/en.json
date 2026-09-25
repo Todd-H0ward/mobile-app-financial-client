@@ -20,6 +20,8 @@
     "sound": "Sound",
     "soundSubtitle": "Haptics and future audio — one switch for both",
     "development": "Development",
+    "cameraRig": "Camera rig",
+    "cameraRigSubtitle": "Sliders for framing the arena — paste values into camera.ts",
     "uiKitDescription": "Design system showcase: all components and states on one screen.",
     "openUiKit": "Open UI kit",
     "profile": "Profile",

@@ -13,7 +13,7 @@ import type { UserSave } from '../types';
 // ═══════════════════════════════════════════
 
 /** Save schema version. Bumped on every incompatible change. */
-const USER_SAVE_VERSION = 13;
+const USER_SAVE_VERSION = 14;
 
 /** Player name before the introduction asks for one. */
 const DEFAULT_PLAYER_NAME = '';
@@ -108,6 +108,7 @@ export const createInitialUser = ({
     isParentGateEnabled: true,
     isSoundEnabled: true,
     isAnimationEnabled: true,
+    isCameraRigEnabled: false,
     isDemoMode: false,
     robotSkin: DEFAULT_ROBOT_DOG_SKIN,
     robotAction: DEFAULT_ROBOT_DOG_ACTION,

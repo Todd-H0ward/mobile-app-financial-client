@@ -113,6 +113,7 @@ export {
   useDoneLessonIds,
   useHomeHudSource,
   useIsAnimationEnabled,
+  useIsCameraRigEnabled,
   useIsDemoMode,
   useIsMotionEnabled,
   useIsParentGateEnabled,

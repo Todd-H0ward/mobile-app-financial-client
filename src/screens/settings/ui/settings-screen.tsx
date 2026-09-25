@@ -10,6 +10,7 @@ import { useChangeLanguage } from '@/features/change-language';
 import type { RobotDogAction, RobotDogSkin } from '@/entities/robot-dog';
 import {
   useIsAnimationEnabled,
+  useIsCameraRigEnabled,
   useIsSoundEnabled,
   useRobotAction,
   useRobotSkin,
@@ -43,6 +44,7 @@ export const SettingsScreen = () => {
   const updateUser = useUpdateUser();
   const isAnimationEnabled = useIsAnimationEnabled();
   const isSoundEnabled = useIsSoundEnabled();
+  const isCameraRigEnabled = useIsCameraRigEnabled();
   const robotSkin = useRobotSkin();
   const robotAction = useRobotAction();
 
@@ -65,6 +67,12 @@ export const SettingsScreen = () => {
     updateUser((u) => ({
       ...u,
       settings: { ...u.settings, isSoundEnabled: isEnabled },
+    }));
+
+  const setCameraRig = (isEnabled: boolean) =>
+    updateUser((u) => ({
+      ...u,
+      settings: { ...u.settings, isCameraRigEnabled: isEnabled },
     }));
 
   return (
@@ -164,12 +172,21 @@ export const SettingsScreen = () => {
       {__DEV__ ? (
         <Card tone="surfaceSoft">
           <Card.Title>{t('settings.development')}</Card.Title>
-          <Card.Content>
+          <Card.Content style={styles.toggles}>
+            <ListRow
+              title={t('settings.cameraRig')}
+              subtitle={t('settings.cameraRigSubtitle')}
+              trailing={
+                <Switch
+                  isChecked={isCameraRigEnabled}
+                  onChange={setCameraRig}
+                  label={t('settings.cameraRig')}
+                />
+              }
+            />
             <Text variant="small" themeColor="textSecondary">
               {t('settings.uiKitDescription')}
             </Text>
-          </Card.Content>
-          <Card.Footer>
             <Button
               size="m"
               isFullWidth
@@ -177,7 +194,7 @@ export const SettingsScreen = () => {
             >
               {t('settings.openUiKit')}
             </Button>
-          </Card.Footer>
+          </Card.Content>
         </Card>
       ) : null}
 

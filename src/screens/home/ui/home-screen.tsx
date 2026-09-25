@@ -13,6 +13,7 @@ import { cellKey, SCENE_TERRACE_COUNT } from '@/entities/scene';
 import {
   useDoneCells,
   useDoneLessonIds,
+  useIsCameraRigEnabled,
   useIsMotionEnabled,
   useRobotAction,
   useRobotSkin,
@@ -55,6 +56,7 @@ export const HomeScreen = () => {
   const chosenAction = useRobotAction();
   const user = useUser();
   const isMotionEnabled = useIsMotionEnabled();
+  const isCameraRigEnabled = useIsCameraRigEnabled();
   const [view, setView] = useState<SceneView>(0);
   const [talkingTo, setTalkingTo] = useState<WatcherId | null>(null);
   const isNavigating = useRef(false);
@@ -135,6 +137,7 @@ export const HomeScreen = () => {
             navigate(DYNAMIC_ROUTES.lesson(key));
           }}
           isAnimated={isMotionEnabled}
+          isCameraRig={isCameraRigEnabled}
         />
 
         <Pressable

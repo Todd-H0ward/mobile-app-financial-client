@@ -47,6 +47,14 @@ const STAGE_FROM_PET: Record<string, RobotDogStage> = {
  * version cannot do that.
  */
 const MIGRATIONS: Record<number, MigrationStep> = {
+  13: (save) => ({
+    ...save,
+    version: 14,
+    settings: {
+      ...(isRecord(save.settings) ? save.settings : {}),
+      isCameraRigEnabled: false,
+    },
+  }),
   12: (save) => {
     const cells = Array.isArray(save.completedLessonCells)
       ? save.completedLessonCells.filter(
@@ -326,6 +334,7 @@ const isSettings = (value: unknown): boolean =>
   typeof value.isParentGateEnabled === 'boolean' &&
   typeof value.isSoundEnabled === 'boolean' &&
   typeof value.isAnimationEnabled === 'boolean' &&
+  typeof value.isCameraRigEnabled === 'boolean' &&
   typeof value.isDemoMode === 'boolean' &&
   isRobotDogSkin(value.robotSkin) &&
   isRobotDogAction(value.robotAction);

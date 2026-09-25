@@ -63,6 +63,7 @@ export const createDemoProfile = (
       isParentGateEnabled: true,
       isSoundEnabled: settings?.isSoundEnabled ?? true,
       isAnimationEnabled: settings?.isAnimationEnabled ?? true,
+      isCameraRigEnabled: settings?.isCameraRigEnabled ?? false,
       isDemoMode: true,
       robotSkin: settings?.robotSkin ?? DEFAULT_ROBOT_DOG_SKIN,
       robotAction: settings?.robotAction ?? DEFAULT_ROBOT_DOG_ACTION,
@@ -80,6 +81,7 @@ const carryDeviceSettings = (
   isParentGateEnabled: from.isParentGateEnabled,
   isSoundEnabled: from.isSoundEnabled,
   isAnimationEnabled: from.isAnimationEnabled,
+  isCameraRigEnabled: from.isCameraRigEnabled,
   isDemoMode,
   // The coat is the child's, not the profile's: a demo run should not undress
   // the dog they picked, and leaving demo should not undo a coat picked in it.

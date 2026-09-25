@@ -180,6 +180,13 @@ interface SettingsSave {
   isSoundEnabled: boolean;
   /** Animations. Turned off for a weak device and for 3.6. */
   isAnimationEnabled: boolean;
+  /**
+   * Camera-rig overlay on the arena — elevations, fit, dump.
+   *
+   * Off by default; only useful while framing shots. The settings toggle
+   * lives under Development and is hidden outside `__DEV__`.
+   */
+  isCameraRigEnabled: boolean;
   /** Demo mode: swaps `TimeSource` and the starting profile, 2.5.13. */
   isDemoMode: boolean;
   /** The robot dog's coat. Purely looks — the stage is what the child earns. */

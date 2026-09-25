@@ -34,6 +34,10 @@ export const useIsDemoMode = () =>
 export const useIsParentGateEnabled = () =>
   useUserStore((state) => state.user?.settings.isParentGateEnabled ?? true);
 
+/** Camera-rig overlay on the arena — off unless the grown-up turns it on. */
+export const useIsCameraRigEnabled = () =>
+  useUserStore((state) => state.user?.settings.isCameraRigEnabled ?? false);
+
 /** The coat the robot dog wears on the home screen. */
 export const useRobotSkin = (): RobotDogSkin =>
   useUserStore(
@@ -58,6 +62,7 @@ export const useSettings = () => ({
   isSoundEnabled: useIsSoundEnabled(),
   isDemoMode: useIsDemoMode(),
   isParentGateEnabled: useIsParentGateEnabled(),
+  isCameraRigEnabled: useIsCameraRigEnabled(),
   robotSkin: useRobotSkin(),
   robotAction: useRobotAction(),
 });

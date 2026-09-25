@@ -36,6 +36,7 @@ export type {
 export { PERIOD_PHASES } from './types';
 export {
   useIsAnimationEnabled,
+  useIsCameraRigEnabled,
   useIsDemoMode,
   useIsMotionEnabled,
   useIsParentGateEnabled,

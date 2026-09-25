@@ -131,7 +131,7 @@ interface RoomSceneProps {
   isAnimated?: boolean;
   /**
    * Framing desk at the top: dial elevations / fit / platform, then paste
-   * the dump into `camera.ts`. Defaults on in `__DEV__`.
+   * the dump into `camera.ts`. Off by default — turn on in settings.
    */
   isCameraRig?: boolean;
 }
@@ -273,7 +273,7 @@ export const RoomScene = ({
   doneLessonIds = [],
   mapHud = null,
   isAnimated = true,
-  isCameraRig = __DEV__,
+  isCameraRig = false,
 }: RoomSceneProps) => {
   const insets = useSafeAreaInsets();
   const [tune, setTune] = useState<CameraTune>(DEFAULT_CAMERA_TUNE);
