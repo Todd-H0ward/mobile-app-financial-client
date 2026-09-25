@@ -38,7 +38,7 @@ export const GamesScreen = () => {
           <Button
             variant="secondary"
             isFullWidth
-            onPress={() => router.push(DYNAMIC_ROUTES.shop('toys'))}
+            onPress={() => router.push(DYNAMIC_ROUTES.shop('workshop'))}
           >
             {t('games.puzzle.goToys')}
           </Button>

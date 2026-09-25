@@ -1,17 +1,16 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Redirect, useRouter } from 'expo-router';
 
 import { PuzzleScene } from '@/widgets/minigame/puzzle';
 
-import { WALLET_SOURCES } from '@/entities/economy';
-import { payoutFor } from '@/entities/minigame';
+import { useArcadeSession } from '@/features/arcade-session';
+
 import { isPuzzleOwned, puzzleById } from '@/entities/minigame/puzzle';
-import { creditWallet, useUser, useUserStore } from '@/entities/user';
+import { useUser } from '@/entities/user';
 
 import { STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { useTimeSource } from '@/shared/lib';
 import { Button, Screen, Sheet, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
@@ -34,15 +33,19 @@ interface PuzzleScreenProps {
 export const PuzzleScreen = ({ puzzleId }: PuzzleScreenProps) => {
   const { t } = useTranslation();
   const router = useRouter();
-  const time = useTimeSource();
   const user = useUser();
-  const updateUser = useUserStore((state) => state.updateUser);
+  const session = useArcadeSession('puzzle');
+  const [rewardReason, setRewardReason] = useState('paid');
 
   const puzzle = puzzleById(puzzleId);
   const ownedItemIds = user?.ownedItemIds ?? [];
   const isOwned = puzzle != null && isPuzzleOwned(ownedItemIds, puzzle.id);
   const [reward, setReward] = useState<number | null>(null);
   const didPay = useRef(false);
+
+  useEffect(() => {
+    if (isOwned) session.start();
+  }, [isOwned, session.start]);
 
   const title = puzzle
     ? t(`games.puzzle.levels.${puzzle.id}`, { defaultValue: puzzle.id })
@@ -52,19 +55,14 @@ export const PuzzleScreen = ({ puzzleId }: PuzzleScreenProps) => {
     if (didPay.current || !user) return;
     didPay.current = true;
 
-    const coins = payoutFor({ gameId: 'puzzle', isCorrect: true });
-    updateUser((current) => ({
-      ...current,
-      wallet: creditWallet(current.wallet, {
-        source: WALLET_SOURCES.gamePuzzle,
-        amount: coins,
-        direction: null,
-        periodIndex: current.period.index,
-        at: time.now(),
-      }),
-    }));
-    setReward(coins);
-  }, [time, updateUser, user]);
+    const result = session.complete();
+    if (!result) {
+      didPay.current = false;
+      return;
+    }
+    setRewardReason(result.reason);
+    setReward(result.coins);
+  }, [session.complete, user]);
 
   if (!puzzle || !isOwned) {
     return <Redirect href={STATIC_ROUTES.HOME} />;
@@ -78,6 +76,14 @@ export const PuzzleScreen = ({ puzzleId }: PuzzleScreenProps) => {
           <Screen.Title>{title}</Screen.Title>
         </Screen.Heading>
       </Screen.Header>
+      <Text themeColor="textSecondary">
+        {t(
+          session.paidRemaining > 0
+            ? 'games.paidRemaining'
+            : 'games.practiceAvailable',
+          { count: session.paidRemaining },
+        )}
+      </Text>
 
       <PuzzleScene puzzle={puzzle} onComplete={onComplete} />
 
@@ -87,9 +93,14 @@ export const PuzzleScreen = ({ puzzleId }: PuzzleScreenProps) => {
       >
         <Sheet.Title>{t('games.puzzle.completeTitle')}</Sheet.Title>
         <Text themeColor="textSecondary">
-          {t('games.puzzle.completeBody', {
-            reward: formatMoney(reward ?? 0),
-          })}
+          {t(
+            rewardReason === 'paid'
+              ? 'games.puzzle.completeBody'
+              : `games.practice.${rewardReason}`,
+            {
+              reward: formatMoney(reward ?? 0),
+            },
+          )}
         </Text>
         <Button isFullWidth onPress={() => router.replace(STATIC_ROUTES.HOME)}>
           {t('games.puzzle.completeClose')}

@@ -10,18 +10,17 @@ import {
 } from '@/widgets/minigame/console';
 import { SnakeScene } from '@/widgets/minigame/snake';
 
-import { WALLET_SOURCES } from '@/entities/economy';
-import { payoutFor } from '@/entities/minigame';
+import { useArcadeSession } from '@/features/arcade-session';
+
 import {
   isConsoleOwned,
   useArcadeScoresStore,
 } from '@/entities/minigame/console';
-import { creditWallet, useUser, useUserStore } from '@/entities/user';
+import { useUser } from '@/entities/user';
 
 import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { useTimeSource } from '@/shared/lib';
 import { Button, Screen, Sheet, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
@@ -33,9 +32,9 @@ export const SnakeScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
   const router = useRouter();
-  const time = useTimeSource();
   const user = useUser();
-  const updateUser = useUserStore((state) => state.updateUser);
+  const session = useArcadeSession('snake');
+  const [rewardReason, setRewardReason] = useState('paid');
   const submitSnake = useArcadeScoresStore((state) => state.submitSnake);
   const snakeScores = useArcadeScoresStore((state) => state.snake);
 
@@ -51,21 +50,16 @@ export const SnakeScreen = () => {
       if (didPay.current || !user) return;
       didPay.current = true;
 
+      const result = session.complete();
+      if (!result) {
+        didPay.current = false;
+        return;
+      }
       submitSnake(apples);
-      const coins = payoutFor({ gameId: 'snake', isCorrect: true });
-      updateUser((current) => ({
-        ...current,
-        wallet: creditWallet(current.wallet, {
-          source: WALLET_SOURCES.gameSnake,
-          amount: coins,
-          direction: null,
-          periodIndex: current.period.index,
-          at: time.now(),
-        }),
-      }));
-      setReward(coins);
+      setRewardReason(result.reason);
+      setReward(result.coins);
     },
-    [submitSnake, time, updateUser, user],
+    [submitSnake, session.complete, user],
   );
 
   if (!isOwned) {
@@ -80,6 +74,14 @@ export const SnakeScreen = () => {
           <Screen.Title>{t('games.snake.title')}</Screen.Title>
         </Screen.Heading>
       </Screen.Header>
+      <Text themeColor="textSecondary">
+        {t(
+          session.paidRemaining > 0
+            ? 'games.paidRemaining'
+            : 'games.practiceAvailable',
+          { count: session.paidRemaining },
+        )}
+      </Text>
 
       {isPlaying ? (
         <SnakeScene key={runId} onComplete={onComplete} />
@@ -91,6 +93,7 @@ export const SnakeScreen = () => {
               <ConsoleVolumeButton
                 accessibilityLabel={t('games.snake.start')}
                 onPress={() => {
+                  if (!session.start()) return;
                   didPay.current = false;
                   setRunId((id) => id + 1);
                   setIsPlaying(true);
@@ -138,9 +141,14 @@ export const SnakeScreen = () => {
       >
         <Sheet.Title>{t('games.snake.completeTitle')}</Sheet.Title>
         <Text themeColor="textSecondary">
-          {t('games.snake.completeBody', {
-            reward: formatMoney(reward ?? 0),
-          })}
+          {t(
+            rewardReason === 'paid'
+              ? 'games.snake.completeBody'
+              : `games.practice.${rewardReason}`,
+            {
+              reward: formatMoney(reward ?? 0),
+            },
+          )}
         </Text>
         <Button
           isFullWidth
