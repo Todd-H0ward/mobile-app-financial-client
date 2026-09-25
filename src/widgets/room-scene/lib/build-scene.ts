@@ -112,6 +112,8 @@ interface SceneModel {
   watcherFocus: (watcher: WatcherId) => WatcherFocus | null;
   /** Puts one of the screens into a state — talking, idling, reacting. */
   playWatcher: (watcher: WatcherId, action: WatcherAction) => void;
+  /** Shows or hides the watcher models */
+  setWatchersVisible: (isVisible: boolean) => void;
   /** Moves the arena under the look-at point (camera-rig knob). */
   setPlatformY: (y: number) => void;
   /** Frees every buffer the GL context is holding. */
@@ -484,6 +486,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   scene.add(watcherMount);
   let watchers: Watchers | null = null;
   let watchersDisposed = false;
+  let watchersVisible = true;
 
   void import('./watchers')
     .then(({ attachWatchers }) => attachWatchers(watcherMount))
@@ -493,6 +496,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         return;
       }
       watchers = loaded;
+      watchers.setVisible(watchersVisible);
     })
     .catch((error: unknown) => {
       console.warn('[room-scene] watchers failed to load', error);
@@ -838,8 +842,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
 
   const setLevelProgress = (progress: number) => {
     // The pit sinks around the robot rather than lifting them out of it: each
-    // level swallows one more ring into the floor, and the skyline the child
-    // is counting drops by one.
+    // paid stage lowers the rim; the fifth stage finally flattens the bowl.
     terraces.forEach((terrace, index) => {
       terrace.position.y = terraceSinkY(index, progress);
     });
@@ -937,6 +940,10 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     watcherRoot: (watcher) => watchers?.root(watcher) ?? null,
     watcherFocus: (watcher) => watchers?.focus(watcher) ?? null,
     playWatcher: (watcher, action) => watchers?.play(watcher, action),
+    setWatchersVisible: (isVisible) => {
+      watchersVisible = isVisible;
+      watchers?.setVisible(isVisible);
+    },
     setPlatformY,
     dispose,
   };

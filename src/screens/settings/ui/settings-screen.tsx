@@ -1,5 +1,9 @@
+import { useState } from 'react';
+
 import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
+
+import { RobotCard, RobotSetup } from '@/widgets/robot-setup';
 
 import { useChangeLanguage } from '@/features/change-language';
 
@@ -17,8 +21,6 @@ import { useTranslation } from '@/shared/i18n';
 import type { LanguagePreference } from '@/shared/types';
 import { Button, Card, ListRow, Screen, Switch, Text } from '@/shared/ui';
 
-import { RobotCard } from './robot-card';
-
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
@@ -35,6 +37,7 @@ const LANGUAGE_OPTIONS: { value: LanguagePreference; labelKey: string }[] = [
 
 export const SettingsScreen = () => {
   const router = useRouter();
+  const [isSetupVisible, setSetupVisible] = useState(false);
   const { t } = useTranslation();
   const { languagePreference, changeLanguage } = useChangeLanguage();
   const updateUser = useUpdateUser();
@@ -73,6 +76,10 @@ export const SettingsScreen = () => {
         </Screen.Heading>
       </Screen.Header>
 
+      <Button variant="secondary" onPress={() => setSetupVisible(true)}>
+        {t('setup.edit')}
+      </Button>
+      {isSetupVisible && <RobotSetup onClose={() => setSetupVisible(false)} />}
       <Card tone="surfaceSoft">
         <Card.Title>{t('settings.language')}</Card.Title>
         <Card.Content>

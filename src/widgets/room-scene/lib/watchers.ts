@@ -51,6 +51,8 @@ interface Watchers {
    * the camera staring at the back of a television.
    */
   focus: (watcher: WatcherId) => WatcherFocus | null;
+  /** Hides both machines when the camera is in a segment, not on the map. */
+  setVisible: (isVisible: boolean) => void;
   dispose: () => void;
 }
 
@@ -357,6 +359,9 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
       for (const mixer of mixers.values()) mixer.update(deltaSec);
     },
     play,
+    setVisible: (isVisible: boolean) => {
+      rig.visible = isVisible;
+    },
     dispose: () => {
       for (const mixer of mixers.values()) mixer.stopAllAction();
       for (const look of looks.values()) {

@@ -361,7 +361,10 @@ export const RoomScene = ({
   useEffect(() => {
     if (isAnimated) camera.applyView(view);
     else camera.jumpToView(view);
-  }, [camera, isAnimated, view]);
+    model.current?.setWatchersVisible(
+      view === 'top' || focusedWatcher !== null,
+    );
+  }, [camera, isAnimated, view, focusedWatcher]);
 
   /**
    * Sinks what the child has already learnt.
@@ -463,6 +466,9 @@ export const RoomScene = ({
       // Seed the platform where the game already is, so a rebuilt context
       // does not replay the whole climb from the bottom of the pit.
       built.setLevelProgress(lift.current);
+      built.setWatchersVisible(
+        viewRef.current === 'top' || focusRef.current !== null,
+      );
 
       renderer.current = webgl;
       model.current = built;
