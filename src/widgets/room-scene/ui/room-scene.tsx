@@ -55,7 +55,7 @@ import { CameraRigPanel } from './camera-rig-panel';
 interface RoomSceneProps {
   /** The stop the camera is heading for. Controlled by the screen. */
   view: SceneView;
-  /** Raised by a settled swipe, and by a tap on another segment's cell. */
+  /** Raised by a climb back to the map, and by a tap on a cell. */
   onViewChange: (view: SceneView) => void;
   /**
    * How far out of the pit the game has climbed, `0 … SCENE_TERRACE_COUNT`.
@@ -208,13 +208,12 @@ const createRenderer = (gl: ExpoWebGLRenderingContext): WebGLRenderer => {
 // ═══════════════════════════════════════════
 
 /**
- * The world, as one model on a turntable.
+ * The world, as one model under a fixed camera.
  *
- * Three rooms sit 120° apart around the same axis, so walking between them is
- * the model turning rather than a page sliding: the child keeps seeing where
- * the other rooms are while they travel to one. The camera opens on the
- * horizon in front of a room; the overhead stop is still one swipe or button
- * away.
+ * Three bays sit 120° apart around the same axis. Walking between them is a
+ * trip through the overhead map — the camera does not spin while the child
+ * is standing in a bay. A drag upwards is still the way back to that map;
+ * a tap on a cell is the way down into a bay.
  *
  * Nothing here runs on the UI runtime. The pan gesture is `runOnJS`, because
  * everything it drives — the three.js camera, the GL context — lives on the JS
@@ -696,12 +695,18 @@ export const RoomScene = ({
       const cell = built.cellAt(hit.object, hit.faceIndex);
       if (!cell) return;
 
-      // A tap on another segment is the child pointing at where they want to
-      // be, not at a tile — walking there first is what they meant. With the
-      // buttons gone this is also the one way across that is not a gesture.
-      if (view !== cell.segment) {
+      // A tap on another segment from inside a bay is the child asking for
+      // the map, not a free turn of the world — the camera does not spin
+      // between bays anymore. From the map, the same tap walks in.
+      if (view === 'top') {
         built.selectCell(null);
         onViewChange(cell.segment);
+        return;
+      }
+
+      if (view !== cell.segment) {
+        built.selectCell(null);
+        onViewChange('top');
         return;
       }
 
@@ -709,11 +714,14 @@ export const RoomScene = ({
       onCellPress?.(cell);
     });
 
+  // The map does not turn, and neither does a bay: azimuth is locked once
+  // the child is standing in one. The only drag left is the climb back to
+  // the overhead map; picking another bay means going there first.
   const pan = Gesture.Pan()
     .runOnJS(true)
     .enabled(focusedWatcher === null && view !== 'top')
     .onBegin(camera.beginDrag)
-    .onUpdate((event) => camera.dragBy(event.translationX, event.translationY))
+    .onUpdate((event) => camera.dragBy(0, event.translationY))
     .onEnd(() => onViewChange(camera.endDrag()))
     .onFinalize((_event, success) => {
       if (!success) onViewChange(camera.endDrag());

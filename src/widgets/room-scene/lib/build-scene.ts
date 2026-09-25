@@ -654,8 +654,13 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
           ordinal,
         });
       });
-      terraces[terrace].add(new LineSegments(markerBuffer, frames[segment]));
+      const markerLines = new LineSegments(markerBuffer, frames[segment]);
+
+      terraces[terrace].add(markerLines);
+      segmentParts[segment].push(markerLines);
+
       const frame = mergeEdges(outlines);
+
       geometries.push(frame);
 
       // A sunk cell takes its outline down with it, so both buffers are
@@ -790,10 +795,12 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       material.opacity = isLit ? CELL_FRAME_OPACITY : CELL_FRAME_OPACITY * 0.45;
     });
 
-    // Everything stays on screen. Hiding the other two bays was tried and
-    // the arena stopped being a place: the child could no longer see where
-    // they had come from. What keeps the near rim out of the way is
-    // `ROOM_ELEVATION` instead — see `camera.ts`.
+    segmentParts.forEach((parts, index) => {
+      const isShown = segment === null || segment === index;
+      for (const part of parts) part.visible = isShown;
+    });
+
+    for (const gear of gears) gear.visible = segment === null;
   };
 
   /**

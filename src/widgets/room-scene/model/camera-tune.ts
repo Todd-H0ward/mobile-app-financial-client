@@ -32,10 +32,10 @@ interface CameraTune {
 
 /** Mirrors `entities/scene/model/camera.ts` — keep in sync when you paste. */
 const DEFAULT_CAMERA_TUNE: CameraTune = {
-  roomElevation: 24,
+  roomElevation: 13.5,
   topElevation: 30,
   topAzimuth: 315,
-  roomFit: 0.66,
+  roomFit: 0.47,
   topFit: 0.765,
   platformY: -120,
   fov: 45,
@@ -43,7 +43,7 @@ const DEFAULT_CAMERA_TUNE: CameraTune = {
 
 /** Sliders’ legal ranges — wide enough to find a shot, not infinite. */
 const CAMERA_TUNE_RANGE = {
-  roomElevation: { min: 0, max: 45, step: 1 },
+  roomElevation: { min: 0, max: 45, step: 0.5 },
   topElevation: { min: 12, max: 89, step: 1 },
   topAzimuth: { min: 0, max: 359, step: 5 },
   roomFit: { min: 0.35, max: 1.4, step: 0.01 },
@@ -61,7 +61,7 @@ const formatCameraTune = (tune: CameraTune): string =>
   [
     `const TOP_ELEVATION = ${Math.round(tune.topElevation)};`,
     `const TOP_AZIMUTH = ${Math.round(tune.topAzimuth)};`,
-    `const ROOM_ELEVATION = ${Math.round(tune.roomElevation)};`,
+    `const ROOM_ELEVATION = ${tune.roomElevation};`,
     `const ROOM_FIT = ${tune.roomFit.toFixed(2)};`,
     `const TOP_FIT = ${tune.topFit.toFixed(3)};`,
     `const SCENE_PLATFORM_Y = ${Math.round(tune.platformY)};`,
