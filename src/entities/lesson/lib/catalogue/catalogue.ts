@@ -15,17 +15,12 @@ export const listLessons = (): readonly Lesson[] => LESSONS;
 export const getLessonById = (id: string): Lesson | undefined =>
   LESSONS.find((lesson) => lesson.id === id);
 
-/**
- * The lesson behind a cell, by that cell's place in the arena.
- *
- * Ninety cells and six lessons, so they repeat: the ordinal walks the list
- * and wraps. It is deliberate that this is arithmetic rather than a table —
- * a cell must lead to the same lesson today and tomorrow, and a table with
- * ninety rows in it would be ninety chances to get that wrong.
- */
-export const lessonAt = (ordinal: number): Lesson => {
-  const index =
-    ((Math.trunc(ordinal) % LESSONS.length) + LESSONS.length) % LESSONS.length;
-
+/** Stable arena order: foundations, savings practice, purchase decisions. */
+export const lessonAt = (index: number): Lesson => {
+  if (!Number.isInteger(index) || index < 0 || index >= LESSONS.length) {
+    throw new RangeError(
+      `Lesson index must be 0…${LESSONS.length - 1} (content/lessons.json)`,
+    );
+  }
   return LESSONS[index];
 };

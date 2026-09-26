@@ -124,7 +124,7 @@ const CameraRigPanel = ({ tune, onTuneChange, live }: CameraRigPanelProps) => {
           <TuneRow
             label="ROOM_ELEVATION"
             value={tune.roomElevation}
-            digits={0}
+            digits={1}
             onChange={set('roomElevation')}
             {...CAMERA_TUNE_RANGE.roomElevation}
           />

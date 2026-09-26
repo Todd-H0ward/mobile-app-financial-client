@@ -1,25 +1,28 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 
 import {
+  activeLessonIndexForCell,
+  INITIAL_LESSON_SESSION,
   isPassed,
   type Lesson,
+  type LessonAction,
+  type LessonStage,
+  lessonAccess,
   lessonAt,
   passMark,
-  useCompleteLesson,
+  transitionLesson,
 } from '@/entities/lesson';
 import { cellFromKey, cellKey, cellOrdinal } from '@/entities/scene';
+import { useCompleteLesson, useUser } from '@/entities/user';
 
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
 
-/** Read the theory, sit the test, see the result. */
-type LessonStage = 'theory' | 'test' | 'result';
-
 interface LessonState {
   /** The lesson behind this cell, or `null` if the route named no real cell. */
   lesson: Lesson | null;
-  /** Its place in the arena, `1`-based — the number written on the tile. */
+  /** Its place in the catalogue, `1`-based — the number written on the tile. */
   number: number;
   /** Where the child is. */
   stage: LessonStage;
@@ -57,7 +60,8 @@ interface LessonState {
  *
  * The cell is the argument rather than the lesson, because what the child
  * pressed is a tile and what has to sink afterwards is that same tile — the
- * lesson on it is a lookup.
+ * lesson on it is a lookup. When `lessons.json` outgrows the ninety discs,
+ * the tile hosts a stack and this opens the next unfinished layer.
  *
  * The test is answered once per question and scored at the end, rather than
  * retried until right: a score nobody can miss is not a result worth showing.
@@ -65,56 +69,49 @@ interface LessonState {
  */
 export const useLesson = (cellId: string): LessonState => {
   const completeCell = useCompleteLesson();
+  const user = useUser();
 
   const cell = useMemo(() => cellFromKey(cellId), [cellId]);
+  const activeIndex = useMemo(() => {
+    if (!cell || !user) return null;
+    const ordinal = cellOrdinal(cell);
+    if (
+      lessonAccess(ordinal, user.completedLessonIds, user.platform.level)
+        .status === 'LOCKED'
+    ) {
+      return null;
+    }
+    return activeLessonIndexForCell(ordinal, user.completedLessonIds);
+  }, [cell, user]);
+
   const lesson = useMemo(
-    () => (cell ? lessonAt(cellOrdinal(cell)) : null),
-    [cell],
+    () => (activeIndex === null ? null : lessonAt(activeIndex)),
+    [activeIndex],
   );
 
-  const [stage, setStage] = useState<LessonStage>('theory');
-  const [index, setIndex] = useState(0);
-  const [correct, setCorrect] = useState(0);
-  const [verdict, setVerdict] = useState<LessonState['verdict']>(null);
-
+  const [session, dispatch] = useReducer(
+    (current: typeof INITIAL_LESSON_SESSION, action: LessonAction) =>
+      transitionLesson(current, lesson, action),
+    INITIAL_LESSON_SESSION,
+  );
+  const { stage, index, correct, verdict } = session;
+  useEffect(() => {
+    void cellId;
+    void lesson?.id;
+    dispatch({ type: 'reset' });
+  }, [cellId, lesson?.id]);
   const theoryCount = lesson?.theory.length ?? 0;
   const questionCount = lesson?.questions.length ?? 0;
   const total = stage === 'theory' ? theoryCount : questionCount;
-
-  const next = useCallback(() => {
-    // The verdict on screen is what `next` is dismissing, so it goes first.
-    setVerdict(null);
-
-    setIndex((current) => {
-      if (stage === 'theory') {
-        if (current + 1 < theoryCount) return current + 1;
-        setStage('test');
-        return 0;
-      }
-
-      if (current + 1 < questionCount) return current + 1;
-      setStage('result');
-      return current;
-    });
-  }, [questionCount, stage, theoryCount]);
-
-  const answer = useCallback(
-    (option: number) => {
-      if (!lesson || verdict) return;
-
-      const isRight = option === lesson.questions[index].answerIndex;
-      setVerdict({ chosen: option, isRight });
-      if (isRight) setCorrect((score) => score + 1);
-    },
-    [index, lesson, verdict],
+  const next = useCallback(
+    () => dispatch({ type: 'next', stage, index }),
+    [stage, index],
   );
-
-  const retry = useCallback(() => {
-    setStage('theory');
-    setIndex(0);
-    setCorrect(0);
-    setVerdict(null);
-  }, []);
+  const answer = useCallback(
+    (option: number) => dispatch({ type: 'answer', index, option }),
+    [index],
+  );
+  const retry = useCallback(() => dispatch({ type: 'reset' }), []);
 
   const passed = isPassed(correct, questionCount);
 
@@ -130,7 +127,7 @@ export const useLesson = (cellId: string): LessonState => {
 
   return {
     lesson,
-    number: cell ? cellOrdinal(cell) + 1 : 0,
+    number: activeIndex !== null ? activeIndex + 1 : 0,
     stage,
     index,
     total,

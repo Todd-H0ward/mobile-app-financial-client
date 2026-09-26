@@ -6,14 +6,13 @@ import type { Lesson, LessonFile, LessonQuestion } from '../../model';
 // CONSTANTS
 // ═══════════════════════════════════════════
 
+/** Three sectors, five terraces and six discs — the FBX floor. */
+const MIN_LESSONS = 90;
+
 /**
- * One segment's worth: five terraces of six cells.
- *
- * `lessonAt` walks the list and wraps, so the other two segments repeat these
- * until they are written. Thirty is the floor because a child working through
- * one whole segment must never meet the same lesson twice.
+ * Content may outgrow the discs: extras stack as further layers on the same
+ * cells (`lessonIndicesForCell`). Geometry stays fixed; only the JSON grows.
  */
-const MIN_LESSONS = 30;
 
 /** Two would be a coin toss; three is a choice. */
 const MIN_OPTIONS = 3;
@@ -45,6 +44,12 @@ const assertQuestion = (quiz: unknown, path: string): LessonQuestion => {
   });
 
   const { answerIndex } = quiz;
+  if (quiz.explanation !== undefined && !isNonEmptyString(quiz.explanation)) {
+    throw new Error(`${path}.explanation: non-empty string required`);
+  }
+  if (new Set(quiz.options).size !== quiz.options.length) {
+    throw new Error(`${path}.options: answers must be distinct`);
+  }
   if (
     typeof answerIndex !== 'number' ||
     !Number.isInteger(answerIndex) ||

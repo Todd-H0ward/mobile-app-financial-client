@@ -28,11 +28,14 @@ interface HazeBackdrop {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** Soft shell behind the arena — Smash Hit–style gradient sky + mist. */
+/** Soft shell behind the arena — night void + amber smog. */
 const SKY_RADIUS = SCENE_RADIUS * 2.4;
 
-/** How much the drifting mist lifts off the gradient (0…1). */
-const HAZE_STRENGTH = 0.28;
+/**
+ * How much the drifting mist lifts off the gradient (0…1).
+ * Dense enough to read as atmosphere without washing the wedges.
+ */
+const HAZE_STRENGTH = 0.34;
 
 const SKY_VERTEX = /* glsl */ `
 varying vec3 vLocalPos;
@@ -72,7 +75,7 @@ float noise(vec2 p) {
 float fbm(vec2 p) {
   float v = 0.0;
   float a = 0.5;
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 5; i++) {
     v += a * noise(p);
     p *= 2.05;
     a *= 0.5;
@@ -84,24 +87,30 @@ void main() {
   vec3 dir = normalize(vLocalPos);
   float h = dir.y * 0.5 + 0.5;
 
-  // Soft three-stop vertical wash — the Smash Hit “empty corridor” sky.
-  vec3 sky = mix(uSkyBottom, uSkyHorizon, smoothstep(0.0, 0.38, h));
-  sky = mix(sky, uSkyMid, smoothstep(0.28, 0.62, h));
-  sky = mix(sky, uSkyTop, smoothstep(0.55, 1.0, h));
+  // Night void → polluted horizon → black under the rim.
+  vec3 sky = mix(uSkyBottom, uSkyHorizon, smoothstep(0.0, 0.42, h));
+  sky = mix(sky, uSkyMid, smoothstep(0.32, 0.68, h));
+  sky = mix(sky, uSkyTop, smoothstep(0.58, 1.0, h));
 
-  // Slow colour breathing so the gradient never feels printed.
-  float breath = sin(uTime * 0.18) * 0.025 + sin(uTime * 0.07 + 1.7) * 0.015;
-  sky += breath;
+  // Slow sodium pulse so the smog never reads as a flat poster.
+  float breath = sin(uTime * 0.14) * 0.03 + sin(uTime * 0.06 + 1.7) * 0.02;
+  sky += vec3(breath * 0.6, breath * 0.25, breath * 0.1);
 
-  // Light animated haze, denser near the horizon.
+  // Volumetric haze: denser at the horizon and under the platform.
   vec2 mistUv = vec2(atan(dir.z, dir.x) * 0.3183 + 0.5, h);
-  float n1 = fbm(mistUv * vec2(2.2, 1.4) + vec2(uTime * 0.035, uTime * 0.018));
-  float n2 = fbm(mistUv * vec2(4.0, 2.5) - vec2(uTime * 0.022, -uTime * 0.03));
-  float mist = smoothstep(0.3, 0.85, n1 * 0.55 + n2 * 0.45);
-  float horizon = smoothstep(0.05, 0.55, 1.0 - abs(dir.y));
-  float haze = mist * horizon * uHazeStrength;
+  float n1 = fbm(mistUv * vec2(2.4, 1.5) + vec2(uTime * 0.04, uTime * 0.02));
+  float n2 = fbm(mistUv * vec2(4.2, 2.6) - vec2(uTime * 0.025, -uTime * 0.032));
+  float n3 = fbm(mistUv * vec2(1.2, 0.8) + vec2(uTime * 0.012, 0.4));
+  float mist = smoothstep(0.22, 0.9, n1 * 0.45 + n2 * 0.35 + n3 * 0.2);
+  float horizon = smoothstep(0.0, 0.62, 1.0 - abs(dir.y));
+  float under = smoothstep(0.55, 0.15, h);
+  float haze = mist * max(horizon, under * 0.7) * uHazeStrength;
 
   sky = mix(sky, uHaze, haze);
+
+  // Soft glow band just above the horizon — distant city light bleed.
+  float glowBand = smoothstep(0.38, 0.48, h) * (1.0 - smoothstep(0.48, 0.58, h));
+  sky += uHaze * glowBand * 0.22;
 
   gl_FragColor = vec4(sky, 1.0);
 }
@@ -112,7 +121,7 @@ void main() {
 // ═══════════════════════════════════════════
 
 /**
- * Inward sky sphere: Smash Hit soft gradient + cheap drifting haze.
+ * Inward sky sphere: Blade Runner void + amber particulate haze.
  * One draw call, no post-process (those melt mid-range Android).
  */
 const createHazeBackdrop = (): HazeBackdrop => {

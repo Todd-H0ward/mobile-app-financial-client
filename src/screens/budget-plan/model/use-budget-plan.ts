@@ -30,6 +30,8 @@ interface BudgetPlanController {
   /** Coins not laid out yet. Leaving some is allowed. */
   planLeft: number;
   canConfirm: boolean;
+  /** Only planning accepts edits; other phases return to the world. */
+  isPlanning: boolean;
   /** True when needs is still zero — confirmation asks before starting. */
   isNeedsEmpty: boolean;
   isNeedsWarningVisible: boolean;
@@ -60,6 +62,7 @@ export const useBudgetPlan = (): BudgetPlanController => {
   const updateUser = useUpdateUser();
   const showFeedback = useShowFeedback();
 
+  const isPlanning = user?.period.phase === 'planning';
   const available = user?.wallet.balance ?? 0;
   const savedPlan = user?.period.plan ?? EMPTY_PLAN;
 
@@ -69,17 +72,30 @@ export const useBudgetPlan = (): BudgetPlanController => {
   const planLeft = remainder(available, plan);
 
   const commit = (next: BudgetPlan) => {
-    if (!user) return;
+    if (!user || !isPlanning) return;
 
-    const drafted = {
-      ...user,
-      period: { ...user.period, plan: next },
-    };
-    const after = startPeriod(drafted);
+    let transition: { before: typeof user; after: typeof user } | undefined;
+    updateUser((current) => {
+      // A second tap or stale screen must not overwrite a newer period.
+      if (
+        current.period.phase !== 'planning' ||
+        current.period.index !== user.period.index ||
+        !canConfirm(next, current.wallet.balance)
+      )
+        return current;
+      const after = startPeriod({
+        ...current,
+        period: { ...current.period, plan: next },
+      });
+      transition = { before: current, after };
+      return after;
+    });
+    if (!transition) return;
+    const { before, after } = transition;
 
     hapticSuccess();
     showFeedback({
-      before: user,
+      before,
       after,
       action: 'plan',
       params: {
@@ -89,7 +105,6 @@ export const useBudgetPlan = (): BudgetPlanController => {
       },
     });
 
-    updateUser(() => after);
     setIsNeedsWarningVisible(false);
     router.replace(STATIC_ROUTES.HOME);
   };
@@ -98,7 +113,8 @@ export const useBudgetPlan = (): BudgetPlanController => {
     available,
     plan,
     planLeft,
-    canConfirm: canConfirm(plan, available),
+    isPlanning,
+    canConfirm: isPlanning && canConfirm(plan, available),
     isNeedsEmpty: plan.needs === 0,
     isNeedsWarningVisible,
     /** Wallet is empty — confirm starts the day so chores can pay. */
@@ -117,7 +133,7 @@ export const useBudgetPlan = (): BudgetPlanController => {
     },
 
     requestConfirm: () => {
-      if (!canConfirm(plan, available)) return;
+      if (!isPlanning || !canConfirm(plan, available)) return;
 
       // Nothing to allocate — skip the needs warning and open the day so
       // the child can earn on chores (period-2 softlock otherwise).
@@ -137,7 +153,7 @@ export const useBudgetPlan = (): BudgetPlanController => {
     dismissNeedsWarning: () => setIsNeedsWarningVisible(false),
 
     confirmDespiteNeeds: () => {
-      if (!canConfirm(plan, available)) return;
+      if (!isPlanning || !canConfirm(plan, available)) return;
       commit(plan);
     },
   };

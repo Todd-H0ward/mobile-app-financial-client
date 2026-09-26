@@ -3,8 +3,12 @@ export { createInitialUser, USER_SAVE_VERSION } from './initial-user';
 export { isUserSave, migrateUser } from './migrations';
 export type { UserPersistedState, UserStore } from './store';
 export {
+  useCommitUser,
+  useCompleteLesson,
   useCreateUser,
   useDeleteUser,
+  useDoneCells,
+  useDoneLessonIds,
   useHomeHudSource,
   useResetUser,
   useSetDemoMode,
@@ -16,6 +20,7 @@ export {
 export type {
   BudgetFact,
   BudgetPlan,
+  ModulesSave,
   PeriodPhase,
   PeriodRecord,
   PeriodSave,
@@ -31,7 +36,9 @@ export type {
 export { PERIOD_PHASES } from './types';
 export {
   useIsAnimationEnabled,
+  useIsCameraRigEnabled,
   useIsDemoMode,
+  useIsGlassEnabled,
   useIsMotionEnabled,
   useIsParentGateEnabled,
   useIsSoundEnabled,

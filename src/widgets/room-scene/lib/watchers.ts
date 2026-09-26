@@ -21,7 +21,9 @@ import {
   WATCHER_ACTIONS,
   WATCHER_CLIPS,
   WATCHER_FADE_SEC,
+  WATCHER_FOCUS_AIM_DOWN,
   WATCHER_FOCUS_DISTANCE,
+  WATCHER_FOCUS_LIFT,
   WATCHER_HIDDEN_MATERIALS,
   WATCHER_IDS,
   WATCHER_PLACEMENT,
@@ -51,6 +53,13 @@ interface Watchers {
    * the camera staring at the back of a television.
    */
   focus: (watcher: WatcherId) => WatcherFocus | null;
+  /**
+   * Raises the focused machine so the React terminal fits under the face.
+   * Pass `null` to restore both to their map height.
+   */
+  setLifted: (watcher: WatcherId | null) => void;
+  /** Hides both machines when the camera is in a segment, not on the map. */
+  setVisible: (isVisible: boolean) => void;
   dispose: () => void;
 }
 
@@ -337,7 +346,10 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
     // hovers, the keeper swings on its bracket — so aiming at the pivot
     // leaves the camera staring at the cable below an empty sky.
     face.updateWorldMatrix(true, false);
-    const anchor = new Box3().setFromObject(face).getCenter(new Vector3());
+    const centre = new Box3().setFromObject(face).getCenter(new Vector3());
+    // Aim under the face so it sits in the upper band above the React terminal.
+    const anchor = centre.clone();
+    anchor.y -= WATCHER_FOCUS_AIM_DOWN;
 
     // +Z is the way a screen faces in its own space, so this is the seat
     // directly in front of it however the rig and the yaw have turned it.
@@ -347,7 +359,10 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
       .applyQuaternion(pivot.getWorldQuaternion(new Quaternion()))
       .multiplyScalar(WATCHER_FOCUS_DISTANCE);
 
-    return { anchor, eye: anchor.clone().add(ahead) };
+    // Eye stays level with the face, not the depressed aim point.
+    const eye = centre.clone().add(ahead);
+
+    return { anchor, eye };
   };
 
   return {
@@ -357,6 +372,18 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
       for (const mixer of mixers.values()) mixer.update(deltaSec);
     },
     play,
+    setLifted: (watcher) => {
+      for (const id of WATCHER_IDS) {
+        const pivot = pivots.get(id);
+        if (!pivot) continue;
+        const spot = WATCHER_PLACEMENT[id];
+        const lift = watcher === id ? WATCHER_FOCUS_LIFT : 0;
+        pivot.position.set(spot.x, spot.y + lift, spot.z);
+      }
+    },
+    setVisible: (isVisible) => {
+      rig.visible = isVisible;
+    },
     dispose: () => {
       for (const mixer of mixers.values()) mixer.stopAllAction();
       for (const look of looks.values()) {

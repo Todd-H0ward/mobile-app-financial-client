@@ -1,0 +1,1 @@
+export { assertStoryContent } from './schema';

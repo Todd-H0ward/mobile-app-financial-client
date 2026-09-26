@@ -5,9 +5,6 @@
     "cancel": "Cancel",
     "understood": "Got it"
   },
-  "tabs": {
-    "home": "Home"
-  },
   "settings": {
     "title": "Settings",
     "language": "Language",
@@ -19,7 +16,11 @@
     "animationsSubtitle": "Smooth transitions and robot movement. Honours system Reduce Motion",
     "sound": "Sound",
     "soundSubtitle": "Haptics and future audio — one switch for both",
+    "glass": "Liquid glass",
+    "glassSubtitle": "Frosted cards and sheets. Off keeps solid surfaces. Honours Reduce Transparency",
     "development": "Development",
+    "cameraRig": "Camera rig",
+    "cameraRigSubtitle": "Sliders for framing the arena — paste values into camera.ts",
     "uiKitDescription": "Design system showcase: all components and states on one screen.",
     "openUiKit": "Open UI kit",
     "profile": "Profile",
@@ -85,32 +86,15 @@
   },
   "home": {
     "settingsA11y": "Settings",
-    "balance": "Balance",
-    "savings": "Savings jar",
-    "planBannerTitle": "Make a budget plan",
-    "planBannerBody": "Decide where the coins go first — then you can spend.",
-    "planBannerAction": "Make a plan",
-    "endBannerTitle": "End the day",
-    "endBannerBody": "See where the coins went — plan next to fact.",
-    "endBannerWarnTitle": "End the day?",
-    "endBannerWarnBody": "Needs are still under plan — you can finish anyway; the totals will show the gap.",
-    "endBannerDisabledTitle": "End the day",
-    "endBannerDisabledBody": "First make a budget plan — then you can finish the day.",
-    "endBannerDisabledAction": "Make a plan",
-    "endBannerAction": "End day",
     "goal": {
-      "none": "No goal chosen",
-      "noneHint": "Open the savings jar and pick what to save for",
       "progress": "{{saved}} of {{price}}",
       "progressA11y": "Goal progress: {{percent}} percent"
     },
-    "lastCredit": "Latest credit",
     "task": {
       "title": "Task",
       "comingSoon": "Tasks will show up here very soon",
       "allDone": "Every chore this period is done — well done"
-    },
-    "parentsA11y": "Grown-ups"
+    }
   },
   "parents": {
     "title": "Grown-ups",
@@ -180,7 +164,17 @@
         "name": "The Keeper",
         "line": "Put a little aside. Whatever you save, I will keep safe."
       }
-    }
+    },
+    "escaped": "You made it out! Your tiers are saved.",
+    "liftSavings": "Tier savings: {{saved}} / {{price}}",
+    "planFirst": "Make a plan",
+    "saveForLift": "Save for a tier",
+    "confirmLiftTitle": "Rise to tier {{level}}?",
+    "confirmLiftBody": "Spend {{price}} from the tier jar, leaving {{remaining}}. Your wallet stays unchanged. This tier is yours permanently.",
+    "cancelLift": "Not yet",
+    "confirmLift": "Pay and rise",
+    "liftHistory": "Platform purchases",
+    "liftReceipt": "Tier {{level}} · period {{period}}: −{{amount}} from savings, {{remaining}} left."
   },
   "wallet": {
     "source": {
@@ -355,6 +349,27 @@
     "under": "−{{count}} under plan",
     "whatHappened": "What happened",
     "continue": "What you can do next",
+    "detailTitle": "Where the coins went",
+    "earned": "Earned: {{count}}",
+    "spentCharge": "Spent on charge: {{count}}",
+    "spentModules": "Spent on modules and looks: {{count}}",
+    "saved": "Put in the jar: {{count}}",
+    "bonus": "Plan bonus: +{{count}}",
+    "penalty": "Plan miss: −{{count}}",
+    "goalTitle": "Your goal",
+    "goalNone": "No goal picked yet.",
+    "goalProgress": "{{saved}} / {{price}}",
+    "goalReached": "Goal reached this period.",
+    "goalOpen": "Still saving.",
+    "robotTitle": "Robot status",
+    "robotCharge": "Charge {{value}}%",
+    "robotSpirit": "Spirit {{value}}%",
+    "robotLevel": "Platform tier {{level}}",
+    "mood": {
+      "tired": "Mood: tired — charge is low.",
+      "sad": "Mood: sad — spirit is low.",
+      "content": "Mood: content."
+    },
     "story": {
       "allOnPlan": "Every direction landed on the plan. Nice work keeping the three boxes in balance.",
       "wantsAteSavings": "Wants took more than planned, and those coins did not reach the savings jar. The money moved — it did not vanish.",
@@ -408,70 +423,54 @@
     "planFirstBody": "Spending waits on a confirmed plan. Make one, then come back.",
     "goPlan": "Make a plan",
     "stores": {
-      "grocery": {
-        "title": "Grocery",
-        "subtitle": "Food and soap"
-      },
-      "clothes": {
-        "title": "Clothes",
-        "subtitle": "What you want to wear"
-      },
-      "furniture": {
-        "title": "Decor",
-        "subtitle": "Nice to have, not required"
-      },
-      "toys": {
-        "title": "Toys",
-        "subtitle": "Buy now — play later"
+      "workshop": {
+        "title": "Workshop",
+        "subtitle": "Charge, modules and looks for the robot"
       }
     },
-    "toys": {
-      "gamesTitle": "Games for the shelf",
-      "gamesBody": "Buy a puzzle or the console here — they appear on the living-room shelf. Tap the shelf to play."
-    },
     "items": {
-      "bread": {
-        "title": "Bread and milk",
-        "note": "Food for the period — a need."
+      "charge-small": {
+        "title": "Small charge",
+        "note": "Basic battery charge — a need every period."
       },
-      "porridge": {
-        "title": "Porridge",
-        "note": "A filling breakfast — a need, not a luxury."
+      "charge-medium": {
+        "title": "Medium charge",
+        "note": "A solid charge — lasts longer."
       },
-      "soap": {
-        "title": "Soap",
-        "note": "Cleanliness is a need, not a luxury."
+      "charge-full": {
+        "title": "Full charge",
+        "note": "Maximum charge — the dog is in great shape."
       },
-      "stickers": {
-        "title": "Stickers",
-        "note": "They decorate the wall. Can wait until next period."
+      "module-sensor": {
+        "title": "Sensor module",
+        "note": "First module: +10% chore rewards."
       },
-      "toy-car": {
-        "title": "Toy car",
-        "note": "A toy. You will be able to play with it later."
+      "module-antenna": {
+        "title": "Antenna module",
+        "note": "Second module: +1 hint in mini-games."
       },
-      "ball": {
-        "title": "Ball",
-        "note": "Roll and catch. The mini-game comes a little later."
+      "module-core": {
+        "title": "Core module",
+        "note": "Third module: +15% rewards and +2 hints."
       },
-      "rug": {
-        "title": "Rug",
-        "note": "A soft rug — decor, not a need."
+      "visor-red": {
+        "title": "Red visor",
+        "note": "A bright visor — looks only, not required."
       },
-      "lamp": {
-        "title": "Night light",
-        "note": "Warm light in the evening — a want, not a need."
+      "visor-gold": {
+        "title": "Gold visor",
+        "note": "A gold visor — it shines nicely."
       },
-      "sweater": {
-        "title": "Sweater",
-        "note": "A fancy sweater. Expensive — worth saving first."
+      "antenna-long": {
+        "title": "Long antenna",
+        "note": "A tall antenna — easy to spot from afar."
       },
-      "scarf": {
-        "title": "Scarf",
-        "note": "A warm scarf — nice to have, not required."
+      "sticker-star": {
+        "title": "Star sticker",
+        "note": "A sticker for the shell — can wait."
       },
-      "puzzle-living": {
-        "title": "Living-room puzzle",
+      "puzzle-arena": {
+        "title": "Arena puzzle",
         "note": "Buy it — the puzzle unlocks in the mini-games."
       },
       "game-console": {
@@ -521,6 +520,9 @@
       },
       "telescope": {
         "title": "Telescope"
+      },
+      "lift": {
+        "title": "Next tier"
       }
     }
   },
@@ -723,6 +725,102 @@
       "owned": "Things you keep"
     }
   },
+  "playkit": {
+    "section": "Overseer trials",
+    "ok": "Right",
+    "miss": "Close",
+    "ui": {
+      "abort": "< ABORT",
+      "channel": "CHANNEL {{title}}",
+      "debrief": "// DEBRIEF",
+      "noPenalty": "// ERRORS STILL PAY"
+    },
+    "bins": {
+      "needs": "Needs",
+      "wants": "Wants",
+      "savings": "Jar"
+    },
+    "conveyor": {
+      "dragHint": "Pick a bin for the item"
+    },
+    "scales": {
+      "hint": "Match both pans to the targets"
+    },
+    "cashier": {
+      "brief": "Price {{price}}, paid {{paid}}. Make exact change.",
+      "change": "Change: {{count}}",
+      "reset": "Reset"
+    },
+    "jar": {
+      "hint": "Tap real coins — skip the fakes",
+      "picked": "Picked: {{count}}"
+    },
+    "pinball": {
+      "hint": "Swipe left, centre or right toward a pocket",
+      "swipe": "Swipe here",
+      "target": "Target: pocket {{pocket}}"
+    },
+    "memory": {
+      "hint": "Open pairs: price and item"
+    },
+    "path": {
+      "hint": "Tap safe cells from bottom to top",
+      "reset": "Reset path"
+    },
+    "assemble": {
+      "hint": "Pick a part, then a slot"
+    },
+    "laser": {
+      "hint": "Mark waste lines on the receipt"
+    },
+    "orbit": {
+      "hint": "Drag the coin and release over the jar",
+      "ready": "Release now!",
+      "spin": "Keep spinning…"
+    },
+    "games": {
+      "conveyor": {
+        "title": "Conveyor",
+        "blurb": "Sort needs, wants and jar"
+      },
+      "scales": {
+        "title": "Budget scales",
+        "blurb": "Balance charge and modules"
+      },
+      "cashier": {
+        "title": "Cashier",
+        "blurb": "Tap coins for exact change"
+      },
+      "jar": {
+        "title": "Jar catch",
+        "blurb": "Catch the real coins"
+      },
+      "pinball": {
+        "title": "Pit pinball",
+        "blurb": "Send the gear into a pocket"
+      },
+      "memory": {
+        "title": "Price memory",
+        "blurb": "Match price and item pairs"
+      },
+      "path": {
+        "title": "Climb path",
+        "blurb": "Trace a safe path upward"
+      },
+      "assemble": {
+        "title": "Module build",
+        "blurb": "Seat parts into slots"
+      },
+      "laser": {
+        "title": "Receipt scan",
+        "blurb": "Mark waste spending"
+      },
+      "orbit": {
+        "title": "Coin orbit",
+        "blurb": "Release the coin over the jar"
+      }
+    }
+  },
   "games": {
     "title": "Arcade",
     "subtitle": "Short sittings — coins under a chore",
@@ -774,9 +872,15 @@
       "levels": {
         "rooms-living": "Living room"
       },
-      "empty": "No puzzles on the shelf yet. Buy one in the toys shop on the street.",
+      "empty": "No puzzles on the shelf yet.",
       "goToys": "Go to toys"
-    }
+    },
+    "practice": {
+      "limit": "You have completed today’s three paid sittings. Keep practising without extra coins.",
+      "planning": "Practice complete. Confirm the period budget before playing for coins."
+    },
+    "paidRemaining": "Paid sittings left today: {{count}}",
+    "practiceAvailable": "Games are open for practice. No extra coins are paid right now."
   },
   "lesson": {
     "header": "LESSON {{number}} / 30",
@@ -794,5 +898,197 @@
     "failedText": "Not passed. At least {{needed}} must be right. Read it again.",
     "retry": "TAKE IT AGAIN",
     "back": "LEAVE"
+  },
+  "setup": {
+    "welcome": "Let’s find our way out!",
+    "story": "A robot dog fell into a pit. The lift runs on game coins. Help it escape: do tasks and choose where your coins go.",
+    "needs": "Needs: charge for the robot.",
+    "wants": "Wants: decorations and upgrades. They can wait.",
+    "savings": "Savings: put coins aside for the next tier or another goal.",
+    "safeError": "Mistakes are safe. Your earned progress stays, and you can improve your next plan. Tap “?” whenever you need help.",
+    "meet": "Meet your robot",
+    "title": "Your team",
+    "privacy": "Invent game names. No real name is needed. Everything stays on this device.",
+    "playerName": "Your game name",
+    "robotName": "Robot’s name",
+    "defaultPlayer": "Explorer",
+    "defaultRobot": "Spark",
+    "emptyName": "Fill in both names. Spaces do not count.",
+    "start": "Start the adventure",
+    "save": "Save",
+    "edit": "Names and appearance",
+    "modules": {
+      "head": {
+        "0": "Scout ears",
+        "1": "Radar",
+        "2": "Twin antennae",
+        "title": "Head and antennae"
+      },
+      "body": {
+        "0": "Light panel",
+        "1": "Cargo rack",
+        "2": "Protective armour",
+        "title": "Chassis"
+      },
+      "legs": {
+        "0": "Light pads",
+        "1": "Traction shoes",
+        "2": "Wide stabilisers",
+        "title": "Feet"
+      }
+    }
+  },
+  "story": {
+    "skip": "Continue",
+    "placeholder": "Video comes later. For now — the story in words.",
+    "videoReady": "Video is wired.",
+    "intro": {
+      "title": "The walk",
+      "beats": {
+        "walk": "The robot dog walks with its friend. An ordinary day, an ordinary road.",
+        "event": "Something happens — the ground gives way.",
+        "fall": "It falls into the pit. The friend stays at the rim. Now they must climb out."
+      }
+    },
+    "finale": {
+      "title": "Out",
+      "beats": {
+        "climb": "The last tier is behind. The rim is close.",
+        "reunion": "They are together again. The story is not over — more adventures wait."
+      }
+    }
+  },
+  "action": {
+    "tasks": "Open chores",
+    "games": "Open arcade",
+    "budget_plan": "Make a plan",
+    "shop": "Open workshop",
+    "savings": "Open jar",
+    "end_period": "End the day",
+    "period_summary": "See totals",
+    "history": "Open reports",
+    "glossary": "Open glossary"
+  },
+  "watcher": {
+    "terminal": {
+      "label": "{{name}} · TERMINAL",
+      "onAir": "{{name}} on the line",
+      "leave": "[ return to the pit ]",
+      "back": "back",
+      "subtitle": {
+        "keeper": "let’s make a plan for the period",
+        "overseer": "trials and coins",
+        "plan": "three budget boxes",
+        "shop": "charge · modules · looks",
+        "jar": "jar for the next tier",
+        "report": "totals and history",
+        "trials": "pick a trial",
+        "arcade": "Overseer mini-games"
+      },
+      "menu": {
+        "plan": "make a plan",
+        "shop": "workshop",
+        "jar": "savings jar",
+        "report": "totals",
+        "trials": "trials",
+        "arcade": "arcade"
+      },
+      "plan": {
+        "youHave": "you have",
+        "coinsForPlan": "coins for this plan",
+        "needs": "charge",
+        "needsHint": "needed every period",
+        "wants": "modules",
+        "wantsHint": "can buy later",
+        "savings": "jar",
+        "savingsHint": "for the next tier",
+        "remainder": "not allocated yet: {{count}} coins",
+        "save": "save plan",
+        "notPlanning": "The plan is already locked. Come back next period.",
+        "minus": "Remove 10",
+        "plus": "Add 10"
+      },
+      "shop": {
+        "balance": "wallet: {{count}}",
+        "planFirst": "Confirm the period plan first.",
+        "shortage": "Short by {{shortfall}}. Earn more or pick cheaper.",
+        "confirm": "Buy “{{item}}” for {{price}}?",
+        "buy": "buy",
+        "bought": "Bought: {{item}}",
+        "failed": "Purchase failed. Try again."
+      },
+      "jar": {
+        "empty": "No jar goal selected.",
+        "progress": "{{saved}} of {{price}} ({{percent}}%)",
+        "remaining": "{{count}} left",
+        "open": "open the jar"
+      },
+      "report": {
+        "summaryReady": "Period totals are ready. Read them, then move on.",
+        "historyHint": "Here is the history of plans and facts."
+      },
+      "trials": {
+        "planFirst": "Make a plan with the Keeper first — then trials.",
+        "pick": "Pick a trial. Right and wrong both pay."
+      },
+      "arcade": {
+        "paidLeft": "Paid games today: {{left}} of {{total}}",
+        "hint": "After the limit, arcade stays open without coins.",
+        "trialsTitle": "Overseer trials"
+      }
+    },
+    "overseer": {
+      "default": "I am watching. Every coin has a place — or it does not.",
+      "challenge": "A new period. Prove you can earn before you spend.",
+      "active_task": "A chore waits. Finish it — I count the coins.",
+      "no_task": "No chore left. Find another way to earn, or face the totals.",
+      "low_charge": "Charge is low. Weak dogs do not climb. Act.",
+      "high_charge": "Full charge. Do not waste it on nothing.",
+      "games": "Arcade pays less than chores. Remember that.",
+      "level_ready": "The lift jar is heavy. Rise — or keep scraping.",
+      "period_end": "Period closed. Numbers do not lie.",
+      "new_module": "A module changes the math. Use it or lose the edge."
+    },
+    "keeper": {
+      "default": "I keep what you set aside. Ask when you are unsure.",
+      "plan": "Before you spend, name the three boxes. I will hold the plan.",
+      "shop": "The workshop has charge, modules and looks. Needs first.",
+      "savings": "A little into the jar now is a tier later.",
+      "low_charge": "Charge is low. Buy charge before toys — needs come first.",
+      "report": "Here are the totals. Read them, then choose the next step.",
+      "goal_near": "Your goal is close. One more deposit and you are there.",
+      "needs_unmet": "Needs are still under plan. Protect them before wants.",
+      "recovery": "A miss is not the end. We rebuild the plan together.",
+      "glossary": "Words matter. Open the glossary if a word is new."
+    }
+  },
+  "financeGame": {
+    "market": "Smart basket",
+    "weekly": "Weekly plan",
+    "console": "Console: Snake and Spacewar",
+    "round": "Round {{round}} of 3",
+    "check": "Check decision",
+    "debrief": "Review the decision",
+    "comparison": "Your answer: {{chosen}} · Calculated: {{correct}}",
+    "understood": "Continue",
+    "remaining": "Paid games remaining today: {{count}}. After that, practice stays open without coins.",
+    "noPenalty": "Mistakes never remove coins. A completed game with mistakes earns half the usual reward when payment is available.",
+    "weeklyPractice": "This week’s reward has been paid. This is free practice. A new week starts on Monday UTC.",
+    "result": {
+      "paid": "Earned {{coins}} coins.",
+      "limit": "Practice complete. Today’s three paid games are used.",
+      "planning": "Practice complete. Confirm a budget to earn rewards.",
+      "weekly": "Practice complete. This week’s reward has already been paid.",
+      "duplicate": "This session was already counted."
+    }
+  },
+  "storageRecovery": {
+    "title": "Could not save or load the game",
+    "write": "The last action has not been saved. Previous progress is unchanged. Free device storage and retry.",
+    "read": "The profile could not be read. It has not been replaced with a new game. You can retry loading.",
+    "retry": "Retry",
+    "backup": "Only you can choose a new game. The original record is copied first for recovery. If copying fails, it remains untouched.",
+    "newProfile": "Keep a copy and start again",
+    "confirm": "Confirm new game"
   }
 }

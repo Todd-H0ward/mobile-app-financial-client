@@ -14,7 +14,6 @@ import {
 
 import { STORAGE_KEYS } from '@/shared/constants';
 import { makeDemoTimeSource } from '@/shared/lib/time-source';
-import { flushPersistWrites } from '@/shared/model';
 
 import { useTaskPlay, useTasksList } from './use-task';
 
@@ -107,21 +106,18 @@ const currentUser = (): UserSave => {
 };
 
 const reopenFromDisk = async () => {
-  await flushPersistWrites();
   const raw = storage.get(STORAGE_KEYS.USER);
   if (!raw) throw new Error('Expected a persisted profile');
   useUserStore.setState({ user: null });
   storage.set(STORAGE_KEYS.USER, raw);
   await useUserStore.persist.rehydrate();
-  await flushPersistWrites();
 };
 
 // ═══════════════════════════════════════════
 // TESTS
 // ═══════════════════════════════════════════
 
-beforeEach(async () => {
-  await flushPersistWrites();
+beforeEach(() => {
   storage.clear();
   useUserStore.setState({ user: activeUser(), demoBackup: null });
   showFeedback.mockReset();

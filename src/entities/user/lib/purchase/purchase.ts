@@ -2,13 +2,34 @@ import {
   type CatalogueItem,
   directionForKind,
   getCatalogueItem,
+  isModuleItem,
 } from '@/entities/catalogue';
 
 import type { TimeSource } from '@/shared/lib/time-source';
 import { clamp } from '@/shared/utils';
 
-import type { UserSave } from '../../model';
+import type { ModulesSave, UserSave } from '../../model';
 import { debitWallet } from '../wallet';
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
+/**
+ * Adds a bought module to the save and bumps the tier to the owned count
+ * (capped at 3). Cosmetics and charge packs leave modules untouched.
+ */
+const withPurchasedModule = (
+  modules: ModulesSave,
+  item: CatalogueItem,
+): ModulesSave => {
+  if (!isModuleItem(item) || !item.ownedId) return modules;
+  if (modules.owned.includes(item.ownedId)) return modules;
+
+  const owned = [...modules.owned, item.ownedId];
+  const tier = Math.min(3, owned.length) as ModulesSave['tier'];
+  return { owned, tier };
+};
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -115,6 +136,7 @@ export const applyPurchase = (
         charge,
       },
       ownedItemIds,
+      modules: withPurchasedModule(user.modules, item),
     },
   };
 };

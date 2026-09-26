@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
-import { GAME_REWARDS } from '@/entities/minigame';
+import { GAME_REWARDS, PLAYKIT_GAME_IDS } from '@/entities/minigame';
 import { ownedPuzzles } from '@/entities/minigame/puzzle';
 import { useUser } from '@/entities/user';
 
@@ -21,7 +21,7 @@ export const GamesScreen = () => {
   const levels = ownedPuzzles(user?.ownedItemIds ?? []);
 
   return (
-    <Screen gap="three" isTabBarVisible={false}>
+    <Screen gap="three">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -30,6 +30,33 @@ export const GamesScreen = () => {
         </Screen.Heading>
       </Screen.Header>
 
+      <Text variant="subtitle">{t('playkit.section')}</Text>
+      {PLAYKIT_GAME_IDS.map((gameId) => (
+        <ListRow
+          key={gameId}
+          title={t(`playkit.games.${gameId}.title`)}
+          subtitle={t(`playkit.games.${gameId}.blurb`)}
+          onPress={() => router.push(DYNAMIC_ROUTES.play(gameId))}
+          trailing={
+            <Text variant="smallBold">
+              +{formatMoney(GAME_REWARDS[gameId])}
+            </Text>
+          }
+        />
+      ))}
+
+      <Button onPress={() => router.push(STATIC_ROUTES.GAMES_MARKET)}>
+        {t('financeGame.market')}
+      </Button>
+      <Button onPress={() => router.push(STATIC_ROUTES.GAMES_WEEKLY)}>
+        {t('financeGame.weekly')}
+      </Button>
+      <Button
+        variant="secondary"
+        onPress={() => router.push(STATIC_ROUTES.GAMES_CONSOLE)}
+      >
+        {t('financeGame.console')}
+      </Button>
       <Text variant="subtitle">{t('games.puzzle.title')}</Text>
 
       {levels.length === 0 ? (
@@ -38,7 +65,9 @@ export const GamesScreen = () => {
           <Button
             variant="secondary"
             isFullWidth
-            onPress={() => router.push(DYNAMIC_ROUTES.shop('toys'))}
+            onPress={() =>
+              router.push(DYNAMIC_ROUTES.watcher('keeper', 'shop'))
+            }
           >
             {t('games.puzzle.goToys')}
           </Button>

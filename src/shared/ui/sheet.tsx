@@ -27,6 +27,7 @@ import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useMotionEnabled } from '@/shared/model';
 
+import { GlassSurface } from './glass-surface';
 import { Text, type TextProps } from './text';
 
 // ═══════════════════════════════════════════
@@ -106,7 +107,7 @@ const SheetRoot = ({
   const theme = useTheme();
 
   return (
-    <View style={[styles.root, { backgroundColor: theme.surface }, style]}>
+    <GlassSurface tone="surface" style={[styles.root, style]}>
       {isGrabberVisible && (
         <View
           style={[styles.grabber, { backgroundColor: theme.surfaceDeep }]}
@@ -114,7 +115,7 @@ const SheetRoot = ({
       )}
 
       {children}
-    </View>
+    </GlassSurface>
   );
 };
 

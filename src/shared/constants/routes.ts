@@ -5,7 +5,10 @@ export const STATIC_ROUTES = {
   END_PERIOD: '/end-period',
   PERIOD_SUMMARY: '/period-summary',
   RECOVERY: '/recovery',
+  /** Deep-link alias — redirects into the Keeper terminal shop page. */
   SHOP: '/shop',
+  GAMES_MARKET: '/games/market',
+  GAMES_WEEKLY: '/games/weekly',
   SAVINGS: '/savings',
   TASKS: '/tasks',
   GAMES: '/games',
@@ -15,6 +18,7 @@ export const STATIC_ROUTES = {
   HISTORY: '/history',
   GLOSSARY: '/glossary',
   SETTINGS: '/settings',
+  SETUP: '/setup',
   PARENTS: '/parents',
   UI_KIT: '/ui-kit',
 } as const;
@@ -23,6 +27,17 @@ export type RoutePath = (typeof STATIC_ROUTES)[keyof typeof STATIC_ROUTES];
 
 export const DYNAMIC_ROUTES = {
   shop: (shopId: string) => `${STATIC_ROUTES.SHOP}/${shopId}` as const,
+  /** Opens home focused on a watcher terminal page. */
+  watcher: (watcher: 'keeper' | 'overseer', page?: string) =>
+    ({
+      pathname: '/home' as const,
+      params: page ? { watcher, page } : { watcher },
+    }) as const,
+  story: (cutsceneId: string) =>
+    ({
+      pathname: '/story/[cutsceneId]' as const,
+      params: { cutsceneId },
+    }) as const,
   goal: (goalId: string) =>
     ({
       pathname: '/savings/[goalId]' as const,
@@ -47,5 +62,10 @@ export const DYNAMIC_ROUTES = {
     ({
       pathname: '/games/puzzle/[puzzleId]' as const,
       params: { puzzleId },
+    }) as const,
+  play: (gameId: string) =>
+    ({
+      pathname: '/games/play/[gameId]' as const,
+      params: { gameId },
     }) as const,
 };

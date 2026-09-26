@@ -1,6 +1,6 @@
-const SHOP_IDS = ['grocery', 'clothes', 'furniture', 'toys'] as const;
+const SHOP_IDS = ['workshop'] as const;
 
-/** Id of one of the four street shops. */
+/** Id of one of the street shops. */
 type ShopId = (typeof SHOP_IDS)[number];
 
 /** Kind of a shop item — maps onto a budget direction. */
@@ -28,6 +28,8 @@ interface CatalogueItem {
    * the console unlocks in the arcade.
    */
   ownedId?: string;
+  /** Module tier (1, 2, or 3). Only present for module items. */
+  moduleTier?: 1 | 2 | 3;
   /** Extra line under the title — why it exists. */
   note?: string;
 }

@@ -4,7 +4,7 @@ import { useShowFeedback } from '@/features/feedback';
 
 import { getGoalById } from '@/entities/goal';
 import { explainWithdraw, type WithdrawExplain } from '@/entities/savings';
-import { applyWithdraw, useUpdateUser, useUser } from '@/entities/user';
+import { applyWithdraw, useCommitUser, useUser } from '@/entities/user';
 
 import { useTimeSource } from '@/shared/lib';
 
@@ -36,7 +36,7 @@ export const useWithdraw = (
   amount: number,
 ): WithdrawController | null => {
   const user = useUser();
-  const updateUser = useUpdateUser();
+  const commitUser = useCommitUser();
   const time = useTimeSource();
   const showFeedback = useShowFeedback();
 
@@ -73,14 +73,13 @@ export const useWithdraw = (
     confirm: () => {
       if (!canConfirm) return false;
       const result = applyWithdraw(user, goalId, amount, time);
-      if (!result.ok) return false;
+      if (!result.ok || !commitUser(user, result.user)) return false;
       showFeedback({
         before: user,
         after: result.user,
         action: 'withdraw',
         params: { goal: goal.title, amount },
       });
-      updateUser(() => result.user);
       return true;
     },
   };

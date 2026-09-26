@@ -47,3 +47,5 @@ export {
   ROBOT_DOG_SKINS,
   ROBOT_DOG_STAGES,
 } from './model';
+export type { RobotAssembly } from './model/assembly';
+export { DEFAULT_ROBOT_ASSEMBLY, isRobotAssembly } from './model/assembly';

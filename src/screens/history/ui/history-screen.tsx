@@ -4,7 +4,11 @@ import { FlatList, type ListRenderItem, StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import type { PeriodRecord, WalletHistoryRow } from '@/entities/user';
+import {
+  type PeriodRecord,
+  useUserStore,
+  type WalletHistoryRow,
+} from '@/entities/user';
 
 import { SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
@@ -51,6 +55,7 @@ const getItemLayout = (_: unknown, index: number) => ({
 export const HistoryScreen = () => {
   const { t } = useTranslation();
   const history = useHistory();
+  const receipts = useUserStore((state) => state.user?.platform.receipts);
 
   const renderItem: ListRenderItem<WalletHistoryRow> = useCallback(
     ({ item }) => <WalletHistoryRowView row={item} />,
@@ -68,6 +73,23 @@ export const HistoryScreen = () => {
         <HintButton screen="history" />
       </Screen.Header>
 
+      {receipts && receipts.length > 0 ? (
+        <Card tone="surfaceSoft">
+          <Card.Content>
+            <Text variant="bodyBold">{t('scene.liftHistory')}</Text>
+            {[...receipts].reverse().map((receipt) => (
+              <Text key={receipt.id}>
+                {t('scene.liftReceipt', {
+                  level: receipt.level,
+                  amount: receipt.amount,
+                  period: receipt.periodIndex,
+                  remaining: receipt.savingsAfter,
+                })}
+              </Text>
+            ))}
+          </Card.Content>
+        </Card>
+      ) : null}
       <Card tone="surfaceSoft">
         <Card.Content>
           <Text variant="bodyBold">{t('history.lastPeriod')}</Text>
@@ -143,7 +165,7 @@ export const HistoryScreen = () => {
   );
 
   return (
-    <Screen gap="three" isTabBarVisible={false} isScrollable={false}>
+    <Screen gap="three" isScrollable={false}>
       <FlatList
         data={history.walletRows}
         keyExtractor={keyExtractor}

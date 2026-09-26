@@ -1,5 +1,5 @@
 import { getGoalById } from '@/entities/goal';
-import { remainingFor } from '@/entities/savings';
+import { isLiquid, remainingFor } from '@/entities/savings';
 
 import type { TimeSource } from '@/shared/lib/time-source';
 
@@ -23,7 +23,8 @@ interface SavingsFail {
     | 'invalid_amount'
     | 'insufficient_funds'
     | 'insufficient_saved'
-    | 'goal_complete';
+    | 'goal_complete'
+    | 'non_liquid';
   shortfall?: number;
   price?: number;
   balance?: number;
@@ -142,6 +143,9 @@ export const applyWithdraw = (
   amount: number,
   time: TimeSource,
 ): SavingsResult => {
+  if (!isLiquid(goalId)) {
+    return { ok: false, reason: 'non_liquid' };
+  }
   if (user.period.phase !== 'active') {
     return { ok: false, reason: 'wrong_phase' };
   }

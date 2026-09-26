@@ -87,6 +87,7 @@ const Test = ({
   total,
   verdict,
   answerIndex,
+  explanation,
   onAnswer,
   onNext,
 }: {
@@ -96,6 +97,7 @@ const Test = ({
   total: number;
   verdict: { chosen: number; isRight: boolean } | null;
   answerIndex: number;
+  explanation?: string;
   onAnswer: (option: number) => void;
   onNext: () => void;
 }) => {
@@ -133,6 +135,7 @@ const Test = ({
               answer: options[answerIndex],
             })}
           </Terminal.Line>
+          {explanation ? <Terminal.Line>{explanation}</Terminal.Line> : null}
           <Terminal.Key onPress={onNext}>
             {t(index + 1 < total ? 'lesson.nextQuestion' : 'lesson.toResult')}
           </Terminal.Key>
@@ -270,6 +273,35 @@ export const LessonScreen = () => {
             />
           ) : null}
 
+          {stage === 'scenario' && lesson.scenario ? (
+            <View style={styles.body}>
+              <Terminal.Line tone="amber">
+                {lesson.learningObjective}
+              </Terminal.Line>
+              <Terminal.Line>{lesson.scenario.situation}</Terminal.Line>
+              {lesson.scenario.actions.map((action, index) => (
+                <Terminal.Key
+                  key={action.title}
+                  onPress={() => lessonState.answer(index)}
+                >
+                  {action.title}
+                </Terminal.Key>
+              ))}
+              {lessonState.verdict ? (
+                <>
+                  <Terminal.Line>
+                    {
+                      lesson.scenario.actions[lessonState.verdict.chosen]
+                        .consequence
+                    }
+                  </Terminal.Line>
+                  <Terminal.Key onPress={lessonState.next}>
+                    {t('lesson.toTest')}
+                  </Terminal.Key>
+                </>
+              ) : null}
+            </View>
+          ) : null}
           {stage === 'test' && question ? (
             <Test
               question={question.question}
@@ -278,6 +310,7 @@ export const LessonScreen = () => {
               total={lessonState.total}
               verdict={lessonState.verdict}
               answerIndex={question.answerIndex}
+              explanation={question.explanation}
               onAnswer={lessonState.answer}
               onNext={lessonState.next}
             />
@@ -292,7 +325,9 @@ export const LessonScreen = () => {
               onRetry={lessonState.retry}
               onLeave={leave}
             />
-          ) : null}
+          ) : (
+            <Terminal.Key onPress={leave}>{t('lesson.back')}</Terminal.Key>
+          )}
         </ScrollView>
       </Animated.View>
 

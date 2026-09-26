@@ -135,3 +135,46 @@ Actions:
 | `No such file or directory` в aapt2 / hermesc / cxx | мусор от прерванной или параллельной сборки. `cd android && ./gradlew --stop`, затем `rm -rf android/app/build android/app/.cxx` и `npm run build:apk` |
 | `CMAKE_C_COMPILER not set` / `ninja: error: loading 'build.ninja'` | испорченный кеш CMake или кончилось место на диске: `rm -rf android/app/.cxx`, проверьте `df -h` (полная сборка требует ~10 ГБ) |
 | `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | на телефоне лежит сборка с другим ключом — удалить приложение |
+
+## Android App Bundle
+
+`pnpm build:bundle` собирает подписанные APK и AAB одним ключом из одного
+checkout. AAB находится в `build/mobile-hackathon-<version>.aab` и предназначен
+для загрузки в магазин; на телефон устанавливается APK. Оба скрипта создают
+рядом файлы SHA-256. APK проходит `apksigner verify`, AAB — `jarsigner -verify`.
+Сборка использует `NODE_ENV=production`.
+
+25.09.2026 локально создан release keystore в игнорируемом каталоге
+`credentials/`. Его и env-файл нужно сохранить в надёжной резервной копии:
+для дальнейших обновлений нужен тот же ключ. Секреты не входят в исходники
+и не должны отправляться вместе с APK или AAB.
+
+В конфигурации убраны ненужные игре разрешения внешнего хранилища и наложения
+поверх приложений. Профиль хранится во внутренней SQLite; Android auto-backup
+отключён. Изменение этих параметров проверяется по итоговому merged manifest.
+
+## Проверка артефактов
+
+После `pnpm build:bundle` выполнить `pnpm verify:release`. Проверяются подписи
+APK/AAB, package id, versionName/versionCode, launcher name, отсутствие
+debuggable-флага и заблокированных разрешений, наличие встроенного JS и GLB.
+Результат с размерами, SHA-256 и отпечатком сертификата сохраняется в
+`build/release-verification.json`. Проверка не заменяет приёмку интерфейса
+и поведения на устройстве.
+
+`pnpm audit:licenses` создаёт `build/runtime-dependencies.json` из локально
+установленных зависимостей. Секреты подписи в эти отчёты не попадают.
+
+### Проверенная сборка v11 — 25.09.2026
+
+APK и AAB пересобраны с 90 упражнениями, геометрическими модулями робота,
+оборудованием стадий, expo-audio и новым оформлением запуска. Проверка
+`pnpm verify:release` пройдена; два WAV включены в APK, разрешений микрофона
+и фонового аудиосервиса нет. Сертификат остался прежним.
+
+- APK: 76 972 645 байт, SHA-256
+  `f9a05f77b49fe85d8b1b1dfac41645d863777ba10b136a437f732f6beb7c6988`.
+- AAB: 57 495 324 байта, SHA-256
+  `794f48b501a27c6aca7626e48b63be7cd7a53c7102f909929339eb704202d6c7`.
+- Исходники: typecheck, format, lint и 572 теста — PASS.
+- Актуальные границы готовности: [review-handoff.md](./review-handoff.md).

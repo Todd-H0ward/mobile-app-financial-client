@@ -69,7 +69,9 @@ export const canConfirm = (
   plan: BudgetPlan,
   available = Number.POSITIVE_INFINITY,
 ): boolean =>
-  BUDGET_DIRECTIONS.some((direction) => plan[direction] > 0) || available === 0;
+  isValidPlan(plan, available) &&
+  (BUDGET_DIRECTIONS.some((direction) => plan[direction] > 0) ||
+    available === 0);
 
 /**
  * Shape and remainder check. Screens use `allocate` so this should always

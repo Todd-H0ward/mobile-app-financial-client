@@ -101,13 +101,26 @@ const WATCHER_YAW = {
 /**
  * How far in front of a screen the camera sits when the child taps it.
  *
- * Close enough to read: the machine answers on its own display, so the shot
- * has to be the display, filling the frame the way a terminal does — not the
- * machine standing in a room. The panels are 82 units across, and a 45° lens
- * on a portrait screen sees about 100 units of width from here, so the screen
- * takes four fifths of it and the casing makes up the border.
+ * Close enough to read the face in the top band of the phone — the React
+ * terminal owns the lower ~40%, so the shot must park the face *above* that
+ * panel, not dead-centre behind it.
  */
-const WATCHER_FOCUS_DISTANCE = 260;
+const WATCHER_FOCUS_DISTANCE = 300;
+
+/**
+ * How far the machine rises (arena Y) while focused.
+ *
+ * Clears the arena rim so the face sits in open sky above the terminal.
+ */
+const WATCHER_FOCUS_LIFT = 140;
+
+/**
+ * How far below the face centre the camera aims (arena units).
+ *
+ * Looking slightly under the screen pushes the face into the upper third of
+ * the frame — the band the terminal does not cover.
+ */
+const WATCHER_FOCUS_AIM_DOWN = 28;
 
 /** What a watcher plays while the child is standing in front of it. */
 const WATCHER_FOCUS_ACTION = 'talk';
@@ -130,7 +143,9 @@ export {
   WATCHER_CLIPS,
   WATCHER_FADE_SEC,
   WATCHER_FOCUS_ACTION,
+  WATCHER_FOCUS_AIM_DOWN,
   WATCHER_FOCUS_DISTANCE,
+  WATCHER_FOCUS_LIFT,
   WATCHER_HIDDEN_MATERIALS,
   WATCHER_IDS,
   WATCHER_PLACEMENT,

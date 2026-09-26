@@ -67,7 +67,7 @@ the mockups is still to be designed.
 | `Switch` | `isChecked`, `onChange`, `isDisabled` | переключатели раздела для взрослого |
 | `Input` | `hint`, `isCounterVisible`, `maxLength` | имя робота и игровое имя |
 | `HintRow` + `.Title` `.Hint` | — | «заголовок слева, значение справа» |
-| `Screen` + `.Header` `.Back` | `variant`, `gap`, `isTabBarVisible` | рамка экрана: фон, safe area, скролл, колонка |
+| `Screen` + `.Header` `.Back` | `variant`, `gap`, `isScrollable` | рамка экрана: фон, safe area, скролл, колонка |
 
 Import everything from the barrel: `import { Button, Chip } from '@/shared/ui';`
 

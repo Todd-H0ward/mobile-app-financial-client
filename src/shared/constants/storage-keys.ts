@@ -3,8 +3,8 @@ export const STORAGE_KEYS = {
   USER: '@app:user',
   /** Device preferences: theme and language. Neither profile nor game state. */
   PREFERENCES: '@app:preferences',
-  /** Cells whose lesson has been passed. Outlives a profile reset on purpose. */
+  /** Legacy pre-v9 lesson key, read only during migration and removed on delete. */
   LESSONS: '@app:lessons',
-  /** Console high scores — snake apples and Spacewar clear times. */
+  /** Legacy pre-v9 score key, read only during migration and removed on delete. */
   ARCADE_SCORES: '@app:arcade-scores',
 };

@@ -1,16 +1,11 @@
 import type { ReactNode } from 'react';
 
-import {
-  Pressable,
-  type StyleProp,
-  StyleSheet,
-  View,
-  type ViewStyle,
-} from 'react-native';
+import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
 
 import { RADII, SPACING, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 
+import { GlassSurface } from './glass-surface';
 import { Text, type TextProps } from './text';
 
 // ═══════════════════════════════════════════
@@ -106,7 +101,6 @@ const CardRoot = ({
   const cardStyle: StyleProp<ViewStyle> = [
     styles.root,
     {
-      backgroundColor: theme[tone],
       borderColor: isSelected ? theme.primary : theme.border,
       borderWidth: isSelected ? SELECTED_BORDER : BORDER,
       // The thicker border eats into the content box, so the padding gives
@@ -116,19 +110,16 @@ const CardRoot = ({
     style,
   ];
 
-  if (!onPress) {
-    return <View style={cardStyle}>{children}</View>;
-  }
-
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: isSelected }}
+    <GlassSurface
+      tone={tone}
       onPress={onPress}
-      style={({ pressed }) => [cardStyle, pressed && styles.pressed]}
+      accessibilityRole={onPress ? 'button' : undefined}
+      accessibilityState={onPress ? { selected: isSelected } : undefined}
+      style={cardStyle}
     >
       {children}
-    </Pressable>
+    </GlassSurface>
   );
 };
 
@@ -150,9 +141,6 @@ const styles = StyleSheet.create({
   root: {
     borderRadius: RADII.l,
     gap: SPACING.two,
-  },
-  pressed: {
-    opacity: 0.85,
   },
   content: {
     gap: SPACING.one,

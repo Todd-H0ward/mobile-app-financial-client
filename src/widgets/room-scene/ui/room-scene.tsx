@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { type ExpoWebGLRenderingContext, GLView } from 'expo-gl';
+import { useFocusEffect } from 'expo-router';
 import { type LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,15 +14,20 @@ import {
   WebGLRenderer,
 } from 'three';
 
+import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
 import {
+  DEFAULT_ROBOT_ASSEMBLY,
   DEFAULT_ROBOT_DOG_ACTION,
   DEFAULT_ROBOT_DOG_SKIN,
+  type RobotAssembly,
   type RobotDogAction,
   type RobotDogSkin,
+  type RobotDogStage,
 } from '@/entities/robot-dog';
 import {
   CAMERA_FAR,
   CAMERA_NEAR,
+  cellKey,
   damp,
   levelProgress,
   orbitPosition,
@@ -38,6 +44,7 @@ import {
 } from '@/entities/watcher';
 
 import { CONTENT_PADDING, SPACING } from '@/shared/constants';
+import { hapticLight } from '@/shared/lib';
 
 import { buildScene, type SceneModel } from '../lib';
 import { type CameraTune, DEFAULT_CAMERA_TUNE } from '../model/camera-tune';
@@ -52,7 +59,7 @@ import { CameraRigPanel } from './camera-rig-panel';
 interface RoomSceneProps {
   /** The stop the camera is heading for. Controlled by the screen. */
   view: SceneView;
-  /** Raised by a settled swipe, and by a tap on another segment's cell. */
+  /** Raised by a climb back to the map, and by a tap on a cell. */
   onViewChange: (view: SceneView) => void;
   /**
    * How far out of the pit the game has climbed, `0 … SCENE_TERRACE_COUNT`.
@@ -65,6 +72,10 @@ interface RoomSceneProps {
   level?: number;
   /** The coat the dog wears. Swapping it reloads the model. */
   robotSkin?: RobotDogSkin;
+  /** Independent modules selected in the introduction. */
+  robotAssembly?: RobotAssembly;
+  /** Equipment earned by progressing through the game. */
+  robotStage?: RobotDogStage;
   /** What the dog does when nothing interrupts it — its state. */
   robotAction?: RobotDogAction;
   /**
@@ -83,10 +94,10 @@ interface RoomSceneProps {
   /** A tap landed on a screen, or on nothing while one was focused. */
   onWatcherFocus?: (watcher: WatcherId | null) => void;
   /**
-   * A cell of the room the camera is already in was pressed.
+   * A cell of the room the camera is already in was held long enough.
    *
-   * A cell in one of the other two rooms never reaches here: that tap is the
-   * child pointing at where they want to go, so it turns the world instead.
+   * Short taps never reach here — cells sit too close for a tap to be the
+   * only way in, so the child has to hold while the tile fills.
    */
   onCellPress?: (cell: SceneCell) => void;
   /**
@@ -97,11 +108,30 @@ interface RoomSceneProps {
    * the child — `firstDone` is what tells the two apart.
    */
   doneCells?: readonly string[];
+  /**
+   * Lesson ids finished on the arena.
+   *
+   * Drives lock colour and the number on each tile when `lessons.json` stacks
+   * more than one exercise on a disc.
+   */
+  doneLessonIds?: readonly string[];
+  /**
+   * Coins / tier / charge for the three boards on the overhead map.
+   *
+   * `null` or omitted hides them. The boards live in the 3D scene — not as
+   * React overlays — so the child reads them as part of the arena.
+   */
+  mapHud?: {
+    balance: number;
+    tier: number;
+    tierTotal: number;
+    charge: number;
+  } | null;
   /** Off when the grown-up disables animations — the camera then cuts. */
   isAnimated?: boolean;
   /**
    * Framing desk at the top: dial elevations / fit / platform, then paste
-   * the dump into `camera.ts`. Defaults on in `__DEV__`.
+   * the dump into `camera.ts`. Off by default — turn on in settings.
    */
   isCameraRig?: boolean;
 }
@@ -129,6 +159,17 @@ const MAX_DELTA = 0.1;
  * a magic constant, so changing `SCENE_LIFT_SEC` changes the feel.
  */
 const LIFT_SMOOTHING = 0.02 ** (1 / SCENE_LIFT_SEC);
+
+/**
+ * How long a cell must be held before its lesson opens, in ms.
+ *
+ * Short enough that it does not feel like a chore, long enough that a
+ * crowded bay does not open on a brush of the finger.
+ */
+const CELL_HOLD_MS = 520;
+
+/** Finger travel, in view points, that cancels an in-progress cell hold. */
+const CELL_HOLD_SLOP = 18;
 
 /**
  * Share of the flight to a watcher still left after a second.
@@ -201,13 +242,12 @@ const createRenderer = (gl: ExpoWebGLRenderingContext): WebGLRenderer => {
 // ═══════════════════════════════════════════
 
 /**
- * The world, as one model on a turntable.
+ * The world, as one model under a fixed camera.
  *
- * Three rooms sit 120° apart around the same axis, so walking between them is
- * the model turning rather than a page sliding: the child keeps seeing where
- * the other rooms are while they travel to one. The camera opens on the
- * horizon in front of a room; the overhead stop is still one swipe or button
- * away.
+ * Three bays sit 120° apart around the same axis. Walking between them is a
+ * trip through the overhead map — the camera does not spin while the child
+ * is standing in a bay. A drag upwards is still the way back to that map;
+ * a tap on a cell is the way down into a bay.
  *
  * Nothing here runs on the UI runtime. The pan gesture is `runOnJS`, because
  * everything it drives — the three.js camera, the GL context — lives on the JS
@@ -222,14 +262,18 @@ export const RoomScene = ({
   onViewChange,
   level = 0,
   robotSkin = DEFAULT_ROBOT_DOG_SKIN,
+  robotAssembly = DEFAULT_ROBOT_ASSEMBLY,
+  robotStage = 'basic',
   robotAction = DEFAULT_ROBOT_DOG_ACTION,
   petTapAction = 'joy',
   focusedWatcher = null,
   onWatcherFocus,
   onCellPress,
   doneCells,
+  doneLessonIds = [],
+  mapHud = null,
   isAnimated = true,
-  isCameraRig = __DEV__,
+  isCameraRig = false,
 }: RoomSceneProps) => {
   const insets = useSafeAreaInsets();
   const [tune, setTune] = useState<CameraTune>(DEFAULT_CAMERA_TUNE);
@@ -280,6 +324,11 @@ export const RoomScene = ({
    * `onContextCreate` runs once and closes over what it saw; these refs are
    * how a skin chosen later still reaches a scene built earlier.
    */
+  const assemblyRef = useRef({ assembly: robotAssembly, stage: robotStage });
+  useEffect(() => {
+    assemblyRef.current = { assembly: robotAssembly, stage: robotStage };
+    model.current?.setCharacterAssembly(robotAssembly, robotStage);
+  }, [robotAssembly, robotStage]);
   const robotSkinRef = useRef(robotSkin);
   const robotActionRef = useRef(robotAction);
   /** False until the sunk cells have been placed once, without animating. */
@@ -291,6 +340,10 @@ export const RoomScene = ({
    * props first arrive — this is how the scene it builds learns about them.
    */
   const doneCellsRef = useRef<readonly string[]>([]);
+  const doneLessonIdsRef = useRef<readonly string[]>([]);
+  const levelRef = useRef(level);
+  const mapHudRef = useRef(mapHud);
+  mapHudRef.current = mapHud;
   /** Which screen the loop is flying towards, `null` for back to the arena. */
   const focusRef = useRef<WatcherId | null>(focusedWatcher);
   /** `0` on the arena, `1` parked in front of a face; damped in between. */
@@ -342,6 +395,28 @@ export const RoomScene = ({
     highlight.current = view === 'top' ? null : view;
   }, [isAnimated, view]);
 
+  /**
+   * Coming back from a lesson (or any pushed screen) the GL context may have
+   * been rebuilt while `appliedHighlight` still matched the view — so the
+   * loop would skip `highlight` and leave every bay drawn. Re-seed on focus.
+   */
+  useFocusEffect(
+    useCallback(() => {
+      const segment = viewRef.current === 'top' ? null : viewRef.current;
+      highlight.current = segment;
+      const built = model.current;
+      if (!built) {
+        appliedHighlight.current = undefined;
+        return;
+      }
+      built.highlight(segment, true);
+      appliedHighlight.current = segment;
+      built.setWatchersVisible(
+        viewRef.current === 'top' || focusRef.current !== null,
+      );
+    }, []),
+  );
+
   useEffect(() => {
     const next = levelProgress(level);
     const isClimbing = next > liftTarget.current;
@@ -361,7 +436,10 @@ export const RoomScene = ({
   useEffect(() => {
     if (isAnimated) camera.applyView(view);
     else camera.jumpToView(view);
-  }, [camera, isAnimated, view]);
+    model.current?.setWatchersVisible(
+      view === 'top' || focusedWatcher !== null,
+    );
+  }, [camera, isAnimated, view, focusedWatcher]);
 
   /**
    * Sinks what the child has already learnt.
@@ -374,11 +452,22 @@ export const RoomScene = ({
   useEffect(() => {
     if (!doneCells) return;
     doneCellsRef.current = doneCells;
+    doneLessonIdsRef.current = doneLessonIds;
+    levelRef.current = level;
 
     if (!model.current) return;
     model.current.setCellsDone(doneCells, !hasSunkOnce.current);
+    model.current.setCellAccess(doneLessonIds, level);
     hasSunkOnce.current = true;
-  }, [doneCells]);
+  }, [doneCells, doneLessonIds, level]);
+
+  useEffect(() => {
+    const built = model.current;
+    if (!built) return;
+    const isMap = view === 'top' && focusedWatcher === null;
+    built.setMapHudVisible(isMap);
+    if (mapHud) built.setMapHudStats(mapHud);
+  }, [view, focusedWatcher, mapHud]);
 
   /**
    * The loop reads a ref, and the screen it is aimed at starts talking.
@@ -388,11 +477,13 @@ export const RoomScene = ({
    */
   useEffect(() => {
     focusRef.current = focusedWatcher;
+    model.current?.setWatcherLifted(focusedWatcher);
     if (!focusedWatcher) return;
 
     model.current?.playWatcher(focusedWatcher, WATCHER_FOCUS_ACTION);
     return () => {
       model.current?.playWatcher(focusedWatcher, DEFAULT_WATCHER_ACTION);
+      model.current?.setWatcherLifted(null);
     };
   }, [focusedWatcher]);
 
@@ -444,12 +535,17 @@ export const RoomScene = ({
       webgl.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight, false);
 
       const built = buildScene(robotSkinRef.current, robotActionRef.current);
+      built.setCharacterAssembly(
+        assemblyRef.current.assembly,
+        assemblyRef.current.stage,
+      );
       built.setPlatformY(tuneRef.current.platformY);
       // The effect below has already run by now and found no scene to talk
       // to: `onContextCreate` waits for the surface to be measured, which is
       // a render later. Without this the tiles a child sank yesterday come
       // back up every time the app is opened.
       built.setCellsDone(doneCellsRef.current, true);
+      built.setCellAccess(doneLessonIdsRef.current, level);
       hasSunkOnce.current = true;
       const lens = new PerspectiveCamera(
         tuneRef.current.fov,
@@ -463,6 +559,20 @@ export const RoomScene = ({
       // Seed the platform where the game already is, so a rebuilt context
       // does not replay the whole climb from the bottom of the pit.
       built.setLevelProgress(lift.current);
+      built.setWatchersVisible(
+        viewRef.current === 'top' || focusRef.current !== null,
+      );
+      // A rebuilt context starts with every bay solid — snap the highlight to
+      // the live view so returning from a lesson does not flash all three.
+      const segment =
+        viewRef.current === 'top' || typeof viewRef.current !== 'number'
+          ? null
+          : viewRef.current;
+      built.highlight(segment, true);
+      appliedHighlight.current = segment;
+      const isMap = viewRef.current === 'top' && focusRef.current === null;
+      built.setMapHudVisible(isMap);
+      if (mapHudRef.current) built.setMapHudStats(mapHudRef.current);
 
       renderer.current = webgl;
       model.current = built;
@@ -500,7 +610,7 @@ export const RoomScene = ({
 
         if (appliedHighlight.current !== highlight.current) {
           appliedHighlight.current = highlight.current;
-          built.highlight(highlight.current);
+          built.highlight(highlight.current, !isAnimatedRef.current);
         }
 
         const fov = tuneRef.current.fov;
@@ -592,7 +702,7 @@ export const RoomScene = ({
 
       loop();
     },
-    [camera],
+    [camera, level],
   );
 
   const onLayout = (event: LayoutChangeEvent) => {
@@ -613,7 +723,113 @@ export const RoomScene = ({
    * stands in: the camera tilts and turns, and a child tapping the floor
    * beside the dog should not get a wag. The order is the order of things
    * the child means — the screens overhead, then the robot, then the floor.
+   *
+   * Opening a lesson is not a tap: cells sit too close, so that path is the
+   * hold gesture below. A tap on a cell only walks the camera (map ↔ bay).
    */
+  const hitCellAt = (x: number, y: number): SceneCell | null => {
+    const built = model.current;
+    const size = surface;
+    const lens = lensRef.current;
+    if (!built || !size || !lens) return null;
+
+    pointer.current.set((x / size.width) * 2 - 1, -(y / size.height) * 2 + 1);
+    raycaster.current.setFromCamera(pointer.current, lens);
+
+    const hit = raycaster.current.intersectObjects(
+      built.cellTargets(),
+      false,
+    )[0];
+    if (hit?.faceIndex === undefined || hit.faceIndex === null) return null;
+    return built.cellAt(hit.object, hit.faceIndex);
+  };
+
+  const isHoldableCell = (cell: SceneCell | null): cell is SceneCell => {
+    if (!cell) return false;
+    if (view === 'top' || view !== cell.segment) return false;
+    const ordinal = lessonOrdinalForKey(cellKey(cell));
+    if (ordinal === null) return false;
+    return (
+      lessonAccess(ordinal, doneLessonIdsRef.current, levelRef.current)
+        .status !== 'LOCKED'
+    );
+  };
+
+  const holdRef = useRef<{
+    cell: SceneCell;
+    startMs: number;
+    frame: number | null;
+    isDone: boolean;
+  } | null>(null);
+
+  const clearCellHold = () => {
+    const hold = holdRef.current;
+    if (hold?.frame !== null && hold?.frame !== undefined) {
+      cancelAnimationFrame(hold.frame);
+    }
+    holdRef.current = null;
+    model.current?.endCellHold();
+  };
+
+  const tickCellHold = () => {
+    const hold = holdRef.current;
+    const built = model.current;
+    if (!hold || !built) return;
+
+    const progress = Math.min(1, (Date.now() - hold.startMs) / CELL_HOLD_MS);
+    built.setCellHoldProgress(progress);
+    if (progress >= 1) return;
+    hold.frame = requestAnimationFrame(tickCellHold);
+  };
+
+  useEffect(
+    () => () => {
+      const hold = holdRef.current;
+      if (hold?.frame !== null && hold?.frame !== undefined) {
+        cancelAnimationFrame(hold.frame);
+      }
+      holdRef.current = null;
+      model.current?.endCellHold();
+    },
+    [],
+  );
+
+  /**
+   * Hold-to-enter: the fill rises while the finger stays put; releasing early
+   * cancels. Stays behind the camera pan so a climb to the map still wins
+   * when the finger moves (LongPress waits in BEGAN until `minDuration`).
+   */
+  const cellHold = Gesture.LongPress()
+    .runOnJS(true)
+    .minDuration(CELL_HOLD_MS)
+    .maxDistance(CELL_HOLD_SLOP)
+    .onBegin((event) => {
+      const cell = hitCellAt(event.x, event.y);
+      if (!isHoldableCell(cell)) return;
+
+      clearCellHold();
+      holdRef.current = {
+        cell,
+        startMs: Date.now(),
+        frame: null,
+        isDone: false,
+      };
+      model.current?.beginCellHold(cell);
+      holdRef.current.frame = requestAnimationFrame(tickCellHold);
+    })
+    .onStart(() => {
+      const hold = holdRef.current;
+      if (!hold) return;
+      hold.isDone = true;
+      const cell = hold.cell;
+      clearCellHold();
+      hapticLight();
+      onCellPress?.(cell);
+    })
+    .onFinalize(() => {
+      if (holdRef.current && !holdRef.current.isDone) clearCellHold();
+    });
+
   const tap = Gesture.Tap()
     .runOnJS(true)
     .maxDistance(12)
@@ -661,33 +877,40 @@ export const RoomScene = ({
 
       // The floor last, and only the tile buffers: a ray through the arena
       // also finds the sky sphere and the ramps, and neither is a cell.
-      const hit = raycaster.current.intersectObjects(
-        built.cellTargets(),
-        false,
-      )[0];
-      if (hit?.faceIndex === undefined || hit.faceIndex === null) return;
-
-      const cell = built.cellAt(hit.object, hit.faceIndex);
+      const cell = hitCellAt(event.x, event.y);
       if (!cell) return;
 
-      // A tap on another segment is the child pointing at where they want to
-      // be, not at a tile — walking there first is what they meant. With the
-      // buttons gone this is also the one way across that is not a gesture.
-      if (view !== cell.segment) {
+      // A tap on another segment from inside a bay is the child asking for
+      // the map, not a free turn of the world — the camera does not spin
+      // between bays anymore. From the map, the same tap walks in.
+      if (view === 'top') {
         built.selectCell(null);
         onViewChange(cell.segment);
         return;
       }
 
-      built.selectCell(cell);
-      onCellPress?.(cell);
+      if (view !== cell.segment) {
+        built.selectCell(null);
+        onViewChange('top');
+      }
+      // Same-segment cell: lesson entry is the hold gesture, not a tap.
     });
 
+  // The map does not turn, and neither does a bay: azimuth is locked once
+  // the child is standing in one. The only drag left is the climb back to
+  // the overhead map; picking another bay means going there first.
+  //
+  // `activeOffsetY` keeps a still press on a cell for the hold gesture —
+  // without it the pan would claim every touch on contact.
   const pan = Gesture.Pan()
     .runOnJS(true)
     .enabled(focusedWatcher === null && view !== 'top')
+    .activeOffsetY([-14, 14])
     .onBegin(camera.beginDrag)
-    .onUpdate((event) => camera.dragBy(event.translationX, event.translationY))
+    .onUpdate((event) => {
+      clearCellHold();
+      camera.dragBy(0, event.translationY);
+    })
     .onEnd(() => onViewChange(camera.endDrag()))
     .onFinalize((_event, success) => {
       if (!success) onViewChange(camera.endDrag());
@@ -695,7 +918,7 @@ export const RoomScene = ({
 
   return (
     <View style={styles.root} onLayout={onLayout}>
-      <GestureDetector gesture={Gesture.Exclusive(pan, tap)}>
+      <GestureDetector gesture={Gesture.Exclusive(pan, cellHold, tap)}>
         <View style={styles.canvas}>
           {surface && (
             <GLView

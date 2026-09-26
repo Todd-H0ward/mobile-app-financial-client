@@ -90,6 +90,8 @@ describe('enterDemoMode', () => {
       isParentGateEnabled: true,
       isSoundEnabled: false,
       isAnimationEnabled: true,
+      isGlassEnabled: true,
+      isCameraRigEnabled: false,
       isDemoMode: false,
       robotSkin: 'arctic',
       robotAction: 'walk',
@@ -193,6 +195,48 @@ describe('demo mode — five periods back-to-back', () => {
     expect(user.history).toHaveLength(DEMO_RUN_PERIODS);
     expect(hasValidShape(user)).toBe(true);
   });
+
+  it('runs income, both purchase kinds and savings in all five periods', () => {
+    const user = runDemoPeriods(createDemoProfile());
+    for (const record of user.history) {
+      expect(record.fact.needs).toBeGreaterThan(0);
+      expect(record.fact.wants).toBeGreaterThan(0);
+      expect(record.fact.savings).toBeGreaterThan(0);
+      expect(record.isPlanKept).toBe(true);
+      expect(
+        user.wallet.history.some(
+          (entry) =>
+            entry.periodIndex === record.index &&
+            entry.source.startsWith('task:'),
+        ),
+      ).toBe(true);
+    }
+    expect(user.robot.stage).toBe('complete');
+    expect(user.wallet.balance).toBeGreaterThanOrEqual(0);
+  });
+
+  it('can recover from an empty demo wallet through real task rewards', () => {
+    const user = createDemoProfile();
+    user.wallet.balance = 0;
+    const after = runDemoPeriods(user);
+    expect(after.history).toHaveLength(5);
+    expect(after.history[0].plan).toEqual({ needs: 0, wants: 0, savings: 0 });
+    expect(after.history[0].fact.needs).toBeGreaterThan(0);
+    expect(after.wallet.balance).toBeGreaterThanOrEqual(0);
+  });
+
+  it('never advances a real player profile', () => {
+    expect(() => runDemoPeriods(createInitialUser())).toThrow(
+      'demo profile required',
+    );
+  });
+
+  it.each([-1, 0.5, 6, Number.NaN, Number.POSITIVE_INFINITY])(
+    'rejects invalid period count %s',
+    (count) => {
+      expect(() => runDemoPeriods(createDemoProfile(), count)).toThrow('count');
+    },
+  );
 
   it('starts from active and still finishes exactly five periods', () => {
     let user = createDemoProfile();

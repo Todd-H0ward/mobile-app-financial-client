@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
-  Pressable,
   ScrollView,
   type StyleProp,
   StyleSheet,
@@ -16,7 +15,6 @@ import {
 } from 'react-native-safe-area-context';
 
 import {
-  BOTTOM_TAB_INSET,
   CONTENT_PADDING,
   MAX_CONTENT_WIDTH,
   RADII,
@@ -26,8 +24,10 @@ import {
   type ThemeColor,
 } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useGlassEnabled } from '@/shared/model';
 import { hitSlopFor } from '@/shared/utils';
 
+import { GlassSurface } from './glass-surface';
 import { Text, type TextProps } from './text';
 import { ThemedView } from './themed-view';
 
@@ -39,8 +39,6 @@ interface ScreenRootProps {
   children?: ReactNode;
   variant?: ThemeColor;
   gap?: Spacing;
-  /** Leaves room for the tab bar. Off for pushed screens. */
-  isTabBarVisible?: boolean;
   /**
    * When false, the screen does not wrap children in a `ScrollView` — use this
    * when a child owns scrolling (`FlatList`), so lists stay virtualized.
@@ -95,7 +93,8 @@ const ScreenBack = ({
   const router = useRouter();
 
   return (
-    <Pressable
+    <GlassSurface
+      tone={tone}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? t('common.back')}
       hitSlop={hitSlopFor(BACK_SIZE)}
@@ -107,19 +106,12 @@ const ScreenBack = ({
 
         router.replace(STATIC_ROUTES.ENTRY);
       }}
-      style={({ pressed }) => [
-        styles.back,
-        {
-          backgroundColor: theme[tone],
-          borderColor: theme.border,
-          opacity: pressed ? 0.7 : 1,
-        },
-      ]}
+      style={[styles.back, { borderColor: theme.border, borderWidth: 1 }]}
     >
       <Text variant="subtitle" themeColor={color}>
         ‹
       </Text>
-    </Pressable>
+    </GlassSurface>
   );
 };
 
@@ -167,16 +159,16 @@ const ScreenRoot = ({
   children,
   variant = 'background',
   gap = 'two',
-  isTabBarVisible = true,
   isScrollable = true,
   style,
 }: ScreenRootProps) => {
   // The bottom edge stays off `SafeAreaView` on purpose: padding it there would
   // clip the scroll view instead of letting content scroll past the indicator.
-  // It goes on the scroll content, together with the tab-bar inset.
+  // It goes on the scroll content with the home-indicator inset.
   const insets = useSafeAreaInsets();
-  const bottomPad =
-    (isTabBarVisible ? BOTTOM_TAB_INSET : insets.bottom) + SPACING.four;
+  const theme = useTheme();
+  const isGlass = useGlassEnabled();
+  const bottomPad = insets.bottom + SPACING.four;
 
   const column = (
     <View
@@ -193,6 +185,26 @@ const ScreenRoot = ({
 
   return (
     <ThemedView variant={variant} style={styles.root}>
+      {isGlass ? (
+        <>
+          <View
+            pointerEvents="none"
+            style={[
+              styles.wash,
+              styles.washTop,
+              { backgroundColor: theme.primarySoft },
+            ]}
+          />
+          <View
+            pointerEvents="none"
+            style={[
+              styles.wash,
+              styles.washBottom,
+              { backgroundColor: theme.accentSoft },
+            ]}
+          />
+        </>
+      ) : null}
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         {isScrollable ? (
           <ScrollView
@@ -238,6 +250,23 @@ export const Screen = Object.assign(ScreenRoot, {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+  },
+  wash: {
+    borderRadius: 999,
+    opacity: 0.55,
+    position: 'absolute',
+  },
+  washBottom: {
+    bottom: -80,
+    height: 280,
+    right: -60,
+    width: 280,
+  },
+  washTop: {
+    height: 260,
+    left: -80,
+    top: -40,
+    width: 260,
   },
   back: {
     alignItems: 'center',

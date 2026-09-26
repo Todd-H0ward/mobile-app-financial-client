@@ -13,7 +13,7 @@ import type { UserSave } from '../types';
 // ═══════════════════════════════════════════
 
 /** Save schema version. Bumped on every incompatible change. */
-const USER_SAVE_VERSION = 6;
+const USER_SAVE_VERSION = 16;
 
 /** Player name before the introduction asks for one. */
 const DEFAULT_PLAYER_NAME = '';
@@ -54,11 +54,28 @@ export const createInitialUser = ({
   settings,
 }: CreateUserInput = {}): UserSave => ({
   version: USER_SAVE_VERSION,
+  arcade: {
+    sequence: 0,
+    active: null,
+    paidDay: -1,
+    paidWeek: -1,
+    paidCount: 0,
+    scores: { snake: [], spacewarMs: [] },
+  },
+  completedLessonCells: [],
+  completedLessonIds: [],
+  /**
+   * Cutscene ids the child has finished or skipped (`intro`, `finale`).
+   * Empty on a fresh profile — setup then plays the walk/fall stub.
+   */
+  seenStoryIds: [],
+  platform: { level: 0, receipts: [] },
   playerName,
   createdAt,
   robot: {
     name: DEFAULT_ROBOT_NAME,
     stage: 'basic',
+    assembly: { head: 0, body: 0, legs: 0 },
     charge: 1,
     spirit: 1,
     ...robot,
@@ -91,10 +108,13 @@ export const createInitialUser = ({
   },
   history: [],
   ownedItemIds: [],
+  modules: { owned: [], tier: 0 },
   settings: settings ?? {
     isParentGateEnabled: true,
     isSoundEnabled: true,
     isAnimationEnabled: true,
+    isGlassEnabled: true,
+    isCameraRigEnabled: false,
     isDemoMode: false,
     robotSkin: DEFAULT_ROBOT_DOG_SKIN,
     robotAction: DEFAULT_ROBOT_DOG_ACTION,

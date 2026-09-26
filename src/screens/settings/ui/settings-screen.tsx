@@ -1,11 +1,17 @@
+import { useState } from 'react';
+
 import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
+
+import { RobotCard, RobotSetup } from '@/widgets/robot-setup';
 
 import { useChangeLanguage } from '@/features/change-language';
 
 import type { RobotDogAction, RobotDogSkin } from '@/entities/robot-dog';
 import {
   useIsAnimationEnabled,
+  useIsCameraRigEnabled,
+  useIsGlassEnabled,
   useIsSoundEnabled,
   useRobotAction,
   useRobotSkin,
@@ -16,8 +22,6 @@ import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import type { LanguagePreference } from '@/shared/types';
 import { Button, Card, ListRow, Screen, Switch, Text } from '@/shared/ui';
-
-import { RobotCard } from './robot-card';
 
 // ═══════════════════════════════════════════
 // CONSTANTS
@@ -35,11 +39,14 @@ const LANGUAGE_OPTIONS: { value: LanguagePreference; labelKey: string }[] = [
 
 export const SettingsScreen = () => {
   const router = useRouter();
+  const [isSetupVisible, setSetupVisible] = useState(false);
   const { t } = useTranslation();
   const { languagePreference, changeLanguage } = useChangeLanguage();
   const updateUser = useUpdateUser();
   const isAnimationEnabled = useIsAnimationEnabled();
   const isSoundEnabled = useIsSoundEnabled();
+  const isGlassEnabled = useIsGlassEnabled();
+  const isCameraRigEnabled = useIsCameraRigEnabled();
   const robotSkin = useRobotSkin();
   const robotAction = useRobotAction();
 
@@ -64,8 +71,20 @@ export const SettingsScreen = () => {
       settings: { ...u.settings, isSoundEnabled: isEnabled },
     }));
 
+  const setGlass = (isEnabled: boolean) =>
+    updateUser((u) => ({
+      ...u,
+      settings: { ...u.settings, isGlassEnabled: isEnabled },
+    }));
+
+  const setCameraRig = (isEnabled: boolean) =>
+    updateUser((u) => ({
+      ...u,
+      settings: { ...u.settings, isCameraRigEnabled: isEnabled },
+    }));
+
   return (
-    <Screen gap="three" isTabBarVisible={false}>
+    <Screen gap="three">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -73,6 +92,10 @@ export const SettingsScreen = () => {
         </Screen.Heading>
       </Screen.Header>
 
+      <Button variant="secondary" onPress={() => setSetupVisible(true)}>
+        {t('setup.edit')}
+      </Button>
+      {isSetupVisible && <RobotSetup onClose={() => setSetupVisible(false)} />}
       <Card tone="surfaceSoft">
         <Card.Title>{t('settings.language')}</Card.Title>
         <Card.Content>
@@ -117,6 +140,17 @@ export const SettingsScreen = () => {
               />
             }
           />
+          <ListRow
+            title={t('settings.glass')}
+            subtitle={t('settings.glassSubtitle')}
+            trailing={
+              <Switch
+                isChecked={isGlassEnabled}
+                onChange={setGlass}
+                label={t('settings.glass')}
+              />
+            }
+          />
         </Card.Content>
       </Card>
 
@@ -157,12 +191,21 @@ export const SettingsScreen = () => {
       {__DEV__ ? (
         <Card tone="surfaceSoft">
           <Card.Title>{t('settings.development')}</Card.Title>
-          <Card.Content>
+          <Card.Content style={styles.toggles}>
+            <ListRow
+              title={t('settings.cameraRig')}
+              subtitle={t('settings.cameraRigSubtitle')}
+              trailing={
+                <Switch
+                  isChecked={isCameraRigEnabled}
+                  onChange={setCameraRig}
+                  label={t('settings.cameraRig')}
+                />
+              }
+            />
             <Text variant="small" themeColor="textSecondary">
               {t('settings.uiKitDescription')}
             </Text>
-          </Card.Content>
-          <Card.Footer>
             <Button
               size="m"
               isFullWidth
@@ -170,7 +213,7 @@ export const SettingsScreen = () => {
             >
               {t('settings.openUiKit')}
             </Button>
-          </Card.Footer>
+          </Card.Content>
         </Card>
       ) : null}
 

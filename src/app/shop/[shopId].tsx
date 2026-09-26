@@ -1,17 +1,8 @@
-import { Redirect, useLocalSearchParams } from 'expo-router';
+import { Redirect } from 'expo-router';
 
-import { ShopRouteScreen } from '@/screens/shop';
+import { DYNAMIC_ROUTES } from '@/shared/constants';
 
-import { STATIC_ROUTES } from '@/shared/constants';
-
-const ShopRoute = () => {
-  const { shopId } = useLocalSearchParams<{ shopId: string }>();
-
-  if (typeof shopId !== 'string') {
-    return <Redirect href={STATIC_ROUTES.HOME} />;
-  }
-
-  return <ShopRouteScreen shopId={shopId} />;
-};
-
-export default ShopRoute;
+/** Any shopfront opens the Keeper workshop page. */
+export default function ShopRoute() {
+  return <Redirect href={DYNAMIC_ROUTES.watcher('keeper', 'shop')} />;
+}

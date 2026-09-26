@@ -12,7 +12,7 @@ import {
   applyCompleteTask,
   selectTask,
   type UserSave,
-  useUpdateUser,
+  useCommitUser,
   useUser,
   useUserStore,
 } from '@/entities/user';
@@ -70,7 +70,7 @@ const isSamePeriod = (
 /** Showcase of every catalogue chore for the period. */
 export const useTasksList = (): TasksListController => {
   const user = useUser();
-  const updateUser = useUpdateUser();
+  const commitUser = useCommitUser();
   const canPlay = user?.period.phase === 'active';
 
   const rows: TasksListRow[] =
@@ -91,7 +91,7 @@ export const useTasksList = (): TasksListController => {
       if (!isSamePeriod(current, user) || current.period.phase !== 'active')
         return;
       const result = selectTask(current, taskId);
-      if (result.ok) updateUser(() => result.user);
+      if (result.ok) commitUser(current, result.user);
     },
   };
 };
@@ -99,7 +99,7 @@ export const useTasksList = (): TasksListController => {
 /** One chore play session — mechanic scores, then `applyCompleteTask`. */
 export const useTaskPlay = (taskId: string): TaskPlayController | null => {
   const user = useUser();
-  const updateUser = useUpdateUser();
+  const commitUser = useCommitUser();
   const time = useTimeSource();
   const showFeedback = useShowFeedback();
   const task = getTaskById(taskId);
@@ -129,9 +129,8 @@ export const useTaskPlay = (taskId: string): TaskPlayController | null => {
       }
 
       const outcome = applyCompleteTask(current, task.id, time, rewardShare);
-      if (!outcome.ok) return false;
+      if (!outcome.ok || !commitUser(current, outcome.user)) return false;
 
-      updateUser(() => outcome.user);
       hapticSuccess();
       showFeedback({
         before: current,

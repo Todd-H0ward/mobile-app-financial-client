@@ -123,6 +123,8 @@ const CREDIT_REASON_KEY: Record<string, string> = {
   [WALLET_SOURCES.gamePuzzle]: 'wallet.source.gamePuzzle',
   [WALLET_SOURCES.gameSpacewar]: 'wallet.source.gameSpacewar',
   [WALLET_SOURCES.gameSnake]: 'wallet.source.gameSnake',
+  'game:market': 'financeGame.market',
+  'game:weekly': 'financeGame.weekly',
 };
 
 // ═══════════════════════════════════════════

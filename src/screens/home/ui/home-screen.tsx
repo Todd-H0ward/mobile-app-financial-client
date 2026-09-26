@@ -1,252 +1,224 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Redirect, useRouter } from 'expo-router';
+import {
+  type Href,
+  Redirect,
+  useFocusEffect,
+  useLocalSearchParams,
+  useRouter,
+} from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { RoomScene, type SceneView } from '@/widgets/room-scene';
+import { WatcherTerminal } from '@/widgets/watcher-terminal';
 
-import { useDoneCells } from '@/entities/lesson';
-import { actionForMood } from '@/entities/robot-dog';
-import { cellKey, SCENE_LEVEL_COUNT } from '@/entities/scene';
-import { useRobotAction, useRobotSkin } from '@/entities/user';
-import type { WatcherId } from '@/entities/watcher';
+import { PLATFORM_LEVEL_COUNT } from '@/entities/economy';
+import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
+import { actionForMood, moodFor } from '@/entities/robot-dog';
+import { cellKey, SCENE_PALETTE, SCENE_TERRACE_COUNT } from '@/entities/scene';
+import {
+  hasSeenStory,
+  useDoneCells,
+  useDoneLessonIds,
+  useIsCameraRigEnabled,
+  useIsMotionEnabled,
+  useRobotAction,
+  useRobotSkin,
+  useUser,
+} from '@/entities/user';
+import {
+  KEEPER_LINES,
+  OVERSEER_LINES,
+  pickLine,
+  WATCHER_IDS,
+  type WatcherGameState,
+  type WatcherId,
+  type WatcherPageId,
+} from '@/entities/watcher';
 
 import {
   CONTENT_PADDING,
   DYNAMIC_ROUTES,
-  RADII,
   SPACING,
   STATIC_ROUTES,
 } from '@/shared/constants';
-import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { Button, SettingsIcon, Text, ThemedView } from '@/shared/ui';
-import { hitSlopFor } from '@/shared/utils';
-
-import { useHomeHud } from '../model';
+import { SettingsIcon, ThemedView } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
-// CONSTANTS
+// HELPERS
 // ═══════════════════════════════════════════
 
-/** Visual size of the settings button; hitSlop expands it to 48dp. */
-const GEAR_SIZE = 40;
+const isWatcherId = (value: unknown): value is WatcherId =>
+  typeof value === 'string' &&
+  (WATCHER_IDS as readonly string[]).includes(value);
 
-/**
- * Vertical travel for the five tiers. Kept short so the rail fits between the
- * gear and the room buttons without spilling past the safe area.
- */
-const _STEP_SLIDER_HEIGHT = 168;
-
-/** Room-button strip under the scene — keep the rail clear of it. */
-const ROOM_CONTROLS_CLEARANCE = 56;
-
-// ═══════════════════════════════════════════
-// COMPONENTS
-// ═══════════════════════════════════════════
-
-/**
- * Settings: the child's own switches — sound, animations, language.
- *
- * Reachable without the barrier on purpose. Turning the sound off on a bus is
- * an accessibility need (3.6), and an accessibility switch a child cannot
- * reach without solving 7 × 8 is not an accessible switch. The grown-up's
- * section sits behind its own quiet door inside.
- */
-const SettingsButton = ({ onPress }: { onPress: () => void }) => {
-  const { t } = useTranslation();
-  const theme = useTheme();
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={t('home.settingsA11y')}
-      hitSlop={hitSlopFor(GEAR_SIZE)}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.gear,
-        {
-          backgroundColor: theme.surface,
-          borderColor: theme.border,
-          opacity: pressed ? 0.7 : 1,
-        },
-      ]}
-    >
-      <SettingsIcon color={theme.textSecondary} />
-    </Pressable>
-  );
-};
-
-/**
- * What a screen is saying while the child stands in front of it.
- *
- * Bottom of the frame rather than beside the face: the camera has flown in
- * close, and the head fills the middle of the window. A tap anywhere on the
- * world also walks away — the button is the visible way out, not the only
- * one, which is 3.6.
- */
-const WatcherCard = ({
-  watcher,
-  onLeave,
-}: {
-  watcher: WatcherId;
-  onLeave: () => void;
-}) => {
-  const { t } = useTranslation();
-  const theme = useTheme();
-
-  return (
-    <View
-      style={[
-        styles.watcherCard,
-        { backgroundColor: theme.surface, borderColor: theme.border },
-      ]}
-    >
-      <Text variant="label" themeColor="textMuted">
-        {t(`scene.watchers.${watcher}.name`)}
-      </Text>
-      <Text variant="body">{t(`scene.watchers.${watcher}.line`)}</Text>
-      <Button size="s" variant="secondary" onPress={onLeave}>
-        {t('scene.watcherLeave')}
-      </Button>
-    </View>
-  );
-};
+const isWatcherPage = (value: unknown): value is WatcherPageId =>
+  value === 'greeting' ||
+  value === 'plan' ||
+  value === 'shop' ||
+  value === 'jar' ||
+  value === 'report' ||
+  value === 'trials' ||
+  value === 'arcade';
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
 /**
- * The world: one model with three rooms on it, turning under the camera.
+ * The arena is the home screen: the map, the robot, the two AIs.
  *
- * Not a `Screen`: the scene is edge to edge and runs under the status bar,
- * while `Screen` is a padded scrolling column. What `Screen` gave — the safe
- * area — is taken directly here, so the model keeps the whole window and only
- * the controls step inside the inset.
- *
- * The HUD is off while the scene is being built: the coins, the goal and the
- * task have to be placed against the 3D world, and half-placed they would
- * only get in the way. The robot dog already stands on the platform and
- * shows its mood through its clip.
+ * Plan, jar and shop live on the Keeper terminal; trials and arcade on the
+ * Overseer. On the overhead map three boards show coins, tier and charge.
  */
 export const HomeScreen = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const theme = useTheme();
   const { t } = useTranslation();
-  const hud = useHomeHud();
+  const params = useLocalSearchParams<{
+    watcher?: string;
+    page?: string;
+  }>();
   const robotSkin = useRobotSkin();
   const chosenAction = useRobotAction();
-
-  /** Opens over the first segment, not on the map: a place, not a menu. */
-  const [view, setView] = useState<SceneView>(0);
-  /**
-   * How far out of the pit the game has climbed, `0 … SCENE_LEVEL_COUNT`.
-   *
-   * Starts at the bottom: the child opens the game standing on the floor of
-   * the pit with the walls above them, and every level lifts the platform a
-   * ring higher until it clears the rim. Local state for now — the real game
-   * will read this off the period the player has finished.
-   */
-  const [level, setLevel] = useState(0);
-  /** At the top the button turns into a way back down, not a dead end. */
-  const isOutOfPit = level >= SCENE_LEVEL_COUNT;
-  /**
-   * The screen overhead the child has tapped, if any.
-   *
-   * Owned here rather than inside the widget: the camera flight is the
-   * widget's, but what the machine says is the game's, and the level card has
-   * to stand down while somebody is talking.
-   */
+  const user = useUser();
+  const isMotionEnabled = useIsMotionEnabled();
+  const isCameraRigEnabled = useIsCameraRigEnabled();
+  const [view, setView] = useState<SceneView>('top');
   const [talkingTo, setTalkingTo] = useState<WatcherId | null>(null);
-  /** Tiles the child has already learnt on; the scene sinks them. */
+  const [terminalPage, setTerminalPage] = useState<WatcherPageId>('greeting');
+  const isNavigating = useRef(false);
   const doneCells = useDoneCells();
+  const doneLessonIds = useDoneLessonIds();
 
-  if (hud.isSummary) {
+  useFocusEffect(
+    useCallback(() => {
+      isNavigating.current = false;
+    }, []),
+  );
+
+  // Deep-link from /shop or /budget-plan redirects.
+  useEffect(() => {
+    if (!isWatcherId(params.watcher)) return;
+    setTalkingTo(params.watcher);
+    setTerminalPage(isWatcherPage(params.page) ? params.page : 'greeting');
+  }, [params.watcher, params.page]);
+
+  const navigate = (href: Href) => {
+    if (isNavigating.current) return;
+    isNavigating.current = true;
+    router.push(href);
+  };
+
+  const leaveTerminal = () => {
+    setTalkingTo(null);
+    setTerminalPage('greeting');
+  };
+
+  if (!user) return <Redirect href={STATIC_ROUTES.ENTRY} />;
+  if (!user.playerName || !user.robot.name) {
+    return <Redirect href={STATIC_ROUTES.SETUP} />;
+  }
+  if (!hasSeenStory(user, 'intro')) {
+    return <Redirect href={DYNAMIC_ROUTES.story('intro')} />;
+  }
+  if (
+    user.platform.level >= PLATFORM_LEVEL_COUNT &&
+    !hasSeenStory(user, 'finale')
+  ) {
+    return <Redirect href={DYNAMIC_ROUTES.story('finale')} />;
+  }
+  if (user.period.phase === 'summary') {
     return <Redirect href={STATIC_ROUTES.PERIOD_SUMMARY} />;
   }
 
+  const mood = moodFor(user.robot.charge, user.robot.spirit);
+  const gameState: WatcherGameState = {
+    phase: user.period.phase,
+    charge: user.robot.charge,
+    spirit: user.robot.spirit,
+    hasActiveTask: !!user.tasks.activeTaskId,
+    areNeedsMet: user.period.fact.needs >= user.period.plan.needs,
+    balance: user.wallet.balance,
+    periodIndex: user.period.index,
+    platformLevel: user.platform.level,
+    moduleTier: user.modules.tier,
+  };
+
+  const currentLine = talkingTo
+    ? pickLine(
+        talkingTo === 'overseer' ? OVERSEER_LINES : KEEPER_LINES,
+        gameState,
+      )
+    : null;
+
   return (
-    <ThemedView variant="background" style={styles.root}>
-      <RoomScene
-        view={view}
-        onViewChange={setView}
-        level={level}
-        robotSkin={robotSkin}
-        robotAction={actionForMood(hud.robot?.moodName ?? null, chosenAction)}
-        focusedWatcher={talkingTo}
-        onWatcherFocus={setTalkingTo}
-        doneCells={doneCells}
-        onCellPress={(cell) =>
-          router.push(DYNAMIC_ROUTES.lesson(cellKey(cell)))
-        }
-        isAnimated={hud.isAnimationEnabled}
-      />
-
-      {/* box-none: the scene keeps every touch the controls do not want, so a
-          swipe started next to the gear still turns the world. */}
-      <View
-        pointerEvents="box-none"
-        style={[styles.top, { paddingTop: insets.top + SPACING.two }]}
-      >
-        <SettingsButton onPress={() => router.push(STATIC_ROUTES.SETTINGS)} />
-      </View>
-
-      {talkingTo ? (
-        <View
-          pointerEvents="box-none"
-          style={[
-            styles.watcherDock,
-            {
-              paddingBottom:
-                insets.bottom + ROOM_CONTROLS_CLEARANCE + SPACING.three,
-            },
-          ]}
-        >
-          <WatcherCard watcher={talkingTo} onLeave={() => setTalkingTo(null)} />
-        </View>
-      ) : null}
-
-      {/* The level knob stands down mid-conversation: it belongs to the
-          arena, and the camera is not on the arena. */}
-      <View
-        pointerEvents="box-none"
-        style={[
-          styles.stepsRail,
-          talkingTo ? styles.hidden : null,
-          {
-            paddingBottom:
-              insets.bottom + ROOM_CONTROLS_CLEARANCE + SPACING.three,
-            paddingTop: insets.top + GEAR_SIZE + SPACING.four,
-          },
-        ]}
-      >
-        <View
-          style={[
-            styles.levelCard,
-            {
-              backgroundColor: theme.surface,
-              borderColor: theme.border,
-            },
-          ]}
-        >
-          <Text variant="label" themeColor="textMuted">
-            {t('scene.level', { level, total: SCENE_LEVEL_COUNT })}
-          </Text>
-          <Button
-            size="s"
-            variant={isOutOfPit ? 'secondary' : 'primary'}
-            onPress={() =>
-              setLevel((current) =>
-                current >= SCENE_LEVEL_COUNT ? 0 : current + 1,
-              )
+    <ThemedView
+      variant="background"
+      style={[styles.root, { backgroundColor: SCENE_PALETTE.background }]}
+    >
+      <View style={styles.world}>
+        <RoomScene
+          view={view}
+          onViewChange={setView}
+          level={user.platform.level}
+          robotSkin={robotSkin}
+          robotAssembly={user.robot.assembly}
+          robotStage={user.robot.stage}
+          robotAction={actionForMood(mood.name, chosenAction)}
+          focusedWatcher={talkingTo}
+          onWatcherFocus={(watcher) => {
+            setTalkingTo(watcher);
+            setTerminalPage('greeting');
+          }}
+          doneCells={doneCells}
+          doneLessonIds={doneLessonIds}
+          mapHud={{
+            balance: user.wallet.balance,
+            tier: user.platform.level,
+            tierTotal: SCENE_TERRACE_COUNT,
+            charge: user.robot.charge,
+          }}
+          onCellPress={(cell) => {
+            const key = cellKey(cell);
+            const ordinal = lessonOrdinalForKey(key);
+            if (ordinal === null) return;
+            if (
+              lessonAccess(ordinal, doneLessonIds, user.platform.level)
+                .status === 'LOCKED'
+            ) {
+              return;
             }
-          >
-            {t(isOutOfPit ? 'scene.levelReset' : 'scene.levelUp')}
-          </Button>
-        </View>
+            navigate(DYNAMIC_ROUTES.lesson(key));
+          }}
+          isAnimated={isMotionEnabled}
+          isCameraRig={isCameraRigEnabled}
+        />
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('home.settingsA11y')}
+          onPress={() => navigate(STATIC_ROUTES.SETTINGS)}
+          style={[
+            styles.settings,
+            { top: insets.top + SPACING.one, right: CONTENT_PADDING },
+          ]}
+          hitSlop={12}
+        >
+          <SettingsIcon color={SCENE_PALETTE.cellFrame} />
+        </Pressable>
+
+        {talkingTo && currentLine ? (
+          <WatcherTerminal
+            key={`${talkingTo}-${terminalPage}`}
+            watcher={talkingTo}
+            line={currentLine}
+            initialPage={terminalPage}
+            onLeave={leaveTerminal}
+          />
+        ) : null}
       </View>
     </ThemedView>
   );
@@ -257,60 +229,14 @@ export const HomeScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  gear: {
+  root: { flex: 1 },
+  settings: {
     alignItems: 'center',
-    borderRadius: RADII.m,
-    borderWidth: 1,
-    height: GEAR_SIZE,
     justifyContent: 'center',
-    width: GEAR_SIZE,
-  },
-  top: {
-    alignItems: 'flex-end',
-    left: 0,
-    paddingHorizontal: CONTENT_PADDING,
+    minHeight: 48,
+    minWidth: 48,
     position: 'absolute',
-    right: 0,
-    top: 0,
+    zIndex: 2,
   },
-  watcherCard: {
-    alignItems: 'flex-start',
-    borderRadius: RADII.l,
-    borderWidth: 1,
-    gap: SPACING.two,
-    padding: SPACING.three,
-  },
-  watcherDock: {
-    bottom: 0,
-    justifyContent: 'flex-end',
-    left: 0,
-    paddingHorizontal: CONTENT_PADDING,
-    pointerEvents: 'box-none',
-    position: 'absolute',
-    right: 0,
-  },
-  stepsRail: {
-    bottom: 0,
-    justifyContent: 'center',
-    paddingRight: CONTENT_PADDING,
-    pointerEvents: 'box-none',
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-  hidden: {
-    display: 'none',
-  },
-  levelCard: {
-    alignItems: 'center',
-    alignSelf: 'flex-end',
-    borderRadius: RADII.l,
-    borderWidth: 1,
-    gap: SPACING.one,
-    paddingHorizontal: SPACING.two,
-    paddingVertical: SPACING.two,
-  },
+  world: { flex: 1 },
 });

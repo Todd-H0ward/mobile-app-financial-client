@@ -25,14 +25,8 @@ const SCENE_TERRACE_RADII = [133, 200, 267, 333, 400];
 /** Radius of the platform as the artist built it. */
 const SCENE_PLATFORM_RADIUS = 267;
 
-/**
- * Level-ups it takes to get out of the pit.
- *
- * Four, not five: the robot stands on the floor of the bowl, level with the
- * innermost ring, so it is the four rings above that have somewhere to sink.
- * When the last one lands, the pit is a plain and the robot is out of it.
- */
-const SCENE_LEVEL_COUNT = 4;
+/** Five progression stages; geometry must represent the full game progression. */
+const SCENE_LEVEL_COUNT = 5;
 
 /**
  * How far each gear turns per level, in radians.

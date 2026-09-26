@@ -2,6 +2,7 @@ import {
   BUDGET_DIRECTIONS,
   PERIOD_HISTORY_LIMIT,
   PERIOD_NEED_DECAY,
+  PLATFORM_GOAL_ID,
   REGULARITY_BONUS,
   WALLET_SOURCES,
 } from '@/entities/economy';
@@ -13,6 +14,7 @@ import { clamp } from '@/shared/utils';
 // The types module, not the slice barrel: the barrel carries the store,
 // and with it `expo-sqlite`, which the node test runner cannot parse.
 import type { PeriodRecord, UserSave } from '../../model';
+import { buildPeriodReport, computeAdjustment } from '../period-report';
 import { creditWallet } from '../wallet';
 
 // ═══════════════════════════════════════════
@@ -67,6 +69,21 @@ export const startPeriod = (user: UserSave, at?: number): UserSave => {
   if (user.period.phase !== 'planning') {
     throw new Error(
       `startPeriod: expected phase 'planning', got '${user.period.phase}'`,
+    );
+  }
+
+  const allocations = BUDGET_DIRECTIONS.map(
+    (direction) => user.period.plan[direction],
+  );
+  if (
+    !allocations.every(
+      (amount) => Number.isSafeInteger(amount) && amount >= 0,
+    ) ||
+    allocations.reduce((total, amount) => total + amount, 0) >
+      user.wallet.balance
+  ) {
+    throw new Error(
+      'startPeriod: plan must contain whole coins within the wallet balance',
     );
   }
 
@@ -143,6 +160,54 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
     .filter((g) => g.reachedInPeriod === period.index)
     .map((g) => g.goalId);
 
+  // Spending the completed jar buys permanent progress; it must not erase
+  // the goal achievement used for this period's growth calculation.
+  if (
+    user.platform.receipts.some(
+      (receipt) => receipt.periodIndex === period.index,
+    ) &&
+    !reachedGoalIds.includes(PLATFORM_GOAL_ID)
+  ) {
+    reachedGoalIds.push(PLATFORM_GOAL_ID);
+  }
+
+  const report = buildPeriodReport(user);
+
+  const walletAfterBonus =
+    savings.depositsThisPeriod > 0
+      ? creditWallet(user.wallet, {
+          source: WALLET_SOURCES.regularityBonus,
+          amount: REGULARITY_BONUS,
+          direction: null,
+          periodIndex: period.index,
+          at: endedAt,
+        })
+      : user.wallet;
+
+  // Budget adherence consequence: bonus for meeting the plan, penalty for
+  // overspending. Levels and non-liquid savings are never touched (ТЗ §2.2).
+  // Penalty is taken from the post-bonus liquid balance so a child who
+  // deposited still feels the miss on what they kept in the wallet.
+  const adjustment = computeAdjustment(isPlanKept, walletAfterBonus.balance);
+  const wallet =
+    adjustment > 0
+      ? creditWallet(walletAfterBonus, {
+          source: 'bonus:budget-met',
+          amount: adjustment,
+          direction: null,
+          periodIndex: period.index,
+          at: endedAt,
+        })
+      : adjustment < 0
+        ? {
+            ...walletAfterBonus,
+            balance: Math.max(0, walletAfterBonus.balance + adjustment),
+          }
+        : walletAfterBonus;
+
+  const charge = clamp(user.robot.charge - PERIOD_NEED_DECAY.charge, 0, 1);
+  const spirit = clamp(user.robot.spirit - PERIOD_NEED_DECAY.spirit, 0, 1);
+
   // Facts are counted on the full append first: trimming must not shrink the
   // counters that just earned a stage (goals that aged out of the window stay
   // reflected in `robot.stage`, which never goes backwards).
@@ -155,6 +220,10 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
       isPlanKept,
       reachedGoalIds,
       endedAt,
+      earned: report.earned,
+      adjustment,
+      robotCharge: charge,
+      robotSpirit: spirit,
     },
   ];
   const stage = growRobotDog(user.robot.stage, growthFacts(history));
@@ -162,20 +231,6 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
     history.length > PERIOD_HISTORY_LIMIT
       ? history.slice(-PERIOD_HISTORY_LIMIT)
       : history;
-
-  const wallet =
-    savings.depositsThisPeriod > 0
-      ? creditWallet(user.wallet, {
-          source: WALLET_SOURCES.regularityBonus,
-          amount: REGULARITY_BONUS,
-          direction: null,
-          periodIndex: period.index,
-          at: endedAt,
-        })
-      : user.wallet;
-
-  const charge = clamp(user.robot.charge - PERIOD_NEED_DECAY.charge, 0, 1);
-  const spirit = clamp(user.robot.spirit - PERIOD_NEED_DECAY.spirit, 0, 1);
 
   return {
     ...user,

@@ -1,11 +1,27 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
+import {
+  activeLessonIndexForCell,
+  completedCellKeysFromLessons,
+  lessonAccess,
+  lessonAt,
+  lessonOrdinalForKey,
+} from '@/entities/lesson';
+
 import { STORAGE_KEYS } from '@/shared/constants';
-import { createPersistStorage } from '@/shared/model';
+import {
+  createPersistStorage,
+  durablePersist,
+  reportStorageIssue,
+  useStorageHealth,
+} from '@/shared/model';
 
 import { enterDemoMode, exitDemoMode } from '../../lib/demo';
+import {
+  importLegacyProgress,
+  isCompletedCellKey,
+} from '../../lib/legacy-progress';
 import { resetUser } from '../../lib/reset';
 import {
   type CreateUserInput,
@@ -32,6 +48,8 @@ interface UserPersistedState {
 }
 
 interface UserStore extends UserPersistedState {
+  /** Marks one arena cell complete inside the current profile, idempotently. */
+  completeLesson: (cellKey: string) => void;
   /** Creates the guest profile. Overwrites an existing one. */
   createUser: (input: CreateUserInput) => void;
   /**
@@ -40,6 +58,8 @@ interface UserStore extends UserPersistedState {
    * holds the result and writes it to disk.
    */
   updateUser: (update: (user: UserSave) => UserSave) => void;
+  /** Commits a reviewed action only if its source snapshot is still current. */
+  commitUser: (before: UserSave, after: UserSave) => boolean;
   /**
    * Turns demo mode on and off, 2.5.13. Switching on parks the child's save in
    * `demoBackup` and plays a demo profile; switching off gives the parked save
@@ -59,10 +79,9 @@ interface UserStore extends UserPersistedState {
 /**
  * One save for the whole app, see docs/game-state.md.
  *
- * There is no explicit "save": `persist` queues a write on every `set`. Disk
- * I/O is debounced and async so a burst of updates does not block input
- * (`docs/performance.md`); a crash can still lose only the last debounce
- * window.
+ * There is no explicit "save": `persist` writes synchronously on every `set`.
+ * Once an action returns, its snapshot is committed; no debounce window can
+ * lose a reward when the process is killed immediately afterwards.
  *
  * Reads stay synchronous (`createPersistStorage`), so the save is already
  * there on the first render: `user === null` always means "no profile", never
@@ -70,10 +89,38 @@ interface UserStore extends UserPersistedState {
  * startup is deliberate.
  */
 export const useUserStore = create<UserStore>()(
-  persist(
+  durablePersist(
     (set, get) => ({
       user: null,
       demoBackup: null,
+
+      completeLesson: (cellKey) => {
+        const { user } = get();
+        const ordinal = lessonOrdinalForKey(cellKey);
+        if (!user || ordinal === null || !isCompletedCellKey(cellKey)) return;
+        if (
+          lessonAccess(ordinal, user.completedLessonIds, user.platform.level)
+            .status === 'LOCKED'
+        ) {
+          return;
+        }
+        const active = activeLessonIndexForCell(
+          ordinal,
+          user.completedLessonIds,
+        );
+        if (active === null) return;
+        const lesson = lessonAt(active);
+        if (user.completedLessonIds.includes(lesson.id)) return;
+        const completedLessonIds = [...user.completedLessonIds, lesson.id];
+        set({
+          user: {
+            ...user,
+            completedLessonIds,
+            completedLessonCells:
+              completedCellKeysFromLessons(completedLessonIds),
+          },
+        });
+      },
 
       createUser: (input) =>
         set({ user: createInitialUser(input), demoBackup: null }),
@@ -83,6 +130,12 @@ export const useUserStore = create<UserStore>()(
         if (!user) return;
 
         set({ user: update(user) });
+      },
+
+      commitUser: (before, after) => {
+        if (get().user !== before || before === after) return false;
+        set({ user: after });
+        return get().user === after;
       },
 
       setDemoMode: (isOn) => {
@@ -110,11 +163,21 @@ export const useUserStore = create<UserStore>()(
         // only then `clearStorage` removes the key. The other way around would
         // leave a key holding an empty profile instead of a clean device.
         set({ user: null, demoBackup: null });
+        if (get().user !== null) return;
         useUserStore.persist.clearStorage();
+        const legacy = createPersistStorage();
+        legacy.removeItem(STORAGE_KEYS.LESSONS);
+        legacy.removeItem(STORAGE_KEYS.ARCADE_SCORES);
       },
     }),
     {
       name: STORAGE_KEYS.USER,
+      onWriteError: (_error, retry) =>
+        reportStorageIssue({ kind: 'write', retry }),
+      onRehydrateStorage: () => (_state, error) => {
+        if (error) reportStorageIssue({ kind: 'read' });
+        else useStorageHealth.getState().clear();
+      },
       storage: createPersistStorage<UserPersistedState>(),
       version: USER_SAVE_VERSION,
       // Actions stay in memory: only the save goes to disk.
@@ -125,18 +188,51 @@ export const useUserStore = create<UserStore>()(
       migrate: (persisted, version) => {
         const saved = persisted as Partial<UserPersistedState> | undefined;
 
-        return {
+        if (!saved || typeof saved !== 'object' || !('user' in saved))
+          throw new Error('Invalid saved envelope');
+        const migrated = {
           user: migrateUser(saved?.user, version),
           demoBackup: migrateUser(saved?.demoBackup, version),
         };
+        if (
+          (saved?.user != null && !migrated.user) ||
+          (saved?.demoBackup != null && !migrated.demoBackup)
+        )
+          throw new Error('Cannot migrate save');
+        if (version < 9) {
+          const readLegacy = (key: string): unknown => {
+            try {
+              return createPersistStorage<unknown>().getItem(key)?.state;
+            } catch {
+              return undefined;
+            }
+          };
+          const target = migrated.demoBackup ? 'demoBackup' : 'user';
+          const profile = migrated[target];
+          if (profile)
+            migrated[target] = importLegacyProgress(
+              profile,
+              readLegacy(STORAGE_KEYS.LESSONS),
+              readLegacy(STORAGE_KEYS.ARCADE_SCORES),
+            );
+        }
+        return migrated;
       },
       // `migrate` only runs when the version changed, `merge` always does, so
       // the shape is checked here: a save of the current version can be broken
       // too.
       merge: (persisted, current) => {
         const saved = persisted as Partial<UserPersistedState> | undefined;
-        const readSave = (value: unknown): UserSave | null =>
-          isUserSave(value) ? value : null;
+        if (
+          persisted !== undefined &&
+          (!saved || typeof saved !== 'object' || !('user' in saved))
+        )
+          throw new Error('Invalid saved envelope');
+        const readSave = (value: unknown): UserSave | null => {
+          if (value == null) return null;
+          if (!isUserSave(value)) throw new Error('Invalid user save');
+          return value;
+        };
 
         return {
           ...current,
@@ -156,6 +252,22 @@ export const useUserStore = create<UserStore>()(
 
 /** The whole save, or `null` before the first profile exists. */
 export const useUser = () => useUserStore((state) => state.user);
+
+const EMPTY_COMPLETED_CELLS: string[] = [];
+const EMPTY_COMPLETED_LESSONS: string[] = [];
+
+/** Arena progress belongs to the current profile, including its demo backup. */
+export const useDoneCells = () =>
+  useUserStore(
+    (state) => state.user?.completedLessonCells ?? EMPTY_COMPLETED_CELLS,
+  );
+/** Lesson ids finished — cells may host more than one when content grows. */
+export const useDoneLessonIds = () =>
+  useUserStore(
+    (state) => state.user?.completedLessonIds ?? EMPTY_COMPLETED_LESSONS,
+  );
+export const useCompleteLesson = () =>
+  useUserStore((state) => state.completeLesson);
 
 /** The robot slice of the save, or `undefined` before there is a profile. */
 export const useUserRobot = () => useUserStore((state) => state.user?.robot);
@@ -189,6 +301,9 @@ export const useCreateUser = () => useUserStore((state) => state.createUser);
 
 /** The only way to change the save — takes a pure update function. */
 export const useUpdateUser = () => useUserStore((state) => state.updateUser);
+
+/** Rejects stale confirmations and repeat taps before displaying success. */
+export const useCommitUser = () => useUserStore((state) => state.commitUser);
 
 /** Turns demo mode on and off, parking and restoring the child's save. */
 export const useSetDemoMode = () => useUserStore((state) => state.setDemoMode);

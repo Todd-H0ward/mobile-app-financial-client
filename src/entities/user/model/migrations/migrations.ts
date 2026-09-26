@@ -1,6 +1,10 @@
+import { PLATFORM_GOAL_ID, PLATFORM_LEVEL_COUNT } from '@/entities/economy';
+import { listLessons } from '@/entities/lesson';
 import {
+  DEFAULT_ROBOT_ASSEMBLY,
   DEFAULT_ROBOT_DOG_ACTION,
   DEFAULT_ROBOT_DOG_SKIN,
+  isRobotAssembly,
   isRobotDogAction,
   isRobotDogSkin,
   ROBOT_DOG_STAGES,
@@ -43,6 +47,136 @@ const STAGE_FROM_PET: Record<string, RobotDogStage> = {
  * version cannot do that.
  */
 const MIGRATIONS: Record<number, MigrationStep> = {
+  15: (save) => ({
+    ...save,
+    version: 16,
+    settings: {
+      ...(isRecord(save.settings) ? save.settings : {}),
+      isGlassEnabled: true,
+    },
+  }),
+  14: (save) => {
+    // Named profiles already passed setup — do not force the intro stub on them.
+    const robot = isRecord(save.robot) ? save.robot : {};
+    const hasNames =
+      typeof save.playerName === 'string' &&
+      save.playerName.trim().length > 0 &&
+      typeof robot.name === 'string' &&
+      robot.name.trim().length > 0;
+    return {
+      ...save,
+      version: 15,
+      seenStoryIds: hasNames ? ['intro'] : [],
+    };
+  },
+  13: (save) => ({
+    ...save,
+    version: 14,
+    settings: {
+      ...(isRecord(save.settings) ? save.settings : {}),
+      isCameraRigEnabled: false,
+    },
+  }),
+  12: (save) => {
+    const cells = Array.isArray(save.completedLessonCells)
+      ? save.completedLessonCells.filter(
+          (key): key is string =>
+            typeof key === 'string' && /^[0-2]-[0-4]-[0-5]$/.test(key),
+        )
+      : [];
+    // Layer 0 only — extras in lessons.json were never reachable before.
+    const completedLessonIds = cells
+      .map((key) => {
+        const [sector, level, index] = key.split('-').map(Number);
+        const ordinal = sector * 30 + level * 6 + index;
+        return listLessons()[ordinal]?.id;
+      })
+      .filter((id): id is string => typeof id === 'string');
+    return {
+      ...save,
+      version: 13,
+      completedLessonIds: [...new Set(completedLessonIds)],
+    };
+  },
+  11: (save) => ({
+    ...save,
+    version: 12,
+    arcade: { ...(isRecord(save.arcade) ? save.arcade : {}), paidWeek: -1 },
+  }),
+  10: (save) => ({
+    ...save,
+    version: 11,
+    robot: {
+      ...(isRecord(save.robot) ? save.robot : {}),
+      assembly: { ...DEFAULT_ROBOT_ASSEMBLY },
+    },
+  }),
+  // The old arena repeated the first 30 lessons in every sector. Preserve
+  // that learned content without marking new practice exercises completed.
+  // Also backfills modules / arcade scores for saves that reached v9 via the
+  // workshop-only step on this branch.
+  9: (save) => {
+    const arcade = isRecord(save.arcade) ? save.arcade : {};
+    return {
+      ...save,
+      version: 10,
+      modules: isRecord(save.modules) ? save.modules : { owned: [], tier: 0 },
+      arcade: {
+        ...arcade,
+        scores: isRecord(arcade.scores)
+          ? arcade.scores
+          : { snake: [], spacewarMs: [] },
+      },
+      completedLessonCells: Array.isArray(save.completedLessonCells)
+        ? [
+            ...new Set(
+              save.completedLessonCells
+                .filter(
+                  (key): key is string =>
+                    typeof key === 'string' && /^[0-2]-[0-4]-[0-5]$/.test(key),
+                )
+                .map((key) => `0${key.slice(1)}`),
+            ),
+          ]
+        : [],
+    };
+  },
+  8: (save) => ({
+    ...save,
+    version: 9,
+    modules: { owned: [], tier: 0 },
+    completedLessonCells: [],
+    arcade: {
+      ...(isRecord(save.arcade) ? save.arcade : {}),
+      scores: { snake: [], spacewarMs: [] },
+    },
+  }),
+  7: (save) => ({
+    ...save,
+    version: 8,
+    arcade: { sequence: 0, active: null, paidDay: -1, paidCount: 0 },
+  }),
+  // v6 had only a local preview level; no money or earned progress is removed.
+  6: (save) => {
+    const savings = isRecord(save.savings) ? save.savings : {};
+    const goals = Array.isArray(savings.goals) ? savings.goals : [];
+    return {
+      ...save,
+      version: 7,
+      platform: { level: 0, receipts: [] },
+      savings: {
+        ...savings,
+        goals: goals.some(
+          (goal) => isRecord(goal) && goal.goalId === PLATFORM_GOAL_ID,
+        )
+          ? goals
+          : [
+              ...goals,
+              { goalId: PLATFORM_GOAL_ID, saved: 0, reachedInPeriod: null },
+            ],
+      },
+    };
+  },
   // v0 — a save from a build before versioning: fewer fields, no `version`.
   // Missing fields come from the starting profile; what the player earned stays.
   0: (save) => ({ ...createInitialUser(), ...save, version: 1 }),
@@ -153,6 +287,30 @@ const MIGRATIONS: Record<number, MigrationStep> = {
 // VALIDATION
 // ═══════════════════════════════════════════
 
+const isPlatform = (value: unknown): boolean =>
+  isRecord(value) &&
+  Number.isInteger(value.level) &&
+  typeof value.level === 'number' &&
+  value.level >= 0 &&
+  value.level <= PLATFORM_LEVEL_COUNT &&
+  Array.isArray(value.receipts) &&
+  value.receipts.length === value.level &&
+  value.receipts.every(
+    (receipt, index) =>
+      isRecord(receipt) &&
+      receipt.id === `platform:${index + 1}` &&
+      receipt.level === index + 1 &&
+      isFiniteNumber(receipt.amount) &&
+      receipt.amount > 0 &&
+      isFiniteNumber(receipt.savingsBefore) &&
+      isFiniteNumber(receipt.savingsAfter) &&
+      receipt.savingsAfter >= 0 &&
+      receipt.savingsBefore - receipt.amount === receipt.savingsAfter &&
+      isFiniteNumber(receipt.periodIndex) &&
+      receipt.periodIndex >= 1 &&
+      isFiniteNumber(receipt.at),
+  );
+
 const isBudget = (value: unknown): boolean =>
   isRecord(value) &&
   isFiniteNumber(value.needs) &&
@@ -162,6 +320,7 @@ const isBudget = (value: unknown): boolean =>
 const isRobot = (value: unknown): boolean =>
   isRecord(value) &&
   typeof value.name === 'string' &&
+  isRobotAssembly(value.assembly) &&
   isOneOf(value.stage, ROBOT_DOG_STAGES) &&
   isFiniteNumber(value.charge) &&
   isFiniteNumber(value.spirit);
@@ -197,6 +356,8 @@ const isSettings = (value: unknown): boolean =>
   typeof value.isParentGateEnabled === 'boolean' &&
   typeof value.isSoundEnabled === 'boolean' &&
   typeof value.isAnimationEnabled === 'boolean' &&
+  typeof value.isGlassEnabled === 'boolean' &&
+  typeof value.isCameraRigEnabled === 'boolean' &&
   typeof value.isDemoMode === 'boolean' &&
   isRobotDogSkin(value.robotSkin) &&
   isRobotDogAction(value.robotAction);
@@ -206,6 +367,56 @@ const isTasks = (value: unknown): boolean =>
   (value.activeTaskId === null || typeof value.activeTaskId === 'string') &&
   Array.isArray(value.completedThisPeriod) &&
   value.completedThisPeriod.every((id) => typeof id === 'string');
+
+const isScores = (value: unknown): boolean =>
+  Array.isArray(value) &&
+  value.length <= 5 &&
+  value.every((score) => Number.isSafeInteger(score) && score > 0);
+
+const isArcade = (value: unknown): boolean =>
+  isRecord(value) &&
+  isRecord(value.scores) &&
+  isScores(value.scores.snake) &&
+  isScores(value.scores.spacewarMs) &&
+  Number.isSafeInteger(value.sequence) &&
+  Number(value.sequence) >= 0 &&
+  Number.isSafeInteger(value.paidWeek) &&
+  Number(value.paidWeek) >= -1 &&
+  Number.isSafeInteger(value.paidDay) &&
+  Number(value.paidDay) >= -1 &&
+  Number.isInteger(value.paidCount) &&
+  Number(value.paidCount) >= 0 &&
+  Number(value.paidCount) <= 3 &&
+  (value.active === null ||
+    (isRecord(value.active) &&
+      value.active.id === value.sequence &&
+      Number(value.active.id) > 0 &&
+      [
+        'puzzle',
+        'snake',
+        'spacewar',
+        'market',
+        'weekly',
+        'conveyor',
+        'scales',
+        'cashier',
+        'jar',
+        'pinball',
+        'memory',
+        'path',
+        'assemble',
+        'laser',
+        'orbit',
+      ].includes(String(value.active.gameId))));
+
+const isModules = (value: unknown): boolean =>
+  isRecord(value) &&
+  Array.isArray(value.owned) &&
+  value.owned.every((id) => typeof id === 'string') &&
+  (value.tier === 0 ||
+    value.tier === 1 ||
+    value.tier === 2 ||
+    value.tier === 3);
 
 /**
  * Checks the shape of the save, not its meaning: passing means no screen will
@@ -218,6 +429,21 @@ export const isUserSave = (value: unknown): value is UserSave =>
   typeof value.playerName === 'string' &&
   isFiniteNumber(value.createdAt) &&
   isRobot(value.robot) &&
+  isPlatform(value.platform) &&
+  isArcade(value.arcade) &&
+  Array.isArray(value.completedLessonCells) &&
+  value.completedLessonCells.length <= 90 &&
+  value.completedLessonCells.every(
+    (key) => typeof key === 'string' && /^[0-2]-[0-4]-[0-5]$/.test(key),
+  ) &&
+  new Set(value.completedLessonCells).size ===
+    value.completedLessonCells.length &&
+  Array.isArray(value.completedLessonIds) &&
+  value.completedLessonIds.every((id) => typeof id === 'string') &&
+  new Set(value.completedLessonIds).size === value.completedLessonIds.length &&
+  Array.isArray(value.seenStoryIds) &&
+  value.seenStoryIds.every((id) => typeof id === 'string') &&
+  new Set(value.seenStoryIds).size === value.seenStoryIds.length &&
   isWallet(value.wallet) &&
   isSavings(value.savings) &&
   isTasks(value.tasks) &&
@@ -225,6 +451,7 @@ export const isUserSave = (value: unknown): value is UserSave =>
   Array.isArray(value.history) &&
   Array.isArray(value.ownedItemIds) &&
   value.ownedItemIds.every((id) => typeof id === 'string') &&
+  isModules(value.modules) &&
   isSettings(value.settings);
 
 // ═══════════════════════════════════════════

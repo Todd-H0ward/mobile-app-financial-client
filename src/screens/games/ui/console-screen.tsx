@@ -29,7 +29,7 @@ export const ConsoleScreen = () => {
   }
 
   return (
-    <Screen gap="two" isTabBarVisible={false} isScrollable={false}>
+    <Screen gap="two" isScrollable={false}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

@@ -1,113 +1,114 @@
 {
   "items": [
     {
-      "id": "bread",
-      "title": "Хлеб и молоко",
+      "id": "charge-small",
+      "title": "Малый заряд",
       "price": 8,
       "kind": "need",
-      "shop": "grocery",
-      "category": "food",
+      "shop": "workshop",
+      "category": "charge",
       "chargeDelta": 0.08,
-      "note": "Еда на период — обязательный расход."
+      "note": "Базовый заряд батареи — обязательный расход каждый период."
     },
     {
-      "id": "porridge",
-      "title": "Каша",
-      "price": 10,
+      "id": "charge-medium",
+      "title": "Средний заряд",
+      "price": 15,
       "kind": "need",
-      "shop": "grocery",
-      "category": "food",
-      "chargeDelta": 0.1,
-      "note": "Сытный завтрак — нужное, а не роскошь."
+      "shop": "workshop",
+      "category": "charge",
+      "chargeDelta": 0.15,
+      "note": "Хороший заряд — хватит надольше."
     },
     {
-      "id": "soap",
-      "title": "Мыло",
-      "price": 6,
+      "id": "charge-full",
+      "title": "Полный заряд",
+      "price": 25,
       "kind": "need",
-      "shop": "grocery",
-      "category": "hygiene",
-      "chargeDelta": 0.05,
-      "note": "Чистота — тоже нужное, не роскошь."
+      "shop": "workshop",
+      "category": "charge",
+      "chargeDelta": 0.25,
+      "note": "Максимальный заряд — пёс в отличной форме."
     },
     {
-      "id": "sweater",
-      "title": "Свитер",
-      "price": 40,
-      "kind": "want",
-      "shop": "clothes",
-      "category": "clothes",
-      "chargeDelta": 0.06,
-      "ownedId": "sweater",
-      "note": "Красивый свитер. Дорогой — стоит сначала накопить."
-    },
-    {
-      "id": "scarf",
-      "title": "Шарф",
-      "price": 14,
-      "kind": "want",
-      "shop": "clothes",
-      "category": "clothes",
-      "chargeDelta": 0.04,
-      "ownedId": "scarf",
-      "note": "Тёплый шарф — хочется, а не обязательно."
-    },
-    {
-      "id": "rug",
-      "title": "Коврик",
+      "id": "module-sensor",
+      "title": "Модуль «Датчик»",
       "price": 20,
       "kind": "want",
-      "shop": "furniture",
-      "category": "decor",
-      "ownedId": "rug",
-      "note": "Мягкий коврик — украшение, не нужное."
+      "shop": "workshop",
+      "category": "module",
+      "ownedId": "module-sensor",
+      "moduleTier": 1,
+      "note": "Первый модуль: +10% к награде за испытания."
     },
     {
-      "id": "lamp",
-      "title": "Ночник",
-      "price": 18,
+      "id": "module-antenna",
+      "title": "Модуль «Антенна»",
+      "price": 35,
       "kind": "want",
-      "shop": "furniture",
-      "category": "decor",
-      "ownedId": "lamp",
-      "note": "Тёплый свет вечером — украшение, не нужное."
+      "shop": "workshop",
+      "category": "module",
+      "ownedId": "module-antenna",
+      "moduleTier": 2,
+      "note": "Второй модуль: +1 подсказка в мини-играх."
     },
     {
-      "id": "stickers",
-      "title": "Наклейки",
-      "price": 5,
+      "id": "module-core",
+      "title": "Модуль «Ядро»",
+      "price": 50,
       "kind": "want",
-      "shop": "furniture",
-      "category": "decor",
-      "ownedId": "stickers",
-      "note": "Украсят стену. Можно и в следующий период."
+      "shop": "workshop",
+      "category": "module",
+      "ownedId": "module-core",
+      "moduleTier": 3,
+      "note": "Третий модуль: +15% к награде и +2 подсказки."
     },
     {
-      "id": "toy-car",
-      "title": "Машинка",
-      "price": 12,
-      "kind": "want",
-      "shop": "toys",
-      "category": "toy",
-      "ownedId": "toy-car",
-      "note": "Игрушка. Позже с ней можно будет поиграть."
-    },
-    {
-      "id": "ball",
-      "title": "Мячик",
-      "price": 7,
-      "kind": "want",
-      "shop": "toys",
-      "category": "toy",
-      "ownedId": "ball",
-      "note": "Катать и ловить. Мини-игра появится чуть позже."
-    },
-    {
-      "id": "puzzle-living",
-      "title": "Пазл «Гостиная»",
+      "id": "visor-red",
+      "title": "Красный визор",
       "price": 10,
       "kind": "want",
-      "shop": "toys",
+      "shop": "workshop",
+      "category": "cosmetic",
+      "ownedId": "visor-red",
+      "note": "Яркий визор — украшение, не обязательное."
+    },
+    {
+      "id": "visor-gold",
+      "title": "Золотой визор",
+      "price": 10,
+      "kind": "want",
+      "shop": "workshop",
+      "category": "cosmetic",
+      "ownedId": "visor-gold",
+      "note": "Золотой визор — красиво блестит."
+    },
+    {
+      "id": "antenna-long",
+      "title": "Длинная антенна",
+      "price": 12,
+      "kind": "want",
+      "shop": "workshop",
+      "category": "cosmetic",
+      "ownedId": "antenna-long",
+      "note": "Заметная антенна — видно издалека."
+    },
+    {
+      "id": "sticker-star",
+      "title": "Наклейка «Звезда»",
+      "price": 5,
+      "kind": "want",
+      "shop": "workshop",
+      "category": "cosmetic",
+      "ownedId": "sticker-star",
+      "note": "Наклейка на корпус — можно и подождать."
+    },
+    {
+      "id": "puzzle-arena",
+      "title": "Пазл «Арена»",
+      "price": 10,
+      "kind": "want",
+      "shop": "workshop",
       "category": "toy",
       "ownedId": "rooms-living",
       "note": "Купи — пазл откроется в мини-играх."
@@ -117,7 +118,7 @@
       "title": "Игровая консоль",
       "price": 14,
       "kind": "want",
-      "shop": "toys",
+      "shop": "workshop",
       "category": "toy",
       "ownedId": "game-console",
       "note": "Купи — в мини-играх откроются Spacewar и змейка."

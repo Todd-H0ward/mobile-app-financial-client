@@ -1,7 +1,8 @@
 import { StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toaster as SonnerToaster, toast as sonnerToast } from 'sonner-native';
 
-import { BOTTOM_TAB_INSET, SPACING } from '@/shared/constants';
+import { SPACING } from '@/shared/constants';
 
 import { Toast, type ToastVariant } from './toast';
 
@@ -54,10 +55,11 @@ export const clearToasts = () => sonnerToast.dismiss();
 // ═══════════════════════════════════════════
 
 export const Toaster = () => {
+  const insets = useSafeAreaInsets();
   return (
     <SonnerToaster
       position="bottom-center"
-      offset={BOTTOM_TAB_INSET + SPACING.three}
+      offset={insets.bottom + SPACING.three}
       duration={DEFAULT_DURATION}
       visibleToasts={MAX_VISIBLE}
       gap={8}

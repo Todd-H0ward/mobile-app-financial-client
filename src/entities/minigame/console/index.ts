@@ -9,5 +9,4 @@ export {
 export {
   CONSOLE_OWNED_ID,
   isConsoleOwned,
-  useArcadeScoresStore,
 } from './model';

@@ -1,0 +1,12 @@
+--- a/src/entities/user/lib/savings/savings.ts
++++ b/src/entities/user/lib/savings/savings.ts
+@@ -143,9 +143,6 @@ export const applyWithdraw = (
+   amount: number,
+   time: TimeSource,
+ ): SavingsResult => {
+-  if (!isLiquid(goalId)) {
+-    return { ok: false, reason: 'non_liquid' };
+-  }
+   if (user.period.phase !== 'active') {
+     return { ok: false, reason: 'wrong_phase' };
+   }

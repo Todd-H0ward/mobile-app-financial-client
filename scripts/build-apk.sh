@@ -7,6 +7,7 @@
 #
 # Output: build/mobile-hackathon-<version>.apk
 set -euo pipefail
+export NODE_ENV=production
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
@@ -19,7 +20,7 @@ if [ -f "$ENV_FILE" ]; then
   set +a
 fi
 
-if [ -z "${ANDROID_KEYSTORE_PATH:-}" ]; then
+if [ -z "${ANDROID_KEYSTORE_PATH:-}" ] || [ -z "${ANDROID_KEYSTORE_PASSWORD:-}" ] || [ -z "${ANDROID_KEY_ALIAS:-}" ]; then
   echo "No release credentials found. Run ./scripts/generate-keystore.sh first." >&2
   echo "(Without them the APK would be signed with the throwaway debug key.)" >&2
   exit 1
@@ -46,6 +47,9 @@ fi
 VERSION="$(node -p "require('./app.json').expo.version")"
 mkdir -p build
 cp android/app/build/outputs/apk/release/app-release.apk "build/mobile-hackathon-$VERSION.apk"
+
+"$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "build/mobile-hackathon-$VERSION.apk"
+shasum -a 256 "build/mobile-hackathon-$VERSION.apk" > "build/mobile-hackathon-$VERSION.apk.sha256"
 
 echo
 echo "APK: build/mobile-hackathon-$VERSION.apk"
