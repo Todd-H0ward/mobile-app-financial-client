@@ -10,6 +10,7 @@ export {
   useDoneCells,
   useDoneLessonIds,
   useHomeHudSource,
+  useHomeScreenData,
   useResetUser,
   useSetDemoMode,
   useUpdateUser,

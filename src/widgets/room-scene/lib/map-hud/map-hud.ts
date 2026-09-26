@@ -24,6 +24,12 @@ import {
 
 import { clamp } from '@/shared/utils';
 
+import {
+  gearGeometryLocal,
+  mergeGeometries,
+  textGeometryLocal,
+} from '../scene-glyphs';
+
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
@@ -104,215 +110,12 @@ const DIGIT_HEIGHT = 28;
 /** Ink floats just in front of the slab face. */
 const INK_Z = PANEL_DEPTH / 2 + 0.4;
 
-/**
- * Serif digit strokes in a 6×8 box.
- *
- * Terminal ticks on the stems — the same GL path as the cell numbers, but
- * with a classical read so the boards feel like engraved plates, not a HUD.
- */
-const DIGIT_STROKES: Record<
-  string,
-  ReadonlyArray<readonly [number, number, number, number]>
-> = {
-  '0': [
-    [1, 0.8, 5, 0.8],
-    [5, 0.8, 5, 7.2],
-    [5, 7.2, 1, 7.2],
-    [1, 7.2, 1, 0.8],
-    [0.2, 0.8, 1.8, 0.8],
-    [4.2, 0.8, 5.8, 0.8],
-    [0.2, 7.2, 1.8, 7.2],
-    [4.2, 7.2, 5.8, 7.2],
-  ],
-  '1': [
-    [3, 0.5, 3, 7.5],
-    [1.4, 6.2, 3, 7.5],
-    [1.4, 0.5, 4.6, 0.5],
-    [2.4, 7.5, 3.6, 7.5],
-  ],
-  '2': [
-    [1, 7.2, 5, 7.2],
-    [5, 7.2, 5, 4.2],
-    [5, 4.2, 1, 4.2],
-    [1, 4.2, 1, 0.8],
-    [1, 0.8, 5, 0.8],
-    [0.2, 7.2, 1, 7.2],
-    [5, 7.2, 5.8, 7.2],
-    [0.2, 0.8, 1, 0.8],
-    [5, 0.8, 5.8, 0.8],
-    [0.2, 4.2, 1, 4.2],
-    [5, 4.2, 5.8, 4.2],
-  ],
-  '3': [
-    [1, 7.2, 5, 7.2],
-    [5, 7.2, 5, 0.8],
-    [5, 0.8, 1, 0.8],
-    [1.2, 4, 5, 4],
-    [0.2, 7.2, 1, 7.2],
-    [5, 7.2, 5.8, 7.2],
-    [0.2, 0.8, 1, 0.8],
-    [5, 0.8, 5.8, 0.8],
-    [5, 4, 5.8, 4],
-  ],
-  '4': [
-    [1.2, 7.5, 1.2, 3.6],
-    [1.2, 3.6, 5, 3.6],
-    [4.2, 7.5, 4.2, 0.5],
-    [0.4, 3.6, 1.2, 3.6],
-    [5, 3.6, 5.8, 3.6],
-    [3.4, 0.5, 5, 0.5],
-  ],
-  '5': [
-    [5, 7.2, 1, 7.2],
-    [1, 7.2, 1, 4.2],
-    [1, 4.2, 5, 4.2],
-    [5, 4.2, 5, 0.8],
-    [5, 0.8, 1, 0.8],
-    [0.2, 7.2, 1, 7.2],
-    [5, 7.2, 5.8, 7.2],
-    [0.2, 4.2, 1, 4.2],
-    [5, 4.2, 5.8, 4.2],
-    [0.2, 0.8, 1, 0.8],
-    [5, 0.8, 5.8, 0.8],
-  ],
-  '6': [
-    [5, 7.2, 1, 7.2],
-    [1, 7.2, 1, 0.8],
-    [1, 0.8, 5, 0.8],
-    [5, 0.8, 5, 4],
-    [5, 4, 1, 4],
-    [0.2, 7.2, 1, 7.2],
-    [5, 7.2, 5.8, 7.2],
-    [0.2, 0.8, 1, 0.8],
-    [5, 0.8, 5.8, 0.8],
-    [0.2, 4, 1, 4],
-    [5, 4, 5.8, 4],
-  ],
-  '7': [
-    [1, 7.2, 5, 7.2],
-    [5, 7.2, 2.2, 0.5],
-    [0.2, 7.2, 1, 7.2],
-    [5, 7.2, 5.8, 7.2],
-    [1.4, 0.5, 3, 0.5],
-  ],
-  '8': [
-    [1, 0.8, 5, 0.8],
-    [5, 0.8, 5, 7.2],
-    [5, 7.2, 1, 7.2],
-    [1, 7.2, 1, 0.8],
-    [1, 4, 5, 4],
-    [0.2, 0.8, 1, 0.8],
-    [5, 0.8, 5.8, 0.8],
-    [0.2, 7.2, 1, 7.2],
-    [5, 7.2, 5.8, 7.2],
-    [0.2, 4, 1, 4],
-    [5, 4, 5.8, 4],
-  ],
-  '9': [
-    [1, 0.8, 5, 0.8],
-    [5, 0.8, 5, 7.2],
-    [5, 7.2, 1, 7.2],
-    [1, 7.2, 1, 4],
-    [1, 4, 5, 4],
-    [0.2, 0.8, 1, 0.8],
-    [5, 0.8, 5.8, 0.8],
-    [0.2, 7.2, 1, 7.2],
-    [5, 7.2, 5.8, 7.2],
-    [0.2, 4, 1, 4],
-    [5, 4, 5.8, 4],
-  ],
-  '/': [
-    [4.4, 0.4, 1.6, 7.6],
-    [3.6, 0.4, 5.2, 0.4],
-    [0.8, 7.6, 2.4, 7.6],
-  ],
-};
-
-const DIGIT_GAP = 3.5;
-const CHAR_WIDTH = 6;
-
 /** Charge below this reads on the warm battery colour. */
 const CHARGE_LOW = 0.35;
 
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
-
-/** Line endpoints for a string of serif digits in a local XY plane. */
-const textLines = (
-  text: string,
-  originX: number,
-  originY: number,
-  height: number,
-): number[] => {
-  const scale = height / 8;
-  const digitWidth = CHAR_WIDTH * scale;
-  const gap = DIGIT_GAP;
-  const totalWidth =
-    text.length * digitWidth + Math.max(0, text.length - 1) * gap;
-  const values: number[] = [];
-  let cursor = originX - totalWidth / 2;
-
-  const write = (x1: number, y1: number, x2: number, y2: number) => {
-    values.push(x1, y1, INK_Z, x2, y2, INK_Z);
-  };
-
-  for (const char of text) {
-    const strokes = DIGIT_STROKES[char] ?? DIGIT_STROKES['0'];
-    for (const [x1, y1, x2, y2] of strokes) {
-      write(
-        cursor + x1 * scale,
-        originY + y1 * scale,
-        cursor + x2 * scale,
-        originY + y2 * scale,
-      );
-    }
-    cursor += digitWidth + gap;
-  }
-
-  return values;
-};
-
-/**
- * Local currency mark — a gear, the machine that climbs the pit.
- *
- * Tooth outline + hub; drawn as line segments like the digits.
- */
-const gearCurrencyLines = (cx: number, cy: number, outer: number): number[] => {
-  const teeth = 8;
-  const valley = outer * 0.72;
-  const hub = outer * 0.28;
-  const values: number[] = [];
-  const write = (x1: number, y1: number, x2: number, y2: number) => {
-    values.push(x1, y1, INK_Z, x2, y2, INK_Z);
-  };
-
-  const points: Array<readonly [number, number]> = [];
-  for (let i = 0; i < teeth * 2; i += 1) {
-    const angle = (i / (teeth * 2)) * Math.PI * 2 - Math.PI / 2;
-    const radius = i % 2 === 0 ? outer : valley;
-    points.push([cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius]);
-  }
-  for (let i = 0; i < points.length; i += 1) {
-    const [x1, y1] = points[i] ?? [0, 0];
-    const [x2, y2] = points[(i + 1) % points.length] ?? [0, 0];
-    write(x1, y1, x2, y2);
-  }
-
-  const hubSteps = 14;
-  for (let i = 0; i < hubSteps; i += 1) {
-    const a0 = (i / hubSteps) * Math.PI * 2;
-    const a1 = ((i + 1) / hubSteps) * Math.PI * 2;
-    write(
-      cx + Math.cos(a0) * hub,
-      cy + Math.sin(a0) * hub,
-      cx + Math.cos(a1) * hub,
-      cy + Math.sin(a1) * hub,
-    );
-  }
-
-  return values;
-};
 
 const setLineGeometry = (mesh: LineSegments, floats: number[]) => {
   const previous = mesh.geometry;
@@ -321,6 +124,12 @@ const setLineGeometry = (mesh: LineSegments, floats: number[]) => {
     'position',
     new BufferAttribute(new Float32Array(floats), 3),
   );
+  mesh.geometry = geometry;
+  previous.dispose();
+};
+
+const setMeshGeometry = (mesh: Mesh, geometry: BufferGeometry) => {
+  const previous = mesh.geometry;
   mesh.geometry = geometry;
   previous.dispose();
 };
@@ -370,7 +179,8 @@ const panelBoxEdges = (
 /**
  * Battery outline in local XY: body + terminal nub.
  *
- * Drawn as line segments so the same GL path that shows cell numbers works.
+ * Drawn as line segments — the fill plane carries the charge, the outline
+ * just frames it.
  */
 const batteryOutlineLines = (
   width: number,
@@ -454,11 +264,13 @@ const createMapHud = (): MapHud => {
   });
   const edgeMaterial = new LineBasicMaterial({
     color: new Color(SCENE_PALETTE.hudPanelEdge),
-    depthTest: false,
+    depthTest: true,
   });
-  const inkMaterial = new LineBasicMaterial({
+  const inkMaterial = new MeshBasicMaterial({
     color: new Color(SCENE_PALETTE.hudInk),
-    depthTest: false,
+    side: DoubleSide,
+    depthTest: true,
+    depthWrite: true,
   });
   const batteryFillMaterial = new MeshBasicMaterial({
     color: new Color(SCENE_PALETTE.hudBattery),
@@ -519,16 +331,16 @@ const createMapHud = (): MapHud => {
   const tierPanel = makePanel(HUD_AZIMUTH);
   const chargePanel = makePanel(HUD_AZIMUTH + PANEL_STEP_DEG);
 
-  const coinsInk = new LineSegments(new BufferGeometry(), inkMaterial);
-  coinsInk.renderOrder = 3;
+  const coinsInk = new Mesh(new BufferGeometry(), inkMaterial);
+  coinsInk.renderOrder = 1;
   coinsPanel.add(coinsInk);
 
-  const tierInk = new LineSegments(new BufferGeometry(), inkMaterial);
-  tierInk.renderOrder = 3;
+  const tierInk = new Mesh(new BufferGeometry(), inkMaterial);
+  tierInk.renderOrder = 1;
   tierPanel.add(tierInk);
 
-  const batteryOutline = new LineSegments(new BufferGeometry(), inkMaterial);
-  batteryOutline.renderOrder = 3;
+  const batteryOutline = new LineSegments(new BufferGeometry(), edgeMaterial);
+  batteryOutline.renderOrder = 1;
   chargePanel.add(batteryOutline);
 
   const batteryBodyWidth = 78;
@@ -553,8 +365,8 @@ const createMapHud = (): MapHud => {
   batteryFill.position.y = batteryY;
   chargePanel.add(batteryFill);
 
-  const chargeLabel = new LineSegments(new BufferGeometry(), inkMaterial);
-  chargeLabel.renderOrder = 3;
+  const chargeLabel = new Mesh(new BufferGeometry(), inkMaterial);
+  chargeLabel.renderOrder = 1;
   chargeLabel.position.set(0, -28, 0);
   chargePanel.add(chargeLabel);
 
@@ -569,18 +381,19 @@ const createMapHud = (): MapHud => {
     if (key === lastKey) return;
     lastKey = key;
 
-    const gear = gearCurrencyLines(-48, 0, 15);
-    const amount = textLines(
+    const gear = gearGeometryLocal(-48, 0, 15, INK_Z);
+    const amount = textGeometryLocal(
       String(balance),
       20,
-      -DIGIT_HEIGHT / 2,
+      0,
       DIGIT_HEIGHT,
+      INK_Z,
     );
-    setLineGeometry(coinsInk, [...gear, ...amount]);
+    setMeshGeometry(coinsInk, mergeGeometries([gear, amount]));
 
-    setLineGeometry(
+    setMeshGeometry(
       tierInk,
-      textLines(`${tier}/${tierTotal}`, 0, -DIGIT_HEIGHT / 2, DIGIT_HEIGHT),
+      textGeometryLocal(`${tier}/${tierTotal}`, 0, 0, DIGIT_HEIGHT, INK_Z),
     );
 
     const fillWidth = Math.max(0.01, fillMaxWidth * charge);
@@ -593,13 +406,14 @@ const createMapHud = (): MapHud => {
         : SCENE_PALETTE.hudBattery,
     );
 
-    setLineGeometry(
+    setMeshGeometry(
       chargeLabel,
-      textLines(
+      textGeometryLocal(
         `${Math.round(charge * 100)}`,
         0,
-        -DIGIT_HEIGHT / 2,
+        0,
         DIGIT_HEIGHT * 0.55,
+        INK_Z,
       ),
     );
   };

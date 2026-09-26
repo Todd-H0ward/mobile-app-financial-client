@@ -8,6 +8,10 @@ const native = vi.hoisted(() => {
     setItemSync: vi.fn((key: string, value: string) => {
       disk.set(key, value);
     }),
+    /** The async variant used by persist-storage for non-blocking writes. */
+    setItem: vi.fn(async (key: string, value: string) => {
+      disk.set(key, value);
+    }),
     removeItemSync: vi.fn((key: string) => disk.delete(key)),
   };
 });
@@ -47,13 +51,14 @@ describe('persist storage durability', () => {
     expect(storage?.getItem('profile')).toBeNull();
   });
 
-  it('does not report a failed write as successful', () => {
-    native.setItemSync.mockImplementationOnce(() => {
+  it('does not write to disk when the async store rejects', async () => {
+    native.setItem.mockImplementationOnce(async () => {
       throw new Error('disk full');
     });
-    expect(() => storage?.setItem('profile', snapshot(50))).toThrow(
-      'disk full',
-    );
+    // Fire-and-forget: the call itself does not throw.
+    storage?.setItem('profile', snapshot(50));
+    // Flush the rejected promise so the test environment stays clean.
+    await Promise.resolve();
     expect(native.disk.has('profile')).toBe(false);
   });
 

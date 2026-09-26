@@ -57,6 +57,8 @@ describe('the scene palette', () => {
       SCENE_PALETTE.hudBatteryLow,
       SCENE_PALETTE.dust,
       SCENE_PALETTE.spark,
+      SCENE_PALETTE.bondHeart,
+      SCENE_PALETTE.bondSteam,
       SCENE_PALETTE.keyLight,
       SCENE_PALETTE.fillLight,
       SCENE_PALETTE.ambientLight,

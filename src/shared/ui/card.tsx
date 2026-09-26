@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 
 import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
 
@@ -46,29 +46,29 @@ const PADDING = SPACING.three;
 // COMPOUND COMPONENTS
 // ═══════════════════════════════════════════
 
-const CardTitle = ({
-  children,
-  variant = 'subtitle',
-  ...props
-}: CardTitleProps) => {
-  return (
-    <Text variant={variant} {...props}>
-      {children}
-    </Text>
-  );
-};
+const CardTitle = memo(
+  ({ children, variant = 'subtitle', ...props }: CardTitleProps) => {
+    return (
+      <Text variant={variant} {...props}>
+        {children}
+      </Text>
+    );
+  },
+);
 
-const CardContent = ({ children, style }: CardContentProps) => {
+const CardContent = memo(({ children, style }: CardContentProps) => {
   return <View style={[styles.content, style]}>{children}</View>;
-};
+});
 
-const CardFooter = ({ children, isSpread = false, style }: CardFooterProps) => {
-  return (
-    <View style={[styles.footer, isSpread && styles.footerSpread, style]}>
-      {children}
-    </View>
-  );
-};
+const CardFooter = memo(
+  ({ children, isSpread = false, style }: CardFooterProps) => {
+    return (
+      <View style={[styles.footer, isSpread && styles.footerSpread, style]}>
+        {children}
+      </View>
+    );
+  },
+);
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
@@ -89,39 +89,41 @@ const CardFooter = ({ children, isSpread = false, style }: CardFooterProps) => {
  *   </Card.Footer>
  * </Card>
  */
-const CardRoot = ({
-  children,
-  tone = 'surface',
-  isSelected = false,
-  onPress,
-  style,
-}: CardRootProps) => {
-  const theme = useTheme();
-
-  const cardStyle: StyleProp<ViewStyle> = [
-    styles.root,
-    {
-      borderColor: isSelected ? theme.primary : theme.border,
-      borderWidth: isSelected ? SELECTED_BORDER : BORDER,
-      // The thicker border eats into the content box, so the padding gives
-      // back exactly what it took: selecting a row must not nudge its text.
-      padding: PADDING - (isSelected ? SELECTED_BORDER : BORDER),
-    },
+const CardRoot = memo(
+  ({
+    children,
+    tone = 'surface',
+    isSelected = false,
+    onPress,
     style,
-  ];
+  }: CardRootProps) => {
+    const theme = useTheme();
 
-  return (
-    <GlassSurface
-      tone={tone}
-      onPress={onPress}
-      accessibilityRole={onPress ? 'button' : undefined}
-      accessibilityState={onPress ? { selected: isSelected } : undefined}
-      style={cardStyle}
-    >
-      {children}
-    </GlassSurface>
-  );
-};
+    const cardStyle: StyleProp<ViewStyle> = [
+      styles.root,
+      {
+        borderColor: isSelected ? theme.primary : theme.border,
+        borderWidth: isSelected ? SELECTED_BORDER : BORDER,
+        // The thicker border eats into the content box, so the padding gives
+        // back exactly what it took: selecting a row must not nudge its text.
+        padding: PADDING - (isSelected ? SELECTED_BORDER : BORDER),
+      },
+      style,
+    ];
+
+    return (
+      <GlassSurface
+        tone={tone}
+        onPress={onPress}
+        accessibilityRole={onPress ? 'button' : undefined}
+        accessibilityState={onPress ? { selected: isSelected } : undefined}
+        style={cardStyle}
+      >
+        {children}
+      </GlassSurface>
+    );
+  },
+);
 
 // ═══════════════════════════════════════════
 // COMPOUND EXPORT

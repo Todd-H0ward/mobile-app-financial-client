@@ -1,4 +1,7 @@
 export type {
+  BondBurst,
+  BondKind,
+  BondReaction,
   GrowthFacts,
   GrowthProgress,
   GrowthRule,
@@ -6,6 +9,7 @@ export type {
 } from './lib';
 export {
   actionForMood,
+  bondReaction,
   easeRobotDogAxes,
   easeTowards,
   GROWTH_RULES,

@@ -18,14 +18,13 @@ import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
 import { actionForMood, moodFor } from '@/entities/robot-dog';
 import { cellKey, SCENE_PALETTE, SCENE_TERRACE_COUNT } from '@/entities/scene';
 import {
-  hasSeenStory,
   useDoneCells,
   useDoneLessonIds,
+  useHomeScreenData,
   useIsCameraRigEnabled,
   useIsMotionEnabled,
   useRobotAction,
   useRobotSkin,
-  useUser,
 } from '@/entities/user';
 import {
   KEEPER_LINES,
@@ -83,11 +82,12 @@ export const HomeScreen = () => {
   }>();
   const robotSkin = useRobotSkin();
   const chosenAction = useRobotAction();
-  const user = useUser();
+  const homeData = useHomeScreenData();
   const isMotionEnabled = useIsMotionEnabled();
   const isCameraRigEnabled = useIsCameraRigEnabled();
   const [view, setView] = useState<SceneView>('top');
   const [talkingTo, setTalkingTo] = useState<WatcherId | null>(null);
+  const [isBonding, setIsBonding] = useState(false);
   const [terminalPage, setTerminalPage] = useState<WatcherPageId>('greeting');
   const isNavigating = useRef(false);
   const doneCells = useDoneCells();
@@ -96,6 +96,9 @@ export const HomeScreen = () => {
   useFocusEffect(
     useCallback(() => {
       isNavigating.current = false;
+      return () => {
+        setIsBonding(false);
+      };
     }, []),
   );
 
@@ -103,6 +106,7 @@ export const HomeScreen = () => {
   useEffect(() => {
     if (!isWatcherId(params.watcher)) return;
     setTalkingTo(params.watcher);
+    setIsBonding(false);
     setTerminalPage(isWatcherPage(params.page) ? params.page : 'greeting');
   }, [params.watcher, params.page]);
 
@@ -117,34 +121,48 @@ export const HomeScreen = () => {
     setTerminalPage('greeting');
   };
 
-  if (!user) return <Redirect href={STATIC_ROUTES.ENTRY} />;
-  if (!user.playerName || !user.robot.name) {
+  const setWatcherFocus = (watcher: WatcherId | null) => {
+    setTalkingTo(watcher);
+    setTerminalPage('greeting');
+    if (watcher) setIsBonding(false);
+  };
+
+  const setBonding = (next: boolean) => {
+    setIsBonding(next);
+    if (next) {
+      setTalkingTo(null);
+      setTerminalPage('greeting');
+    }
+  };
+
+  if (!homeData) return <Redirect href={STATIC_ROUTES.ENTRY} />;
+  if (!homeData.playerName || !homeData.robotName) {
     return <Redirect href={STATIC_ROUTES.SETUP} />;
   }
-  if (!hasSeenStory(user, 'intro')) {
+  if (!homeData.seenStoryIds.includes('intro')) {
     return <Redirect href={DYNAMIC_ROUTES.story('intro')} />;
   }
   if (
-    user.platform.level >= PLATFORM_LEVEL_COUNT &&
-    !hasSeenStory(user, 'finale')
+    homeData.platformLevel >= PLATFORM_LEVEL_COUNT &&
+    !homeData.seenStoryIds.includes('finale')
   ) {
     return <Redirect href={DYNAMIC_ROUTES.story('finale')} />;
   }
-  if (user.period.phase === 'summary') {
+  if (homeData.periodPhase === 'summary') {
     return <Redirect href={STATIC_ROUTES.PERIOD_SUMMARY} />;
   }
 
-  const mood = moodFor(user.robot.charge, user.robot.spirit);
+  const mood = moodFor(homeData.robotCharge, homeData.robotSpirit);
   const gameState: WatcherGameState = {
-    phase: user.period.phase,
-    charge: user.robot.charge,
-    spirit: user.robot.spirit,
-    hasActiveTask: !!user.tasks.activeTaskId,
-    areNeedsMet: user.period.fact.needs >= user.period.plan.needs,
-    balance: user.wallet.balance,
-    periodIndex: user.period.index,
-    platformLevel: user.platform.level,
-    moduleTier: user.modules.tier,
+    phase: homeData.periodPhase,
+    charge: homeData.robotCharge,
+    spirit: homeData.robotSpirit,
+    hasActiveTask: !!homeData.activeTaskId,
+    areNeedsMet: homeData.periodFact.needs >= homeData.periodPlan.needs,
+    balance: homeData.balance,
+    periodIndex: homeData.periodIndex,
+    platformLevel: homeData.platformLevel,
+    moduleTier: homeData.moduleTier,
   };
 
   const currentLine = talkingTo
@@ -162,31 +180,34 @@ export const HomeScreen = () => {
       <View style={styles.world}>
         <RoomScene
           view={view}
-          onViewChange={setView}
-          level={user.platform.level}
-          robotSkin={robotSkin}
-          robotAssembly={user.robot.assembly}
-          robotStage={user.robot.stage}
-          robotAction={actionForMood(mood.name, chosenAction)}
-          focusedWatcher={talkingTo}
-          onWatcherFocus={(watcher) => {
-            setTalkingTo(watcher);
-            setTerminalPage('greeting');
+          onViewChange={(next) => {
+            setView(next);
+            if (next === 'top') setIsBonding(false);
           }}
+          level={homeData.platformLevel}
+          robotSkin={robotSkin}
+          robotAssembly={homeData.robotAssembly}
+          robotStage={homeData.robotStage}
+          robotAction={actionForMood(mood.name, chosenAction)}
+          bondMood={mood.name}
+          isBonding={isBonding}
+          onBondChange={setBonding}
+          focusedWatcher={talkingTo}
+          onWatcherFocus={setWatcherFocus}
           doneCells={doneCells}
           doneLessonIds={doneLessonIds}
           mapHud={{
-            balance: user.wallet.balance,
-            tier: user.platform.level,
+            balance: homeData.balance,
+            tier: homeData.platformLevel,
             tierTotal: SCENE_TERRACE_COUNT,
-            charge: user.robot.charge,
+            charge: homeData.robotCharge,
           }}
           onCellPress={(cell) => {
             const key = cellKey(cell);
             const ordinal = lessonOrdinalForKey(key);
             if (ordinal === null) return;
             if (
-              lessonAccess(ordinal, doneLessonIds, user.platform.level)
+              lessonAccess(ordinal, doneLessonIds, homeData.platformLevel)
                 .status === 'LOCKED'
             ) {
               return;

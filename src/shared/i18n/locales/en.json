@@ -88,12 +88,20 @@
     "settingsA11y": "Settings",
     "goal": {
       "progress": "{{saved}} of {{price}}",
-      "progressA11y": "Goal progress: {{percent}} percent"
+      "progressA11y": "Goal progress: {{percent}} percent",
+      "noneHint": "Open the jar and pick what to save for"
     },
     "task": {
       "title": "Task",
       "comingSoon": "Tasks will show up here very soon",
       "allDone": "Every chore this period is done — well done"
+    },
+    "planBannerAction": "Make a plan",
+    "endBannerAction": "End day",
+    "hud": {
+      "liquid": "on hand {{count}}",
+      "jar": "jar {{count}}",
+      "lastCredit": "+{{amount}} · {{reason}}"
     }
   },
   "parents": {
@@ -1025,7 +1033,17 @@
       },
       "report": {
         "summaryReady": "Period totals are ready. Read them, then move on.",
-        "historyHint": "Here is the history of plans and facts."
+        "historyHint": "Here is the history of plans and facts.",
+        "period": "Period {{index}} · now",
+        "earned": "earned: {{count}}",
+        "charge": "charge: {{fact}} / plan {{plan}}",
+        "modules": "modules: {{fact}} / plan {{plan}}",
+        "saved": "jar: {{fact}} / plan {{plan}}",
+        "wallet": "wallet: {{count}}",
+        "jarLeft": "{{count}} left to hit the jar plan",
+        "supportBody": "The plan is slipping — that is fine. Fix charge or modules, then we go on.",
+        "openPlan": "open plan",
+        "support": "support"
       },
       "trials": {
         "planFirst": "Make a plan with the Keeper first — then trials.",

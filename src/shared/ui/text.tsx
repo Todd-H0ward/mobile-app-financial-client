@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import {
   Platform,
   Text as RNText,
@@ -42,17 +44,14 @@ const VARIANT_COLOR: Partial<Record<TextVariant, ThemeColor>> = {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-export const Text = ({
-  style,
-  variant = 'body',
-  themeColor,
-  ...props
-}: TextProps) => {
-  const theme = useTheme();
-  const color = theme[themeColor ?? VARIANT_COLOR[variant] ?? 'text'];
+export const Text = memo(
+  ({ style, variant = 'body', themeColor, ...props }: TextProps) => {
+    const theme = useTheme();
+    const color = theme[themeColor ?? VARIANT_COLOR[variant] ?? 'text'];
 
-  return <RNText style={[styles[variant], { color }, style]} {...props} />;
-};
+    return <RNText style={[styles[variant], { color }, style]} {...props} />;
+  },
+);
 
 // ═══════════════════════════════════════════
 // STYLES

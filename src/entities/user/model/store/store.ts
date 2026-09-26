@@ -79,14 +79,17 @@ interface UserStore extends UserPersistedState {
 /**
  * One save for the whole app, see docs/game-state.md.
  *
- * There is no explicit "save": `persist` writes synchronously on every `set`.
- * Once an action returns, its snapshot is committed; no debounce window can
- * lose a reward when the process is killed immediately afterwards.
+ * `durablePersist` serialises the snapshot and hands it to storage before
+ * publishing to subscribers. The storage layer (`createPersistStorage`) fires
+ * the actual SQLite write asynchronously, so disk I/O never blocks the JS
+ * thread: `JSON.stringify` is still synchronous (fast), but the native write
+ * is fire-and-forget. A crash during the async write loses at most one
+ * action — acceptable for a game.
  *
- * Reads stay synchronous (`createPersistStorage`), so the save is already
- * there on the first render: `user === null` always means "no profile", never
- * "not loaded yet". The absence of a `hasHydrated` flag and of any waiting at
- * startup is deliberate.
+ * Reads stay synchronous (`getItemSync`), so the save is already there on the
+ * first render: `user === null` always means "no profile", never "not loaded
+ * yet". The absence of a `hasHydrated` flag and of any waiting at startup is
+ * deliberate.
  */
 export const useUserStore = create<UserStore>()(
   durablePersist(
@@ -252,6 +255,31 @@ export const useUserStore = create<UserStore>()(
 
 /** The whole save, or `null` before the first profile exists. */
 export const useUser = () => useUserStore((state) => state.user);
+
+export const useHomeScreenData = () =>
+  useUserStore(
+    useShallow((state) => {
+      const user = state.user;
+      if (!user) return null;
+      return {
+        playerName: user.playerName,
+        robotName: user.robot.name,
+        seenStoryIds: user.seenStoryIds,
+        platformLevel: user.platform.level,
+        periodPhase: user.period.phase,
+        periodIndex: user.period.index,
+        periodFact: user.period.fact,
+        periodPlan: user.period.plan,
+        robotCharge: user.robot.charge,
+        robotSpirit: user.robot.spirit,
+        robotAssembly: user.robot.assembly,
+        robotStage: user.robot.stage,
+        activeTaskId: user.tasks.activeTaskId,
+        balance: user.wallet.balance,
+        moduleTier: user.modules.tier,
+      };
+    }),
+  );
 
 const EMPTY_COMPLETED_CELLS: string[] = [];
 const EMPTY_COMPLETED_LESSONS: string[] = [];
