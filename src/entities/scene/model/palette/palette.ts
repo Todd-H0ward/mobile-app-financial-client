@@ -44,6 +44,10 @@ const SCENE_PALETTE = {
   dust: '#7A6A54',
   /** Gear-train sparks — brief, additive, hot. */
   spark: '#FFD06A',
+  /** Bond-mode hearts above the dog. */
+  bondHeart: '#FF6B8A',
+  /** Bond-mode steam when the dog is tired or sad. */
+  bondSteam: '#A8B8C8',
   /** Warm sodium key — streetlight over the pit. */
   keyLight: '#FFE0B8',
   /** Cool cyber fill on the shaded side. */

@@ -88,6 +88,7 @@ export const HomeScreen = () => {
   const isCameraRigEnabled = useIsCameraRigEnabled();
   const [view, setView] = useState<SceneView>('top');
   const [talkingTo, setTalkingTo] = useState<WatcherId | null>(null);
+  const [isBonding, setIsBonding] = useState(false);
   const [terminalPage, setTerminalPage] = useState<WatcherPageId>('greeting');
   const isNavigating = useRef(false);
   const doneCells = useDoneCells();
@@ -96,6 +97,9 @@ export const HomeScreen = () => {
   useFocusEffect(
     useCallback(() => {
       isNavigating.current = false;
+      return () => {
+        setIsBonding(false);
+      };
     }, []),
   );
 
@@ -103,6 +107,7 @@ export const HomeScreen = () => {
   useEffect(() => {
     if (!isWatcherId(params.watcher)) return;
     setTalkingTo(params.watcher);
+    setIsBonding(false);
     setTerminalPage(isWatcherPage(params.page) ? params.page : 'greeting');
   }, [params.watcher, params.page]);
 
@@ -115,6 +120,20 @@ export const HomeScreen = () => {
   const leaveTerminal = () => {
     setTalkingTo(null);
     setTerminalPage('greeting');
+  };
+
+  const setWatcherFocus = (watcher: WatcherId | null) => {
+    setTalkingTo(watcher);
+    setTerminalPage('greeting');
+    if (watcher) setIsBonding(false);
+  };
+
+  const setBonding = (next: boolean) => {
+    setIsBonding(next);
+    if (next) {
+      setTalkingTo(null);
+      setTerminalPage('greeting');
+    }
   };
 
   if (!user) return <Redirect href={STATIC_ROUTES.ENTRY} />;
@@ -162,17 +181,20 @@ export const HomeScreen = () => {
       <View style={styles.world}>
         <RoomScene
           view={view}
-          onViewChange={setView}
+          onViewChange={(next) => {
+            setView(next);
+            if (next === 'top') setIsBonding(false);
+          }}
           level={user.platform.level}
           robotSkin={robotSkin}
           robotAssembly={user.robot.assembly}
           robotStage={user.robot.stage}
           robotAction={actionForMood(mood.name, chosenAction)}
+          bondMood={mood.name}
+          isBonding={isBonding}
+          onBondChange={setBonding}
           focusedWatcher={talkingTo}
-          onWatcherFocus={(watcher) => {
-            setTalkingTo(watcher);
-            setTerminalPage('greeting');
-          }}
+          onWatcherFocus={setWatcherFocus}
           doneCells={doneCells}
           doneLessonIds={doneLessonIds}
           mapHud={{

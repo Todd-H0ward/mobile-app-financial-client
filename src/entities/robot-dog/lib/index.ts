@@ -1,4 +1,6 @@
 export { actionForMood } from './action';
+export type { BondBurst, BondKind, BondReaction } from './bond';
+export { bondReaction } from './bond';
 export type { GrowthFacts, GrowthProgress, GrowthRule } from './growth';
 export {
   GROWTH_RULES,

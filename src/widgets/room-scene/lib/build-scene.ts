@@ -1,5 +1,6 @@
 import {
   AmbientLight,
+  Box3,
   BoxGeometry,
   BufferAttribute,
   BufferGeometry,
@@ -28,9 +29,12 @@ import {
   lessonAccess,
 } from '@/entities/lesson';
 import {
+  type BondKind,
+  bondReaction,
   DEFAULT_ROBOT_ASSEMBLY,
   type RobotAssembly,
   type RobotDogAction,
+  type RobotDogMoodName,
   type RobotDogSkin,
   type RobotDogStage,
 } from '@/entities/robot-dog';
@@ -40,6 +44,7 @@ import {
   damp,
   gearAngle,
   isSameCell,
+  orbitPosition,
   SCENE_CELLS_PER_STEP,
   SCENE_CHARACTER_FACING,
   SCENE_FLAT_STEP,
@@ -48,6 +53,7 @@ import {
   SCENE_PLATFORM_Y,
   SCENE_RADIUS,
   SCENE_SEGMENT_COUNT,
+  SCENE_SEGMENT_DISTANCE,
   SCENE_SHARED_SEGMENT,
   SCENE_SOURCE,
   SCENE_TERRACE_COUNT,
@@ -61,6 +67,7 @@ import type { WatcherAction, WatcherId } from '@/entities/watcher';
 
 import { clamp } from '@/shared/utils';
 
+import { createBondBursts } from './bond-bursts';
 import { cellNumberGeometry, colorForLabelStatus } from './cell-number-marker';
 import type { CenterCharacter } from './center-character';
 import { createHazeBackdrop } from './haze-backdrop';
@@ -99,8 +106,25 @@ interface SceneModel {
   playCharacterAction: (action: RobotDogAction) => void;
   /** One-shot reaction to a tap; the dog returns to its state afterwards. */
   reactCharacter: (action: RobotDogAction, fallback: RobotDogAction) => void;
+  /**
+   * Bond-mode reaction: clip + particle burst above the head.
+   *
+   * Pure show — mood only picks the clip/burst; charge and spirit stay put.
+   */
+  reactBond: (
+    kind: BondKind,
+    mood: RobotDogMoodName | null,
+    fallback: RobotDogAction,
+  ) => void;
   /** What a tap ray is tested against — `null` until the model has loaded. */
   characterRoot: () => Object3D | null;
+  /**
+   * Close-up shot on the dog for bond mode — same shape as a watcher focus.
+   *
+   * `azimuthDeg` is the orbit heading the child was standing on, so the
+   * lens still approaches from their side of the pit.
+   */
+  characterFocus: (azimuthDeg: number) => WatcherFocus | null;
   /**
    * Turns the robot to face the camera, in radians.
    *
@@ -214,6 +238,15 @@ const CELL_SINK_EPSILON = 0.05;
  * so the locked tiles sink without going black.
  */
 const LOCKED_CELL_TINT = 0.28;
+
+/**
+ * Bond-mode close-up: ~0.38 of the segment shot, so the dog fills the frame
+ * without clipping the platform under its paws.
+ */
+const CHARACTER_FOCUS_DISTANCE = SCENE_SEGMENT_DISTANCE * 0.38;
+
+/** A touch above eye-level so the muzzle sits in the upper third. */
+const CHARACTER_FOCUS_ELEVATION = 22;
 
 /** Opacity of the hold-to-enter fill at full charge. */
 const HOLD_FILL_OPACITY = 0.62;
@@ -849,6 +882,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   // what reach 46, not the ground the robot walks on.
   platform.add(characterMount);
 
+  const bondBursts = createBondBursts(platform);
+
   const mapHud = createMapHud();
   // Hang off the outer ring so the boards ride under its rim as it sinks.
   terraces[SCENE_TERRACE_COUNT - 1]?.add(mapHud.root);
@@ -1209,6 +1244,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     character?.tick(deltaSec);
     watchers?.tick(deltaSec);
     effects.tick(deltaSec);
+    bondBursts.tick(deltaSec);
     tickCellSinks(deltaSec);
     tickHighlight(deltaSec);
   };
@@ -1230,7 +1266,45 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     character?.playOnce(next, fallback);
   };
 
+  const reactBond = (
+    kind: BondKind,
+    mood: RobotDogMoodName | null,
+    fallback: RobotDogAction,
+  ) => {
+    const reaction = bondReaction(mood, kind);
+    character?.playOnce(reaction.action, fallback);
+
+    const root = character?.root;
+    if (!root || reaction.burst === 'none') return;
+    root.updateWorldMatrix(true, false);
+    const box = new Box3().setFromObject(root);
+    const origin = box.getCenter(new Vector3());
+    // Spawn just above the head so hearts clear the ears.
+    origin.y = box.max.y + 12;
+    bondBursts.burst(reaction.burst, origin);
+  };
+
   const characterRoot = () => character?.root ?? null;
+
+  const characterFocus = (azimuthDeg: number): WatcherFocus | null => {
+    const root = character?.root;
+    if (!root) return null;
+
+    root.updateWorldMatrix(true, false);
+    const box = new Box3().setFromObject(root);
+    const anchor = box.getCenter(new Vector3());
+    // Aim at the upper chest / muzzle, not the belly.
+    anchor.y = box.min.y + (box.max.y - box.min.y) * 0.72;
+
+    const { x, y, z } = orbitPosition(
+      azimuthDeg,
+      CHARACTER_FOCUS_ELEVATION,
+      CHARACTER_FOCUS_DISTANCE,
+    );
+    // Character already rides the platform in world space — eye Y is absolute.
+    const eye = new Vector3(x, y + platformHeight(), z);
+    return { eye, anchor };
+  };
 
   const setCharacterFacing = (azimuthRad: number) => {
     characterMount.rotation.y = azimuthRad + SCENE_CHARACTER_FACING;
@@ -1249,6 +1323,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     character = null;
     haze.dispose();
     effects.dispose();
+    bondBursts.dispose();
     mapHud.dispose();
     for (const geometry of geometries) geometry.dispose();
     for (const material of rooms) material.dispose();
@@ -1278,7 +1353,9 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     setCharacterSkin,
     playCharacterAction,
     reactCharacter,
+    reactBond,
     characterRoot,
+    characterFocus,
     setCharacterFacing,
     cellTargets,
     cellAt,

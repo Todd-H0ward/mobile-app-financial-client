@@ -19,8 +19,10 @@ import {
   DEFAULT_ROBOT_ASSEMBLY,
   DEFAULT_ROBOT_DOG_ACTION,
   DEFAULT_ROBOT_DOG_SKIN,
+  ROBOT_DOG_REACTION_SEC,
   type RobotAssembly,
   type RobotDogAction,
+  type RobotDogMoodName,
   type RobotDogSkin,
   type RobotDogStage,
 } from '@/entities/robot-dog';
@@ -79,10 +81,20 @@ interface RoomSceneProps {
   /** What the dog does when nothing interrupts it — its state. */
   robotAction?: RobotDogAction;
   /**
-   * What a tap on the dog plays before it settles back into `robotAction`.
-   * `null` leaves taps unanswered.
+   * Mood that picks the bond-mode clip and particle burst.
+   *
+   * `null` reads as content (hearts on a stroke). Never mutates charge/spirit.
    */
-  petTapAction?: RobotDogAction | null;
+  bondMood?: RobotDogMoodName | null;
+  /**
+   * Close-up on the dog — controlled by the screen like `focusedWatcher`.
+   *
+   * While true the orbit freezes, cell holds are off, and a stroke / kick
+   * plays a reaction. Entry only from a segment view (not the map).
+   */
+  isBonding?: boolean;
+  /** Tap on the dog entered bond, or a tap away / flick exited it. */
+  onBondChange?: (isBonding: boolean) => void;
   /**
    * The screen the child is talking to, or `null` for the arena.
    *
@@ -182,6 +194,16 @@ const FOCUS_SMOOTHING = 0.0006;
 /** Below this the camera is treated as back on the arena, and stops blending. */
 const FOCUS_EPSILON = 0.002;
 
+/**
+ * Finger speed (points / sec) above which a bond-mode pan counts as a kick.
+ *
+ * Slow drags are strokes; a flick is a nudge.
+ */
+const BOND_KICK_VELOCITY = 920;
+
+/** Minimum travel before a bond pan counts as anything. */
+const BOND_STROKE_MIN = 28;
+
 /** How often the dev readout samples the camera and the frame counter, in ms. */
 const READOUT_MS = 500;
 
@@ -265,7 +287,9 @@ export const RoomScene = ({
   robotAssembly = DEFAULT_ROBOT_ASSEMBLY,
   robotStage = 'basic',
   robotAction = DEFAULT_ROBOT_DOG_ACTION,
-  petTapAction = 'joy',
+  bondMood = null,
+  isBonding = false,
+  onBondChange,
   focusedWatcher = null,
   onWatcherFocus,
   onCellPress,
@@ -346,11 +370,16 @@ export const RoomScene = ({
   mapHudRef.current = mapHud;
   /** Which screen the loop is flying towards, `null` for back to the arena. */
   const focusRef = useRef<WatcherId | null>(focusedWatcher);
-  /** `0` on the arena, `1` parked in front of a face; damped in between. */
+  /** Bond close-up — mutually exclusive with a watcher focus. */
+  const isBondingRef = useRef(isBonding);
+  const bondMoodRef = useRef(bondMood);
+  /** Last bond reaction clock, so strokes cannot spam the mixer. */
+  const lastBondReactMs = useRef(0);
+  /** `0` on the arena, `1` parked in front of a face / the dog; damped in between. */
   const focusBlend = useRef(0);
   /**
    * The shot the blend is travelling to — or the one it is travelling back
-   * from, which is why it outlives `focusRef` going null.
+   * from, which is why it outlives `focusRef` / bonding going null.
    */
   const focusShot = useRef<{ anchor: Vector3; eye: Vector3 } | null>(null);
 
@@ -436,10 +465,25 @@ export const RoomScene = ({
   useEffect(() => {
     if (isAnimated) camera.applyView(view);
     else camera.jumpToView(view);
+    // Bond freezes the orbit the same way a watcher does — no pan while close.
     model.current?.setWatchersVisible(
       view === 'top' || focusedWatcher !== null,
     );
   }, [camera, isAnimated, view, focusedWatcher]);
+
+  useEffect(() => {
+    focusRef.current = focusedWatcher;
+    isBondingRef.current = isBonding;
+    bondMoodRef.current = bondMood ?? null;
+    model.current?.setWatcherLifted(focusedWatcher);
+    if (!focusedWatcher) return;
+
+    model.current?.playWatcher(focusedWatcher, WATCHER_FOCUS_ACTION);
+    return () => {
+      model.current?.playWatcher(focusedWatcher, DEFAULT_WATCHER_ACTION);
+      model.current?.setWatcherLifted(null);
+    };
+  }, [focusedWatcher, isBonding, bondMood]);
 
   /**
    * Sinks what the child has already learnt.
@@ -468,24 +512,6 @@ export const RoomScene = ({
     built.setMapHudVisible(isMap);
     if (mapHud) built.setMapHudStats(mapHud);
   }, [view, focusedWatcher, mapHud]);
-
-  /**
-   * The loop reads a ref, and the screen it is aimed at starts talking.
-   *
-   * Only the one in focus changes state: the other keeps whatever it was
-   * doing, so walking away from one does not reset the pair.
-   */
-  useEffect(() => {
-    focusRef.current = focusedWatcher;
-    model.current?.setWatcherLifted(focusedWatcher);
-    if (!focusedWatcher) return;
-
-    model.current?.playWatcher(focusedWatcher, WATCHER_FOCUS_ACTION);
-    return () => {
-      model.current?.playWatcher(focusedWatcher, DEFAULT_WATCHER_ACTION);
-      model.current?.setWatcherLifted(null);
-    };
-  }, [focusedWatcher]);
 
   // Rig knobs rewrite fit / elevation / platform without rebuilding GL.
   useEffect(() => {
@@ -668,14 +694,18 @@ export const RoomScene = ({
         // whichever segment the child is standing in, it is looking at them.
         built.setCharacterFacing((state.azimuth * Math.PI) / 180);
 
-        // Talking to a screen is not an orbit: the camera leaves the axis
-        // entirely and parks in front of a face. Rather than teach the orbit
-        // about a second pivot, both shots are computed every frame and the
-        // lens is eased from one to the other.
-        const wanted = focusRef.current;
-        if (wanted) focusShot.current = built.watcherFocus(wanted);
+        // Talking to a screen or bonding with the dog is not an orbit: the
+        // camera leaves the axis and parks on a close-up. Both shots are
+        // computed every frame and the lens eases from one to the other.
+        const wantedWatcher = focusRef.current;
+        const wantedBond = isBondingRef.current;
+        if (wantedWatcher) {
+          focusShot.current = built.watcherFocus(wantedWatcher);
+        } else if (wantedBond) {
+          focusShot.current = built.characterFocus(state.azimuth);
+        }
 
-        const blendTo = wanted && focusShot.current ? 1 : 0;
+        const blendTo = wantedWatcher || wantedBond ? 1 : 0;
         focusBlend.current = isAnimatedRef.current
           ? damp(focusBlend.current, blendTo, FOCUS_SMOOTHING, delta)
           : blendTo;
@@ -689,7 +719,7 @@ export const RoomScene = ({
           lens.position.copy(orbitEye);
           // Nothing left to travel back from; drop the shot so a watcher
           // that reloads is looked up fresh.
-          if (!wanted) focusShot.current = null;
+          if (!wantedWatcher && !wantedBond) focusShot.current = null;
         }
         lens.lookAt(orbitAim);
 
@@ -794,41 +824,15 @@ export const RoomScene = ({
     [],
   );
 
-  /**
-   * Hold-to-enter: the fill rises while the finger stays put; releasing early
-   * cancels. Stays behind the camera pan so a climb to the map still wins
-   * when the finger moves (LongPress waits in BEGAN until `minDuration`).
-   */
-  const cellHold = Gesture.LongPress()
-    .runOnJS(true)
-    .minDuration(CELL_HOLD_MS)
-    .maxDistance(CELL_HOLD_SLOP)
-    .onBegin((event) => {
-      const cell = hitCellAt(event.x, event.y);
-      if (!isHoldableCell(cell)) return;
-
-      clearCellHold();
-      holdRef.current = {
-        cell,
-        startMs: Date.now(),
-        frame: null,
-        isDone: false,
-      };
-      model.current?.beginCellHold(cell);
-      holdRef.current.frame = requestAnimationFrame(tickCellHold);
-    })
-    .onStart(() => {
-      const hold = holdRef.current;
-      if (!hold) return;
-      hold.isDone = true;
-      const cell = hold.cell;
-      clearCellHold();
-      hapticLight();
-      onCellPress?.(cell);
-    })
-    .onFinalize(() => {
-      if (holdRef.current && !holdRef.current.isDone) clearCellHold();
-    });
+  const fireBondReaction = (kind: 'stroke' | 'kick') => {
+    const built = model.current;
+    if (!built) return;
+    const now = Date.now();
+    if (now - lastBondReactMs.current < ROBOT_DOG_REACTION_SEC * 1000) return;
+    lastBondReactMs.current = now;
+    built.reactBond(kind, bondMoodRef.current, robotActionRef.current);
+    hapticLight();
+  };
 
   const tap = Gesture.Tap()
     .runOnJS(true)
@@ -844,6 +848,18 @@ export const RoomScene = ({
         -(event.y / size.height) * 2 + 1,
       );
       raycaster.current.setFromCamera(pointer.current, lens);
+
+      // Bond mode first: a tap on the dog is a soft stroke; anywhere else
+      // walks the camera back to the bay.
+      if (isBonding) {
+        const root = built.characterRoot();
+        if (root && raycaster.current.intersectObject(root, true).length > 0) {
+          fireBondReaction('stroke');
+          return;
+        }
+        onBondChange?.(false);
+        return;
+      }
 
       // The screens are asked first: they hang in front of the sky where
       // nothing else is, so a ray that finds one found nothing else.
@@ -867,11 +883,13 @@ export const RoomScene = ({
 
       const root = built.characterRoot();
       if (
-        petTapAction !== null &&
         root &&
+        view !== 'top' &&
         raycaster.current.intersectObject(root, true).length > 0
       ) {
-        built.reactCharacter(petTapAction, robotActionRef.current);
+        // Enter bond from a bay only — on the map the dog is too small and
+        // the same tap should walk into a cell's segment.
+        onBondChange?.(true);
         return;
       }
 
@@ -900,20 +918,67 @@ export const RoomScene = ({
   // the child is standing in one. The only drag left is the climb back to
   // the overhead map; picking another bay means going there first.
   //
+  // In bond mode the same pan becomes stroke / kick instead of a climb.
+  //
   // `activeOffsetY` keeps a still press on a cell for the hold gesture —
   // without it the pan would claim every touch on contact.
   const pan = Gesture.Pan()
     .runOnJS(true)
-    .enabled(focusedWatcher === null && view !== 'top')
+    .enabled(focusedWatcher === null && (isBonding || view !== 'top'))
     .activeOffsetY([-14, 14])
-    .onBegin(camera.beginDrag)
+    .onBegin(() => {
+      if (!isBonding) camera.beginDrag();
+    })
     .onUpdate((event) => {
       clearCellHold();
+      if (isBonding) return;
       camera.dragBy(0, event.translationY);
     })
-    .onEnd(() => onViewChange(camera.endDrag()))
+    .onEnd((event) => {
+      if (isBonding) {
+        const travel = Math.hypot(event.translationX, event.translationY);
+        if (travel < BOND_STROKE_MIN) return;
+        const velocity = Math.hypot(event.velocityX, event.velocityY);
+        fireBondReaction(velocity >= BOND_KICK_VELOCITY ? 'kick' : 'stroke');
+        return;
+      }
+      onViewChange(camera.endDrag());
+    })
     .onFinalize((_event, success) => {
+      if (isBonding) return;
       if (!success) onViewChange(camera.endDrag());
+    });
+
+  const cellHold = Gesture.LongPress()
+    .runOnJS(true)
+    .enabled(!isBonding && focusedWatcher === null)
+    .minDuration(CELL_HOLD_MS)
+    .maxDistance(CELL_HOLD_SLOP)
+    .onBegin((event) => {
+      const cell = hitCellAt(event.x, event.y);
+      if (!isHoldableCell(cell)) return;
+
+      clearCellHold();
+      holdRef.current = {
+        cell,
+        startMs: Date.now(),
+        frame: null,
+        isDone: false,
+      };
+      model.current?.beginCellHold(cell);
+      holdRef.current.frame = requestAnimationFrame(tickCellHold);
+    })
+    .onStart(() => {
+      const hold = holdRef.current;
+      if (!hold) return;
+      hold.isDone = true;
+      const cell = hold.cell;
+      clearCellHold();
+      hapticLight();
+      onCellPress?.(cell);
+    })
+    .onFinalize(() => {
+      if (holdRef.current && !holdRef.current.isDone) clearCellHold();
     });
 
   return (
