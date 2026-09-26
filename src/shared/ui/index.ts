@@ -13,8 +13,6 @@ export type {
   CardTitleProps,
 } from './card';
 export { Card } from './card';
-export type { GlassSurfaceProps } from './glass-surface';
-export { GlassSurface } from './glass-surface';
 export type { ChartPoint, ChartSeries, LineChartProps } from './charts';
 export {
   CHART_HEIGHT,
@@ -40,6 +38,8 @@ export type {
 export { Collapsible } from './collapsible';
 export type { ExternalLinkProps } from './external-link';
 export { ExternalLink } from './external-link';
+export type { GlassSurfaceProps } from './glass-surface';
+export { GlassSurface } from './glass-surface';
 export type {
   HintRowHintProps,
   HintRowRootProps,
