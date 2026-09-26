@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { createContext, useContext, useEffect } from 'react';
+import { createContext, memo, useContext, useEffect } from 'react';
 
 import {
   Pressable,
@@ -153,61 +153,61 @@ export const TerminalRule = ({ style }: TerminalRuleProps) => {
   return <View style={[styles.rule, { borderColor: lcdDim }, style]} />;
 };
 
-export const TerminalPrompt = ({
-  children,
-  isCursorVisible = false,
-  onPress,
-  disabled,
-}: TerminalPromptProps) => {
-  const { lcd } = useTerminalTones();
-  const content = (
-    <View style={styles.promptRow}>
-      <Text style={[styles.mono, { color: lcd }]}>{`> ${children}`}</Text>
-      {isCursorVisible ? <TerminalCursor color={lcd} /> : null}
-    </View>
-  );
+export const TerminalPrompt = memo(
+  ({
+    children,
+    isCursorVisible = false,
+    onPress,
+    disabled,
+  }: TerminalPromptProps) => {
+    const { lcd } = useTerminalTones();
+    const content = (
+      <View style={styles.promptRow}>
+        <Text style={[styles.mono, { color: lcd }]}>{`> ${children}`}</Text>
+        {isCursorVisible ? <TerminalCursor color={lcd} /> : null}
+      </View>
+    );
 
-  if (!onPress) return content;
+    if (!onPress) return content;
 
-  return (
-    <Pressable
-      accessibilityRole="button"
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [pressed && styles.pressed]}
-    >
-      {content}
-    </Pressable>
-  );
-};
+    return (
+      <Pressable
+        accessibilityRole="button"
+        disabled={disabled}
+        onPress={onPress}
+        style={({ pressed }) => [pressed && styles.pressed]}
+      >
+        {content}
+      </Pressable>
+    );
+  },
+);
 
-export const TerminalMenuRow = ({ label, onPress }: TerminalMenuRowProps) => {
-  const { lcd } = useTerminalTones();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
-    >
-      <Text style={[styles.mono, { color: lcd }]}>{`> ${label}`}</Text>
-    </Pressable>
-  );
-};
+export const TerminalMenuRow = memo(
+  ({ label, onPress }: TerminalMenuRowProps) => {
+    const { lcd } = useTerminalTones();
+    return (
+      <Pressable
+        accessibilityRole="button"
+        onPress={onPress}
+        style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
+      >
+        <Text style={[styles.mono, { color: lcd }]}>{`> ${label}`}</Text>
+      </Pressable>
+    );
+  },
+);
 
-export const TerminalText = ({
-  children,
-  isDim = false,
-}: {
-  children: string;
-  isDim?: boolean;
-}) => {
-  const { lcd, lcdDim } = useTerminalTones();
-  return (
-    <Text style={[styles.mono, { color: isDim ? lcdDim : lcd }]}>
-      {children}
-    </Text>
-  );
-};
+export const TerminalText = memo(
+  ({ children, isDim = false }: { children: string; isDim?: boolean }) => {
+    const { lcd, lcdDim } = useTerminalTones();
+    return (
+      <Text style={[styles.mono, { color: isDim ? lcdDim : lcd }]}>
+        {children}
+      </Text>
+    );
+  },
+);
 
 /**
  * CRT glass under the 3D face — green for Keeper, red for Overseer.

@@ -4,14 +4,23 @@ import { initReactI18next } from 'react-i18next';
 
 import type { AppLanguage, LanguagePreference } from '@/shared/types';
 
-import en from './locales/en.json';
-import ru from './locales/ru.json';
-
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
 
 const SUPPORTED_LANGUAGES = ['en', 'ru'] as const;
+
+/**
+ * Lazy locale loaders: only the active language is parsed at startup.
+ *
+ * `require()` is synchronous and bundled, but the JSON is only parsed when
+ * the function runs. The second language loads on demand when the user
+ * switches — saving ~60 KB of upfront JSON parsing.
+ */
+const LOCALE_LOADERS: Record<AppLanguage, () => Record<string, string>> = {
+  en: () => require('./locales/en.json'),
+  ru: () => require('./locales/ru.json'),
+};
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -32,11 +41,18 @@ export const resolveLanguagePreference = (
   return preference === 'system' ? getSystemLanguage() : preference;
 };
 
+/** Ensure the bundle for `lang` is registered before switching. */
+const ensureLocale = (lang: AppLanguage) => {
+  if (!i18n.hasResourceBundle(lang, 'translation')) {
+    i18n.addResourceBundle(lang, 'translation', LOCALE_LOADERS[lang]());
+  }
+};
+
 export const applyLanguagePreference = async (
   preference: LanguagePreference,
 ) => {
   const language = resolveLanguagePreference(preference);
-
+  ensureLocale(language);
   if (language !== i18n.language) await changeLanguage(language);
 };
 
@@ -44,17 +60,23 @@ export const applyLanguagePreference = async (
 // CONFIG
 // ═══════════════════════════════════════════
 
+const startLanguage = getSystemLanguage();
+const fallback: AppLanguage = 'en';
+
 i18n.use(initReactI18next).init({
   resources: {
-    en: {
-      translation: en,
+    [startLanguage]: {
+      translation: LOCALE_LOADERS[startLanguage](),
     },
-    ru: {
-      translation: ru,
-    },
+    // Load fallback only if it differs from the start language.
+    ...(startLanguage !== fallback && {
+      [fallback]: {
+        translation: LOCALE_LOADERS[fallback](),
+      },
+    }),
   },
-  lng: getSystemLanguage(),
-  fallbackLng: 'en',
+  lng: startLanguage,
+  fallbackLng: fallback,
   interpolation: {
     escapeValue: false,
   },

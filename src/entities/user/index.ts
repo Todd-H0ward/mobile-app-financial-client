@@ -114,6 +114,7 @@ export {
   useDoneCells,
   useDoneLessonIds,
   useHomeHudSource,
+  useHomeScreenData,
   useIsAnimationEnabled,
   useIsCameraRigEnabled,
   useIsDemoMode,

@@ -397,6 +397,17 @@ export const RoomScene = ({
   const clearColor = useRef(SCENE_PALETTE.background);
   const isAnimatedRef = useRef(isAnimated);
   const viewRef = useRef(view);
+
+  /**
+   * `true` while another screen is stacked over the home screen.
+   *
+   * The loop stops scheduling frames when paused: a 3D render loop left
+   * running under a pushed screen eats GPU, battery and steals frames from
+   * the visible route. `resumeLoop` restarts it when focus returns.
+   */
+  const pausedRef = useRef(false);
+  /** Kicks the rAF loop after a pause — stored by `onContextCreate`. */
+  const resumeLoop = useRef<(() => void) | null>(null);
   const highlight = useRef<number | null>(null);
   const appliedHighlight = useRef<number | null | undefined>(undefined);
 
@@ -443,6 +454,26 @@ export const RoomScene = ({
       built.setWatchersVisible(
         viewRef.current === 'top' || focusRef.current !== null,
       );
+    }, []),
+  );
+
+  // Pause the render loop when a screen is pushed over the home screen,
+  // resume it when focus returns. Without this the 3D scene renders at
+  // 60 FPS under every pushed route — wasting GPU, CPU and battery.
+  useFocusEffect(
+    useCallback(() => {
+      pausedRef.current = false;
+      // Restart the loop if it was stopped while we were away.
+      if (frame.current === null && resumeLoop.current) {
+        resumeLoop.current();
+      }
+      return () => {
+        pausedRef.current = true;
+        if (frame.current !== null) {
+          cancelAnimationFrame(frame.current);
+          frame.current = null;
+        }
+      };
     }, []),
   );
 
@@ -619,6 +650,13 @@ export const RoomScene = ({
       const loop = () => {
         if (loopId.current !== id) return;
 
+        // A pushed screen stole focus — stop scheduling frames until it
+        // returns. The ref is flipped by `useFocusEffect` below.
+        if (pausedRef.current) {
+          frame.current = null;
+          return;
+        }
+
         frame.current = requestAnimationFrame(loop);
 
         // The native surface resizes on rotation without telling us.
@@ -728,6 +766,12 @@ export const RoomScene = ({
         webgl.setClearColor(clear.set(clearColor.current), 1);
         webgl.render(built.scene, lens);
         gl.endFrameEXP();
+      };
+
+      // Let the focus effect restart the loop after a pause.
+      resumeLoop.current = () => {
+        last = Date.now();
+        loop();
       };
 
       loop();

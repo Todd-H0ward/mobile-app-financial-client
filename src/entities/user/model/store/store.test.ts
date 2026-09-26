@@ -31,6 +31,10 @@ vi.mock('expo-sqlite/kv-store', () => ({
     setItemSync: (key: string, value: string) => {
       storage.set(key, value);
     },
+    /** The async variant used by persist-storage for non-blocking writes. */
+    setItem: async (key: string, value: string) => {
+      storage.set(key, value);
+    },
     setItemAsync: async (key: string, value: string) => {
       storage.set(key, value);
     },
