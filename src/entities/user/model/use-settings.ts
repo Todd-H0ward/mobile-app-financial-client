@@ -28,6 +28,10 @@ export const useIsMotionEnabled = (): boolean => {
 export const useIsSoundEnabled = () =>
   useUserStore((state) => state.user?.settings.isSoundEnabled ?? true);
 
+/** Saved liquid-glass switch — settings UI and GlassEnabledProvider. */
+export const useIsGlassEnabled = () =>
+  useUserStore((state) => state.user?.settings.isGlassEnabled ?? true);
+
 export const useIsDemoMode = () =>
   useUserStore((state) => state.user?.settings.isDemoMode ?? false);
 
@@ -60,6 +64,7 @@ export const useSettings = () => ({
   isAnimationEnabled: useIsAnimationEnabled(),
   isMotionEnabled: useIsMotionEnabled(),
   isSoundEnabled: useIsSoundEnabled(),
+  isGlassEnabled: useIsGlassEnabled(),
   isDemoMode: useIsDemoMode(),
   isParentGateEnabled: useIsParentGateEnabled(),
   isCameraRigEnabled: useIsCameraRigEnabled(),

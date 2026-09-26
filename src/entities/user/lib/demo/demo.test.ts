@@ -90,6 +90,7 @@ describe('enterDemoMode', () => {
       isParentGateEnabled: true,
       isSoundEnabled: false,
       isAnimationEnabled: true,
+      isGlassEnabled: true,
       isCameraRigEnabled: false,
       isDemoMode: false,
       robotSkin: 'arctic',

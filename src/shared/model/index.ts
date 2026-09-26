@@ -1,5 +1,9 @@
 export { durablePersist } from './durable-persist';
 export {
+  GlassEnabledProvider,
+  useGlassEnabled,
+} from './glass-enabled';
+export {
   MotionEnabledProvider,
   useMotionEnabled,
 } from './motion-enabled';

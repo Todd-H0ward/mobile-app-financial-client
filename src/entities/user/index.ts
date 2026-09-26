@@ -117,6 +117,7 @@ export {
   useIsAnimationEnabled,
   useIsCameraRigEnabled,
   useIsDemoMode,
+  useIsGlassEnabled,
   useIsMotionEnabled,
   useIsParentGateEnabled,
   useIsSoundEnabled,

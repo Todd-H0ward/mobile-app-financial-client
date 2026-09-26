@@ -181,6 +181,13 @@ interface SettingsSave {
   /** Animations. Turned off for a weak device and for 3.6. */
   isAnimationEnabled: boolean;
   /**
+   * Liquid-glass surfaces on cards, sheets and chrome.
+   *
+   * Off falls back to solid theme fills. System Reduce Transparency also
+   * forces the solid path so a11y wins over the look.
+   */
+  isGlassEnabled: boolean;
+  /**
    * Camera-rig overlay on the arena — elevations, fit, dump.
    *
    * Off by default; only useful while framing shots. The settings toggle

@@ -16,6 +16,8 @@
     "animationsSubtitle": "Smooth transitions and robot movement. Honours system Reduce Motion",
     "sound": "Sound",
     "soundSubtitle": "Haptics and future audio — one switch for both",
+    "glass": "Liquid glass",
+    "glassSubtitle": "Frosted cards and sheets. Off keeps solid surfaces. Honours Reduce Transparency",
     "development": "Development",
     "cameraRig": "Camera rig",
     "cameraRigSubtitle": "Sliders for framing the arena — paste values into camera.ts",

@@ -11,6 +11,7 @@ import type { RobotDogAction, RobotDogSkin } from '@/entities/robot-dog';
 import {
   useIsAnimationEnabled,
   useIsCameraRigEnabled,
+  useIsGlassEnabled,
   useIsSoundEnabled,
   useRobotAction,
   useRobotSkin,
@@ -44,6 +45,7 @@ export const SettingsScreen = () => {
   const updateUser = useUpdateUser();
   const isAnimationEnabled = useIsAnimationEnabled();
   const isSoundEnabled = useIsSoundEnabled();
+  const isGlassEnabled = useIsGlassEnabled();
   const isCameraRigEnabled = useIsCameraRigEnabled();
   const robotSkin = useRobotSkin();
   const robotAction = useRobotAction();
@@ -67,6 +69,12 @@ export const SettingsScreen = () => {
     updateUser((u) => ({
       ...u,
       settings: { ...u.settings, isSoundEnabled: isEnabled },
+    }));
+
+  const setGlass = (isEnabled: boolean) =>
+    updateUser((u) => ({
+      ...u,
+      settings: { ...u.settings, isGlassEnabled: isEnabled },
     }));
 
   const setCameraRig = (isEnabled: boolean) =>
@@ -129,6 +137,17 @@ export const SettingsScreen = () => {
                 isChecked={isSoundEnabled}
                 onChange={setSound}
                 label={t('settings.sound')}
+              />
+            }
+          />
+          <ListRow
+            title={t('settings.glass')}
+            subtitle={t('settings.glassSubtitle')}
+            trailing={
+              <Switch
+                isChecked={isGlassEnabled}
+                onChange={setGlass}
+                label={t('settings.glass')}
               />
             }
           />

@@ -13,6 +13,8 @@ export type {
   CardTitleProps,
 } from './card';
 export { Card } from './card';
+export type { GlassSurfaceProps } from './glass-surface';
+export { GlassSurface } from './glass-surface';
 export type { ChartPoint, ChartSeries, LineChartProps } from './charts';
 export {
   CHART_HEIGHT,

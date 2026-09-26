@@ -16,7 +16,7 @@ import { WatcherTerminal } from '@/widgets/watcher-terminal';
 import { PLATFORM_LEVEL_COUNT } from '@/entities/economy';
 import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
 import { actionForMood, moodFor } from '@/entities/robot-dog';
-import { cellKey, SCENE_TERRACE_COUNT } from '@/entities/scene';
+import { cellKey, SCENE_PALETTE, SCENE_TERRACE_COUNT } from '@/entities/scene';
 import {
   hasSeenStory,
   useDoneCells,
@@ -43,7 +43,6 @@ import {
   SPACING,
   STATIC_ROUTES,
 } from '@/shared/constants';
-import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { SettingsIcon, ThemedView } from '@/shared/ui';
 
@@ -77,7 +76,6 @@ const isWatcherPage = (value: unknown): value is WatcherPageId =>
 export const HomeScreen = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const theme = useTheme();
   const { t } = useTranslation();
   const params = useLocalSearchParams<{
     watcher?: string;
@@ -88,7 +86,7 @@ export const HomeScreen = () => {
   const user = useUser();
   const isMotionEnabled = useIsMotionEnabled();
   const isCameraRigEnabled = useIsCameraRigEnabled();
-  const [view, setView] = useState<SceneView>(0);
+  const [view, setView] = useState<SceneView>('top');
   const [talkingTo, setTalkingTo] = useState<WatcherId | null>(null);
   const [terminalPage, setTerminalPage] = useState<WatcherPageId>('greeting');
   const isNavigating = useRef(false);
@@ -157,7 +155,10 @@ export const HomeScreen = () => {
     : null;
 
   return (
-    <ThemedView variant="background" style={styles.root}>
+    <ThemedView
+      variant="background"
+      style={[styles.root, { backgroundColor: SCENE_PALETTE.background }]}
+    >
       <View style={styles.world}>
         <RoomScene
           view={view}
@@ -206,7 +207,7 @@ export const HomeScreen = () => {
           ]}
           hitSlop={12}
         >
-          <SettingsIcon color={theme.textSecondary} />
+          <SettingsIcon color={SCENE_PALETTE.cellFrame} />
         </Pressable>
 
         {talkingTo && currentLine ? (

@@ -47,6 +47,14 @@ const STAGE_FROM_PET: Record<string, RobotDogStage> = {
  * version cannot do that.
  */
 const MIGRATIONS: Record<number, MigrationStep> = {
+  15: (save) => ({
+    ...save,
+    version: 16,
+    settings: {
+      ...(isRecord(save.settings) ? save.settings : {}),
+      isGlassEnabled: true,
+    },
+  }),
   14: (save) => {
     // Named profiles already passed setup — do not force the intro stub on them.
     const robot = isRecord(save.robot) ? save.robot : {};
@@ -348,6 +356,7 @@ const isSettings = (value: unknown): boolean =>
   typeof value.isParentGateEnabled === 'boolean' &&
   typeof value.isSoundEnabled === 'boolean' &&
   typeof value.isAnimationEnabled === 'boolean' &&
+  typeof value.isGlassEnabled === 'boolean' &&
   typeof value.isCameraRigEnabled === 'boolean' &&
   typeof value.isDemoMode === 'boolean' &&
   isRobotDogSkin(value.robotSkin) &&

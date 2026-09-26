@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
-  Pressable,
   ScrollView,
   type StyleProp,
   StyleSheet,
@@ -25,8 +24,10 @@ import {
   type ThemeColor,
 } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useGlassEnabled } from '@/shared/model';
 import { hitSlopFor } from '@/shared/utils';
 
+import { GlassSurface } from './glass-surface';
 import { Text, type TextProps } from './text';
 import { ThemedView } from './themed-view';
 
@@ -92,7 +93,8 @@ const ScreenBack = ({
   const router = useRouter();
 
   return (
-    <Pressable
+    <GlassSurface
+      tone={tone}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? t('common.back')}
       hitSlop={hitSlopFor(BACK_SIZE)}
@@ -104,19 +106,12 @@ const ScreenBack = ({
 
         router.replace(STATIC_ROUTES.ENTRY);
       }}
-      style={({ pressed }) => [
-        styles.back,
-        {
-          backgroundColor: theme[tone],
-          borderColor: theme.border,
-          opacity: pressed ? 0.7 : 1,
-        },
-      ]}
+      style={[styles.back, { borderColor: theme.border, borderWidth: 1 }]}
     >
       <Text variant="subtitle" themeColor={color}>
         ‹
       </Text>
-    </Pressable>
+    </GlassSurface>
   );
 };
 
@@ -171,6 +166,8 @@ const ScreenRoot = ({
   // clip the scroll view instead of letting content scroll past the indicator.
   // It goes on the scroll content with the home-indicator inset.
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isGlass = useGlassEnabled();
   const bottomPad = insets.bottom + SPACING.four;
 
   const column = (
@@ -188,6 +185,26 @@ const ScreenRoot = ({
 
   return (
     <ThemedView variant={variant} style={styles.root}>
+      {isGlass ? (
+        <>
+          <View
+            pointerEvents="none"
+            style={[
+              styles.wash,
+              styles.washTop,
+              { backgroundColor: theme.primarySoft },
+            ]}
+          />
+          <View
+            pointerEvents="none"
+            style={[
+              styles.wash,
+              styles.washBottom,
+              { backgroundColor: theme.accentSoft },
+            ]}
+          />
+        </>
+      ) : null}
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         {isScrollable ? (
           <ScrollView
@@ -233,6 +250,23 @@ export const Screen = Object.assign(ScreenRoot, {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+  },
+  wash: {
+    borderRadius: 999,
+    opacity: 0.55,
+    position: 'absolute',
+  },
+  washBottom: {
+    bottom: -80,
+    height: 280,
+    right: -60,
+    width: 280,
+  },
+  washTop: {
+    height: 260,
+    left: -80,
+    top: -40,
+    width: 260,
   },
   back: {
     alignItems: 'center',

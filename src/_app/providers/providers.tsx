@@ -6,15 +6,19 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { FeedbackHost } from '@/features/feedback';
 
-import { useIsMotionEnabled, useUserStore } from '@/entities/user';
+import {
+  useIsGlassEnabled,
+  useIsMotionEnabled,
+  useUserStore,
+} from '@/entities/user';
 
-import { useAppLanguage } from '@/shared/hooks';
+import { useAppLanguage, useReducedTransparency } from '@/shared/hooks';
 import {
   bindHapticsSoundGate,
   realTimeSource,
   TimeSourceContext,
 } from '@/shared/lib';
-import { MotionEnabledProvider } from '@/shared/model';
+import { GlassEnabledProvider, MotionEnabledProvider } from '@/shared/model';
 import { Toaster } from '@/shared/ui';
 
 import '@/shared/i18n';
@@ -35,6 +39,9 @@ interface ProvidersProps {
 
 const AccessibilityBridge = ({ children }: { children: ReactNode }) => {
   const isMotionEnabled = useIsMotionEnabled();
+  const isGlassPreferred = useIsGlassEnabled();
+  const isTransparencyReduced = useReducedTransparency();
+  const isGlassEnabled = isGlassPreferred && !isTransparencyReduced;
 
   // Shared haptics must not import the user store — FSD; gate is bound here.
   bindHapticsSoundGate(
@@ -43,7 +50,9 @@ const AccessibilityBridge = ({ children }: { children: ReactNode }) => {
 
   return (
     <MotionEnabledProvider isEnabled={isMotionEnabled}>
-      {children}
+      <GlassEnabledProvider isEnabled={isGlassEnabled}>
+        {children}
+      </GlassEnabledProvider>
     </MotionEnabledProvider>
   );
 };

@@ -19,6 +19,7 @@ import {
   clearToasts,
   dismissToast,
   ExternalLink,
+  GlassSurface,
   HelpIcon,
   HintRow,
   HomeIcon,
@@ -223,6 +224,26 @@ export const UiKitScreen = () => {
             <Button isFullWidth onPress={() => toast('Во всю ширину')}>
               Во всю ширину
             </Button>
+          </KitSection.Row>
+        </KitSection>
+
+        <KitSection
+          title="GlassSurface"
+          caption="Жидкое стекло (настройка Interface). Выкл. — сплошная заливка"
+        >
+          <KitSection.Row label="surface / surfaceSoft">
+            <GlassSurface
+              tone="surface"
+              style={{ padding: 16, borderRadius: 16 }}
+            >
+              <Text>Glass surface</Text>
+            </GlassSurface>
+            <GlassSurface
+              tone="surfaceSoft"
+              style={{ padding: 16, borderRadius: 16 }}
+            >
+              <Text>Glass soft</Text>
+            </GlassSurface>
           </KitSection.Row>
         </KitSection>
 

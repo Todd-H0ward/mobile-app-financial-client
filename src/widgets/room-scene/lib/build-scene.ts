@@ -225,14 +225,17 @@ const KEY_LIGHT_POSITION = [0.6, 1, 0.45];
 const FILL_LIGHT_POSITION = [-0.7, 0.35, -0.6];
 
 /**
- * Soft corridor light: warm key, cool fill, bright ambient — Smash Hit, not
- * neon alley. Flat Phong colour + mild emissive; no textures.
+ * Cinematic pit light: warm sodium key, cool fill, low ambient so concrete
+ * emissive and amber haze read as glow — Blade Runner, not a bright corridor.
  */
-const KEY_LIGHT_INTENSITY = 1.8;
-const FILL_LIGHT_INTENSITY = 1.2;
-const AMBIENT_INTENSITY = 0.85;
-const HEMISPHERE_INTENSITY = 1.2;
+const KEY_LIGHT_INTENSITY = 1.95;
+const FILL_LIGHT_INTENSITY = 1.25;
+const AMBIENT_INTENSITY = 0.65;
+const HEMISPHERE_INTENSITY = 1.05;
 const CENTRE_POINT_INTENSITY = 3.2;
+
+/** Soft self-glow on platform slabs — stand-in for bloom on mid-range GL. */
+const PLATFORM_EMISSIVE = 0.26;
 /** How high above the dropped platform the neon lamps sit. */
 const POINT_LIGHT_HEIGHT = 220;
 
@@ -524,8 +527,8 @@ const roomMaterial = (hex: string): MeshPhongMaterial =>
     emissive: new Color(hex),
     // Soft — locked tiles darken via vertex colours, and a strong emissive
     // would light them back up through the tint.
-    emissiveIntensity: 0.08,
-    shininess: 40,
+    emissiveIntensity: PLATFORM_EMISSIVE,
+    shininess: 28,
     specular: new Color(SCENE_PALETTE.specular),
     // The wedges are thin shells in places; a missing back face reads as a
     // hole in the floor.
@@ -969,7 +972,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       const hex = SCENE_PALETTE.segments[index];
       material.color.set(hex);
       material.emissive.set(hex);
-      material.emissiveIntensity = 0.08;
+      material.emissiveIntensity = PLATFORM_EMISSIVE;
       segmentPresenceTarget[index] = isShown ? 1 : 0;
       frames[index].color.set(SCENE_PALETTE.cellFrame);
       // Fading in has to be drawable on the first frame of the ease.
