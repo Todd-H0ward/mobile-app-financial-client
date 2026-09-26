@@ -61,7 +61,7 @@ import type { WatcherAction, WatcherId } from '@/entities/watcher';
 
 import { clamp } from '@/shared/utils';
 
-import { cellNumberLines, colorForLabelStatus } from './cell-number-marker';
+import { cellNumberGeometry, colorForLabelStatus } from './cell-number-marker';
 import type { CenterCharacter } from './center-character';
 import { createHazeBackdrop } from './haze-backdrop';
 import { createLiftEffects, type LiftEffects } from './lift-effects';
@@ -177,14 +177,14 @@ interface CellLabelRecord {
   segment: number;
   /** Arena ordinal `0…89`. */
   ordinal: number;
-  /** Top-centre of the tile — where the number strokes are rebuilt. */
+  /** Top-centre of the tile — where the number glyphs are rebuilt. */
   anchor: Vector3;
   /** Availability — drives the number colour. */
   status: LessonStatus;
-  /** Stroke mesh for the lesson number. */
-  mesh: LineSegments;
+  /** Filled digit mesh for the lesson number. */
+  mesh: Mesh;
   /** Own material so status colour does not share state with frames. */
-  material: LineBasicMaterial;
+  material: MeshBasicMaterial;
 }
 
 // ═══════════════════════════════════════════
@@ -447,7 +447,7 @@ const faceStarts = (nodes: SceneNode[]): number[] => {
 
 /**
  * Where a lesson number sits on a cell: top centre, same spot the old status
- * markers used. `cellNumberLines` then lays the strokes flat on that plane.
+ * markers used. `cellNumberGeometry` then lays the filled digits flat there.
  */
 const frontAnchorOf = (edges: BufferGeometry): Vector3 => {
   edges.computeBoundingBox();
@@ -456,7 +456,7 @@ const frontAnchorOf = (edges: BufferGeometry): Vector3 => {
 
   const center = box.getCenter(new Vector3());
   // Lift clear of the tile — same daylight gap the cell frames use — so the
-  // strokes do not z-fight the floor into a dashed crawl.
+  // glyphs do not z-fight the floor into a dashed crawl.
   center.y = box.max.y + 3;
   return center;
 };
@@ -755,8 +755,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       segmentParts[segment].push(tiles);
 
       // Every cell keeps its own outline, so the selected one can be picked
-      // out of the row without rebuilding anything. Lesson numbers are drawn
-      // as line strokes on the cell top — the same path the old status
+      // out of the row without rebuilding anything. Lesson numbers are filled
+      // capsule glyphs on the cell top — the same plane the old status
       // markers used, which this GL stack actually shows.
       const outlines = cells.map((node) => cellEdges(node));
       const numberGeometries: BufferGeometry[] = [];
@@ -766,28 +766,28 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         const ordinal = segment * 30 + terrace * 6 + cell;
         const status = lessonAccess(ordinal, [], 0).status;
         const anchor = frontAnchorOf(edges);
-        const floats = cellNumberLines(
+        const numberGeometry = cellNumberGeometry(
           displayNumberForCell(ordinal, []) - 1,
           anchor,
-        );
-        const numberGeometry = new BufferGeometry();
-        numberGeometry.setAttribute(
-          'position',
-          new BufferAttribute(new Float32Array(floats), 3),
         );
         geometries.push(numberGeometry);
         numberGeometries.push(numberGeometry);
 
-        const numberMaterial = new LineBasicMaterial({
+        const isLocked = status === 'LOCKED';
+        const numberMaterial = new MeshBasicMaterial({
           color: new Color(colorForLabelStatus(status)),
-          transparent: true,
-          opacity: 1,
-          depthTest: false,
+          // Opaque path for open cells: `transparent: true` on every digit
+          // put ninety meshes in the transparent pass, where they depth-wrote
+          // each other away. Locked stays translucent and does not write depth.
+          transparent: isLocked,
+          opacity: isLocked ? 0.45 : 1,
+          depthTest: true,
+          depthWrite: !isLocked,
+          side: DoubleSide,
         });
-        const numberLines = new LineSegments(numberGeometry, numberMaterial);
-        numberLines.renderOrder = 2;
-        terraces[terrace].add(numberLines);
-        segmentParts[segment].push(numberLines);
+        const numberMesh = new Mesh(numberGeometry, numberMaterial);
+        terraces[terrace].add(numberMesh);
+        segmentParts[segment].push(numberMesh);
 
         cellLabelRecords.push({
           key,
@@ -795,7 +795,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
           ordinal,
           anchor,
           status,
-          mesh: numberLines,
+          mesh: numberMesh,
           material: numberMaterial,
         });
       });
@@ -1294,19 +1294,18 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
           level,
         ).status;
         record.material.color.set(colorForLabelStatus(record.status));
-        record.material.opacity = record.status === 'LOCKED' ? 0.45 : 1;
+        const isLocked = record.status === 'LOCKED';
+        record.material.transparent = isLocked;
+        record.material.opacity = isLocked ? 0.45 : 1;
+        record.material.depthWrite = !isLocked;
+        record.material.needsUpdate = true;
 
         const display = displayNumberForCell(
           record.ordinal,
           completedLessonIds,
         );
-        const floats = cellNumberLines(display - 1, record.anchor);
         const previous = record.mesh.geometry;
-        const geometry = new BufferGeometry();
-        geometry.setAttribute(
-          'position',
-          new BufferAttribute(new Float32Array(floats), 3),
-        );
+        const geometry = cellNumberGeometry(display - 1, record.anchor);
         record.mesh.geometry = geometry;
         previous.dispose();
 
@@ -1320,7 +1319,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         sink.parts[2] = {
           geometry,
           from: 0,
-          to: floats.length,
+          to: geometry.getAttribute('position').array.length,
         };
       }
 

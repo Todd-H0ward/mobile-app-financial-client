@@ -1,6 +1,5 @@
 export {
-  cellNumberLines,
+  cellNumberGeometry,
   colorForLabelStatus,
   DIGIT_HEIGHT,
-  numberLineFloats,
 } from './cell-number-marker';
