@@ -52,9 +52,11 @@ import {
 import {
   DYNAMIC_ROUTES,
   isSheetPath,
+  SOUNDS,
   SPACING,
   STATIC_ROUTES,
 } from '@/shared/constants';
+import { playSfx } from '@/shared/lib';
 import { TerminalDock, ThemedView } from '@/shared/ui';
 
 import { useHomeHud } from '../model';
@@ -179,7 +181,17 @@ export const HomeScreen = () => {
     setIsBonding(false);
     setIsRobotOpen(false);
     setTerminalPage(isWatcherPage(params.page) ? params.page : 'greeting');
+    playSfx(
+      params.watcher === 'keeper' ? SOUNDS.KEEPER_ON : SOUNDS.OVERSEER_ON,
+    );
   }, [params.watcher, params.page]);
+
+  // Soft talk blip whenever a watcher opens or flips to another page.
+  useEffect(() => {
+    if (!talkingTo) return;
+    void terminalPage;
+    playSfx(talkingTo === 'keeper' ? SOUNDS.KEEPER_TALK : SOUNDS.OVERSEER_TALK);
+  }, [talkingTo, terminalPage]);
 
   const navigate = (href: Href) => {
     if (isNavigating.current) return;
@@ -188,11 +200,19 @@ export const HomeScreen = () => {
   };
 
   const leaveTerminal = () => {
+    if (talkingTo) {
+      playSfx(talkingTo === 'keeper' ? SOUNDS.KEEPER_OFF : SOUNDS.OVERSEER_OFF);
+    }
     setTalkingTo(null);
     setTerminalPage('greeting');
   };
 
   const setWatcherFocus = (watcher: WatcherId | null) => {
+    if (watcher) {
+      playSfx(watcher === 'keeper' ? SOUNDS.KEEPER_ON : SOUNDS.OVERSEER_ON);
+    } else if (talkingTo) {
+      playSfx(talkingTo === 'keeper' ? SOUNDS.KEEPER_OFF : SOUNDS.OVERSEER_OFF);
+    }
     setTalkingTo(watcher);
     setTerminalPage('greeting');
     if (watcher) {
@@ -204,16 +224,21 @@ export const HomeScreen = () => {
   const openRobot = () => {
     setTalkingTo(null);
     setTerminalPage('greeting');
-    // The close-up is framed from inside a bay; from the overhead map the
-    // lens would look at the dog through the rim wall.
+
     viewBeforeRobot.current = view;
+
     if (view === 'top') setView(0);
+
     setIsBonding(true);
     setIsRobotOpen(true);
+    playSfx(SOUNDS.DOG_ENTER);
   };
 
   const setBonding = (next: boolean) => {
-    setIsBonding(next);
+    setIsBonding((prev) => {
+      if (prev !== next) playSfx(next ? SOUNDS.DOG_ENTER : SOUNDS.DOG_EXIT);
+      return next;
+    });
     if (!next && isRobotOpenRef.current) {
       setIsRobotOpen(false);
       if (viewBeforeRobot.current !== null) setView(viewBeforeRobot.current);
@@ -335,6 +360,9 @@ export const HomeScreen = () => {
               hud={hud}
               bottom={insets.bottom + SPACING.compact}
               onOpen={(watcher, page) => {
+                playSfx(
+                  watcher === 'keeper' ? SOUNDS.KEEPER_ON : SOUNDS.OVERSEER_ON,
+                );
                 setTalkingTo(watcher);
                 setTerminalPage(page);
                 setIsBonding(false);

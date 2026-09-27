@@ -22,8 +22,9 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { FONTS, RADII, SPACING } from '@/shared/constants';
+import { FONTS, RADII, SOUNDS, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { playSfx } from '@/shared/lib';
 import { useMotionEnabled } from '@/shared/model';
 import { isTextOnly } from '@/shared/utils';
 
@@ -121,6 +122,7 @@ const ButtonRoot = ({
   isFullWidth = false,
   disabled,
   style,
+  onPress,
   onPressIn,
   onPressOut,
   accessibilityState,
@@ -210,6 +212,15 @@ const ButtonRoot = ({
         disabled: isBlocked,
       }}
       disabled={isBlocked}
+      onPress={(event) => {
+        if (!isBlocked) {
+          if (variant === 'ghost') playSfx(SOUNDS.UI_BACK);
+          else if (variant === 'primary' || variant === 'warning')
+            playSfx(SOUNDS.UI_CONFIRM);
+          else playSfx(SOUNDS.UI_TAP);
+        }
+        onPress?.(event);
+      }}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       style={[styles.root, isFullWidth && styles.fullWidth, style]}

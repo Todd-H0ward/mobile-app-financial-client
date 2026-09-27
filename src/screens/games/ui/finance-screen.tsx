@@ -13,9 +13,9 @@ import {
 } from '@/entities/minigame/finance';
 import { useUser } from '@/entities/user';
 
-import { STATIC_ROUTES } from '@/shared/constants';
+import { SOUNDS, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { useTimeSource } from '@/shared/lib';
+import { playSfx, useTimeSource } from '@/shared/lib';
 import { Button, Text } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
@@ -48,7 +48,12 @@ export const FinanceScreen = ({ game }: FinanceScreenProps) => {
   const next = () => {
     if (choice === null || gate.current) return;
     gate.current = true;
-    if (choice === round.correct) correct.current += 1;
+
+    const isRight = choice === round.correct;
+
+    if (isRight) correct.current += 1;
+
+    playSfx(isRight ? SOUNDS.CORRECT : SOUNDS.WRONG);
     setDebrief(true);
   };
   const continueRound = () => {

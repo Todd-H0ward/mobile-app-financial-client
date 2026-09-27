@@ -7,6 +7,8 @@ export {
   SHEET_ROUTE_NAMES,
   STATIC_ROUTES,
 } from './routes';
+export type { SoundId } from './sounds';
+export { SOUNDS } from './sounds';
 export { STORAGE_KEYS } from './storage-keys';
 export type { Spacing, ThemeColor } from './theme';
 export {

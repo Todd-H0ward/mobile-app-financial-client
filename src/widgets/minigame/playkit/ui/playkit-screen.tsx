@@ -12,10 +12,10 @@ import {
   playkitRound,
 } from '@/entities/minigame/playkit';
 
-import { FONTS, SPACING, STATIC_ROUTES } from '@/shared/constants';
+import { FONTS, SOUNDS, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { useTimeSource } from '@/shared/lib';
+import { playSfx, useTimeSource } from '@/shared/lib';
 import { Text } from '@/shared/ui';
 
 import { PlayDebrief, PlayShell } from './play-shell';
@@ -80,7 +80,9 @@ export const PlaykitScreen = ({ gameId }: PlaykitScreenProps) => {
   const check = () => {
     if (!isReady || gate.current || index >= 3) return;
     gate.current = true;
-    if (isPlaykitAnswerCorrect(round, answer)) correctCount.current += 1;
+    const isRight = isPlaykitAnswerCorrect(round, answer);
+    if (isRight) correctCount.current += 1;
+    playSfx(isRight ? SOUNDS.CORRECT : SOUNDS.WRONG);
     setDebrief(true);
   };
 
