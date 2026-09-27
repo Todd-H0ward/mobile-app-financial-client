@@ -54,7 +54,7 @@ export const EndPeriodScreen = () => {
         </View>
       )}
 
-      <View style={styles.actions}>
+      <Screen.Footer>
         <Button
           variant="primary"
           size="l"
@@ -71,7 +71,7 @@ export const EndPeriodScreen = () => {
         >
           {t('endPeriod.cancel')}
         </Button>
-      </View>
+      </Screen.Footer>
     </Screen>
   );
 };
@@ -81,10 +81,6 @@ export const EndPeriodScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  actions: {
-    gap: SPACING.TWO,
-    marginTop: SPACING.TWO,
-  },
   warn: {
     borderRadius: RADII.m,
     borderStyle: 'dashed',

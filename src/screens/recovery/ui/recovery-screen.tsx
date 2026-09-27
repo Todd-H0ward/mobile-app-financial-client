@@ -53,7 +53,7 @@ export const RecoveryScreen = () => {
         ))}
       </View>
 
-      <View style={styles.actions}>
+      <Screen.Footer>
         <Button
           size="l"
           isFullWidth
@@ -67,7 +67,7 @@ export const RecoveryScreen = () => {
         <Button variant="ghost" size="s" isFullWidth onPress={recovery.skip}>
           {t('recovery.skip')}
         </Button>
-      </View>
+      </Screen.Footer>
     </Screen>
   );
 };
@@ -79,9 +79,5 @@ export const RecoveryScreen = () => {
 const styles = StyleSheet.create({
   list: {
     gap: SPACING.TWO,
-  },
-  actions: {
-    gap: SPACING.ONE,
-    marginTop: SPACING.TWO,
   },
 });

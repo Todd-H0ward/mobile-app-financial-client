@@ -34,6 +34,7 @@ export type { RingsBackdropProps } from './rings-backdrop';
 export { RingsBackdrop } from './rings-backdrop';
 export type {
   ScreenBackProps,
+  ScreenFooterProps,
   ScreenHeaderProps,
   ScreenHeadingProps,
   ScreenLabelProps,

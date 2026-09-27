@@ -1,4 +1,10 @@
-import { type ReactNode, useState } from 'react';
+import {
+  Children,
+  isValidElement,
+  type ReactElement,
+  type ReactNode,
+  useState,
+} from 'react';
 
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -78,6 +84,15 @@ type ScreenTitleProps = TextProps;
 
 type ScreenSubtitleProps = TextProps;
 
+/**
+ * Pinned under the scroll — primary actions stay put when the body
+ * grows or shrinks (recovery options, trial submit).
+ */
+interface ScreenFooterProps {
+  children?: ReactNode;
+  style?: StyleProp<ViewStyle>;
+}
+
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
@@ -86,6 +101,31 @@ type ScreenSubtitleProps = TextProps;
 const PIT_HEIGHT = 56;
 /** Top gap so the status board stays readable above the tallest sheet. */
 const SHEET_TOP_CLEARANCE = 104;
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
+const isScreenFooter = (
+  child: ReactNode,
+): child is ReactElement<ScreenFooterProps> =>
+  isValidElement(child) && child.type === ScreenFooter;
+
+/** Pull `Screen.Footer` out of the scroll column so it can sit on the panel edge. */
+const splitScreenChildren = (children: ReactNode) => {
+  const body: ReactNode[] = [];
+  let footer: ReactElement<ScreenFooterProps> | null = null;
+
+  Children.forEach(children, (child) => {
+    if (isScreenFooter(child)) {
+      footer = child;
+      return;
+    }
+    body.push(child);
+  });
+
+  return { body, footer };
+};
 
 // ═══════════════════════════════════════════
 // COMPONENTS
@@ -168,6 +208,10 @@ const ScreenHeader = ({ children, style }: ScreenHeaderProps) => (
   <View style={[styles.header, style]}>{children}</View>
 );
 
+const ScreenFooter = ({ children, style }: ScreenFooterProps) => (
+  <View style={[styles.footer, style]}>{children}</View>
+);
+
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
@@ -183,7 +227,8 @@ const ScreenRoot = ({
 }: ScreenRootProps) => {
   // The bottom edge stays off `SafeAreaView` on purpose: padding it there would
   // clip the scroll view instead of letting content scroll past the indicator.
-  // It goes on the scroll content with the home-indicator inset.
+  // It goes on the scroll content with the home-indicator inset — or on the
+  // pinned footer when one is set, so actions sit on the safe bottom.
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const router = useRouter();
@@ -193,7 +238,9 @@ const ScreenRoot = ({
   // sheet measures the space it really has instead.
   const [areaHeight, setAreaHeight] = useState<number | null>(null);
 
+  const { body, footer } = splitScreenChildren(children);
   const bottomPad = insets.bottom + SPACING.FOUR;
+  const contentBottomPad = footer ? SPACING.TWO : bottomPad;
 
   const column = (
     <View
@@ -204,9 +251,21 @@ const ScreenRoot = ({
         style,
       ]}
     >
-      {children}
+      {body}
     </View>
   );
+
+  const footerNode = footer ? (
+    <View
+      style={
+        presentation === 'sheet'
+          ? styles.sheetFooterPad
+          : { paddingBottom: bottomPad }
+      }
+    >
+      {footer}
+    </View>
+  ) : null;
 
   if (presentation === 'sheet') {
     const close = () => {
@@ -221,6 +280,10 @@ const ScreenRoot = ({
         insets.bottom -
         SPACING.TWO,
     );
+    // A footer needs the panel to fill the sheet so actions sit on the bottom
+    // edge instead of riding up under short content.
+    const sheetSize =
+      footer || !isScrollable ? { height: maxHeight } : { maxHeight };
 
     return (
       <View
@@ -242,35 +305,35 @@ const ScreenRoot = ({
         >
           <TerminalPanel
             variant={terminalVariant}
-            frameStyle={[
-              styles.sheetFrame,
-              isScrollable ? { maxHeight } : { height: maxHeight },
-            ]}
-            style={styles.sheetPanel}
+            frameStyle={[styles.sheetFrame, sheetSize]}
+            style={footer ? styles.sheetPanelFill : styles.sheetPanel}
           >
-            {isScrollable ? (
-              <ScrollView
-                style={styles.sheetScroll}
-                keyboardShouldPersistTaps="handled"
-                keyboardDismissMode="on-drag"
-                contentContainerStyle={[
-                  styles.content,
-                  { paddingBottom: SPACING.THREE },
-                ]}
-              >
-                {column}
-              </ScrollView>
-            ) : (
-              <View
-                style={[
-                  styles.content,
-                  styles.static,
-                  { paddingBottom: SPACING.TWO },
-                ]}
-              >
-                {column}
-              </View>
-            )}
+            <View style={footer ? styles.panelBody : undefined}>
+              {isScrollable ? (
+                <ScrollView
+                  style={footer ? styles.sheetScrollFill : styles.sheetScroll}
+                  keyboardShouldPersistTaps="handled"
+                  keyboardDismissMode="on-drag"
+                  contentContainerStyle={[
+                    styles.content,
+                    { paddingBottom: footer ? SPACING.TWO : SPACING.THREE },
+                  ]}
+                >
+                  {column}
+                </ScrollView>
+              ) : (
+                <View
+                  style={[
+                    styles.content,
+                    styles.static,
+                    { paddingBottom: SPACING.TWO },
+                  ]}
+                >
+                  {column}
+                </View>
+              )}
+              {footerNode}
+            </View>
           </TerminalPanel>
         </View>
       </View>
@@ -293,11 +356,12 @@ const ScreenRoot = ({
           <View style={styles.panelContent}>
             {isScrollable ? (
               <ScrollView
+                style={footer ? styles.scrollFill : undefined}
                 keyboardShouldPersistTaps="handled"
                 keyboardDismissMode="on-drag"
                 contentContainerStyle={[
                   styles.content,
-                  { paddingBottom: bottomPad },
+                  { paddingBottom: contentBottomPad },
                 ]}
               >
                 {column}
@@ -307,12 +371,13 @@ const ScreenRoot = ({
                 style={[
                   styles.content,
                   styles.static,
-                  { paddingBottom: bottomPad },
+                  { paddingBottom: contentBottomPad },
                 ]}
               >
                 {column}
               </View>
             )}
+            {footerNode}
           </View>
         </TerminalPanel>
       </SafeAreaView>
@@ -331,6 +396,7 @@ export const Screen = Object.assign(ScreenRoot, {
   Heading: ScreenHeading,
   Title: ScreenTitle,
   Subtitle: ScreenSubtitle,
+  Footer: ScreenFooter,
 });
 
 // ═══════════════════════════════════════════
@@ -338,25 +404,32 @@ export const Screen = Object.assign(ScreenRoot, {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
+  adult: { letterSpacing: 1 },
   column: {
+    flexGrow: 1,
     maxWidth: MAX_CONTENT_WIDTH,
     width: '100%',
-    flexGrow: 1,
   },
   columnFill: {
     flex: 1,
   },
   content: {
     alignItems: 'center',
+    flexGrow: 1,
     paddingHorizontal: CONTENT_PADDING,
     paddingTop: SPACING.THREE,
-    flexGrow: 1,
   },
-  static: {
+  footer: {
+    gap: SPACING.ONE,
+    maxWidth: MAX_CONTENT_WIDTH,
+    paddingHorizontal: CONTENT_PADDING,
+    paddingTop: SPACING.TWO,
+    width: '100%',
+  },
+  frame: {
     flex: 1,
+    maxWidth: MAX_CONTENT_WIDTH + SPACING.THREE,
+    width: '100%',
   },
   header: {
     alignItems: 'center',
@@ -368,14 +441,13 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
-  frame: {
-    flex: 1,
-    maxWidth: MAX_CONTENT_WIDTH + SPACING.THREE,
-    width: '100%',
-  },
-  adult: { letterSpacing: 1 },
   overseer: { letterSpacing: 1 },
   panel: { flex: 1 },
+  panelBody: {
+    flex: 1,
+    minHeight: 0,
+  },
+  panelContent: { flex: 1 },
   pit: {
     alignSelf: 'stretch',
     height: PIT_HEIGHT - SPACING.TWO,
@@ -383,13 +455,22 @@ const styles = StyleSheet.create({
     marginTop: -SPACING.TWO,
     overflow: 'hidden',
   },
-  panelContent: { flex: 1 },
+  root: {
+    flex: 1,
+  },
   safeArea: { alignItems: 'center', flex: 1, padding: SPACING.TWO },
+  scrollFill: {
+    flex: 1,
+    minHeight: 0,
+  },
   sheetArea: {
     alignItems: 'center',
     flex: 1,
     justifyContent: 'flex-end',
     paddingHorizontal: SPACING.TWO,
+  },
+  sheetFooterPad: {
+    paddingBottom: SPACING.THREE,
   },
   sheetFrame: {
     flexShrink: 1,
@@ -397,12 +478,23 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   sheetPanel: { flexShrink: 1 },
+  sheetPanelFill: {
+    flex: 1,
+  },
   // Content-sized until the cap, then it scrolls inside the terminal.
   sheetScroll: { flexGrow: 0, flexShrink: 1 },
+  sheetScrollFill: {
+    flex: 1,
+    minHeight: 0,
+  },
+  static: {
+    flex: 1,
+  },
 });
 
 export type {
   ScreenBackProps,
+  ScreenFooterProps,
   ScreenHeaderProps,
   ScreenHeadingProps,
   ScreenLabelProps,

@@ -672,7 +672,7 @@ export const UiKitScreen = () => {
 
         <KitSection
           title="Screen"
-          caption="Этот экран и есть пример: фон, safe area, скролл и колонка по MAX_CONTENT_WIDTH"
+          caption="Этот экран и есть пример: фон, safe area, скролл и колонка по MAX_CONTENT_WIDTH. Screen.Footer — кнопки у низа, без сдвига при росте контента"
         >
           <KitSection.Row label="Screen.Header со всеми слотами">
             <Screen.Header>
@@ -683,6 +683,16 @@ export const UiKitScreen = () => {
               </Screen.Heading>
               <CoinBadge amount={7} variant="plain" coinSize={16} />
             </Screen.Header>
+          </KitSection.Row>
+          <KitSection.Row label="Screen.Footer">
+            <Screen.Footer style={styles.screenFooterDemo}>
+              <Button size="l" isFullWidth>
+                Начать период 2
+              </Button>
+              <Button variant="ghost" size="s" isFullWidth>
+                без выбора
+              </Button>
+            </Screen.Footer>
           </KitSection.Row>
         </KitSection>
 
@@ -989,6 +999,9 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     height: 160,
     overflow: 'hidden',
+  },
+  screenFooterDemo: {
+    paddingHorizontal: 0,
   },
   stack: { gap: SPACING.TWO, width: '100%' },
   swatch: {

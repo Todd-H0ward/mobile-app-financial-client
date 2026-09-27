@@ -17,12 +17,10 @@ const Theory = ({
   paragraph,
   index,
   total,
-  onNext,
 }: {
   paragraph: string;
   index: number;
   total: number;
-  onNext: () => void;
 }) => {
   const { t } = useTranslation();
 
@@ -35,10 +33,6 @@ const Theory = ({
       <Terminal>
         <Terminal.Line>{paragraph}</Terminal.Line>
       </Terminal>
-
-      <Terminal.Key onPress={onNext}>
-        {t(index + 1 < total ? 'lesson.next' : 'lesson.toTest')}
-      </Terminal.Key>
     </View>
   );
 };
@@ -52,7 +46,6 @@ const Test = ({
   answerIndex,
   explanation,
   onAnswer,
-  onNext,
 }: {
   question: string;
   options: string[];
@@ -62,7 +55,6 @@ const Test = ({
   answerIndex: number;
   explanation?: string;
   onAnswer: (option: number) => void;
-  onNext: () => void;
 }) => {
   const { t } = useTranslation();
 
@@ -108,9 +100,6 @@ const Test = ({
             })}
           </Terminal.Line>
           {explanation ? <Terminal.Line>{explanation}</Terminal.Line> : null}
-          <Terminal.Key onPress={onNext}>
-            {t(index + 1 < total ? 'lesson.nextQuestion' : 'lesson.toResult')}
-          </Terminal.Key>
         </>
       )}
     </View>
@@ -122,15 +111,11 @@ const Result = ({
   total,
   needed,
   isPassed,
-  onRetry,
-  onLeave,
 }: {
   correct: number;
   total: number;
   needed: number;
   isPassed: boolean;
-  onRetry: () => void;
-  onLeave: () => void;
 }) => {
   const { t } = useTranslation();
 
@@ -149,14 +134,6 @@ const Result = ({
           {t(isPassed ? 'lesson.passedText' : 'lesson.failedText', { needed })}
         </Terminal.Line>
       </Terminal>
-
-      {isPassed ? null : (
-        <Terminal.Key onPress={onRetry}>{t('lesson.retry')}</Terminal.Key>
-      )}
-
-      <Terminal.Key variant={isPassed ? 'primary' : 'ghost'} onPress={onLeave}>
-        {t('lesson.back')}
-      </Terminal.Key>
     </View>
   );
 };
@@ -187,6 +164,22 @@ export const LessonScreen = () => {
   }
 
   const question = lesson.questions[lessonState.index];
+  const primaryLabel =
+    stage === 'theory'
+      ? t(
+          lessonState.index + 1 < lessonState.total
+            ? 'lesson.next'
+            : 'lesson.toTest',
+        )
+      : stage === 'scenario' && lessonState.verdict
+        ? t('lesson.toTest')
+        : stage === 'test' && lessonState.verdict
+          ? t(
+              lessonState.index + 1 < lessonState.total
+                ? 'lesson.nextQuestion'
+                : 'lesson.toResult',
+            )
+          : null;
 
   return (
     <Screen
@@ -220,7 +213,6 @@ export const LessonScreen = () => {
           paragraph={lesson.theory[lessonState.index]}
           index={lessonState.index}
           total={lessonState.total}
-          onNext={lessonState.next}
         />
       ) : null}
 
@@ -237,17 +229,9 @@ export const LessonScreen = () => {
             </Terminal.Key>
           ))}
           {lessonState.verdict ? (
-            <>
-              <Terminal.Line>
-                {
-                  lesson.scenario.actions[lessonState.verdict.chosen]
-                    .consequence
-                }
-              </Terminal.Line>
-              <Terminal.Key onPress={lessonState.next}>
-                {t('lesson.toTest')}
-              </Terminal.Key>
-            </>
+            <Terminal.Line>
+              {lesson.scenario.actions[lessonState.verdict.chosen].consequence}
+            </Terminal.Line>
           ) : null}
         </View>
       ) : null}
@@ -261,7 +245,6 @@ export const LessonScreen = () => {
           answerIndex={question.answerIndex}
           explanation={question.explanation}
           onAnswer={lessonState.answer}
-          onNext={lessonState.next}
         />
       ) : null}
 
@@ -271,14 +254,37 @@ export const LessonScreen = () => {
           total={lesson.questions.length}
           needed={lessonState.needed}
           isPassed={lessonState.isPassed}
-          onRetry={lessonState.retry}
-          onLeave={leave}
         />
-      ) : (
-        <Terminal.Key variant="ghost" onPress={leave}>
-          {t('lesson.back')}
-        </Terminal.Key>
-      )}
+      ) : null}
+
+      <Screen.Footer>
+        {stage === 'result' ? (
+          <>
+            {lessonState.isPassed ? null : (
+              <Terminal.Key onPress={lessonState.retry}>
+                {t('lesson.retry')}
+              </Terminal.Key>
+            )}
+            <Terminal.Key
+              variant={lessonState.isPassed ? 'primary' : 'ghost'}
+              onPress={leave}
+            >
+              {t('lesson.back')}
+            </Terminal.Key>
+          </>
+        ) : (
+          <>
+            {primaryLabel ? (
+              <Terminal.Key onPress={lessonState.next}>
+                {primaryLabel}
+              </Terminal.Key>
+            ) : null}
+            <Terminal.Key variant="ghost" onPress={leave}>
+              {t('lesson.back')}
+            </Terminal.Key>
+          </>
+        )}
+      </Screen.Footer>
     </Screen>
   );
 };

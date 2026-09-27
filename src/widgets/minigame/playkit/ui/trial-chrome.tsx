@@ -137,7 +137,14 @@ export const TrialChip = ({
       {glyph ? (
         <Text style={[styles.glyph, { color: theme.primary }]}>{glyph}</Text>
       ) : null}
-      <Text style={[styles.chipLabel, { color: theme.primary }]}>{label}</Text>
+      <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.7}
+        style={[styles.chipLabel, { color: theme.primary }]}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 };
@@ -190,11 +197,13 @@ const styles = StyleSheet.create({
   chipGrow: {
     flex: 1,
     minHeight: 72,
+    minWidth: 0,
   },
   chipLabel: {
     fontFamily: FONTS.sansStrong,
     fontSize: 16,
     textAlign: 'center',
+    width: '100%',
   },
   cursor: {
     height: 14,

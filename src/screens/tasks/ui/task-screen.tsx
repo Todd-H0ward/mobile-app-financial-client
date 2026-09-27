@@ -237,27 +237,28 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
         />
       )}
 
-      <View style={styles.reward}>
-        <Text variant="small" themeColor="textSecondary">
-          {t('tasks.reward')}
-        </Text>
-        <View style={styles.rewardValue}>
-          <Text variant="machine">
-            {t('tasks.rewardUpTo', { count: formatMoney(play.reward) })}
+      <Screen.Footer style={styles.footer}>
+        <View style={styles.reward}>
+          <Text variant="small" themeColor="textSecondary">
+            {t('tasks.reward')}
           </Text>
-          <PixelIcon name="coin" tone="coin" />
+          <View style={styles.rewardValue}>
+            <Text variant="machine">
+              {t('tasks.rewardUpTo', { count: formatMoney(play.reward) })}
+            </Text>
+            <PixelIcon name="coin" tone="coin" />
+          </View>
         </View>
-      </View>
-
-      <Button
-        variant="primary"
-        size="l"
-        isFullWidth
-        disabled={!canSubmit}
-        onPress={submit}
-      >
-        {t('tasks.submit')}
-      </Button>
+        <Button
+          variant="primary"
+          size="l"
+          isFullWidth
+          disabled={!canSubmit}
+          onPress={submit}
+        >
+          {t('tasks.submit')}
+        </Button>
+      </Screen.Footer>
 
       <Sheet.Modal
         isVisible={play.sheet === 'planning'}
@@ -300,6 +301,7 @@ export const TaskRouteScreen = ({ taskId }: { taskId: string }) => {
 const styles = StyleSheet.create({
   brief: { gap: SPACING.ONE, paddingHorizontal: 14, paddingVertical: 14 },
   briefTitle: { fontSize: 20, lineHeight: 25 },
+  footer: { gap: SPACING.COMPACT },
   overseerLabel: { letterSpacing: 1 },
   reward: {
     alignItems: 'center',
