@@ -38,10 +38,9 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      # Lets Gradle fetch whatever compileSdk / build-tools the project asks
-      # for on its own, instead of pinning a platform level here that would
-      # drift from android/app/build.gradle.
-      - uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
 
       - name: Restore signing credentials
         env:
