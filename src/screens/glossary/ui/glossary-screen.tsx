@@ -41,7 +41,7 @@ export const GlossaryScreen = () => {
   const [openId, setOpenId] = useState<string | null>(null);
 
   return (
-    <Screen gap="compact">
+    <Screen presentation="sheet" gap="compact">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

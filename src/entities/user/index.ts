@@ -76,6 +76,7 @@ export {
   PLAYER_NAME_MAX_LENGTH,
   PLAYER_NAME_MIN_LENGTH,
   resetUser,
+  rewardForUserTask,
   runDemoPeriods,
   selectTask,
   setActiveGoal,
@@ -83,6 +84,7 @@ export {
   startPeriod,
   validatePlayerName,
 } from './lib';
+export { setModuleInstalled } from './lib/equipment';
 export { hasModule, installModule, moduleId } from './lib/workshop';
 export type {
   BudgetFact,

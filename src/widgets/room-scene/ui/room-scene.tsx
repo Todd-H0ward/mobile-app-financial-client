@@ -96,6 +96,13 @@ interface RoomSceneProps {
   /** Tap on the dog entered bond, or a tap away / flick exited it. */
   onBondChange?: (isBonding: boolean) => void;
   /**
+   * Whether an opaque screen hides the arena, when the host knows better
+   * than focus does. A translucent sheet over home takes focus but leaves
+   * the scene in view, so the loop must keep drawing under it. Left
+   * undefined, losing focus pauses the loop.
+   */
+  isCovered?: boolean;
+  /**
    * The screen the child is talking to, or `null` for the arena.
    *
    * Controlled by the screen the same way `view` is: the widget reports a tap
@@ -290,6 +297,7 @@ export const RoomScene = ({
   bondMood = null,
   isBonding = false,
   onBondChange,
+  isCovered,
   focusedWatcher = null,
   onWatcherFocus,
   onCellPress,
@@ -382,6 +390,11 @@ export const RoomScene = ({
    * from, which is why it outlives `focusRef` / bonding going null.
    */
   const focusShot = useRef<{ anchor: Vector3; eye: Vector3 } | null>(null);
+  /**
+   * The close-up on the dog is measured once, when it starts. Re-measured
+   * every frame it follows the idle sway, and the whole shot rocks with it.
+   */
+  const isBondShotHeld = useRef(false);
 
   /**
    * Where each tier is heading, and where it is now: `[segment][step]`.
@@ -460,22 +473,42 @@ export const RoomScene = ({
   // Pause the render loop when a screen is pushed over the home screen,
   // resume it when focus returns. Without this the 3D scene renders at
   // 60 FPS under every pushed route — wasting GPU, CPU and battery.
+  const isCoveredRef = useRef(isCovered);
+  isCoveredRef.current = isCovered;
+
+  const pauseLoop = useCallback(() => {
+    pausedRef.current = true;
+    if (frame.current !== null) {
+      cancelAnimationFrame(frame.current);
+      frame.current = null;
+    }
+  }, []);
+
+  const resume = useCallback(() => {
+    pausedRef.current = false;
+    // Restart the loop if it was stopped while we were away.
+    if (frame.current === null && resumeLoop.current) {
+      resumeLoop.current();
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
-      pausedRef.current = false;
-      // Restart the loop if it was stopped while we were away.
-      if (frame.current === null && resumeLoop.current) {
-        resumeLoop.current();
-      }
+      if (isCoveredRef.current !== undefined) return;
+      resume();
       return () => {
-        pausedRef.current = true;
-        if (frame.current !== null) {
-          cancelAnimationFrame(frame.current);
-          frame.current = null;
-        }
+        if (isCoveredRef.current === undefined) pauseLoop();
       };
-    }, []),
+    }, [pauseLoop, resume]),
   );
+
+  // The host says when the arena is really hidden: an opaque route pushed
+  // over it, but not a translucent sheet that only took focus.
+  useEffect(() => {
+    if (isCovered === undefined) return;
+    if (isCovered) pauseLoop();
+    else resume();
+  }, [isCovered, pauseLoop, resume]);
 
   useEffect(() => {
     const next = levelProgress(level);
@@ -539,7 +572,7 @@ export const RoomScene = ({
   useEffect(() => {
     const built = model.current;
     if (!built) return;
-    const isMap = view === 'top' && focusedWatcher === null;
+    const isMap = mapHud !== null && view === 'top' && focusedWatcher === null;
     built.setMapHudVisible(isMap);
     if (mapHud) built.setMapHudStats(mapHud);
   }, [view, focusedWatcher, mapHud]);
@@ -627,7 +660,10 @@ export const RoomScene = ({
           : viewRef.current;
       built.highlight(segment, true);
       appliedHighlight.current = segment;
-      const isMap = viewRef.current === 'top' && focusRef.current === null;
+      const isMap =
+        mapHudRef.current !== null &&
+        viewRef.current === 'top' &&
+        focusRef.current === null;
       built.setMapHudVisible(isMap);
       if (mapHudRef.current) built.setMapHudStats(mapHudRef.current);
 
@@ -739,8 +775,14 @@ export const RoomScene = ({
         const wantedBond = isBondingRef.current;
         if (wantedWatcher) {
           focusShot.current = built.watcherFocus(wantedWatcher);
+          isBondShotHeld.current = false;
         } else if (wantedBond) {
-          focusShot.current = built.characterFocus(state.azimuth);
+          if (!isBondShotHeld.current || !focusShot.current) {
+            focusShot.current = built.characterFocus(state.azimuth);
+            isBondShotHeld.current = focusShot.current !== null;
+          }
+        } else {
+          isBondShotHeld.current = false;
         }
 
         const blendTo = wantedWatcher || wantedBond ? 1 : 0;

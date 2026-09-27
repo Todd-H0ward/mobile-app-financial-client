@@ -8,9 +8,10 @@ import {
   type RobotDogStage,
 } from '@/entities/robot-dog';
 import { progressFor } from '@/entities/savings';
-import { getTaskById, rewardForTask } from '@/entities/task';
+import { getTaskById } from '@/entities/task';
 import {
   type RobotSave,
+  rewardForUserTask,
   type UserSave,
   useHomeHudSource,
   useIsMotionEnabled,
@@ -30,6 +31,8 @@ type Translate = ReturnType<typeof useTranslation>['t'];
 type MoodTone = 'calm' | 'attention';
 
 interface HomeHudRobot {
+  /** The saved name, also visible on the mood badge. */
+  name: string;
   /** Build stage — what the scene will dress the dog in. */
   stage: RobotDogStage;
   /** What a screen reader says — name, mood and why (2.5.10). */
@@ -153,6 +156,7 @@ const buildRobot = (robot: RobotSave, t: Translate): HomeHudRobot => {
   const name = robot.name || t('robot.unnamed');
 
   return {
+    name,
     moodName: mood.name,
     stage: robot.stage,
     accessibilityLabel: `${name}, ${moodLabel}, ${moodReasonLabel}`,
@@ -237,6 +241,7 @@ const buildTaskHint = (tasks: UserSave['tasks'], t: Translate): string => {
 /** The picked trial, unless it is already done this period. */
 const buildActiveTrial = (
   tasks: UserSave['tasks'],
+  modules: UserSave['modules'],
   t: Translate,
 ): HomeHudTrial | null => {
   const id = tasks.activeTaskId;
@@ -249,7 +254,7 @@ const buildActiveTrial = (
     title: t(`tasks.items.${task.id}.title`, { defaultValue: task.title }),
     meta: t('home.hud.trialMeta', {
       theme: t(`tasks.themes.${task.theme}`),
-      count: rewardForTask(task),
+      count: rewardForUserTask({ modules }, task),
     }),
   };
 };
@@ -326,7 +331,9 @@ export const useHomeHud = (): HomeHud => {
       lastCredit: source.lastEarn ? buildLastCredit(source.lastEarn, t) : null,
       periodIndex: source.periodIndex,
       activeTrial:
-        source.phase === 'active' ? buildActiveTrial(source.tasks, t) : null,
+        source.phase === 'active'
+          ? buildActiveTrial(source.tasks, source.modules, t)
+          : null,
       taskTitle: buildTaskTitle(source.tasks, t),
       taskHint: buildTaskHint(source.tasks, t),
       isPlanning: source.phase === 'planning',

@@ -1,11 +1,13 @@
-import type { ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
+  Pressable,
   ScrollView,
   type StyleProp,
   StyleSheet,
+  useWindowDimensions,
   View,
   type ViewStyle,
 } from 'react-native';
@@ -37,10 +39,18 @@ import { ThemedView } from './themed-view';
 // TYPES
 // ═══════════════════════════════════════════
 
+/**
+ * `full` owns the whole window. `sheet` is a terminal rising from the bottom
+ * over the live game — the route must be a `transparentModal` for the scene
+ * to show through, see `src/app/_layout.tsx`.
+ */
+type ScreenPresentation = 'full' | 'sheet';
+
 interface ScreenRootProps {
   children?: ReactNode;
   variant?: ThemeColor;
   terminalVariant?: TerminalVariant;
+  presentation?: ScreenPresentation;
   /**
    * A strip of the pit above the terminal — the child always sees where they
    * are. Off for the grown-ups' terminal, which is deliberately not the game.
@@ -94,6 +104,11 @@ type ScreenSubtitleProps = TextProps;
 const BACK_SIZE = 48;
 /** The strip of the pit above the terminal. */
 const PIT_HEIGHT = 56;
+/**
+ * How much of the top a sheet leaves free: the status board that hangs on
+ * cables at the top of the game stays readable above the tallest sheet.
+ */
+const SHEET_TOP_CLEARANCE = 104;
 
 // ═══════════════════════════════════════════
 // COMPONENTS
@@ -120,7 +135,7 @@ const ScreenBack = ({
           return;
         }
 
-        router.replace(STATIC_ROUTES.ENTRY);
+        router.replace(STATIC_ROUTES.HOME);
       }}
       style={[styles.back, { borderColor: theme.borderStrong }]}
     >
@@ -190,6 +205,7 @@ const ScreenHeader = ({ children, style }: ScreenHeaderProps) => (
 const ScreenRoot = ({
   children,
   terminalVariant = 'keeper',
+  presentation = 'full',
   isPitVisible = terminalVariant !== 'adult',
   gap = 'two',
   isScrollable = true,
@@ -199,6 +215,13 @@ const ScreenRoot = ({
   // clip the scroll view instead of letting content scroll past the indicator.
   // It goes on the scroll content with the home-indicator inset.
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const router = useRouter();
+  const { t } = useTranslation();
+  const { height: windowHeight } = useWindowDimensions();
+  // Edge-to-edge Android reports the window without its system bars; the
+  // sheet measures the space it really has instead.
+  const [areaHeight, setAreaHeight] = useState<number | null>(null);
 
   const bottomPad = insets.bottom + SPACING.four;
 
@@ -214,6 +237,75 @@ const ScreenRoot = ({
       {children}
     </View>
   );
+
+  if (presentation === 'sheet') {
+    const close = () => {
+      if (router.canGoBack()) router.back();
+      else router.replace(STATIC_ROUTES.HOME);
+    };
+    const maxHeight = Math.max(
+      320,
+      (areaHeight ?? windowHeight) -
+        insets.top -
+        SHEET_TOP_CLEARANCE -
+        insets.bottom -
+        SPACING.two,
+    );
+
+    return (
+      <View
+        style={styles.root}
+        onLayout={(event) => setAreaHeight(event.nativeEvent.layout.height)}
+      >
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('common.close')}
+          onPress={close}
+          style={[StyleSheet.absoluteFill, { backgroundColor: theme.scrim }]}
+        />
+        <View
+          pointerEvents="box-none"
+          style={[
+            styles.sheetArea,
+            { paddingBottom: insets.bottom + SPACING.two },
+          ]}
+        >
+          <TerminalPanel
+            variant={terminalVariant}
+            frameStyle={[
+              styles.sheetFrame,
+              isScrollable ? { maxHeight } : { height: maxHeight },
+            ]}
+            style={styles.sheetPanel}
+          >
+            {isScrollable ? (
+              <ScrollView
+                style={styles.sheetScroll}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
+                contentContainerStyle={[
+                  styles.content,
+                  { paddingBottom: SPACING.three },
+                ]}
+              >
+                {column}
+              </ScrollView>
+            ) : (
+              <View
+                style={[
+                  styles.content,
+                  styles.static,
+                  { paddingBottom: SPACING.two },
+                ]}
+              >
+                {column}
+              </View>
+            )}
+          </TerminalPanel>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <ThemedView variant="sceneBase" style={styles.root}>
@@ -331,6 +423,20 @@ const styles = StyleSheet.create({
   },
   panelContent: { flex: 1 },
   safeArea: { alignItems: 'center', flex: 1, padding: SPACING.two },
+  sheetArea: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingHorizontal: SPACING.two,
+  },
+  sheetFrame: {
+    flexShrink: 1,
+    maxWidth: MAX_CONTENT_WIDTH + SPACING.three,
+    width: '100%',
+  },
+  sheetPanel: { flexShrink: 1 },
+  // Content-sized until the cap, then it scrolls inside the terminal.
+  sheetScroll: { flexGrow: 0, flexShrink: 1 },
 });
 
 export type {
@@ -338,6 +444,7 @@ export type {
   ScreenHeaderProps,
   ScreenHeadingProps,
   ScreenLabelProps,
+  ScreenPresentation,
   ScreenRootProps,
   ScreenSubtitleProps,
   ScreenTitleProps,

@@ -277,10 +277,12 @@ interface ArcadeSave {
   paidCount: number;
 }
 
-/** Robot modules that give gameplay bonuses (reward multiplier, extra hints). */
+/** Optional electronic modules, separate from the free starting appearance. */
 interface ModulesSave {
   /** IDs of purchased modules, ordered by acquisition. */
   owned: string[];
+  /** Owned electronic modules currently fitted; only these affect rewards. */
+  installed: string[];
   /** Current module tier: 0 (none), 1, 2, or 3. Derived from owned count. */
   tier: 0 | 1 | 2 | 3;
 }

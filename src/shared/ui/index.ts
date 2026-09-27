@@ -88,6 +88,7 @@ export type {
   ScreenHeaderProps,
   ScreenHeadingProps,
   ScreenLabelProps,
+  ScreenPresentation,
   ScreenRootProps,
   ScreenSubtitleProps,
   ScreenTitleProps,
@@ -112,6 +113,8 @@ export { Slider } from './slider';
 export { SplashOverlay } from './splash-overlay';
 export type { SwitchProps } from './switch';
 export { Switch } from './switch';
+export type { TerminalDockProps } from './terminal-dock';
+export { TerminalDock } from './terminal-dock';
 export type {
   TerminalPanelProps,
   TerminalSize,

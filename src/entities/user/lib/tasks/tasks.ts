@@ -110,10 +110,7 @@ export const applyCompleteTask = (
     return { ok: false, reason: 'not_available' };
   }
 
-  const share = clamp(rewardShare, 0, 1);
-  const fullReward = rewardForTask(task);
-  const { rewardMultiplier } = computeEffectiveBonus(user.modules.owned);
-  const reward = Math.max(1, Math.round(fullReward * share * rewardMultiplier));
+  const reward = rewardForUserTask(user, task, rewardShare);
 
   const wallet = creditWallet(user.wallet, {
     source: `task:${task.id}`,
@@ -147,3 +144,16 @@ export const applyCompleteTask = (
 };
 
 export type { TaskFail, TaskOk, TaskResult };
+
+/** Shared by the payout and every UI that previews it. */
+export const rewardForUserTask = (
+  user: Pick<UserSave, 'modules'>,
+  task: TaskContent,
+  share = 1,
+): number => {
+  const { rewardMultiplier } = computeEffectiveBonus(user.modules.installed);
+  return Math.max(
+    1,
+    Math.round(rewardForTask(task) * clamp(share, 0, 1) * rewardMultiplier),
+  );
+};

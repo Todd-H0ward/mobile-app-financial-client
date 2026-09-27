@@ -24,6 +24,7 @@ import { useTranslation } from '@/shared/i18n';
 import {
   Button,
   type ButtonVariant,
+  ChamferCard,
   PixelIcon,
   type PixelIconName,
   TerminalPanel,
@@ -91,6 +92,11 @@ interface TerminalCardProps {
   children?: ReactNode;
   variant?: TerminalCardVariant;
   style?: StyleProp<ViewStyle>;
+}
+
+interface TerminalBubbleProps {
+  /** What the watcher says — a full sentence, in the reading typeface. */
+  children: string;
 }
 
 interface TerminalRuleProps {
@@ -174,6 +180,34 @@ export const TerminalCard = ({
       ]}
     >
       {children}
+    </View>
+  );
+};
+
+/**
+ * The watcher's line as speech (UI kit 09): the Keeper's bubble is rounded
+ * with an ear at the top left, the Overseer's has his cut corner.
+ */
+export const TerminalBubble = ({ children }: TerminalBubbleProps) => {
+  const theme = useTheme();
+  const { watcher } = useTerminalTones();
+
+  if (watcher === 'overseer') {
+    return (
+      <ChamferCard variant="topRight" fillTone="overseerSurface">
+        <Text accessibilityLiveRegion="polite">{children}</Text>
+      </ChamferCard>
+    );
+  }
+
+  return (
+    <View
+      style={[
+        styles.bubble,
+        { backgroundColor: theme.surface, borderColor: theme.border },
+      ]}
+    >
+      <Text accessibilityLiveRegion="polite">{children}</Text>
     </View>
   );
 };
@@ -377,12 +411,21 @@ export const TerminalShell = ({
 
 const styles = StyleSheet.create({
   body: {
-    flex: 1,
+    flexShrink: 1,
     gap: SPACING.compact,
     minHeight: 0,
     paddingBottom: SPACING.three,
     paddingHorizontal: 14,
     paddingTop: SPACING.three,
+  },
+  bubble: {
+    borderBottomLeftRadius: RADII.m,
+    borderBottomRightRadius: RADII.m,
+    borderTopLeftRadius: SPACING.one,
+    borderTopRightRadius: RADII.m,
+    borderWidth: 2,
+    paddingHorizontal: SPACING.compact,
+    paddingVertical: 10,
   },
   card: {
     borderRadius: RADII.m,
@@ -390,8 +433,10 @@ const styles = StyleSheet.create({
     gap: SPACING.two,
     padding: SPACING.compact,
   },
+  // Shrinks, never grows: the terminal is as tall as what it says, and a
+  // long page scrolls once the dock's cap is reached.
   content: {
-    flex: 1,
+    flexShrink: 1,
     minHeight: 0,
   },
   dashed: { borderStyle: 'dashed' },
@@ -420,7 +465,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   overseerLabel: { letterSpacing: 1 },
-  root: { flex: 1 },
+  root: { flexShrink: 1, minHeight: 0 },
   rule: {
     borderBottomWidth: 1,
     marginVertical: SPACING.one,
@@ -428,6 +473,7 @@ const styles = StyleSheet.create({
 });
 
 export type {
+  TerminalBubbleProps,
   TerminalCardProps,
   TerminalCardVariant,
   TerminalFrame,

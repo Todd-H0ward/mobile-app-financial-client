@@ -11,6 +11,7 @@ export type {
   CatalogueItem,
   CatalogueKind,
   ModuleBonus,
+  ModuleSlot,
   ShopId,
 } from './model';
 export {
@@ -19,5 +20,6 @@ export {
   isModuleItem,
   MODULE_BONUSES,
   MODULE_IDS,
+  MODULE_SLOTS,
   SHOP_IDS,
 } from './model';

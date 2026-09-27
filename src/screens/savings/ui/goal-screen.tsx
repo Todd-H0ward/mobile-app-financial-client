@@ -124,7 +124,7 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
     goal.canTransfer && goal.amount > 0 && goal.amount <= goal.maxDeposit;
 
   return (
-    <Screen gap="compact" terminalVariant="keeper">
+    <Screen presentation="sheet" gap="compact" terminalVariant="keeper">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

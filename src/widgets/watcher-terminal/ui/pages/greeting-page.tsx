@@ -7,12 +7,11 @@ import { useTranslation } from '@/shared/i18n';
 import { Button, PixelIcon, type PixelIconName } from '@/shared/ui';
 
 import {
-  TerminalCard,
+  TerminalBubble,
   type TerminalFrame,
   TerminalMenu,
   TerminalMenuRow,
   TerminalShell,
-  TerminalText,
 } from '../terminal-shell';
 
 // ═══════════════════════════════════════════
@@ -79,9 +78,7 @@ export const GreetingPage = ({ frame, line, onAction }: GreetingPageProps) => {
       }
     >
       <ScrollView contentContainerStyle={styles.stack}>
-        <TerminalCard>
-          <TerminalText>{t(line.textKey)}</TerminalText>
-        </TerminalCard>
+        <TerminalBubble>{t(line.textKey)}</TerminalBubble>
         <TerminalMenu>
           {line.actions.map((action) => (
             <TerminalMenuRow

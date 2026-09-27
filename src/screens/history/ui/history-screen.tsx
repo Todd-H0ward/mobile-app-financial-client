@@ -199,7 +199,7 @@ export const HistoryScreen = () => {
 
   if (tab === 'periods') {
     return (
-      <Screen gap="compact">
+      <Screen presentation="sheet" gap="compact">
         {header}
         {receipts && receipts.length > 0 ? (
           <Card>
@@ -233,7 +233,7 @@ export const HistoryScreen = () => {
   }
 
   return (
-    <Screen gap="compact" isScrollable={false}>
+    <Screen presentation="sheet" gap="compact" isScrollable={false}>
       <FlatList
         data={rows}
         keyExtractor={keyExtractor}

@@ -2,7 +2,9 @@ export { HIT_SLOP_SIZE } from './a11y';
 export { APP_VERSION } from './app-version';
 export {
   DYNAMIC_ROUTES,
+  isSheetPath,
   type RoutePath,
+  SHEET_ROUTE_NAMES,
   STATIC_ROUTES,
 } from './routes';
 export { STORAGE_KEYS } from './storage-keys';

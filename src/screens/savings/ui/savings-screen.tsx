@@ -26,7 +26,7 @@ export const SavingsScreen = () => {
   const savings = useSavings();
 
   return (
-    <Screen gap="three" terminalVariant="keeper">
+    <Screen presentation="sheet" gap="three" terminalVariant="keeper">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

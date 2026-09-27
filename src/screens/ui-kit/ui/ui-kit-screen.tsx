@@ -47,6 +47,7 @@ import {
   SplashOverlay,
   Switch,
   TasksIcon,
+  TerminalDock,
   TerminalPanel,
   Text,
   ThemedView,
@@ -242,6 +243,19 @@ export const UiKitScreen = () => {
         </KitSection>
 
         <KitSection
+          title="TerminalDock"
+          caption="Панель у нижнего края над игрой: по высоте содержимого, не выше maxShare. Screen presentation=sheet — то же для маршрутов"
+        >
+          <View style={styles.dockStage}>
+            <TerminalDock maxShare={0.25}>
+              <Text variant="machine">{'> диагностика'}</Text>
+              <Text>{LONG_TITLE}</Text>
+              <Text themeColor="textSecondary">{LONG_TITLE}</Text>
+            </TerminalDock>
+          </View>
+        </KitSection>
+
+        <KitSection
           title="ChamferCard"
           caption="Срезанный угол — подпись Смотрителя, в интерфейсе ребёнка его нет"
         >
@@ -331,10 +345,13 @@ export const UiKitScreen = () => {
 
         <KitSection
           title="RingsBackdrop"
-          caption="Бетон ямы за терминалом — только декор"
+          caption="pit — бетон ямы; surface — светлая поверхность в финале. Только декор."
         >
           <View style={styles.rings}>
             <RingsBackdrop centerY={0.62} />
+          </View>
+          <View style={styles.rings}>
+            <RingsBackdrop variant="surface" centerY={1.3} />
           </View>
         </KitSection>
 
@@ -1233,6 +1250,13 @@ export const UiKitScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
+  dockStage: {
+    alignSelf: 'stretch',
+    backgroundColor: 'transparent',
+    borderRadius: 14,
+    height: 280,
+    overflow: 'hidden',
+  },
   fullWidth: {
     width: '100%',
   },

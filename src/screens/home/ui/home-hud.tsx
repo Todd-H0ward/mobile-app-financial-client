@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
@@ -30,6 +30,7 @@ interface HomeHudBoardProps {
   charge: number;
   top: number;
   onSettings: () => void;
+  onRobot: () => void;
 }
 
 interface HomeDockProps {
@@ -37,6 +38,7 @@ interface HomeDockProps {
   bottom: number;
   onOpen: (watcher: WatcherId, page: WatcherPageId) => void;
   onTrial: (taskId: string) => void;
+  onRobot: () => void;
 }
 
 interface HudCableProps {
@@ -102,6 +104,7 @@ export const HomeHudBoard = ({
   charge,
   top,
   onSettings,
+  onRobot,
 }: HomeHudBoardProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -189,10 +192,11 @@ export const HomeHudBoard = ({
               {formatMoney(hud.savingsTotal)}
             </Text>
           </View>
-          <View
-            accessible
-            accessibilityRole="progressbar"
-            accessibilityLabel={t('home.hud.charge')}
+          <Pressable
+            accessibilityRole="button"
+            onPress={onRobot}
+            accessibilityHint={t('diagnosis.open')}
+            accessibilityLabel={`${t('home.hud.charge')}: ${litCells} / ${CHARGE_CELLS}`}
             accessibilityValue={{ min: 0, max: CHARGE_CELLS, now: litCells }}
             style={styles.amount}
           >
@@ -211,7 +215,7 @@ export const HomeHudBoard = ({
                 />
               ))}
             </View>
-          </View>
+          </Pressable>
         </View>
         <View style={styles.numbers}>
           <Text variant="code" themeColor="textMuted" style={styles.caption}>
@@ -238,14 +242,56 @@ export const HomeHudBoard = ({
  * The bottom dock: one card saying what to do next, and the action bar.
  * Before the plan only "План" is open; the others wear a pixel lock.
  */
-export const HomeDock = ({ hud, bottom, onOpen, onTrial }: HomeDockProps) => {
+export const HomeDock = ({
+  hud,
+  bottom,
+  onOpen,
+  onTrial,
+  onRobot,
+}: HomeDockProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const isPlanning = hud.isPlanning;
   const trial = hud.activeTrial;
+  const { width } = useWindowDimensions();
 
   return (
-    <View pointerEvents="box-none" style={[styles.dock, { bottom }]}>
+    <View
+      pointerEvents="box-none"
+      style={[
+        styles.dock,
+        {
+          bottom,
+          width: Math.min(width - 2 * SPACING.compact, MAX_CONTENT_WIDTH),
+        },
+      ]}
+    >
+      {hud.robot ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={hud.robot.accessibilityLabel}
+          accessibilityHint={t('diagnosis.open')}
+          onPress={onRobot}
+          style={({ pressed }) => [
+            styles.robotStatus,
+            {
+              backgroundColor: pressed
+                ? theme.surfaceSoft
+                : theme.terminalScreen,
+              borderColor: theme.borderStrong,
+            },
+          ]}
+        >
+          <PixelIcon name="face" size={20} />
+          <Text variant="small" style={styles.statusText}>
+            {t('diagnosis.status', {
+              name: hud.robot.name,
+              mood: hud.robot.moodLabel,
+            })}
+          </Text>
+          <PixelIcon name="arrow" size={12} />
+        </Pressable>
+      ) : null}
       {isPlanning ? (
         <TerminalPanel size="m" isLampVisible={false} style={styles.card}>
           <View style={styles.cardCopy}>
@@ -391,10 +437,9 @@ const styles = StyleSheet.create({
   },
   boardPosition: {
     alignSelf: 'center',
-    left: 0,
+    width: '100%',
     maxWidth: MAX_CONTENT_WIDTH + 2 * BOARD_INSET,
     position: 'absolute',
-    right: 0,
     zIndex: 2,
   },
   cable: {
@@ -402,7 +447,7 @@ const styles = StyleSheet.create({
     top: 0,
     width: 2,
   },
-  caption: { fontSize: 11, lineHeight: 15 },
+  caption: { fontSize: 11, lineHeight: 15, flexShrink: 1 },
   card: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -410,7 +455,7 @@ const styles = StyleSheet.create({
     gap: 10,
     padding: SPACING.compact,
   },
-  cardCopy: { flexBasis: 180, flexGrow: 1, gap: 2 },
+  cardCopy: { flexBasis: 180, flexGrow: 1, flexShrink: 1, minWidth: 0, gap: 2 },
   cardTitle: { fontSize: 17, lineHeight: 22 },
   cell: { height: 12, width: 5 },
   cells: { flexDirection: 'row', gap: 2 },
@@ -434,10 +479,8 @@ const styles = StyleSheet.create({
   dock: {
     alignSelf: 'center',
     gap: SPACING.two,
-    left: SPACING.compact,
     maxWidth: MAX_CONTENT_WIDTH,
     position: 'absolute',
-    right: SPACING.compact,
   },
   hudNumber: {
     fontFamily: FONTS.monoStrong,
@@ -468,6 +511,7 @@ const styles = StyleSheet.create({
   },
   numbers: {
     alignItems: 'center',
+    flexWrap: 'wrap',
     flexDirection: 'row',
     gap: SPACING.two,
     justifyContent: 'space-between',
@@ -478,6 +522,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: SPACING.two,
   },
+  robotStatus: {
+    alignItems: 'center',
+    alignSelf: 'center',
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: SPACING.two,
+    maxWidth: '100%',
+    minHeight: 44,
+    paddingHorizontal: SPACING.compact,
+    paddingVertical: SPACING.two,
+  },
+  statusText: { flexShrink: 1 },
   tab: {
     alignItems: 'center',
     borderRadius: 10,

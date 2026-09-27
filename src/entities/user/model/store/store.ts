@@ -312,6 +312,7 @@ export const useHomeHudSource = () =>
 
       return {
         robot: user.robot,
+        modules: user.modules,
         balance: user.wallet.balance,
         /** Newest earn — 2.5.4 on home; spends must not steal the badge. */
         lastEarn:

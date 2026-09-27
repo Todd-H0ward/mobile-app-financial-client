@@ -16,6 +16,7 @@ import { useProfileRestart } from '../model';
 interface RestartProfileButtonProps {
   /** Label of the button itself. The sheet always speaks in full sentences. */
   label?: string;
+  variant?: 'warning' | 'secondary';
 }
 
 // ═══════════════════════════════════════════
@@ -35,7 +36,10 @@ const HOLD_MS = 2000;
  * the app that wipes progress, and it must never happen on a single tap — it
  * takes a two-second hold (screen 26).
  */
-export const RestartProfileButton = ({ label }: RestartProfileButtonProps) => {
+export const RestartProfileButton = ({
+  label,
+  variant = 'warning',
+}: RestartProfileButtonProps) => {
   const { t } = useTranslation();
   const { hasProfile, playerName, finishedPeriods, restart } =
     useProfileRestart();
@@ -54,7 +58,7 @@ export const RestartProfileButton = ({ label }: RestartProfileButtonProps) => {
     <>
       <Button
         size="m"
-        variant="warning"
+        variant={variant}
         isFullWidth
         disabled={!hasProfile}
         onPress={() => setIsConfirmVisible(true)}

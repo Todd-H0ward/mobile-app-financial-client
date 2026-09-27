@@ -137,7 +137,11 @@ describe('applyCompleteTask', () => {
 
     const withModule: UserSave = {
       ...makeActive(),
-      modules: { owned: ['module-sensor'], tier: 1 },
+      modules: {
+        owned: ['module-sensor'],
+        installed: ['module-sensor'],
+        tier: 1,
+      },
     };
     const result = applyCompleteTask(withModule, task.id, time);
     expect(result.ok).toBe(true);

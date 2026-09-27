@@ -16,6 +16,7 @@ import { useTheme } from '@/shared/hooks';
 // ═══════════════════════════════════════════
 
 interface RingsBackdropProps {
+  variant?: 'pit' | 'surface';
   /** Where the rings meet, 0…1 of the height; above 1 sits below the view. */
   centerY?: number;
   /** Ring count, outermost first. */
@@ -40,8 +41,15 @@ const RING_STEP = 22;
  * the backdrop every terminal hangs over. Decorative, never read aloud.
  */
 export const RingsBackdrop = memo(
-  ({ centerY = 0.6, count = 16, style }: RingsBackdropProps) => {
+  ({
+    centerY = 0.6,
+    count = 16,
+    variant = 'pit',
+    style,
+  }: RingsBackdropProps) => {
     const theme = useTheme();
+    const light = variant === 'surface' ? theme.surfaceLight : theme.sceneLight;
+    const shade = variant === 'surface' ? theme.surfaceShade : theme.sceneShade;
     const rings = Array.from(
       { length: count },
       (_, index) => (count - index) * RING_STEP,
@@ -52,7 +60,10 @@ export const RingsBackdrop = memo(
         pointerEvents="none"
         style={[
           StyleSheet.absoluteFill,
-          { backgroundColor: theme.sceneBase },
+          {
+            backgroundColor:
+              variant === 'surface' ? theme.surfaceLight : theme.sceneBase,
+          },
           style,
         ]}
       >
@@ -76,7 +87,7 @@ export const RingsBackdrop = memo(
               cy={VIEW_HEIGHT * centerY}
               rx={rx * 1.1}
               ry={rx * 0.5}
-              fill={index % 2 === 0 ? theme.sceneLight : theme.sceneShade}
+              fill={index % 2 === 0 ? light : shade}
             />
           ))}
         </Svg>

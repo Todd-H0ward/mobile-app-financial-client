@@ -35,6 +35,7 @@ import {
 import { formatMoney } from '@/shared/utils';
 
 import {
+  TerminalBubble,
   TerminalCard,
   type TerminalFrame,
   TerminalRule,
@@ -222,9 +223,9 @@ export const PlanPage = ({ frame, onDone }: PlanPageProps) => {
       }
     >
       <ScrollView contentContainerStyle={styles.stack}>
-        <Text themeColor="textSecondary">
+        <TerminalBubble>
           {t('watcher.terminal.pages.plan.intro')}
-        </Text>
+        </TerminalBubble>
 
         <TerminalCard variant="raised" style={styles.balance}>
           <Text variant="bodyBold">{t('watcher.terminal.plan.youHave')}</Text>

@@ -516,15 +516,15 @@
       },
       "module-sensor": {
         "title": "Sensor module",
-        "note": "First module: +10% chore rewards."
+        "note": "Trial rewards increase by 10% while installed. Optional purchase."
       },
       "module-antenna": {
         "title": "Antenna module",
-        "note": "Second module: +1 hint in mini-games."
+        "note": "Trial rewards increase by 5% while installed. Optional purchase."
       },
       "module-core": {
         "title": "Core module",
-        "note": "Third module: +15% rewards and +2 hints."
+        "note": "Trial rewards increase by 15% while installed. Optional purchase."
       },
       "visor-red": {
         "title": "Red visor",
@@ -1362,5 +1362,72 @@
     "needs": "Charge",
     "wants": "Modules",
     "savings": "Jar"
+  },
+  "returning": {
+    "label": "profile found",
+    "title": "Welcome back!",
+    "progress": "tier {{level}} of {{total}} · period {{period}}",
+    "saved": "Continue where you left off. Everything is saved on this device.",
+    "continue": "Continue",
+    "newGame": "New game"
+  },
+  "diagnosis": {
+    "label": "diagnostics",
+    "because": "Because {{reason}}",
+    "build": "Assembly",
+    "stage": {
+      "basic": "Basic",
+      "upgraded": "Upgraded",
+      "complete": "Complete"
+    },
+    "inProgress": " — building now",
+    "conditions": {
+      "periods": "Finish periods",
+      "goalsReached": "Reach goals",
+      "plansKept": "Keep plans"
+    },
+    "explanation": "Assembly grows through decisions across several periods, not purchases. Earned stages stay with you.",
+    "workshop": "To the workshop",
+    "open": "Mood and assembly",
+    "status": "{{name}} · {{mood}}"
+  },
+  "finale": {
+    "surface": "Tier {{level}} of {{level}} · on the surface",
+    "label": "surface connection",
+    "title": "{{name}} made it out!",
+    "periods": "periods",
+    "saved": "saved up",
+    "plans": "plans kept",
+    "body": "You saved a little at a time and kept going. That is how you climb out of any pit. Keep playing: goals, periods and history stay with you.",
+    "continue": "Keep playing",
+    "history": "Your journey"
+  },
+  "equipment": {
+    "inventory": "Installed modules",
+    "label": "installation · {{slot}}",
+    "title": "What goes here?",
+    "slots": {
+      "head": "Head",
+      "body": "Body",
+      "legs": "Legs"
+    },
+    "base": "Basic unit",
+    "free": "Always available",
+    "owned": "Already owned",
+    "price": "{{amount}} coins · not owned",
+    "buy": "Open workshop",
+    "install": "Install for free",
+    "remove": "Remove for free",
+    "installed": "Module installed. Your balance is unchanged.",
+    "removed": "Module returned to inventory. Your balance is unchanged.",
+    "baseEffect": "Normal trial rewards. All tasks and help remain available.",
+    "effect": {
+      "head": "The antenna connects to the Keeper. Trial rewards are 5% higher while installed.",
+      "body": "The core helps process tasks. Trial rewards are 15% higher while installed.",
+      "legs": "Foot sensors help complete tasks precisely. Trial rewards are 10% higher while installed."
+    },
+    "example": "“{{task}}”: {{before}} → {{after}} coins for full completion.",
+    "explanation": "These purchases are optional. Owned modules stay in your inventory. Installing and removing them is free and does not change your growth stage.",
+    "purchased": "The module is in your inventory. Fit it in Installed modules to activate the bonus. Your growth stage has not changed."
   }
 }

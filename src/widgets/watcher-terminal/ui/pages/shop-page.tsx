@@ -8,6 +8,7 @@ import { useShowFeedback } from '@/features/feedback';
 import {
   type CatalogueItem,
   type CatalogueKind,
+  isModuleItem,
   listCatalogueByShop,
 } from '@/entities/catalogue';
 import {
@@ -71,7 +72,7 @@ const KIND_ICON: Record<CatalogueKind, PixelIconName> = {
 const useItemTitle = () => {
   const { t } = useTranslation();
   return (item: CatalogueItem) =>
-    t(`catalogue.items.${item.id}.title`, { defaultValue: item.title });
+    t(`shop.items.${item.id}.title`, { defaultValue: item.title });
 };
 
 // ═══════════════════════════════════════════
@@ -161,6 +162,11 @@ export const ShopPage = ({ frame }: ShopPageProps) => {
   );
 
   const open = (item: CatalogueItem) => {
+    if (item.ownedId && owned.includes(item.ownedId)) {
+      if (isModuleItem(item)) router.push(STATIC_ROUTES.MODULES);
+      else setMessage(t('watcher.terminal.shop.owned'));
+      return;
+    }
     if (user?.period.phase !== 'active') return;
     setMessage(null);
     if (!canAfford(user.wallet, item.price)) {
@@ -188,6 +194,9 @@ export const ShopPage = ({ frame }: ShopPageProps) => {
         action: 'purchase',
         overPlanBy: result.overPlanBy,
         params: { item: result.item.title },
+        ...(isModuleItem(result.item)
+          ? { whyText: t('equipment.purchased') }
+          : {}),
       });
     }, 0);
   };
@@ -238,6 +247,13 @@ export const ShopPage = ({ frame }: ShopPageProps) => {
           </TerminalCard>
         ) : null}
 
+        <Button
+          variant="secondary"
+          isFullWidth
+          onPress={() => router.push(STATIC_ROUTES.MODULES)}
+        >
+          {t('equipment.inventory')}
+        </Button>
         <Segmented
           options={[
             {

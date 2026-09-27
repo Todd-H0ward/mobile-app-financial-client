@@ -5,6 +5,8 @@
 /** Terminal 2b. Hardware keeps its phosphor palette in either system theme. */
 const TERMINAL_COLORS = {
   sceneLight: '#D7D9D2',
+  surfaceLight: '#F2F2EE',
+  surfaceShade: '#E3E4DF',
   sceneBase: '#C9CBC4',
   sceneShade: '#B9BCB4',
   sceneInk: '#1E2A22',
@@ -54,6 +56,8 @@ const TERMINAL_COLORS = {
   disabled: '#1B3A26',
   onDisabled: '#6FA87A',
   overlay: 'rgba(11, 26, 18, 0.72)',
+  /** Light veil behind a sheet: the game stays readable underneath. */
+  scrim: 'rgba(11, 26, 18, 0.32)',
   scanline: 'rgba(158, 240, 168, 0.04)',
   vignette: 'rgba(0, 0, 0, 0.32)',
   glow: 'rgba(158, 240, 168, 0.45)',

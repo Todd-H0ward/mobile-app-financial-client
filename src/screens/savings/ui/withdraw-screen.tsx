@@ -87,7 +87,7 @@ export const WithdrawScreen = ({ goalId, amount }: WithdrawScreenProps) => {
   ];
 
   return (
-    <Screen gap="compact" terminalVariant="keeper">
+    <Screen presentation="sheet" gap="compact" terminalVariant="keeper">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

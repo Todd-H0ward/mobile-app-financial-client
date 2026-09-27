@@ -151,7 +151,7 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
   };
 
   return (
-    <Screen gap="three" terminalVariant="overseer">
+    <Screen presentation="sheet" gap="three" terminalVariant="overseer">
       <Screen.Header>
         <Screen.Heading>
           <Text

@@ -17,6 +17,8 @@ import {
 
 import { useStory } from '../model';
 
+import { FinaleScreen } from './finale-screen';
+
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
@@ -37,6 +39,8 @@ export const StoryScreen = () => {
   if (!isKnownId || !cutscene) {
     return <Redirect href={STATIC_ROUTES.HOME} />;
   }
+
+  if (cutscene.id === 'finale') return <FinaleScreen onContinue={finish} />;
 
   const beats = cutscene.beats;
   const beat = beats[Math.min(beatIndex, beats.length - 1)];

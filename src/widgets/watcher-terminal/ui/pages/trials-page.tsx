@@ -3,13 +3,9 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { listTasks, TASK_THEMES, type TaskTheme } from '@/entities/task';
 import {
-  listTasks,
-  rewardForTask,
-  TASK_THEMES,
-  type TaskTheme,
-} from '@/entities/task';
-import {
+  rewardForUserTask,
   selectTask,
   type UserSave,
   useCommitUser,
@@ -161,7 +157,7 @@ export const TrialsPage = ({ frame, onArcade }: TrialsPageProps) => {
               key={task.id}
               accessibilityRole="button"
               accessibilityState={{ disabled: !canPlay }}
-              accessibilityLabel={`${title}, +${rewardForTask(task)}`}
+              accessibilityLabel={`${title}, +${user ? rewardForUserTask(user, task) : 0}`}
               disabled={!canPlay}
               onPress={() => openTask(task.id)}
             >
@@ -183,7 +179,7 @@ export const TrialsPage = ({ frame, onArcade }: TrialsPageProps) => {
                   </View>
                   <View style={styles.row}>
                     <Text variant="machine">
-                      {`+${formatMoney(rewardForTask(task))}`}
+                      {`+${formatMoney(user ? rewardForUserTask(user, task) : 0)}`}
                     </Text>
                     <PixelIcon name="coin" size={12} tone="coin" />
                   </View>
