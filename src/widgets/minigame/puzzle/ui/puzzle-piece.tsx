@@ -132,7 +132,8 @@ export const PuzzlePiece = ({
   })();
 
   const stroke = (() => {
-    if (photo) return isFitCell ? withAlpha('#000000', 0.25) : theme.surface;
+    if (photo)
+      return isFitCell ? withAlpha(theme.surfaceDeep, 0.25) : theme.surface;
     if (isSlotActive) return theme.accent;
     if (variant === 'slotDark') return theme.primaryStrong;
     if (isSlot) return theme.borderStrong;

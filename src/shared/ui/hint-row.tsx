@@ -25,7 +25,7 @@ interface HintRowHintProps {
 type HintRowTitleProps = TextProps;
 
 // ═══════════════════════════════════════════
-// COMPOUND COMPONENTS
+// COMPONENTS
 // ═══════════════════════════════════════════
 
 const HintRowHint = ({ children, style }: HintRowHintProps) => {
@@ -75,7 +75,10 @@ export const HintRow = Object.assign(HintRowRoot, {
 
 const styles = StyleSheet.create({
   root: {
+    alignItems: 'center',
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.two,
     justifyContent: 'space-between',
   },
   hint: {

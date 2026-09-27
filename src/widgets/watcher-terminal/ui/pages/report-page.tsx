@@ -1,121 +1,224 @@
 import { type Href, useRouter } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { buildPeriodReport, useUser } from '@/entities/user';
+import type { BudgetDirection } from '@/entities/economy';
+import {
+  buildPeriodReport,
+  labelWalletSource,
+  listWalletHistory,
+  useUser,
+} from '@/entities/user';
 
-import { SPACING, STATIC_ROUTES } from '@/shared/constants';
+import { FONTS, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
+import {
+  Button,
+  PixelIcon,
+  type PixelIconName,
+  ProgressBar,
+  Text,
+} from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
-import { TerminalMenuRow, TerminalRule, TerminalText } from '../terminal-shell';
+import {
+  TerminalCard,
+  type TerminalFrame,
+  TerminalMenu,
+  TerminalMenuRow,
+  TerminalShell,
+  TerminalText,
+} from '../terminal-shell';
 
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
 
 interface ReportPageProps {
-  onBack: () => void;
+  frame: TerminalFrame;
 }
+
+interface BoxCardProps {
+  direction: BudgetDirection;
+  plan: number;
+  fact: number;
+}
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/** One cell of the bar is ten coins — countable with a finger. */
+const COINS_PER_CELL = 10;
+const MAX_CELLS = 15;
+const RECENT_COUNT = 3;
+
+const BOX_META: Record<BudgetDirection, { icon: PixelIconName; key: string }> =
+  {
+    needs: { icon: 'battery', key: 'watcher.terminal.plan.needs' },
+    wants: { icon: 'gear', key: 'watcher.terminal.plan.wants' },
+    savings: { icon: 'piggy', key: 'watcher.terminal.plan.savings' },
+  };
 
 // ═══════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════
 
+/** A box of the plan: how much of it is used, in cells of ten. */
+const BoxCard = ({ direction, plan, fact }: BoxCardProps) => {
+  const { t } = useTranslation();
+  const meta = BOX_META[direction];
+  const cells = Math.min(
+    MAX_CELLS,
+    Math.max(1, Math.ceil(Math.max(plan, fact) / COINS_PER_CELL)),
+  );
+  const isEmptied = direction === 'wants' && fact >= plan && fact > 0;
+
+  return (
+    <TerminalCard>
+      <View style={styles.boxHeader}>
+        <PixelIcon name={meta.icon} />
+        <Text variant="bodyBold" style={styles.boxName}>
+          {t(meta.key)}
+        </Text>
+        <Text variant="small" themeColor="textMuted">
+          {`${t(
+            direction === 'savings'
+              ? 'watcher.terminal.report.saved'
+              : 'watcher.terminal.report.spent',
+          )} `}
+          <Text variant="small" style={styles.boxFact}>
+            {formatMoney(fact)}
+          </Text>
+          {` ${t('watcher.terminal.report.of')} ${formatMoney(plan)}`}
+        </Text>
+      </View>
+      <ProgressBar
+        value={fact / (cells * COINS_PER_CELL)}
+        segmentCount={cells}
+        height={10}
+        trackColor="surfaceSoft"
+      />
+      {isEmptied ? (
+        <Text variant="small" themeColor="textSecondary">
+          {t('watcher.terminal.report.overPlan')}
+        </Text>
+      ) : null}
+    </TerminalCard>
+  );
+};
+
 /**
- * Live period ledger inside the Keeper terminal.
- *
- * Charge / modules / jar fill as the child plays. Settlement screen opens
- * from here when the phase is `summary`.
+ * The live period report (screen 12): plan and fact while the period runs,
+ * the latest coin movements, and a quiet way to finish the period.
  */
-export const ReportPage = ({ onBack }: ReportPageProps) => {
+export const ReportPage = ({ frame }: ReportPageProps) => {
   const { t } = useTranslation();
   const router = useRouter();
   const user = useUser();
 
-  if (!user) {
-    return (
-      <View style={styles.stack}>
-        <TerminalMenuRow label={t('watcher.terminal.back')} onPress={onBack} />
-      </View>
-    );
-  }
+  if (!user) return null;
 
   const report = buildPeriodReport(user);
   const isSummary = user.period.phase === 'summary';
-  const savingsGap = Math.max(0, report.plan.savings - report.fact.savings);
+  const recent = listWalletHistory(user).slice(0, RECENT_COUNT);
   const isSlipping =
     user.period.phase === 'active' &&
     (report.fact.needs < report.plan.needs * 0.5 ||
       report.fact.wants > report.plan.wants);
 
   return (
-    <View style={styles.stack}>
-      <TerminalText>
-        {t('watcher.terminal.report.period', { index: report.periodIndex })}
-      </TerminalText>
-      <TerminalRule />
-      <TerminalText isDim>
-        {t('watcher.terminal.report.earned', {
-          count: formatMoney(report.earned),
-        })}
-      </TerminalText>
-      <TerminalText isDim>
-        {t('watcher.terminal.report.charge', {
-          fact: formatMoney(report.spentOnCharge),
-          plan: formatMoney(report.plan.needs),
-        })}
-      </TerminalText>
-      <TerminalText isDim>
-        {t('watcher.terminal.report.modules', {
-          fact: formatMoney(report.spentOnModules),
-          plan: formatMoney(report.plan.wants),
-        })}
-      </TerminalText>
-      <TerminalText isDim>
-        {t('watcher.terminal.report.saved', {
-          fact: formatMoney(report.savedAmount),
-          plan: formatMoney(report.plan.savings),
-        })}
-      </TerminalText>
-      <TerminalText isDim>
-        {t('watcher.terminal.report.wallet', {
-          count: formatMoney(user.wallet.balance),
-        })}
-      </TerminalText>
-      {savingsGap > 0 ? (
-        <TerminalText isDim>
-          {t('watcher.terminal.report.jarLeft', {
-            count: formatMoney(savingsGap),
-          })}
-        </TerminalText>
-      ) : null}
-      {isSlipping ? (
-        <>
-          <TerminalRule />
-          <TerminalText>
-            {t('watcher.terminal.report.supportBody')}
-          </TerminalText>
-        </>
-      ) : null}
-      <TerminalRule />
-      {isSummary ? (
-        <TerminalMenuRow
-          label={t('action.period_summary')}
-          onPress={() => router.push(STATIC_ROUTES.PERIOD_SUMMARY as Href)}
+    <TerminalShell
+      {...frame}
+      label={t('watcher.terminal.pages.report.label', {
+        index: report.periodIndex,
+      })}
+      title={t('watcher.terminal.pages.report.title')}
+      footer={
+        isSummary ? (
+          <Button
+            isFullWidth
+            onPress={() => router.push(STATIC_ROUTES.PERIOD_SUMMARY as Href)}
+          >
+            {t('watcher.terminal.report.summary')}
+          </Button>
+        ) : user.period.phase === 'active' ? (
+          <Button
+            variant="secondary"
+            isFullWidth
+            onPress={() => router.push(STATIC_ROUTES.END_PERIOD as Href)}
+          >
+            {t('watcher.terminal.report.endPeriod')}
+          </Button>
+        ) : null
+      }
+    >
+      <ScrollView contentContainerStyle={styles.stack}>
+        <BoxCard
+          direction="needs"
+          plan={report.plan.needs}
+          fact={report.spentOnCharge}
         />
-      ) : null}
-      <TerminalMenuRow
-        label={t('action.history')}
-        onPress={() => router.push(STATIC_ROUTES.HISTORY as Href)}
-      />
-      {isSlipping ? (
-        <TerminalMenuRow
-          label={t('watcher.terminal.report.openPlan')}
-          onPress={() => router.push(STATIC_ROUTES.BUDGET_PLAN as Href)}
+        <BoxCard
+          direction="wants"
+          plan={report.plan.wants}
+          fact={report.spentOnModules}
         />
-      ) : null}
-      <TerminalMenuRow label={t('watcher.terminal.back')} onPress={onBack} />
-    </View>
+        <BoxCard
+          direction="savings"
+          plan={report.plan.savings}
+          fact={report.savedAmount}
+        />
+
+        {isSlipping ? (
+          <TerminalCard variant="warning">
+            <TerminalText>
+              {t('watcher.terminal.report.supportBody')}
+            </TerminalText>
+          </TerminalCard>
+        ) : null}
+
+        {recent.length > 0 ? (
+          <>
+            <Text variant="smallBold">
+              {t('watcher.terminal.report.recent')}
+            </Text>
+            <TerminalCard style={styles.recent}>
+              {recent.map((row) => (
+                <View key={row.entry.id} style={styles.recentRow}>
+                  <Text style={styles.recentLabel} numberOfLines={1}>
+                    {labelWalletSource(row.source, t)}
+                  </Text>
+                  <Text
+                    variant={row.entry.kind === 'earn' ? 'machine' : 'code'}
+                    themeColor={
+                      row.entry.kind === 'earn' ? 'phosphor' : 'textSecondary'
+                    }
+                    style={styles.recentAmount}
+                  >
+                    {`${row.entry.kind === 'earn' ? '+' : '−'}${formatMoney(row.entry.amount)}`}
+                  </Text>
+                </View>
+              ))}
+            </TerminalCard>
+          </>
+        ) : null}
+
+        <TerminalMenu>
+          <TerminalMenuRow
+            icon="clock"
+            label={t('watcher.terminal.report.history')}
+            onPress={() => router.push(STATIC_ROUTES.HISTORY as Href)}
+          />
+          {isSlipping ? (
+            <TerminalMenuRow
+              icon="plan"
+              label={t('watcher.terminal.report.openPlan')}
+              onPress={() => router.push(STATIC_ROUTES.BUDGET_PLAN as Href)}
+            />
+          ) : null}
+        </TerminalMenu>
+      </ScrollView>
+    </TerminalShell>
   );
 };
 
@@ -124,5 +227,19 @@ export const ReportPage = ({ onBack }: ReportPageProps) => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  stack: { gap: SPACING.two },
+  boxFact: { fontFamily: FONTS.monoStrong },
+  boxHeader: { alignItems: 'center', flexDirection: 'row', gap: 10 },
+  boxName: { flex: 1 },
+  recent: { gap: 0, paddingVertical: SPACING.one },
+  recentAmount: { fontSize: 16 },
+  recentLabel: { flex: 1 },
+  recentRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    paddingVertical: SPACING.two,
+  },
+  stack: { gap: SPACING.two, paddingBottom: SPACING.two },
 });
+
+export type { ReportPageProps };

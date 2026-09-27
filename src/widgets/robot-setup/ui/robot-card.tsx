@@ -11,7 +11,7 @@ import {
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { Button, Card, ListRow, Text } from '@/shared/ui';
+import { Card, Chip, PixelIcon, Text } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -90,6 +90,11 @@ const SkinTile = ({ skin, isSelected, onPress }: SkinTileProps) => {
         contentFit="cover"
         transition={120}
       />
+      {isSelected ? (
+        <View style={[styles.selected, { backgroundColor: theme.surface }]}>
+          <PixelIcon name="check20" size={20} />
+        </View>
+      ) : null}
       <Text
         variant={isSelected ? 'bodyBold' : 'body'}
         themeColor={isSelected ? 'primaryStrong' : 'textSecondary'}
@@ -119,13 +124,15 @@ export const RobotCard = ({
   const { t } = useTranslation();
 
   return (
-    <Card tone="surfaceSoft">
+    <Card>
       <Card.Title>{t('settings.robot')}</Card.Title>
       <Card.Content style={styles.content}>
-        <ListRow
-          title={t('settings.robotSkin')}
-          subtitle={t('settings.petSkinSubtitle')}
-        />
+        <View style={styles.heading}>
+          <Text variant="bodyBold">{t('settings.robotSkin')}</Text>
+          <Text variant="small" themeColor="textMuted">
+            {t('settings.petSkinSubtitle')}
+          </Text>
+        </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -143,20 +150,21 @@ export const RobotCard = ({
 
         {onActionChange && (
           <>
-            <ListRow
-              title={t('settings.robotAction')}
-              subtitle={t('settings.petActionSubtitle')}
-            />
+            <View style={styles.heading}>
+              <Text variant="bodyBold">{t('settings.robotAction')}</Text>
+              <Text variant="small" themeColor="textMuted">
+                {t('settings.petActionSubtitle')}
+              </Text>
+            </View>
             <View style={styles.actions}>
               {ROBOT_DOG_ACTIONS.map((value) => (
-                <Button
+                <Chip
                   key={value}
-                  size="s"
-                  variant={value === action ? 'primary' : 'secondary'}
+                  variant={value === action ? 'selected' : 'neutral'}
                   onPress={() => onActionChange(value)}
                 >
                   {t(`settings.action.${value}`)}
-                </Button>
+                </Chip>
               ))}
             </View>
           </>
@@ -180,12 +188,20 @@ const styles = StyleSheet.create({
     gap: SPACING.two,
   },
   content: {
-    gap: SPACING.two,
+    gap: SPACING.compact,
   },
+  heading: { gap: 2 },
   preview: {
     borderRadius: RADII.m,
     height: TILE_HEIGHT,
     width: TILE_WIDTH,
+  },
+  selected: {
+    borderRadius: RADII.xs,
+    padding: SPACING.one,
+    position: 'absolute',
+    right: SPACING.one,
+    top: SPACING.one,
   },
   tile: {
     alignItems: 'center',

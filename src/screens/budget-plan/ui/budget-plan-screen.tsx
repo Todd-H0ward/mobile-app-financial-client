@@ -7,7 +7,15 @@ import { BUDGET_DIRECTIONS } from '@/entities/economy';
 
 import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { Button, ProgressBar, Screen, Sheet, Text } from '@/shared/ui';
+import {
+  Button,
+  Card,
+  CoinBadge,
+  ProgressBar,
+  Screen,
+  Sheet,
+  Text,
+} from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
 import { useBudgetPlan } from '../model';
@@ -32,34 +40,38 @@ export const BudgetPlanScreen = () => {
   if (!plan.isPlanning) return <Redirect href={STATIC_ROUTES.HOME} />;
 
   return (
-    <Screen gap="three">
+    <Screen gap="three" terminalVariant="keeper">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
+          <Text variant="code" themeColor="primary">
+            &gt; {t('scene.watchers.keeper.name')}
+          </Text>
           <Screen.Title>{t('budgetPlan.title')}</Screen.Title>
-          <Screen.Subtitle>
-            {t('budgetPlan.available', { count: formatMoney(plan.available) })}
-          </Screen.Subtitle>
         </Screen.Heading>
         <HintButton screen="budget-plan" />
       </Screen.Header>
 
-      <View style={styles.remainder}>
-        <Text variant="bodyBold">
-          {t('budgetPlan.remainder', { count: formatMoney(plan.planLeft) })}
-        </Text>
-        <ProgressBar
-          value={laidOut}
-          accessibilityLabel={t('budgetPlan.progressA11y', {
-            percent: Math.round(laidOut * 100),
-          })}
-        />
-        <Text variant="small" themeColor="textSecondary">
-          {plan.isBroke
-            ? t('budgetPlan.brokeHint')
-            : t('budgetPlan.remainderHint')}
-        </Text>
-      </View>
+      <CoinBadge amount={plan.available} label={t('savings.balance')} />
+
+      <Card>
+        <Card.Content style={styles.remainder}>
+          <Text variant="bodyBold" themeColor="warning">
+            {t('budgetPlan.remainder', { count: formatMoney(plan.planLeft) })}
+          </Text>
+          <ProgressBar
+            value={laidOut}
+            accessibilityLabel={t('budgetPlan.progressA11y', {
+              percent: Math.round(laidOut * 100),
+            })}
+          />
+          <Text variant="small" themeColor="textSecondary">
+            {plan.isBroke
+              ? t('budgetPlan.brokeHint')
+              : t('budgetPlan.remainderHint')}
+          </Text>
+        </Card.Content>
+      </Card>
 
       <View style={styles.rows}>
         {BUDGET_DIRECTIONS.map((direction) => (

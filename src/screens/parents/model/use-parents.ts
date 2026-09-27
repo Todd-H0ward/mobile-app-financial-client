@@ -32,6 +32,9 @@ interface ParentsStatus {
 }
 
 interface ParentsController {
+  /** Current service section; never persisted in the child save. */
+  section: 'overview' | 'topics' | 'manage';
+  setSection: (section: 'overview' | 'topics' | 'manage') => void;
   isLocked: boolean;
   /** The question on the barrier. Replaced after every wrong answer. */
   challenge: GateChallenge;
@@ -68,6 +71,9 @@ export const useParents = (): ParentsController => {
   const [challenge, setChallenge] = useState<GateChallenge>(() =>
     makeGateChallenge(),
   );
+  const [section, setSection] = useState<'overview' | 'topics' | 'manage'>(
+    'overview',
+  );
   const [isUnlocked, setIsUnlocked] = useState(false);
 
   // Leaving the section must close the door again — docs/parents.md. The flag
@@ -88,6 +94,8 @@ export const useParents = (): ParentsController => {
     : [];
 
   return {
+    section,
+    setSection,
     isLocked: isGateEnabled && !isUnlocked,
     challenge,
     unlock: () => setIsUnlocked(true),

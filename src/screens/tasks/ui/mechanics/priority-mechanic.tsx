@@ -5,7 +5,7 @@ import type { PriorityPayload } from '@/entities/task';
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { Text } from '@/shared/ui';
+import { PixelIcon, Text } from '@/shared/ui';
 import { hitSlopFor } from '@/shared/utils';
 
 // ═══════════════════════════════════════════
@@ -23,7 +23,7 @@ interface PriorityMechanicProps {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-const KEY_SIZE = 36;
+const KEY_SIZE = 48;
 
 // ═══════════════════════════════════════════
 // COMPONENTS
@@ -62,6 +62,10 @@ export const PriorityMechanic = ({
               },
             ]}
           >
+            <Text variant="machine" style={styles.index}>
+              {String(index + 1)}
+            </Text>
+            <PixelIcon name={item.kind === 'need' ? 'battery' : 'gear'} />
             <View style={styles.text}>
               <Text variant="bodyBold">{item.title}</Text>
               <Text variant="small" themeColor="textMuted">
@@ -78,14 +82,18 @@ export const PriorityMechanic = ({
                 style={({ pressed }) => [
                   styles.key,
                   {
-                    backgroundColor:
-                      index === 0 ? theme.disabled : theme.surfaceSoft,
-                    borderColor: theme.borderStrong,
-                    opacity: pressed ? 0.7 : 1,
+                    backgroundColor: pressed ? theme.surfaceSoft : undefined,
+                    borderColor:
+                      index === 0 ? theme.border : theme.borderStrong,
                   },
                 ]}
               >
-                <Text variant="bodyBold">↑</Text>
+                <Text
+                  variant="bodyBold"
+                  themeColor={index === 0 ? 'borderStrong' : 'phosphor'}
+                >
+                  ↑
+                </Text>
               </Pressable>
               <Pressable
                 accessibilityRole="button"
@@ -96,16 +104,24 @@ export const PriorityMechanic = ({
                 style={({ pressed }) => [
                   styles.key,
                   {
-                    backgroundColor:
+                    backgroundColor: pressed ? theme.surfaceSoft : undefined,
+                    borderColor:
                       index === orderedIds.length - 1
-                        ? theme.disabled
-                        : theme.surfaceSoft,
-                    borderColor: theme.borderStrong,
-                    opacity: pressed ? 0.7 : 1,
+                        ? theme.border
+                        : theme.borderStrong,
                   },
                 ]}
               >
-                <Text variant="bodyBold">↓</Text>
+                <Text
+                  variant="bodyBold"
+                  themeColor={
+                    index === orderedIds.length - 1
+                      ? 'borderStrong'
+                      : 'phosphor'
+                  }
+                >
+                  ↓
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -123,11 +139,12 @@ const styles = StyleSheet.create({
   key: {
     alignItems: 'center',
     borderRadius: RADII.s,
-    borderWidth: 1,
+    borderWidth: 2,
     height: KEY_SIZE,
     justifyContent: 'center',
     width: KEY_SIZE,
   },
+  index: { minWidth: 14 },
   keys: {
     flexDirection: 'row',
     gap: SPACING.one,
@@ -138,7 +155,7 @@ const styles = StyleSheet.create({
   row: {
     alignItems: 'center',
     borderRadius: RADII.m,
-    borderWidth: 1,
+    borderWidth: 2,
     flexDirection: 'row',
     gap: SPACING.two,
     padding: SPACING.two,

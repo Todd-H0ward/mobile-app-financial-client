@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { SPACING } from '@/shared/constants';
+import { FONTS, SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
@@ -40,15 +40,21 @@ export const ChangeRow = ({ line }: ChangeRowProps) => {
       style={styles.root}
       accessibilityLabel={`${t(line.labelKey)}: ${before} → ${after}`}
     >
-      <Text variant="small" themeColor="textSecondary" style={styles.label}>
+      <Text themeColor="textSecondary" style={styles.label}>
         {t(line.labelKey)}
       </Text>
-      <Text variant="smallBold">
+      <Text variant="code" style={styles.value}>
         {before}
-        <Text variant="small" themeColor="textMuted">
+        <Text variant="code" themeColor="textMuted">
           {' → '}
         </Text>
-        {after}
+        <Text
+          variant="machine"
+          themeColor={line.after >= line.before ? 'phosphor' : 'text'}
+          style={styles.value}
+        >
+          {after}
+        </Text>
       </Text>
     </View>
   );
@@ -66,7 +72,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: SPACING.two,
+    paddingHorizontal: SPACING.compact,
+    paddingVertical: SPACING.two,
   },
+  value: { fontFamily: FONTS.monoStrong, fontSize: 16, lineHeight: 22 },
 });
 
 export type { ChangeRowProps };

@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { Redirect } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
@@ -22,19 +24,23 @@ import { useRecovery } from '../model';
 export const RecoveryScreen = () => {
   const { t } = useTranslation();
   const recovery = useRecovery();
+  const [chosenId, setChosenId] = useState<string | null>(null);
 
   if (!recovery) {
     return <Redirect href={STATIC_ROUTES.HOME} />;
   }
 
+  // The step picked by the deviation stands first and is preselected (F2).
+  const chosen =
+    recovery.options.find((option) => option.id === chosenId) ??
+    recovery.options[0];
+
   return (
-    <Screen gap="three">
+    <Screen gap="compact" terminalVariant="keeper">
       <Screen.Header>
         <Screen.Heading>
-          <Screen.Title>
-            {t('recovery.title', { period: recovery.periodIndex })}
-          </Screen.Title>
-          <Screen.Subtitle>{t('recovery.subtitle')}</Screen.Subtitle>
+          <Screen.Label>{t('recovery.label')}</Screen.Label>
+          <Screen.Title>{t('recovery.heading')}</Screen.Title>
         </Screen.Heading>
         <HintButton screen="recovery" />
       </Screen.Header>
@@ -47,20 +53,27 @@ export const RecoveryScreen = () => {
             key={option.id}
             title={t(`recovery.options.${option.id}.title`)}
             subtitle={t(`recovery.options.${option.id}.body`)}
-            onPress={() => recovery.choose(option)}
+            isSelected={option.id === chosen?.id}
+            onPress={() => setChosenId(option.id)}
           />
         ))}
       </View>
 
-      <Button
-        variant="ghost"
-        size="l"
-        isFullWidth
-        onPress={recovery.skip}
-        style={styles.skip}
-      >
-        {t('recovery.skip')}
-      </Button>
+      <View style={styles.actions}>
+        <Button
+          size="l"
+          isFullWidth
+          disabled={!chosen}
+          onPress={() => {
+            if (chosen) recovery.choose(chosen);
+          }}
+        >
+          {t('recovery.start', { period: recovery.periodIndex + 1 })}
+        </Button>
+        <Button variant="ghost" size="s" isFullWidth onPress={recovery.skip}>
+          {t('recovery.skip')}
+        </Button>
+      </View>
     </Screen>
   );
 };
@@ -73,7 +86,8 @@ const styles = StyleSheet.create({
   list: {
     gap: SPACING.two,
   },
-  skip: {
-    marginTop: 'auto',
+  actions: {
+    gap: SPACING.one,
+    marginTop: SPACING.two,
   },
 });

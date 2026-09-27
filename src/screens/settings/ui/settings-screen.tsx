@@ -21,7 +21,15 @@ import {
 import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import type { LanguagePreference } from '@/shared/types';
-import { Button, Card, ListRow, Screen, Switch, Text } from '@/shared/ui';
+import {
+  Button,
+  ListGroup,
+  PixelIcon,
+  Screen,
+  Segmented,
+  Switch,
+  Text,
+} from '@/shared/ui';
 
 // ═══════════════════════════════════════════
 // CONSTANTS
@@ -84,75 +92,83 @@ export const SettingsScreen = () => {
     }));
 
   return (
-    <Screen gap="three">
+    <Screen gap="compact">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
+          <Screen.Label>{t('settings.label')}</Screen.Label>
           <Screen.Title>{t('settings.title')}</Screen.Title>
         </Screen.Heading>
       </Screen.Header>
 
-      <Button variant="secondary" onPress={() => setSetupVisible(true)}>
-        {t('setup.edit')}
-      </Button>
-      {isSetupVisible && <RobotSetup onClose={() => setSetupVisible(false)} />}
-      <Card tone="surfaceSoft">
-        <Card.Title>{t('settings.language')}</Card.Title>
-        <Card.Content>
-          <View style={styles.langButtons}>
-            {LANGUAGE_OPTIONS.map(({ value, labelKey }) => (
-              <Button
-                key={value}
-                size="m"
-                variant={languagePreference === value ? 'primary' : 'secondary'}
-                isFullWidth
-                onPress={() => changeLanguage(value)}
-              >
-                {t(labelKey)}
-              </Button>
-            ))}
-          </View>
-        </Card.Content>
-      </Card>
+      <ListGroup>
+        <ListGroup.Item
+          title={t('settings.sound')}
+          subtitle={t('settings.soundSubtitle')}
+          trailing={
+            <Switch
+              isChecked={isSoundEnabled}
+              onChange={setSound}
+              label={t('settings.sound')}
+            />
+          }
+        />
+        <ListGroup.Item
+          title={t('settings.animations')}
+          subtitle={t('settings.animationsSubtitle')}
+          trailing={
+            <Switch
+              isChecked={isAnimationEnabled}
+              onChange={setAnimation}
+              label={t('settings.animations')}
+            />
+          }
+        />
+        <ListGroup.Item
+          title={t('settings.glass')}
+          subtitle={t('settings.glassSubtitle')}
+          trailing={
+            <Switch
+              isChecked={isGlassEnabled}
+              onChange={setGlass}
+              label={t('settings.glass')}
+            />
+          }
+        />
+      </ListGroup>
 
-      <Card tone="surfaceSoft">
-        <Card.Title>{t('settings.interface')}</Card.Title>
-        <Card.Content style={styles.toggles}>
-          <ListRow
-            title={t('settings.animations')}
-            subtitle={t('settings.animationsSubtitle')}
-            trailing={
-              <Switch
-                isChecked={isAnimationEnabled}
-                onChange={setAnimation}
-                label={t('settings.animations')}
-              />
-            }
-          />
-          <ListRow
-            title={t('settings.sound')}
-            subtitle={t('settings.soundSubtitle')}
-            trailing={
-              <Switch
-                isChecked={isSoundEnabled}
-                onChange={setSound}
-                label={t('settings.sound')}
-              />
-            }
-          />
-          <ListRow
-            title={t('settings.glass')}
-            subtitle={t('settings.glassSubtitle')}
-            trailing={
-              <Switch
-                isChecked={isGlassEnabled}
-                onChange={setGlass}
-                label={t('settings.glass')}
-              />
-            }
-          />
-        </Card.Content>
-      </Card>
+      <View style={styles.section}>
+        <Text variant="smallBold">{t('settings.language')}</Text>
+        <Segmented
+          options={LANGUAGE_OPTIONS.map(({ value, labelKey }) => ({
+            value,
+            label: t(labelKey),
+          }))}
+          value={languagePreference}
+          onChange={changeLanguage}
+        />
+      </View>
+
+      <ListGroup>
+        <ListGroup.Item
+          title={t('settings.appearance')}
+          subtitle={t('settings.appearanceSubtitle')}
+          onPress={() => setSetupVisible(true)}
+        />
+        <ListGroup.Item
+          icon="clock"
+          title={t('settings.openHistory')}
+          subtitle={t('settings.historyDescription')}
+          onPress={() => router.push(STATIC_ROUTES.HISTORY)}
+        />
+        <ListGroup.Item
+          icon="book"
+          title={t('settings.openGlossary')}
+          subtitle={t('settings.glossaryDescription')}
+          onPress={() => router.push(STATIC_ROUTES.GLOSSARY)}
+        />
+      </ListGroup>
+      {isSetupVisible && <RobotSetup onClose={() => setSetupVisible(false)} />}
 
       <RobotCard
         skin={robotSkin}
@@ -161,82 +177,39 @@ export const SettingsScreen = () => {
         onActionChange={setPetAction}
       />
 
-      <Card tone="surfaceSoft">
-        <Card.Title>{t('settings.handbook')}</Card.Title>
-        <Card.Content style={styles.handbook}>
-          <Text variant="small" themeColor="textSecondary">
-            {t('settings.historyDescription')}
-          </Text>
-          <Button
-            size="m"
-            isFullWidth
-            onPress={() => router.push(STATIC_ROUTES.HISTORY)}
-          >
-            {t('settings.openHistory')}
-          </Button>
-          <Text variant="small" themeColor="textSecondary">
-            {t('settings.glossaryDescription')}
-          </Text>
-          <Button
-            size="m"
-            variant="secondary"
-            isFullWidth
-            onPress={() => router.push(STATIC_ROUTES.GLOSSARY)}
-          >
-            {t('settings.openGlossary')}
-          </Button>
-        </Card.Content>
-      </Card>
-
       {__DEV__ ? (
-        <Card tone="surfaceSoft">
-          <Card.Title>{t('settings.development')}</Card.Title>
-          <Card.Content style={styles.toggles}>
-            <ListRow
-              title={t('settings.cameraRig')}
-              subtitle={t('settings.cameraRigSubtitle')}
-              trailing={
-                <Switch
-                  isChecked={isCameraRigEnabled}
-                  onChange={setCameraRig}
-                  label={t('settings.cameraRig')}
-                />
-              }
-            />
-            <Text variant="small" themeColor="textSecondary">
-              {t('settings.uiKitDescription')}
-            </Text>
-            <Button
-              size="m"
-              isFullWidth
-              onPress={() => router.push(STATIC_ROUTES.UI_KIT)}
-            >
-              {t('settings.openUiKit')}
-            </Button>
-          </Card.Content>
-        </Card>
+        <ListGroup>
+          <ListGroup.Item
+            title={t('settings.cameraRig')}
+            subtitle={t('settings.cameraRigSubtitle')}
+            trailing={
+              <Switch
+                isChecked={isCameraRigEnabled}
+                onChange={setCameraRig}
+                label={t('settings.cameraRig')}
+              />
+            }
+          />
+          <ListGroup.Item
+            title={t('settings.openUiKit')}
+            subtitle={t('settings.uiKitDescription')}
+            onPress={() => router.push(STATIC_ROUTES.UI_KIT)}
+          />
+        </ListGroup>
       ) : null}
 
       {/* Last and quiet — docs/parents.md: the panel a child sees every day
           must not advertise the room they are not allowed into. */}
-      <Card tone="surfaceSoft">
-        <Card.Title>{t('settings.parents')}</Card.Title>
-        <Card.Content>
-          <Text variant="small" themeColor="textSecondary">
-            {t('settings.parentsDescription')}
-          </Text>
-        </Card.Content>
-        <Card.Footer>
-          <Button
-            size="m"
-            variant="secondary"
-            isFullWidth
-            onPress={() => router.push(STATIC_ROUTES.PARENTS)}
-          >
-            {t('settings.openParents')}
-          </Button>
-        </Card.Footer>
-      </Card>
+      <Button
+        size="m"
+        variant="secondary"
+        isFullWidth
+        accessibilityHint={t('settings.parentsDescription')}
+        onPress={() => router.push(STATIC_ROUTES.PARENTS)}
+      >
+        <PixelIcon name="lock" size={12} tone="textSecondary" />
+        <Button.Label>{t('settings.openParents')}</Button.Label>
+      </Button>
     </Screen>
   );
 };
@@ -246,13 +219,5 @@ export const SettingsScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  handbook: {
-    gap: SPACING.two,
-  },
-  langButtons: {
-    gap: SPACING.two,
-  },
-  toggles: {
-    gap: SPACING.two,
-  },
+  section: { gap: SPACING.two },
 });

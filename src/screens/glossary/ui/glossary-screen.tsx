@@ -1,14 +1,30 @@
 import { useState } from 'react';
 
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { SPACING } from '@/shared/constants';
+import { RADII, SPACING } from '@/shared/constants';
+import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { ListRow, Screen, Sheet } from '@/shared/ui';
+import { PixelIcon, type PixelIconName, Screen, Text } from '@/shared/ui';
 
 import { useGlossary } from '../model';
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/** A word tied to a sign in the game wears that sign. */
+const TERM_ICON: Record<string, PixelIconName> = {
+  plan: 'plan',
+  needs: 'battery',
+  wants: 'gear',
+  savings: 'piggy',
+  goal: 'piggy',
+  balance: 'coin',
+  period: 'clock',
+};
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
@@ -16,21 +32,21 @@ import { useGlossary } from '../model';
 
 /**
  * Child-facing glossary — terms from `content/glossary.json` (2.5.11).
+ * Screen 15: a word opens in place, so the list never loses its reader.
  */
 export const GlossaryScreen = () => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const { terms } = useGlossary();
   const [openId, setOpenId] = useState<string | null>(null);
 
-  const open = terms.find((term) => term.id === openId) ?? null;
-
   return (
-    <Screen gap="three">
+    <Screen gap="compact">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
-          <Screen.Title>{t('glossary.title')}</Screen.Title>
-          <Screen.Subtitle>{t('glossary.subtitle')}</Screen.Subtitle>
+          <Screen.Label>{t('glossary.label')}</Screen.Label>
+          <Screen.Title>{t('glossary.wordsTitle')}</Screen.Title>
         </Screen.Heading>
         <HintButton screen="glossary" />
       </Screen.Header>
@@ -40,32 +56,46 @@ export const GlossaryScreen = () => {
           const title = t(`glossary.terms.${term.id}.title`, {
             defaultValue: term.title,
           });
+          const isOpen = term.id === openId;
+          const icon = TERM_ICON[term.id];
           return (
-            <ListRow
+            <Pressable
               key={term.id}
-              title={title}
-              onPress={() => setOpenId(term.id)}
-            />
+              accessibilityRole="button"
+              accessibilityState={{ expanded: isOpen }}
+              accessibilityHint={t('glossary.expandA11y')}
+              onPress={() => setOpenId(isOpen ? null : term.id)}
+              style={({ pressed }) => [
+                styles.term,
+                {
+                  backgroundColor: pressed ? theme.surfaceSoft : theme.surface,
+                  borderColor: isOpen ? theme.phosphor : theme.border,
+                },
+              ]}
+            >
+              <View style={styles.termHead}>
+                {icon ? (
+                  <PixelIcon
+                    name={icon}
+                    tone={icon === 'coin' ? 'coin' : 'phosphor'}
+                  />
+                ) : null}
+                <Text variant="bodyBold" style={styles.termTitle}>
+                  {title}
+                </Text>
+                <Text variant="machine">{isOpen ? '−' : '+'}</Text>
+              </View>
+              {isOpen ? (
+                <Text themeColor="textSecondary">
+                  {t(`glossary.terms.${term.id}.definition`, {
+                    defaultValue: term.definition,
+                  })}
+                </Text>
+              ) : null}
+            </Pressable>
           );
         })}
       </View>
-
-      <Sheet.Modal isVisible={open != null} onClose={() => setOpenId(null)}>
-        <Sheet.Title>
-          {open
-            ? t(`glossary.terms.${open.id}.title`, {
-                defaultValue: open.title,
-              })
-            : ''}
-        </Sheet.Title>
-        <Sheet.Description>
-          {open
-            ? t(`glossary.terms.${open.id}.definition`, {
-                defaultValue: open.definition,
-              })
-            : ''}
-        </Sheet.Description>
-      </Sheet.Modal>
     </Screen>
   );
 };
@@ -78,4 +108,14 @@ const styles = StyleSheet.create({
   list: {
     gap: SPACING.two,
   },
+  term: {
+    borderRadius: RADII.m,
+    borderWidth: 2,
+    gap: SPACING.two,
+    minHeight: 56,
+    paddingHorizontal: 14,
+    paddingVertical: SPACING.compact,
+  },
+  termHead: { alignItems: 'center', flexDirection: 'row', gap: 10 },
+  termTitle: { flex: 1 },
 });

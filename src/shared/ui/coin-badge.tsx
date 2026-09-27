@@ -1,6 +1,6 @@
 import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
 
-import { RADII } from '@/shared/constants';
+import { FONTS, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 
 import { formatMoney } from '../utils';
@@ -38,17 +38,16 @@ export const CoinBadge = ({
   amount,
   variant = 'balance',
   label,
-  coinSize = 22,
+  coinSize = 24,
   style,
 }: CoinBadgeProps) => {
   const theme = useTheme();
   const isDelta = variant === 'delta';
 
-  // A spend must not borrow the green of a gain. The warm accent reads as
-  // "went out" without alarming a child the way a red would.
+  // Gains and spends keep their sign; spending uses quiet text, never a warning.
   const isLoss = isDelta && isNegative(amount);
-  const deltaSurface = isLoss ? theme.accentSoft : theme.successSoft;
-  const deltaText = isLoss ? 'accentStrong' : 'successStrong';
+  const deltaSurface = theme.surfaceDeep;
+  const deltaText = isLoss ? 'textSecondary' : 'primary';
 
   return (
     <View
@@ -56,14 +55,12 @@ export const CoinBadge = ({
         styles.root,
         variant !== 'plain' && {
           backgroundColor: isDelta ? deltaSurface : theme.surface,
-          borderColor: isDelta ? 'transparent' : theme.coinSoft,
-          borderWidth: isDelta ? 0 : 1.5,
+          borderColor: theme.borderStrong,
+          borderWidth: 2,
         },
         style,
       ]}
     >
-      {!isDelta && <Coin size={coinSize} isActive />}
-
       <Text
         variant="subtitle"
         themeColor={isDelta ? deltaText : 'text'}
@@ -73,6 +70,8 @@ export const CoinBadge = ({
           ? `${isDelta && amount > 0 ? '+' : ''}${formatMoney(amount)}`
           : amount}
       </Text>
+
+      <Coin size={coinSize} />
 
       {label != null && (
         <Text variant="small" themeColor="textMuted">
@@ -91,14 +90,14 @@ const styles = StyleSheet.create({
   root: {
     alignItems: 'center',
     alignSelf: 'flex-start',
-    borderRadius: RADII.pill,
+    borderRadius: 12,
     flexDirection: 'row',
-    gap: 7,
-    paddingHorizontal: 13,
-    paddingVertical: 6,
+    gap: SPACING.two,
+    paddingHorizontal: SPACING.two,
+    paddingVertical: SPACING.one,
   },
   amount: {
-    fontWeight: 900,
+    fontFamily: FONTS.monoStrong,
   },
 });
 

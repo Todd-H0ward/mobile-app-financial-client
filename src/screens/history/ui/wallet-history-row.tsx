@@ -1,11 +1,13 @@
 import { memo } from 'react';
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import type { WalletHistoryRow, WalletSourceRef } from '@/entities/user';
+import { labelWalletSource, type WalletHistoryRow } from '@/entities/user';
 
+import { SPACING } from '@/shared/constants';
+import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { ListRow, Text } from '@/shared/ui';
+import { Shape, type ShapeVariant, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
 // ═══════════════════════════════════════════
@@ -14,85 +16,65 @@ import { formatMoney } from '@/shared/utils';
 
 interface WalletHistoryRowViewProps {
   row: WalletHistoryRow;
+  /** Draws the hairline above — every row but the first. */
+  isDivided?: boolean;
 }
 
 // ═══════════════════════════════════════════
-// HELPERS
+// CONSTANTS
 // ═══════════════════════════════════════════
 
-const sourceLabel = (
-  source: WalletSourceRef,
-  t: ReturnType<typeof useTranslation>['t'],
-): string => {
-  switch (source.kind) {
-    case 'startingWallet':
-      return t('wallet.source.startingWallet');
-    case 'regularityBonus':
-      return t('wallet.source.regularityBonus');
-    case 'gamePuzzle':
-      return t('wallet.source.gamePuzzle');
-    case 'gameSpacewar':
-      return t('wallet.source.gameSpacewar');
-    case 'gameMarket':
-      return t('financeGame.market');
-    case 'gameWeekly':
-      return t('financeGame.weekly');
-    case 'module':
-      return t('wallet.source.purchase', {
-        title: t(`setup.modules.${source.part}.${source.variant}`),
-      });
-    case 'gameSnake':
-      return t('wallet.source.gameSnake');
-    case 'task':
-      return t('wallet.source.task', {
-        title: t(`tasks.items.${source.taskId}.title`, {
-          defaultValue: source.title,
-        }),
-      });
-    case 'purchase':
-      return t('wallet.source.purchase', {
-        title: t(`shop.items.${source.itemId}.title`, {
-          defaultValue: source.title,
-        }),
-      });
-    case 'savingsDeposit':
-      return t('wallet.source.savingsDeposit', {
-        title: t(`savings.goals.${source.goalId}.title`, {
-          defaultValue: source.title,
-        }),
-      });
-    case 'savingsWithdraw':
-      return t('wallet.source.savingsWithdraw', {
-        title: t(`savings.goals.${source.goalId}.title`, {
-          defaultValue: source.title,
-        }),
-      });
-    default:
-      return t('wallet.source.unknown');
-  }
+/** The box a spend came out of, as a shape — colour is never the only sign. */
+const DIRECTION_SHAPE: Record<string, ShapeVariant> = {
+  needs: 'circle',
+  wants: 'diamond',
+  savings: 'square',
 };
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/** One named coin movement — source and amount, never a bare number. */
+/** UI kit 07 "строка истории": a coin always has a source. */
 export const WalletHistoryRowView = memo(
-  ({ row }: WalletHistoryRowViewProps) => {
+  ({ row, isDivided = false }: WalletHistoryRowViewProps) => {
     const { t } = useTranslation();
-    const sign = row.entry.kind === 'earn' ? '+' : '−';
-    const amount = `${sign}${formatMoney(row.entry.amount)}`;
+    const theme = useTheme();
+    const isEarn = row.entry.kind === 'earn';
+    const shape = row.entry.direction
+      ? DIRECTION_SHAPE[row.entry.direction]
+      : undefined;
+    const source = labelWalletSource(row.source, t);
+    // Source labels are written mid-sentence; a row starts one.
+    const title = source.charAt(0).toLocaleUpperCase() + source.slice(1);
+    const amount = `${isEarn ? '+' : '−'}${formatMoney(row.entry.amount)}`;
 
     return (
-      <ListRow
-        title={sourceLabel(row.source, t)}
-        subtitle={t('history.walletPeriod', { period: row.entry.periodIndex })}
-        trailing={
-          <Text variant="smallBold" style={styles.amount}>
-            {amount}
+      <View
+        accessible
+        accessibilityLabel={`${title}, ${amount}`}
+        style={[
+          styles.root,
+          isDivided && [styles.divided, { borderColor: theme.border }],
+        ]}
+      >
+        {!isEarn && shape ? (
+          <Shape variant={shape} size={10} color={theme.textSecondary} />
+        ) : null}
+        <View style={styles.copy}>
+          <Text>{title}</Text>
+          <Text variant="code" themeColor="textMuted" style={styles.meta}>
+            {t('history.coinMeta', { period: row.entry.periodIndex })}
           </Text>
-        }
-      />
+        </View>
+        <Text
+          variant={isEarn ? 'machine' : 'code'}
+          themeColor={isEarn ? 'phosphor' : 'textSecondary'}
+          style={styles.amount}
+        >
+          {amount}
+        </Text>
+      </View>
     );
   },
 );
@@ -104,9 +86,16 @@ WalletHistoryRowView.displayName = 'WalletHistoryRowView';
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  amount: {
-    minWidth: 40,
-    textAlign: 'right',
+  amount: { fontSize: 16, lineHeight: 22 },
+  copy: { flex: 1, minWidth: 0 },
+  divided: { borderTopWidth: 1 },
+  meta: { fontSize: 12, lineHeight: 16 },
+  root: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    paddingHorizontal: SPACING.compact,
+    paddingVertical: 10,
   },
 });
 

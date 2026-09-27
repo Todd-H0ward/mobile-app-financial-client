@@ -1,11 +1,6 @@
 import type { ReactNode } from 'react';
 
 import {
-  GlassView,
-  isGlassEffectAPIAvailable,
-  isLiquidGlassAvailable,
-} from 'expo-glass-effect';
-import {
   type Insets,
   Pressable,
   type StyleProp,
@@ -15,8 +10,7 @@ import {
 } from 'react-native';
 
 import type { ThemeColor } from '@/shared/constants';
-import { useColorScheme, useTheme } from '@/shared/hooks';
-import { useGlassEnabled } from '@/shared/model';
+import { useTheme } from '@/shared/hooks';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -36,39 +30,10 @@ interface GlassSurfaceProps {
 }
 
 // ═══════════════════════════════════════════
-// HELPERS
+// COMPONENTS
 // ═══════════════════════════════════════════
 
-const canUseNativeGlass = (): boolean => {
-  try {
-    return isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
-  } catch {
-    return false;
-  }
-};
-
-/** Soft frosted plate when native liquid glass is unavailable. */
-const frostFill = (hex: string, isDark: boolean): string => {
-  const raw = hex.replace('#', '');
-  if (raw.length !== 6) {
-    return isDark ? 'rgba(46, 39, 35, 0.72)' : 'rgba(255, 255, 255, 0.72)';
-  }
-  const r = Number.parseInt(raw.slice(0, 2), 16);
-  const g = Number.parseInt(raw.slice(2, 4), 16);
-  const b = Number.parseInt(raw.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${isDark ? 0.72 : 0.78})`;
-};
-
-// ═══════════════════════════════════════════
-// MAIN COMPONENT
-// ═══════════════════════════════════════════
-
-/**
- * Liquid-glass plate when the setting is on; solid theme fill when off.
- *
- * On iOS 26+ with the API present → native `GlassView`. Everywhere else → a
- * translucent frost that still reads as glass without a native blur module.
- */
+/** Compatibility surface: Terminal 2b always uses solid, legible panels. */
 export const GlassSurface = ({
   children,
   tone = 'surface',
@@ -81,65 +46,27 @@ export const GlassSurface = ({
   accessibilityState,
 }: GlassSurfaceProps) => {
   const theme = useTheme();
-  const scheme = useColorScheme();
-  const isGlass = useGlassEnabled();
-  const isDark = scheme === 'dark';
-  const solid = theme[tone];
-
-  const content = (() => {
-    if (!isGlass) {
-      return (
-        <View style={[styles.root, { backgroundColor: solid }, style]}>
-          {children}
-        </View>
-      );
-    }
-
-    if (canUseNativeGlass()) {
-      return (
-        <GlassView
-          glassEffectStyle="regular"
-          tintColor={solid}
-          colorScheme={isDark ? 'dark' : 'light'}
-          style={[styles.root, style]}
-        >
-          {children}
-        </GlassView>
-      );
-    }
-
+  if (!onPress)
     return (
-      <View
-        style={[
-          styles.root,
-          styles.frost,
-          {
-            backgroundColor: frostFill(solid, isDark),
-            borderColor: isDark
-              ? 'rgba(255, 255, 255, 0.14)'
-              : 'rgba(255, 255, 255, 0.55)',
-          },
-          style,
-        ]}
-      >
+      <View style={[styles.root, { backgroundColor: theme[tone] }, style]}>
         {children}
       </View>
     );
-  })();
-
-  if (!onPress) return content;
-
   return (
     <Pressable
       accessibilityRole={accessibilityRole ?? 'button'}
       accessibilityLabel={accessibilityLabel}
-      accessibilityState={accessibilityState}
+      accessibilityState={{ ...accessibilityState, disabled }}
       disabled={disabled}
       hitSlop={hitSlop}
       onPress={onPress}
-      style={({ pressed }) => [pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.root,
+        { backgroundColor: pressed ? theme.surfaceSoft : theme[tone] },
+        style,
+      ]}
     >
-      {content}
+      {children}
     </Pressable>
   );
 };
@@ -148,16 +75,6 @@ export const GlassSurface = ({
 // STYLES
 // ═══════════════════════════════════════════
 
-const styles = StyleSheet.create({
-  frost: {
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  pressed: {
-    opacity: 0.88,
-  },
-  root: {
-    overflow: 'hidden',
-  },
-});
+const styles = StyleSheet.create({ root: { overflow: 'hidden' } });
 
 export type { GlassSurfaceProps };

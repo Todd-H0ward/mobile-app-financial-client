@@ -133,7 +133,7 @@ export const PlaykitScreen = ({ gameId }: PlaykitScreenProps) => {
       {index === 3 ? <TrialReadout isPrompt>{result}</TrialReadout> : scene}
       <Text
         style={{
-          color: theme.overseerLcdDim,
+          color: theme.textSecondary,
           fontFamily: FONTS.mono,
           fontSize: 11,
           letterSpacing: 1,

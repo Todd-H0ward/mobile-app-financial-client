@@ -7,7 +7,7 @@ import { useUser } from '@/entities/user';
 
 import { DYNAMIC_ROUTES, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { Button, ListRow, Screen, Text } from '@/shared/ui';
+import { Button, ListRow, PixelIcon, Screen, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
 // ═══════════════════════════════════════════
@@ -21,10 +21,13 @@ export const GamesScreen = () => {
   const levels = ownedPuzzles(user?.ownedItemIds ?? []);
 
   return (
-    <Screen gap="three">
+    <Screen gap="three" terminalVariant="overseer">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
+          <Text variant="code" themeColor="overseerLcd">
+            {`// ${t('scene.watchers.overseer.name')}`}
+          </Text>
           <Screen.Title>{t('games.title')}</Screen.Title>
           <Screen.Subtitle>{t('games.subtitle')}</Screen.Subtitle>
         </Screen.Heading>
@@ -34,6 +37,11 @@ export const GamesScreen = () => {
       {PLAYKIT_GAME_IDS.map((gameId) => (
         <ListRow
           key={gameId}
+          icon={
+            <ListRow.Icon>
+              <PixelIcon name="face" size={24} tone="overseerLcd" />
+            </ListRow.Icon>
+          }
           title={t(`playkit.games.${gameId}.title`)}
           subtitle={t(`playkit.games.${gameId}.blurb`)}
           onPress={() => router.push(DYNAMIC_ROUTES.play(gameId))}
@@ -45,10 +53,16 @@ export const GamesScreen = () => {
         />
       ))}
 
-      <Button onPress={() => router.push(STATIC_ROUTES.GAMES_MARKET)}>
+      <Button
+        variant="secondary"
+        onPress={() => router.push(STATIC_ROUTES.GAMES_MARKET)}
+      >
         {t('financeGame.market')}
       </Button>
-      <Button onPress={() => router.push(STATIC_ROUTES.GAMES_WEEKLY)}>
+      <Button
+        variant="secondary"
+        onPress={() => router.push(STATIC_ROUTES.GAMES_WEEKLY)}
+      >
         {t('financeGame.weekly')}
       </Button>
       <Button

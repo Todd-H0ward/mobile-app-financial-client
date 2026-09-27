@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { useEffect } from 'react';
 
 import {
   Pressable,
@@ -8,18 +7,9 @@ import {
   View,
   type ViewStyle,
 } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from 'react-native-reanimated';
-import Svg, { Defs, Pattern, Rect } from 'react-native-svg';
 
 import { FONTS, RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
-import { useMotionEnabled } from '@/shared/model';
 import { Text } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
@@ -49,57 +39,16 @@ interface RoundLampsProps {
 }
 
 // ═══════════════════════════════════════════
-// CONSTANTS
-// ═══════════════════════════════════════════
-
-const CURSOR_MS = 520;
-
-// ═══════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** Thin CRT scanlines — same trick as the watcher terminal. */
-export const TrialScanlines = () => (
-  <Svg
-    style={StyleSheet.absoluteFill}
-    pointerEvents="none"
-    importantForAccessibility="no-hide-descendants"
-  >
-    <Defs>
-      <Pattern id="tscan" width={3} height={3} patternUnits="userSpaceOnUse">
-        <Rect width={3} height={1} fill="#000000" opacity={0.35} />
-      </Pattern>
-    </Defs>
-    <Rect width="100%" height="100%" fill="url(#tscan)" />
-  </Svg>
-);
-
-/** Blinking block cursor for “live” terminal lines. */
+/** A still machine cursor: no flashing on reading surfaces. */
 export const TrialCursor = () => {
   const theme = useTheme();
-  const isMotionEnabled = useMotionEnabled();
-  const opacity = useSharedValue(1);
-
-  useEffect(() => {
-    if (!isMotionEnabled) {
-      opacity.value = 1;
-      return;
-    }
-    opacity.value = withRepeat(
-      withSequence(
-        withTiming(0, { duration: CURSOR_MS }),
-        withTiming(1, { duration: CURSOR_MS }),
-      ),
-      -1,
-    );
-  }, [isMotionEnabled, opacity]);
-
-  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
-
   return (
-    <Animated.View
+    <View
       importantForAccessibility="no"
-      style={[styles.cursor, { backgroundColor: theme.overseerLcd }, style]}
+      style={[styles.cursor, { backgroundColor: theme.primary }]}
     />
   );
 };
@@ -123,16 +72,11 @@ export const RoundLamps = ({ round }: RoundLampsProps) => {
               styles.lamp,
               {
                 backgroundColor: isDone
-                  ? theme.overseerLcd
+                  ? theme.primary
                   : isLive
-                    ? theme.overseerLcdDim
-                    : theme.overseerScreenGlow,
-                borderColor: isLive
-                  ? theme.overseerLcd
-                  : theme.overseerScreenGlow,
-                shadowColor: theme.overseerLcd,
-                shadowOpacity: isLive ? 0.55 : 0,
-                shadowRadius: isLive ? 8 : 0,
+                    ? theme.textSecondary
+                    : theme.surfaceDeep,
+                borderColor: isLive ? theme.primary : theme.surfaceDeep,
               },
             ]}
           />
@@ -154,16 +98,13 @@ export const TrialPanel = ({
       style={[
         styles.panel,
         {
-          backgroundColor: isWell
-            ? theme.overseerScreen
-            : theme.overseerScreenGlow,
-          borderColor: theme.overseerLcdDim,
+          backgroundColor: isWell ? theme.surface : theme.surfaceDeep,
+          borderColor: theme.textSecondary,
         },
         style,
       ]}
     >
       {children}
-      <TrialScanlines />
     </View>
   );
 };
@@ -188,22 +129,16 @@ export const TrialChip = ({
         styles.chip,
         isCompact ? styles.chipCompact : styles.chipGrow,
         {
-          borderColor: isSelected ? theme.overseerLcd : theme.overseerLcdDim,
-          backgroundColor: isSelected
-            ? 'rgba(255, 107, 107, 0.18)'
-            : theme.overseerScreen,
+          borderColor: isSelected ? theme.primary : theme.textSecondary,
+          backgroundColor: isSelected ? theme.primarySoft : theme.surface,
           opacity: pressed ? 0.85 : 1,
         },
       ]}
     >
       {glyph ? (
-        <Text style={[styles.glyph, { color: theme.overseerLcd }]}>
-          {glyph}
-        </Text>
+        <Text style={[styles.glyph, { color: theme.primary }]}>{glyph}</Text>
       ) : null}
-      <Text style={[styles.chipLabel, { color: theme.overseerLcd }]}>
-        {label}
-      </Text>
+      <Text style={[styles.chipLabel, { color: theme.primary }]}>{label}</Text>
     </Pressable>
   );
 };
@@ -225,7 +160,7 @@ export const TrialReadout = ({
         style={[
           styles.readout,
           {
-            color: isDim ? theme.overseerLcdDim : theme.overseerLcd,
+            color: isDim ? theme.textSecondary : theme.primary,
           },
         ]}
       >
@@ -258,9 +193,8 @@ const styles = StyleSheet.create({
     minHeight: 72,
   },
   chipLabel: {
-    fontFamily: FONTS.mono,
-    fontSize: 13,
-    fontWeight: '700',
+    fontFamily: FONTS.sansStrong,
+    fontSize: 16,
     textAlign: 'center',
   },
   cursor: {
@@ -269,9 +203,8 @@ const styles = StyleSheet.create({
     width: 8,
   },
   glyph: {
-    fontFamily: FONTS.mono,
+    fontFamily: FONTS.monoStrong,
     fontSize: 22,
-    fontWeight: '700',
   },
   lamp: {
     borderRadius: 8,

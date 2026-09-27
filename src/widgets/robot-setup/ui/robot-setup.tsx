@@ -94,9 +94,12 @@ export const RobotSetup = ({ onClose }: RobotSetupProps) => {
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
         >
+          <Sheet.Label>{t('setup.formLabel')}</Sheet.Label>
           <Sheet.Title>{t('setup.title')}</Sheet.Title>
           <Text themeColor="textSecondary">{t('setup.privacy')}</Text>
-          <Text variant="bodyBold">{t('setup.playerName')}</Text>
+          <Text variant="small" themeColor="textSecondary">
+            {t('setup.playerName')}
+          </Text>
           <Input
             accessibilityLabel={t('setup.playerName')}
             value={playerName}
@@ -105,7 +108,9 @@ export const RobotSetup = ({ onClose }: RobotSetupProps) => {
             isCounterVisible
             autoCorrect={false}
           />
-          <Text variant="bodyBold">{t('setup.robotName')}</Text>
+          <Text variant="small" themeColor="textSecondary">
+            {t('setup.robotName')}
+          </Text>
           <Input
             accessibilityLabel={t('setup.robotName')}
             value={robotName}
@@ -114,16 +119,19 @@ export const RobotSetup = ({ onClose }: RobotSetupProps) => {
             isCounterVisible
             autoCorrect={false}
           />
+          <Text variant="small" themeColor="textMuted">
+            {t('setup.nameHint')}
+          </Text>
           <RobotCard skin={skin} onSkinChange={setSkin} />
           {!isValid && (
             <Text accessibilityLiveRegion="polite">{t('setup.emptyName')}</Text>
           )}
           <View style={styles.actions}>
-            <Button disabled={!isValid} onPress={save}>
+            <Button isFullWidth disabled={!isValid} onPress={save}>
               {t('setup.save')}
             </Button>
-            <Button variant="secondary" onPress={onClose}>
-              {t('common.back')}
+            <Button variant="ghost" size="s" isFullWidth onPress={onClose}>
+              {t('common.back').toLocaleLowerCase()}
             </Button>
           </View>
         </ScrollView>

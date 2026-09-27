@@ -33,11 +33,11 @@ interface SwitchProps {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-const TRACK_WIDTH = 52;
-const TRACK_HEIGHT = 30;
-const KNOB = 24;
-const PADDING = 3;
-const TRACK_BORDER = 1;
+const TRACK_WIDTH = 56;
+const TRACK_HEIGHT = 32;
+const KNOB = 26;
+const PADDING = 1;
+const TRACK_BORDER = 2;
 
 /**
  * How far the knob travels. The border eats into the content box on both
@@ -84,17 +84,21 @@ export const Switch = ({
       disabled={isDisabled}
       onPress={() => onChange(!isChecked)}
       style={[
-        styles.track,
+        styles.root,
         {
           backgroundColor: isChecked ? theme.primary : theme.surfaceDeep,
-          borderColor: isChecked ? theme.primaryShadow : theme.border,
+          borderColor: isChecked ? theme.primary : theme.borderStrong,
           opacity: isDisabled ? 0.5 : 1,
         },
         style,
       ]}
     >
       <Animated.View
-        style={[styles.knob, { backgroundColor: theme.surface }, knobStyle]}
+        style={[
+          styles.knob,
+          { backgroundColor: isChecked ? theme.onAccent : theme.textMuted },
+          knobStyle,
+        ]}
       />
     </Pressable>
   );
@@ -105,7 +109,7 @@ export const Switch = ({
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  track: {
+  root: {
     borderRadius: RADII.pill,
     borderWidth: TRACK_BORDER,
     height: TRACK_HEIGHT,

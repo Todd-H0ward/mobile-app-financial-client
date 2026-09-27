@@ -132,4 +132,63 @@ export const listWalletHistory = (
     source: describeWalletSource(entry.source),
   }));
 
-export type { WalletHistoryRow, WalletSourceRef };
+/** Any `t` — the entity stays free of i18n, the caller brings its own. */
+type SourceTranslate = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
+/** A coin movement's source in words — "за испытание «Сдача»", never a bare number. */
+export const labelWalletSource = (
+  source: WalletSourceRef,
+  t: SourceTranslate,
+): string => {
+  switch (source.kind) {
+    case 'startingWallet':
+      return t('wallet.source.startingWallet');
+    case 'regularityBonus':
+      return t('wallet.source.regularityBonus');
+    case 'gamePuzzle':
+      return t('wallet.source.gamePuzzle');
+    case 'gameSpacewar':
+      return t('wallet.source.gameSpacewar');
+    case 'gameMarket':
+      return t('financeGame.market');
+    case 'gameWeekly':
+      return t('financeGame.weekly');
+    case 'module':
+      return t('wallet.source.purchase', {
+        title: t(`setup.modules.${source.part}.${source.variant}`),
+      });
+    case 'gameSnake':
+      return t('wallet.source.gameSnake');
+    case 'task':
+      return t('wallet.source.task', {
+        title: t(`tasks.items.${source.taskId}.title`, {
+          defaultValue: source.title,
+        }),
+      });
+    case 'purchase':
+      return t('wallet.source.purchase', {
+        title: t(`shop.items.${source.itemId}.title`, {
+          defaultValue: source.title,
+        }),
+      });
+    case 'savingsDeposit':
+      return t('wallet.source.savingsDeposit', {
+        title: t(`savings.goals.${source.goalId}.title`, {
+          defaultValue: source.title,
+        }),
+      });
+    case 'savingsWithdraw':
+      return t('wallet.source.savingsWithdraw', {
+        title: t(`savings.goals.${source.goalId}.title`, {
+          defaultValue: source.title,
+        }),
+      });
+    default:
+      return t('wallet.source.unknown');
+  }
+};
+
+export type { SourceTranslate, WalletHistoryRow, WalletSourceRef };

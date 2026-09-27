@@ -7,7 +7,6 @@ import {
   useState,
 } from 'react';
 
-import { SymbolView } from 'expo-symbols';
 import {
   Pressable,
   type StyleProp,
@@ -17,9 +16,10 @@ import {
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { HIT_SLOP_SIZE, SPACING } from '@/shared/constants';
-import { useTheme } from '@/shared/hooks';
+import { useMotionEnabled } from '@/shared/model';
 import { isTextOnly } from '@/shared/utils';
 
+import { PixelIcon } from './pixel-icon';
 import { Text } from './text';
 import { ThemedView } from './themed-view';
 
@@ -55,7 +55,7 @@ interface CollapsibleContextValue {
 const CONTENT_ANIMATION_DURATION = 200;
 
 // ═══════════════════════════════════════════
-// CONTEXT
+// HELPERS
 // ═══════════════════════════════════════════
 
 const CollapsibleContext = createContext<CollapsibleContextValue | null>(null);
@@ -71,11 +71,10 @@ const useCollapsibleContext = () => {
 };
 
 // ═══════════════════════════════════════════
-// COMPOUND COMPONENTS
+// COMPONENTS
 // ═══════════════════════════════════════════
 
 const CollapsibleTrigger = ({ children, style }: CollapsibleTriggerProps) => {
-  const theme = useTheme();
   const { isOpen, toggle } = useCollapsibleContext();
 
   return (
@@ -90,15 +89,10 @@ const CollapsibleTrigger = ({ children, style }: CollapsibleTriggerProps) => {
       ]}
     >
       <ThemedView variant="surface" style={styles.chevron}>
-        <SymbolView
-          name={{
-            ios: 'chevron.right',
-            android: 'chevron_right',
-            web: 'chevron_right',
-          }}
-          size={14}
-          weight="bold"
-          tintColor={theme.text}
+        <PixelIcon
+          name="chevron"
+          size={12}
+          tone="primary"
           style={{ transform: [{ rotate: isOpen ? '-90deg' : '90deg' }] }}
         />
       </ThemedView>
@@ -111,11 +105,18 @@ const CollapsibleTrigger = ({ children, style }: CollapsibleTriggerProps) => {
 /** Rendered only while open, so its children stay unmounted until needed. */
 const CollapsibleContent = ({ children, style }: CollapsibleContentProps) => {
   const { isOpen } = useCollapsibleContext();
+  const isMotionEnabled = useMotionEnabled();
 
   if (!isOpen) return null;
 
   return (
-    <Animated.View entering={FadeIn.duration(CONTENT_ANIMATION_DURATION)}>
+    <Animated.View
+      entering={
+        isMotionEnabled
+          ? FadeIn.duration(CONTENT_ANIMATION_DURATION)
+          : undefined
+      }
+    >
       <ThemedView variant="surface" style={[styles.content, style]}>
         {children}
       </ThemedView>
@@ -190,10 +191,10 @@ const styles = StyleSheet.create({
     width: SPACING.four,
   },
   content: {
-    borderRadius: SPACING.three,
-    marginLeft: SPACING.four,
+    borderRadius: 14,
+    marginLeft: 0,
     marginTop: SPACING.three,
-    padding: SPACING.four,
+    padding: SPACING.three,
   },
 });
 

@@ -13,19 +13,23 @@ import Animated, {
 import { getHint, type HintScreenId } from '@/entities/hint';
 import { useIsMotionEnabled } from '@/entities/user';
 
-import { RADII, SPACING } from '@/shared/constants';
+import { SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { Button, Sheet, Text } from '@/shared/ui';
+import { Button, PixelIcon, Sheet, Text } from '@/shared/ui';
 import { hitSlopFor } from '@/shared/utils';
 
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
 
+/** `round` sits in a terminal header; `hud` hangs on a cable over the pit. */
+type HintButtonVariant = 'round' | 'hud';
+
 interface HintButtonProps {
   /** Screen whose hint opens. Every screen id has content — see 2.5.1. */
   screen: HintScreenId;
+  variant?: HintButtonVariant;
   /**
    * Draws attention once, right after mount. Used on the first screen a child
    * ever sees, so that "help is always here" is learned instead of announced.
@@ -38,7 +42,8 @@ interface HintButtonProps {
 // ═══════════════════════════════════════════
 
 /** Visual size of the control; hitSlop expands the target to HIT_SLOP_SIZE. */
-const BUTTON_SIZE = 40;
+const BUTTON_SIZE = 48;
+const HUD_SIZE = 44;
 
 const PULSE_SCALE = 1.12;
 const PULSE_DURATION = 420;
@@ -56,7 +61,11 @@ const PULSE_COUNT = 2;
  * It owns no words: the text comes from `content/hints.json` through
  * `entities/hint`, so a screen's hint is rewritten without opening a `.tsx`.
  */
-export const HintButton = ({ screen, isPulsing = false }: HintButtonProps) => {
+export const HintButton = ({
+  screen,
+  variant = 'round',
+  isPulsing = false,
+}: HintButtonProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const hint = getHint(screen);
@@ -107,18 +116,36 @@ export const HintButton = ({ screen, isPulsing = false }: HintButtonProps) => {
           accessibilityHint={t('hints.buttonA11yHint', { title })}
           hitSlop={hitSlopFor(BUTTON_SIZE)}
           onPress={() => setIsOpen(true)}
-          style={({ pressed }) => [
-            styles.root,
-            {
-              backgroundColor: theme.primarySoft,
-              borderColor: theme.primary,
-              opacity: pressed ? 0.7 : 1,
-            },
-          ]}
+          style={({ pressed }) =>
+            variant === 'hud'
+              ? [styles.hud, { backgroundColor: theme.bezel }]
+              : [
+                  styles.root,
+                  {
+                    backgroundColor: pressed ? theme.surfaceSoft : undefined,
+                    borderColor: pressed ? theme.phosphor : theme.border,
+                  },
+                ]
+          }
         >
-          <Text variant="bodyBold" themeColor="primaryStrong">
-            ?
-          </Text>
+          {({ pressed }) =>
+            variant === 'hud' ? (
+              <View
+                style={[
+                  styles.hudScreen,
+                  {
+                    backgroundColor: pressed
+                      ? theme.surfaceSoft
+                      : theme.terminalScreen,
+                  },
+                ]}
+              >
+                <PixelIcon name="question" size={24} />
+              </View>
+            ) : (
+              <PixelIcon name="question" size={24} />
+            )
+          }
         </Pressable>
       </Animated.View>
 
@@ -127,11 +154,28 @@ export const HintButton = ({ screen, isPulsing = false }: HintButtonProps) => {
         onClose={() => setIsOpen(false)}
         isAnimated={isMotionEnabled}
       >
-        <Sheet.Title>{title}</Sheet.Title>
+        <View style={styles.heading}>
+          <View style={[styles.badge, { borderColor: theme.phosphor }]}>
+            <PixelIcon name="question" size={24} />
+          </View>
+          <View style={styles.headingCopy}>
+            <Text variant="code" themeColor="textMuted">
+              {t('hints.label')}
+            </Text>
+            <Sheet.Title>{title}</Sheet.Title>
+          </View>
+        </View>
 
         <View style={styles.body}>
-          {body.map((paragraph) => (
-            <Sheet.Description key={paragraph}>{paragraph}</Sheet.Description>
+          {body.map((paragraph, index) => (
+            <View key={paragraph} style={styles.step}>
+              <Text variant="machine" style={styles.stepNumber}>
+                {String(index + 1).padStart(2, '0')}
+              </Text>
+              <Sheet.Description style={styles.stepText}>
+                {paragraph}
+              </Sheet.Description>
+            </View>
           ))}
         </View>
 
@@ -150,17 +194,46 @@ export const HintButton = ({ screen, isPulsing = false }: HintButtonProps) => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
+  badge: {
+    alignItems: 'center',
+    borderRadius: 18,
+    borderWidth: 2,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  body: {
+    gap: SPACING.compact,
+  },
+  heading: { alignItems: 'center', flexDirection: 'row', gap: 10 },
+  headingCopy: { flex: 1 },
+  hud: {
+    borderRadius: 12,
+    height: HUD_SIZE,
+    padding: SPACING.one,
+    width: HUD_SIZE,
+  },
+  hudScreen: {
+    alignItems: 'center',
+    borderRadius: SPACING.two,
+    flex: 1,
+    justifyContent: 'center',
+  },
   root: {
     alignItems: 'center',
-    borderRadius: RADII.pill,
-    borderWidth: 1.5,
+    borderRadius: BUTTON_SIZE / 2,
+    borderWidth: 2,
     height: BUTTON_SIZE,
     justifyContent: 'center',
     width: BUTTON_SIZE,
   },
-  body: {
+  step: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
     gap: SPACING.two,
   },
+  stepNumber: { fontSize: 15, lineHeight: 22 },
+  stepText: { flex: 1 },
 });
 
-export type { HintButtonProps };
+export type { HintButtonProps, HintButtonVariant };

@@ -6,6 +6,8 @@ import { useState } from 'react';
 
 interface Playground {
   /** Drives every `isLoading` on the screen at once. */
+  isTextureEnabled: boolean;
+  setIsTextureEnabled: (isEnabled: boolean) => void;
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
   /** Drives every `isDisabled` / `disabled` on the screen at once. */
@@ -36,6 +38,12 @@ interface Playground {
   setIsSheetDismissible: (isSheetDismissible: boolean) => void;
   isCollapsibleOpen: boolean;
   setIsCollapsibleOpen: (isCollapsibleOpen: boolean) => void;
+  /** Chosen tab of the `Segmented` section — a real switch, not a picture. */
+  segment: 'need' | 'want' | 'save';
+  setSegment: (segment: 'need' | 'want' | 'save') => void;
+  /** Stepper value of the plan row example, in coins, 0…50. */
+  stepperValue: number;
+  setStepperValue: (stepperValue: number) => void;
   /**
    * Bumped to remount `SplashOverlay`, which plays once and then unmounts
    * itself — the only way to watch its animation a second time.
@@ -54,6 +62,7 @@ interface Playground {
  * stays a playground instead of a gallery.
  */
 export const usePlayground = (): Playground => {
+  const [isTextureEnabled, setIsTextureEnabled] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const [isChecked, setIsChecked] = useState(true);
@@ -61,6 +70,8 @@ export const usePlayground = (): Playground => {
   const [meterValue, setMeterValue] = useState(0.62);
   const [inputValue, setInputValue] = useState('');
   const [selectedChip, setSelectedChip] = useState<number | null>(1);
+  const [segment, setSegment] = useState<'need' | 'want' | 'save'>('need');
+  const [stepperValue, setStepperValue] = useState(20);
   const [isRowDone, setIsRowDone] = useState(false);
   const [isRowSelected, setIsRowSelected] = useState(false);
   const [isSheetVisible, setIsSheetVisible] = useState(false);
@@ -69,6 +80,8 @@ export const usePlayground = (): Playground => {
   const [splashRun, setSplashRun] = useState(0);
 
   return {
+    isTextureEnabled,
+    setIsTextureEnabled,
     isLoading,
     setIsLoading,
     isDisabled,
@@ -93,6 +106,10 @@ export const usePlayground = (): Playground => {
     setIsSheetDismissible,
     isCollapsibleOpen,
     setIsCollapsibleOpen,
+    segment,
+    setSegment,
+    stepperValue,
+    setStepperValue,
     splashRun,
     replaySplash: () => setSplashRun((run) => run + 1),
   };

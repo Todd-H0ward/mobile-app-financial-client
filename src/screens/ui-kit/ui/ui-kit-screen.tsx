@@ -9,6 +9,7 @@ import {
   BackIcon,
   Button,
   Card,
+  ChamferCard,
   CheckIcon,
   Chip,
   CloseIcon,
@@ -25,15 +26,20 @@ import {
   HomeIcon,
   Input,
   LineChart,
+  ListGroup,
   ListRow,
   MeterCard,
   MinusIcon,
   PawIcon,
+  PIXEL_ICON_NAMES,
   PiggyIcon,
+  PixelIcon,
   PlusIcon,
   ProgressBar,
+  RingsBackdrop,
   ScratchCard,
   Screen,
+  Segmented,
   Shape,
   Sheet,
   ShopIcon,
@@ -41,6 +47,7 @@ import {
   SplashOverlay,
   Switch,
   TasksIcon,
+  TerminalPanel,
   Text,
   ThemedView,
   Toast,
@@ -61,9 +68,10 @@ const BUTTON_VARIANTS = [
   'success',
   'secondary',
   'ghost',
+  'warning',
 ] as const;
 
-const BUTTON_SIZES = ['l', 'm', 's'] as const;
+const BUTTON_SIZES = ['xl', 'l', 'm', 's'] as const;
 
 const TEXT_VARIANTS = [
   'display',
@@ -77,9 +85,23 @@ const TEXT_VARIANTS = [
   'link',
   'linkPrimary',
   'code',
+  'machine',
+  'numberSmall',
+  'number',
+  'numberLarge',
 ] as const;
 
-const CHIP_VARIANTS = ['neutral', 'selected', 'need', 'want', 'muted'] as const;
+const CHIP_VARIANTS = [
+  'neutral',
+  'selected',
+  'need',
+  'want',
+  'muted',
+  'success',
+  'warning',
+  'rule',
+  'locked',
+] as const;
 
 /** The whole icon set, in the order the kit shows it. */
 const ICONS = [
@@ -98,7 +120,7 @@ const ICONS = [
 ] as const;
 
 /** Sizes an icon is asked for today: inline, default, and a tab bar's. */
-const ICON_SIZES = [16, 24, 32] as const;
+const ICON_SIZES = [12, 24, 36] as const;
 
 const SHAPE_VARIANTS = [
   'circle',
@@ -140,9 +162,7 @@ export const UiKitScreen = () => {
           <Screen.Back />
           <Screen.Heading>
             <Screen.Title>UI-кит</Screen.Title>
-            <Screen.Subtitle>
-              Все компоненты @/shared/ui и их состояния
-            </Screen.Subtitle>
+            <Screen.Subtitle>Выше нуля · Терминал 2b</Screen.Subtitle>
           </Screen.Heading>
           <HintButton screen="ui-kit" />
         </Screen.Header>
@@ -174,7 +194,209 @@ export const UiKitScreen = () => {
           </HintRow>
         </KitSection>
 
-        <KitSection title="Text" caption="Все 11 пресетов типографики">
+        <KitSection
+          title="TerminalPanel"
+          caption="Рамка 8 · экран 20 · фактура за текстом · три голоса"
+        >
+          <Switch
+            label="Фактура экрана"
+            isChecked={playground.isTextureEnabled}
+            onChange={playground.setIsTextureEnabled}
+          />
+          {(['keeper', 'overseer', 'adult'] as const).map((variant) => (
+            <TerminalPanel
+              key={variant}
+              variant={variant}
+              isTextureEnabled={playground.isTextureEnabled}
+              style={{ padding: SPACING.three, gap: SPACING.two }}
+            >
+              <Text
+                variant="machine"
+                themeColor={variant === 'overseer' ? 'overseerLcd' : 'phosphor'}
+              >
+                {variant === 'keeper'
+                  ? '> хранитель на связи'
+                  : variant === 'overseer'
+                    ? '// СМОТРИТЕЛЬ'
+                    : '> служебный · взрослым'}
+              </Text>
+              <Text>
+                Сначала — заряд. Остальное раздели между желаниями и целью.
+              </Text>
+              <Text variant="number">70 / 150</Text>
+            </TerminalPanel>
+          ))}
+          <KitSection.Row label="size m · s, без LED-полосы">
+            <View style={styles.stack}>
+              <TerminalPanel size="m" isLampVisible={false} style={styles.pad}>
+                <Text variant="machine">{'> период 3 · начало'}</Text>
+                <Text variant="bodyBold">Составь план бюджета</Text>
+              </TerminalPanel>
+              <TerminalPanel size="s" style={styles.pad}>
+                <Text variant="code" themeColor="textMuted">
+                  ярус 1 / 5 · до подъёма 80
+                </Text>
+              </TerminalPanel>
+            </View>
+          </KitSection.Row>
+        </KitSection>
+
+        <KitSection
+          title="ChamferCard"
+          caption="Срезанный угол — подпись Смотрителя, в интерфейсе ребёнка его нет"
+        >
+          <KitSection.Row label="both — карточка испытания">
+            <ChamferCard style={styles.fullWidth}>
+              <Text variant="code" themeColor="overseerLcd">
+                {'// ИСПЫТАНИЕ № 4 · ПЛАТЕЖИ'}
+              </Text>
+              <Text variant="bodyBold">Посчитай сдачу</Text>
+            </ChamferCard>
+          </KitSection.Row>
+          <KitSection.Row label="topRight — реплика, тонированный фон">
+            <ChamferCard
+              variant="topRight"
+              fillTone="overseerSurface"
+              style={styles.fullWidth}
+            >
+              <Text>{LONG_TITLE}</Text>
+            </ChamferCard>
+          </KitSection.Row>
+          <KitSection.Row label="недоступное — рамка гаснет">
+            <ChamferCard borderTone="border" style={styles.fullWidth}>
+              <Text themeColor="textSecondary">Сначала план</Text>
+            </ChamferCard>
+          </KitSection.Row>
+        </KitSection>
+
+        <KitSection
+          title="ListGroup"
+          caption="Одна мысль — одна рамка, тонкие линии между строками"
+        >
+          <ListGroup style={styles.fullWidth}>
+            <ListGroup.Item
+              title="Звук"
+              subtitle="Щелчки и голоса ИИ"
+              trailing={
+                <Switch
+                  isChecked={playground.isChecked}
+                  onChange={playground.setIsChecked}
+                  label="Звук"
+                />
+              }
+            />
+            <ListGroup.Item
+              icon="clock"
+              title="История"
+              onPress={() => toast('История')}
+            />
+            <ListGroup.Item
+              icon="book"
+              title={LONG_TITLE}
+              subtitle="Длинная строка переносится, шеврон остаётся"
+              onPress={() => toast('Справочник')}
+            />
+            <ListGroup.Item
+              title="Недоступная строка"
+              disabled
+              onPress={() => toast('—')}
+            />
+          </ListGroup>
+        </KitSection>
+
+        <KitSection
+          title="Segmented"
+          caption="Две-три вкладки, выбранная залита — нажми любую"
+        >
+          <Segmented
+            options={[
+              { value: 'need', label: 'Заряд', icon: 'battery' },
+              { value: 'want', label: 'Модули', icon: 'gear' },
+            ]}
+            value={playground.segment === 'save' ? 'need' : playground.segment}
+            onChange={playground.setSegment}
+            style={styles.fullWidth}
+          />
+          <Segmented
+            options={[
+              { value: 'need', label: 'Периоды' },
+              { value: 'want', label: 'Монеты' },
+              { value: 'save', label: 'Испытания' },
+            ]}
+            value={playground.segment}
+            onChange={playground.setSegment}
+            style={styles.fullWidth}
+          />
+        </KitSection>
+
+        <KitSection
+          title="RingsBackdrop"
+          caption="Бетон ямы за терминалом — только декор"
+        >
+          <View style={styles.rings}>
+            <RingsBackdrop centerY={0.62} />
+          </View>
+        </KitSection>
+
+        <KitSection
+          title="HintButton"
+          caption="round — в шапке терминала, hud — висит на тросе над ямой"
+        >
+          <KitSection.Row label="round · hud" isInline>
+            <HintButton screen="ui-kit" />
+            <HintButton screen="ui-kit" variant="hud" />
+          </KitSection.Row>
+        </KitSection>
+
+        <KitSection
+          title="PixelIcon"
+          caption="Единый набор из handoff · цвет задаётся семантическим тоном"
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              gap: SPACING.three,
+            }}
+          >
+            {PIXEL_ICON_NAMES.map((name) => (
+              <View
+                key={name}
+                style={{ alignItems: 'center', gap: SPACING.two, minWidth: 72 }}
+              >
+                <PixelIcon
+                  name={name}
+                  size={name === 'check20' ? 20 : 24}
+                  tone={
+                    name === 'coin'
+                      ? 'coin'
+                      : name === 'face'
+                        ? 'overseerLcd'
+                        : 'phosphor'
+                  }
+                />
+                <Text variant="small">{name}</Text>
+              </View>
+            ))}
+          </View>
+          <KitSection.Row label="12 / 24 / 36 / 72" isInline>
+            {[12, 24, 36, 72].map((size) => (
+              <PixelIcon key={size} name="piggy" size={size} />
+            ))}
+          </KitSection.Row>
+          <KitSection.Row label="phosphor / muted / coin / overseer" isInline>
+            {(['phosphor', 'textMuted', 'coin', 'overseerLcd'] as const).map(
+              (tone) => (
+                <PixelIcon key={tone} name="heart" tone={tone} />
+              ),
+            )}
+          </KitSection.Row>
+        </KitSection>
+
+        <KitSection
+          title="Text"
+          caption="Golos Text для чтения · Martian Mono для чисел"
+        >
           {TEXT_VARIANTS.map((variant) => (
             <KitSection.Row key={variant} label={variant}>
               <Text variant={variant}>Съешь ещё этих булочек — 1 240</Text>
@@ -194,7 +416,7 @@ export const UiKitScreen = () => {
 
         <KitSection
           title="Button"
-          caption="5 вариантов × 3 размера, loading и disabled — сверху"
+          caption="6 вариантов × 4 размера, loading и disabled — сверху"
         >
           {BUTTON_VARIANTS.map((variant) => (
             <KitSection.Row key={variant} label={variant} isInline>
@@ -213,6 +435,71 @@ export const UiKitScreen = () => {
             </KitSection.Row>
           ))}
 
+          <KitSection.Row
+            label="icon · 48 dp · нажатие, loading, disabled"
+            isInline
+          >
+            <Button
+              variant="icon"
+              accessibilityLabel="Уменьшить"
+              disabled={playground.isDisabled}
+              isLoading={playground.isLoading}
+              onPress={() =>
+                playground.setMeterValue(
+                  Math.max(0, playground.meterValue - 0.1),
+                )
+              }
+            >
+              <PixelIcon name="minus" />
+            </Button>
+            <Button
+              variant="icon"
+              accessibilityLabel="Увеличить"
+              disabled={playground.isDisabled}
+              isLoading={playground.isLoading}
+              onPress={() =>
+                playground.setMeterValue(
+                  Math.min(1, playground.meterValue + 0.1),
+                )
+              }
+            >
+              <PixelIcon name="plus" />
+            </Button>
+          </KitSection.Row>
+          <KitSection.Row
+            label={`stepper · 48 · ноль и максимум блокируют — ${playground.stepperValue}`}
+            isInline
+          >
+            <Button
+              variant="stepper"
+              accessibilityLabel="Убрать 10"
+              disabled={playground.isDisabled || playground.stepperValue <= 0}
+              onPress={() =>
+                playground.setStepperValue(
+                  Math.max(0, playground.stepperValue - 10),
+                )
+              }
+            >
+              −
+            </Button>
+            <Button
+              variant="stepper"
+              accessibilityLabel="Добавить 10"
+              disabled={playground.isDisabled || playground.stepperValue >= 50}
+              onPress={() =>
+                playground.setStepperValue(
+                  Math.min(50, playground.stepperValue + 10),
+                )
+              }
+            >
+              +
+            </Button>
+          </KitSection.Row>
+          <KitSection.Row label="длинная подпись">
+            <Button isFullWidth onPress={() => toast('Сохранено')}>
+              Сохранить распределение монет и вернуться к робопсу
+            </Button>
+          </KitSection.Row>
           <KitSection.Row label="Button.Label рядом с иконкой">
             <Button variant="accent" onPress={() => toast('Покупка')}>
               <Shape variant="circle" size={18} color={theme.coin} />
@@ -229,20 +516,20 @@ export const UiKitScreen = () => {
 
         <KitSection
           title="GlassSurface"
-          caption="Жидкое стекло (настройка Interface). Выкл. — сплошная заливка"
+          caption="Сплошные поверхности без стекла; прежний API сохранён"
         >
           <KitSection.Row label="surface / surfaceSoft">
             <GlassSurface
               tone="surface"
               style={{ padding: 16, borderRadius: 16 }}
             >
-              <Text>Glass surface</Text>
+              <Text>Поверхность</Text>
             </GlassSurface>
             <GlassSurface
               tone="surfaceSoft"
               style={{ padding: 16, borderRadius: 16 }}
             >
-              <Text>Glass soft</Text>
+              <Text>Приподнятая поверхность</Text>
             </GlassSurface>
           </KitSection.Row>
         </KitSection>
@@ -268,7 +555,7 @@ export const UiKitScreen = () => {
                 <Button size="s" variant="ghost">
                   Позже
                 </Button>
-                <Button size="s">Покормить</Button>
+                <Button size="s">Зарядить</Button>
               </Card.Footer>
             </Card>
           </KitSection.Row>
@@ -290,7 +577,10 @@ export const UiKitScreen = () => {
           </KitSection.Row>
         </KitSection>
 
-        <KitSection title="Chip" caption="5 вариантов, нажимаемый и статичный">
+        <KitSection
+          title="Chip"
+          caption="9 вариантов: форма + слово, нажимаемый и статичный"
+        >
           <KitSection.Row label="варианты" isInline>
             {CHIP_VARIANTS.map((variant) => (
               <Chip key={variant} variant={variant}>
@@ -439,6 +729,24 @@ export const UiKitScreen = () => {
             />
           </KitSection.Row>
 
+          <KitSection.Row label="warning / максимум / недоступно">
+            <Input
+              label="Имя робопса"
+              variant="warning"
+              hint="Используй только придуманное имя"
+              value={playground.inputValue}
+              onChangeText={playground.setInputValue}
+              isCounterVisible
+              maxLength={12}
+            />
+            <Input
+              label="Максимальная длина"
+              value="Двенадцать12"
+              isCounterVisible
+              maxLength={12}
+              editable={false}
+            />
+          </KitSection.Row>
           <KitSection.Row label="без подписи и счётчика">
             <Input placeholder="Пусто" editable={!playground.isDisabled} />
           </KitSection.Row>
@@ -677,6 +985,7 @@ export const UiKitScreen = () => {
 
           <KitSection.Row label="Sheet без модалки, isGrabberVisible={false}">
             <Sheet isGrabberVisible={false} style={styles.fullWidth}>
+              <Sheet.Label>подтверди</Sheet.Label>
               <Sheet.Title>Заголовок шторки</Sheet.Title>
               <Sheet.Description>
                 Корень можно использовать и отдельно — например, как нижний блок
@@ -689,6 +998,24 @@ export const UiKitScreen = () => {
               </Sheet.Actions>
             </Sheet>
           </KitSection.Row>
+        </KitSection>
+
+        <KitSection
+          title="Sheet · warning"
+          caption="Янтарная кромка и «!» — решение с ценой, никогда не красное"
+        >
+          <Sheet variant="warning" style={styles.fullWidth}>
+            <Sheet.Label variant="warning">не хватает 20</Sheet.Label>
+            <Sheet.Title>Большой аккумулятор стоит 90, у тебя 70</Sheet.Title>
+            <Sheet.Actions>
+              <Button variant="warning" size="m" isFullWidth>
+                Удерживайте 2 секунды
+              </Button>
+              <Button size="m" isFullWidth>
+                Отмена
+              </Button>
+            </Sheet.Actions>
+          </Sheet>
         </KitSection>
 
         <KitSection
@@ -909,6 +1236,14 @@ const styles = StyleSheet.create({
   fullWidth: {
     width: '100%',
   },
+  pad: { gap: SPACING.one, padding: SPACING.compact },
+  rings: {
+    alignSelf: 'stretch',
+    borderRadius: 14,
+    height: 160,
+    overflow: 'hidden',
+  },
+  stack: { gap: SPACING.two, width: '100%' },
   iconCell: {
     alignItems: 'center',
     gap: SPACING.half,

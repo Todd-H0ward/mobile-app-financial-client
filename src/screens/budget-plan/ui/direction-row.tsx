@@ -1,14 +1,12 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { DIRECTION_LOOK } from '@/widgets/direction-look';
 
 import type { BudgetDirection } from '@/entities/economy';
 
-import { RADII, SPACING, type ThemeColor } from '@/shared/constants';
-import { useTheme } from '@/shared/hooks';
+import { SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { Shape, Slider, Text } from '@/shared/ui';
-import { hitSlopFor } from '@/shared/utils';
+import { Button, Card, PixelIcon, Slider, Text } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -26,96 +24,10 @@ interface DirectionRowProps {
 }
 
 // ═══════════════════════════════════════════
-// CONSTANTS
-// ═══════════════════════════════════════════
-
-/** Visual size of a stepper key; hitSlop expands the target to 48dp. */
-const KEY_SIZE = 36;
-const ROW_MARKER_SIZE = 18;
-
-// ═══════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-const CoinStepper = ({
-  value,
-  isAddDisabled,
-  label,
-  accent,
-  onAdd,
-  onRemove,
-}: {
-  value: number;
-  isAddDisabled: boolean;
-  label: string;
-  /** Direction accent — keys sit on a soft tint and need this to stay readable. */
-  accent: ThemeColor;
-  onAdd: () => void;
-  onRemove: () => void;
-}) => {
-  const { t } = useTranslation();
-  const theme = useTheme();
-
-  const key = (
-    sign: string,
-    onPress: () => void,
-    disabled: boolean,
-    accessibilityLabel: string,
-  ) => (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      accessibilityState={{ disabled }}
-      disabled={disabled}
-      hitSlop={hitSlopFor(KEY_SIZE)}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.key,
-        {
-          // Filled accent on the soft row tint — white + hairline border used
-          // to dissolve into primarySoft / accentSoft / successSoft.
-          backgroundColor: disabled ? theme.disabled : theme[accent],
-          borderColor: disabled ? theme.borderStrong : theme[accent],
-          opacity: pressed && !disabled ? 0.85 : 1,
-        },
-      ]}
-    >
-      <Text
-        variant="bodyBold"
-        themeColor={disabled ? 'onDisabled' : 'inverseText'}
-      >
-        {sign}
-      </Text>
-    </Pressable>
-  );
-
-  return (
-    <View style={styles.stepper}>
-      {key(
-        '−',
-        onRemove,
-        value === 0,
-        t('budgetPlan.stepperMinusA11y', { label }),
-      )}
-      <Text variant="bodyBold" themeColor="text" style={styles.count}>
-        {value}
-      </Text>
-      {key(
-        '+',
-        onAdd,
-        isAddDisabled,
-        t('budgetPlan.stepperPlusA11y', { label }),
-      )}
-    </View>
-  );
-};
-
-/**
- * One direction: look, slider capped by the remainder, and +/- steppers.
- *
- * The slider's max is `value + remainder`, so dragging cannot push the plan
- * over the wallet — the same physical limit the steppers enforce.
- */
+/** All three boxes use one phosphor; their icons carry the category. */
 export const DirectionRow = ({
   direction,
   value,
@@ -125,60 +37,59 @@ export const DirectionRow = ({
   onRemove,
 }: DirectionRowProps) => {
   const { t } = useTranslation();
-  const theme = useTheme();
   const look = DIRECTION_LOOK[direction];
   const title = t(`budgetPlan.directions.${direction}.title`);
-  const example = t(`budgetPlan.directions.${direction}.example`);
-
-  const max = value + remainder;
 
   return (
-    <View
-      style={[
-        styles.row,
-        {
-          backgroundColor: theme[look.surface],
-          borderColor: theme[look.accent],
-        },
-      ]}
-    >
-      <View style={styles.header}>
-        <Shape
-          variant={look.marker}
-          size={ROW_MARKER_SIZE}
-          color={theme[look.accent]}
-        />
-        <View style={styles.headerText}>
-          <Text variant="bodyBold" themeColor={look.label}>
-            {title}
-          </Text>
-          <Text variant="small" themeColor="textSecondary">
-            {example}
-          </Text>
+    <Card>
+      <Card.Content style={styles.root}>
+        <View style={styles.header}>
+          <PixelIcon name={look.icon} size={24} />
+          <View style={styles.headerText}>
+            <Text variant="bodyBold">{title}</Text>
+            <Text variant="small" themeColor="textSecondary">
+              {t(`budgetPlan.directions.${direction}.example`)}
+            </Text>
+          </View>
         </View>
-        <CoinStepper
+        <View style={styles.stepper}>
+          <Text variant="title" themeColor="primary" style={styles.count}>
+            {value}
+          </Text>
+          <Button
+            variant="secondary"
+            disabled={value === 0}
+            accessibilityLabel={t('budgetPlan.stepperMinusA11y', {
+              label: title,
+            })}
+            onPress={onRemove}
+            style={styles.key}
+          >
+            −
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={remainder === 0}
+            accessibilityLabel={t('budgetPlan.stepperPlusA11y', {
+              label: title,
+            })}
+            onPress={onAdd}
+            style={styles.key}
+          >
+            +
+          </Button>
+        </View>
+        <Slider
           value={value}
-          isAddDisabled={remainder === 0}
-          label={title}
-          accent={look.accent}
-          onAdd={onAdd}
-          onRemove={onRemove}
+          min={0}
+          max={Math.max(value + remainder, 0)}
+          step={1}
+          color="primary"
+          isThumbFilled
+          onChange={onChange}
         />
-      </View>
-
-      <Slider
-        value={value}
-        min={0}
-        max={Math.max(max, 0)}
-        step={1}
-        color={look.accent}
-        isThumbFilled
-        // White → deep → direction accent: readable on the soft row tint,
-        // same accent family as the steppers above.
-        track={[theme.surface, theme.surfaceDeep, theme[look.accent]]}
-        onChange={onChange}
-      />
-    </View>
+      </Card.Content>
+    </Card>
   );
 };
 
@@ -188,8 +99,7 @@ export const DirectionRow = ({
 
 const styles = StyleSheet.create({
   count: {
-    minWidth: 28,
-    textAlign: 'center',
+    flex: 1,
   },
   header: {
     alignItems: 'center',
@@ -198,22 +108,13 @@ const styles = StyleSheet.create({
   },
   headerText: {
     flex: 1,
-    gap: SPACING.half,
+    gap: SPACING.one,
   },
   key: {
-    alignItems: 'center',
-    borderRadius: RADII.s,
-    borderWidth: 2,
-    height: KEY_SIZE,
-    justifyContent: 'center',
-    width: KEY_SIZE,
+    minWidth: 48,
   },
-  row: {
-    borderRadius: RADII.l,
-    borderWidth: 1.5,
+  root: {
     gap: SPACING.two,
-    paddingHorizontal: SPACING.three,
-    paddingVertical: SPACING.three,
   },
   stepper: {
     alignItems: 'center',

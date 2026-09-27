@@ -1,43 +1,13 @@
-import { useEffect } from 'react';
-
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withTiming,
-} from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StyleSheet, View } from 'react-native';
 
-import {
-  CONTENT_PADDING,
-  LESSON_FADE_MS,
-  SPACING,
-  STATIC_ROUTES,
-  TERMINAL,
-} from '@/shared/constants';
+import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
+import { Screen, Text } from '@/shared/ui';
 
 import { useLesson } from '../model';
 
 import { Terminal } from './terminal';
-
-// ═══════════════════════════════════════════
-// CONSTANTS
-// ═══════════════════════════════════════════
-
-/**
- * How long the terminal waits in the dark before it writes anything.
- *
- * The navigator's fade lands on black; this is the beat after it, so the
- * child sees the world go out and the machine come up as two moments rather
- * than one blur.
- */
-const WAKE_DELAY_MS = LESSON_FADE_MS * 0.6;
-
-/** How long the text takes to come up out of the dark. */
-const WAKE_MS = 420;
 
 // ═══════════════════════════════════════════
 // COMPONENTS
@@ -183,7 +153,9 @@ const Result = ({
         <Terminal.Key onPress={onRetry}>{t('lesson.retry')}</Terminal.Key>
       )}
 
-      <Terminal.Key onPress={onLeave}>{t('lesson.back')}</Terminal.Key>
+      <Terminal.Key variant={isPassed ? 'primary' : 'ghost'} onPress={onLeave}>
+        {t('lesson.back')}
+      </Terminal.Key>
     </View>
   );
 };
@@ -192,17 +164,9 @@ const Result = ({
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * The lesson behind one cell of the arena.
- *
- * Deliberately nothing like the rest of the app. The room the child lives in
- * is warm and rounded; this is the machine that hangs over the arena talking
- * to them, and it looks like the CRTs on the watchers' faces — dark, monospaced
- * and drawn with rules. The world dims out and this comes up in its place.
- */
+/** Lessons share the same readable terminal as the rest of the game. */
 export const LessonScreen = () => {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { cellId } = useLocalSearchParams<{ cellId: string }>();
   const lessonState = useLesson(cellId ?? '');
@@ -224,17 +188,6 @@ export const LessonScreen = () => {
     router.replace(STATIC_ROUTES.HOME);
   };
 
-  const wake = useSharedValue(0);
-
-  // Started from an effect, on the JS thread — a worklet may only call
-  // worklets, and this is the rule that keeps Reanimated off the UI runtime
-  // until the value is already moving (AGENTS.md).
-  useEffect(() => {
-    wake.value = withDelay(WAKE_DELAY_MS, withTiming(1, { duration: WAKE_MS }));
-  }, [wake]);
-
-  const wakeStyle = useAnimatedStyle(() => ({ opacity: wake.value }));
-
   const { lesson, stage } = lessonState;
   if (!lesson) {
     return <Redirect href={STATIC_ROUTES.HOME} />;
@@ -243,96 +196,94 @@ export const LessonScreen = () => {
   const question = lesson.questions[lessonState.index];
 
   return (
-    <View style={styles.root}>
-      <Animated.View style={[styles.screen, wakeStyle]}>
-        <ScrollView
-          contentContainerStyle={[
-            styles.content,
-            {
-              paddingBottom: insets.bottom + SPACING.five,
-              paddingTop: insets.top + SPACING.four,
-            },
-          ]}
-        >
-          <View style={styles.header}>
-            <Terminal.Line tone="dim" variant="label">
-              {t('lesson.header', { number: lessonState.number })}
-            </Terminal.Line>
-            <Terminal.Line variant="heading" tone="amber">
-              {lesson.title.toUpperCase()}
-            </Terminal.Line>
-            <Terminal.Rule />
-          </View>
+    <Screen
+      gap="three"
+      terminalVariant={
+        stage === 'test' || stage === 'scenario' ? 'overseer' : 'keeper'
+      }
+    >
+      <Screen.Header>
+        <Screen.Back />
+        <Screen.Heading>
+          <Text
+            variant="code"
+            themeColor={
+              stage === 'test' || stage === 'scenario'
+                ? 'overseerLcd'
+                : 'primary'
+            }
+          >
+            {stage === 'test' || stage === 'scenario' ? '// ' : '> '}
+            {t('lesson.header', { number: lessonState.number })}
+          </Text>
+          <Screen.Title>{lesson.title}</Screen.Title>
+        </Screen.Heading>
+      </Screen.Header>
+      {stage === 'theory' ? (
+        <Theory
+          paragraph={lesson.theory[lessonState.index]}
+          index={lessonState.index}
+          total={lessonState.total}
+          onNext={lessonState.next}
+        />
+      ) : null}
 
-          {stage === 'theory' ? (
-            <Theory
-              paragraph={lesson.theory[lessonState.index]}
-              index={lessonState.index}
-              total={lessonState.total}
-              onNext={lessonState.next}
-            />
-          ) : null}
-
-          {stage === 'scenario' && lesson.scenario ? (
-            <View style={styles.body}>
-              <Terminal.Line tone="amber">
-                {lesson.learningObjective}
+      {stage === 'scenario' && lesson.scenario ? (
+        <View style={styles.body}>
+          <Terminal.Line tone="amber">{lesson.learningObjective}</Terminal.Line>
+          <Terminal.Line>{lesson.scenario.situation}</Terminal.Line>
+          {lesson.scenario.actions.map((action, index) => (
+            <Terminal.Key
+              key={action.title}
+              onPress={() => lessonState.answer(index)}
+            >
+              {action.title}
+            </Terminal.Key>
+          ))}
+          {lessonState.verdict ? (
+            <>
+              <Terminal.Line>
+                {
+                  lesson.scenario.actions[lessonState.verdict.chosen]
+                    .consequence
+                }
               </Terminal.Line>
-              <Terminal.Line>{lesson.scenario.situation}</Terminal.Line>
-              {lesson.scenario.actions.map((action, index) => (
-                <Terminal.Key
-                  key={action.title}
-                  onPress={() => lessonState.answer(index)}
-                >
-                  {action.title}
-                </Terminal.Key>
-              ))}
-              {lessonState.verdict ? (
-                <>
-                  <Terminal.Line>
-                    {
-                      lesson.scenario.actions[lessonState.verdict.chosen]
-                        .consequence
-                    }
-                  </Terminal.Line>
-                  <Terminal.Key onPress={lessonState.next}>
-                    {t('lesson.toTest')}
-                  </Terminal.Key>
-                </>
-              ) : null}
-            </View>
+              <Terminal.Key onPress={lessonState.next}>
+                {t('lesson.toTest')}
+              </Terminal.Key>
+            </>
           ) : null}
-          {stage === 'test' && question ? (
-            <Test
-              question={question.question}
-              options={question.options}
-              index={lessonState.index}
-              total={lessonState.total}
-              verdict={lessonState.verdict}
-              answerIndex={question.answerIndex}
-              explanation={question.explanation}
-              onAnswer={lessonState.answer}
-              onNext={lessonState.next}
-            />
-          ) : null}
+        </View>
+      ) : null}
+      {stage === 'test' && question ? (
+        <Test
+          question={question.question}
+          options={question.options}
+          index={lessonState.index}
+          total={lessonState.total}
+          verdict={lessonState.verdict}
+          answerIndex={question.answerIndex}
+          explanation={question.explanation}
+          onAnswer={lessonState.answer}
+          onNext={lessonState.next}
+        />
+      ) : null}
 
-          {stage === 'result' ? (
-            <Result
-              correct={lessonState.correct}
-              total={lesson.questions.length}
-              needed={lessonState.needed}
-              isPassed={lessonState.isPassed}
-              onRetry={lessonState.retry}
-              onLeave={leave}
-            />
-          ) : (
-            <Terminal.Key onPress={leave}>{t('lesson.back')}</Terminal.Key>
-          )}
-        </ScrollView>
-      </Animated.View>
-
-      <Terminal.Scanlines />
-    </View>
+      {stage === 'result' ? (
+        <Result
+          correct={lessonState.correct}
+          total={lesson.questions.length}
+          needed={lessonState.needed}
+          isPassed={lessonState.isPassed}
+          onRetry={lessonState.retry}
+          onLeave={leave}
+        />
+      ) : (
+        <Terminal.Key variant="ghost" onPress={leave}>
+          {t('lesson.back')}
+        </Terminal.Key>
+      )}
+    </Screen>
   );
 };
 
@@ -344,21 +295,7 @@ const styles = StyleSheet.create({
   body: {
     gap: SPACING.three,
   },
-  content: {
-    gap: SPACING.four,
-    paddingHorizontal: CONTENT_PADDING,
-  },
-  header: {
-    gap: SPACING.one,
-  },
   options: {
     gap: SPACING.two,
-  },
-  root: {
-    backgroundColor: TERMINAL.void,
-    flex: 1,
-  },
-  screen: {
-    flex: 1,
   },
 });

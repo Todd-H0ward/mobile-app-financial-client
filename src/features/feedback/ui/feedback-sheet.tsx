@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
-import { SPACING } from '@/shared/constants';
+import { RADII, SPACING } from '@/shared/constants';
+import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Sheet, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
@@ -66,6 +67,7 @@ export const FeedbackSheet = ({
   onClose,
 }: FeedbackSheetProps) => {
   const { t } = useTranslation();
+  const theme = useTheme();
 
   if (!report || !isVisible) return null;
 
@@ -75,20 +77,37 @@ export const FeedbackSheet = ({
 
   return (
     <Sheet.Modal isVisible onClose={onClose}>
+      <Sheet.Label>{t('feedback.whatChanged').toLocaleLowerCase()}</Sheet.Label>
       <Sheet.Title>{t(report.titleKey, params)}</Sheet.Title>
 
       {report.changes.length > 0 ? (
-        <View style={styles.changes}>
-          <Text variant="bodyBold">{t('feedback.whatChanged')}</Text>
-          {report.changes.map((line) => (
-            <ChangeRow key={line.id} line={line} />
+        <View
+          style={[
+            styles.changes,
+            {
+              backgroundColor: theme.terminalScreen,
+              borderColor: theme.border,
+            },
+          ]}
+        >
+          {report.changes.map((line, index) => (
+            <View
+              key={line.id}
+              style={
+                index > 0 && [styles.divider, { borderColor: theme.border }]
+              }
+            >
+              <ChangeRow line={line} />
+            </View>
           ))}
         </View>
       ) : null}
 
       {why ? (
         <View style={styles.why}>
-          <Text variant="bodyBold">{t('feedback.whyHeading')}</Text>
+          <Text variant="machine">
+            {`> ${t('feedback.whyHeading').toLocaleLowerCase()}`}
+          </Text>
           <Sheet.Description>{why}</Sheet.Description>
         </View>
       ) : null}
@@ -108,9 +127,11 @@ export const FeedbackSheet = ({
 
 const styles = StyleSheet.create({
   changes: {
-    gap: SPACING.two,
+    borderRadius: RADII.s,
+    borderWidth: 2,
     width: '100%',
   },
+  divider: { borderTopWidth: 1 },
   why: {
     gap: SPACING.one,
     width: '100%',

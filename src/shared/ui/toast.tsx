@@ -8,9 +8,10 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { HIT_SLOP_SIZE, RADII, type ThemeColor } from '@/shared/constants';
+import { HIT_SLOP_SIZE, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 
+import { PixelIcon } from './pixel-icon';
 import { Text } from './text';
 
 // ═══════════════════════════════════════════
@@ -28,26 +29,6 @@ interface ToastProps {
 }
 
 // ═══════════════════════════════════════════
-// CONSTANTS
-// ═══════════════════════════════════════════
-
-const VARIANT_COLORS: Record<
-  ToastVariant,
-  { background: ThemeColor; label: ThemeColor; marker: ThemeColor }
-> = {
-  dark: {
-    background: 'inverseSurface',
-    label: 'inverseText',
-    marker: 'success',
-  },
-  warning: {
-    background: 'warningSoft',
-    label: 'warningStrong',
-    marker: 'warning',
-  },
-};
-
-// ═══════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════
 
@@ -59,8 +40,7 @@ export const Toast = ({
   style,
 }: ToastProps) => {
   const theme = useTheme();
-  const colors = VARIANT_COLORS[variant];
-
+  const isWarning = variant === 'warning';
   const Container = onPress ? Pressable : View;
 
   return (
@@ -70,15 +50,28 @@ export const Toast = ({
       onPress={onPress}
       style={[
         styles.root,
-        { backgroundColor: theme[colors.background] },
+        {
+          backgroundColor: isWarning ? theme.surface : theme.primary,
+          borderColor: isWarning ? theme.warning : theme.primary,
+        },
         style,
       ]}
     >
-      <View style={[styles.marker, { backgroundColor: theme[colors.marker] }]}>
-        {icon}
+      <View style={styles.marker}>
+        {icon ??
+          (isWarning ? (
+            <Text variant="code" themeColor="warning">
+              !
+            </Text>
+          ) : (
+            <PixelIcon name="check20" size={20} tone="onAccent" />
+          ))}
       </View>
-
-      <Text variant="bodyBold" themeColor={colors.label} style={styles.label}>
+      <Text
+        variant="bodyBold"
+        themeColor={isWarning ? 'text' : 'onAccent'}
+        style={styles.label}
+      >
         {children}
       </Text>
     </Container>
@@ -90,24 +83,17 @@ export const Toast = ({
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
+  label: { flex: 1 },
+  marker: { alignItems: 'center', justifyContent: 'center', width: 24 },
   root: {
     alignItems: 'center',
-    borderRadius: RADII.m,
+    borderRadius: 14,
+    borderWidth: 2,
     flexDirection: 'row',
-    gap: 10,
+    gap: SPACING.two,
     minHeight: HIT_SLOP_SIZE,
-    paddingHorizontal: 16,
-    paddingVertical: 13,
-  },
-  marker: {
-    alignItems: 'center',
-    borderRadius: RADII.pill,
-    height: 22,
-    justifyContent: 'center',
-    width: 22,
-  },
-  label: {
-    flex: 1,
+    paddingHorizontal: SPACING.three,
+    paddingVertical: SPACING.two,
   },
 });
 

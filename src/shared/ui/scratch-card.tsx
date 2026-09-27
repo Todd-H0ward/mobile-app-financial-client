@@ -17,6 +17,7 @@ import Animated, {
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
+import { useMotionEnabled } from '@/shared/model';
 
 import { Text } from './text';
 
@@ -69,6 +70,7 @@ export const ScratchCard = ({
   style,
 }: ScratchCardProps) => {
   const theme = useTheme();
+  const isMotionEnabled = useMotionEnabled();
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [cleared, setCleared] = useState(() =>
     Array.from({ length: TILE_TOTAL }, () => false),
@@ -145,9 +147,9 @@ export const ScratchCard = ({
     if (clearedCount / TILE_TOTAL < revealAt) return;
     didReveal.current = true;
     setIsRevealed(true);
-    foilOpacity.value = withTiming(0, { duration: 280 });
+    foilOpacity.value = withTiming(0, { duration: isMotionEnabled ? 280 : 0 });
     onReveal?.();
-  }, [clearedCount, foilOpacity, onReveal, revealAt]);
+  }, [clearedCount, foilOpacity, isMotionEnabled, onReveal, revealAt]);
 
   const pan = Gesture.Pan()
     .onBegin((e) => {
@@ -205,8 +207,8 @@ export const ScratchCard = ({
                     {
                       backgroundColor:
                         (col + row) % 2 === 0
-                          ? 'rgba(176, 178, 188, 0.97)'
-                          : 'rgba(148, 150, 162, 0.97)',
+                          ? theme.border
+                          : theme.borderStrong,
                       height: tileH + 1,
                       left: col * tileW,
                       top: row * tileH,
@@ -218,12 +220,11 @@ export const ScratchCard = ({
             })}
 
           {foilLabel != null && clearedCount === 0 && (
-            <View style={styles.labelWrap} pointerEvents="none">
-              <Text
-                variant="bodyBold"
-                themeColor="inverseText"
-                style={styles.label}
-              >
+            <View
+              style={[styles.labelWrap, { backgroundColor: theme.overlay }]}
+              pointerEvents="none"
+            >
+              <Text variant="bodyBold" themeColor="text" style={styles.label}>
                 {foilLabel}
               </Text>
             </View>
@@ -250,7 +251,6 @@ const styles = StyleSheet.create({
   labelWrap: {
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
-    backgroundColor: 'rgba(90, 92, 104, 0.25)',
     justifyContent: 'center',
     paddingHorizontal: SPACING.three,
   },

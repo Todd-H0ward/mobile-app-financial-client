@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
 
-import { RADII, type ThemeColor } from '@/shared/constants';
+import { SPACING, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { clamp } from '@/shared/utils';
 
@@ -31,7 +31,7 @@ interface MeterCardProps {
 export const MeterCard = ({
   label,
   value,
-  color = 'warning',
+  color = 'primary',
   icon,
   tone = 'default',
   style,
@@ -45,7 +45,7 @@ export const MeterCard = ({
   return (
     <View
       accessibilityRole="progressbar"
-      accessibilityLabel={label}
+      accessibilityLabel={`${isLow ? '! ' : ''}${label}`}
       // Clamped like the bar it describes: an out-of-range stat must not be
       // announced as "120 percent". `clamp` alone would not do — it propagates
       // NaN, and NaN must never reach the screen reader.
@@ -54,9 +54,8 @@ export const MeterCard = ({
         styles.root,
         {
           backgroundColor: isIdle ? theme.backgroundAlt : theme.surface,
-          borderColor: isLow ? theme[color] : theme.border,
-          borderWidth: isLow ? 1.5 : 1,
-          opacity: isIdle ? 0.6 : 1,
+          borderColor: isLow ? theme.warning : theme.border,
+          borderWidth: 2,
         },
         style,
       ]}
@@ -68,14 +67,16 @@ export const MeterCard = ({
         themeColor={isLow ? 'warningStrong' : 'textSecondary'}
         numberOfLines={1}
       >
+        {isLow ? '! ' : ''}
         {label}
       </Text>
 
       <ProgressBar
         aria-hidden
         value={isIdle ? 0 : ratio}
-        color={color}
-        height={6}
+        color={isLow ? 'warning' : color}
+        height={14}
+        segmentCount={5}
         style={styles.bar}
       />
     </View>
@@ -89,11 +90,12 @@ export const MeterCard = ({
 const styles = StyleSheet.create({
   root: {
     alignItems: 'center',
-    borderRadius: RADII.m,
+    borderRadius: 14,
     flex: 1,
-    gap: 5,
-    paddingHorizontal: 6,
-    paddingVertical: 8,
+    gap: SPACING.two,
+    minWidth: 88,
+    paddingHorizontal: SPACING.two,
+    paddingVertical: SPACING.two,
   },
   bar: {
     marginTop: 1,

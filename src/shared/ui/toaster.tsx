@@ -19,7 +19,7 @@ interface ToastOptions {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-const DEFAULT_DURATION = 2500;
+const DEFAULT_DURATION = 3000;
 const MAX_VISIBLE = 3;
 
 // ═══════════════════════════════════════════
@@ -58,8 +58,8 @@ export const Toaster = () => {
   const insets = useSafeAreaInsets();
   return (
     <SonnerToaster
-      position="bottom-center"
-      offset={insets.bottom + SPACING.three}
+      position="top-center"
+      offset={insets.top + SPACING.three}
       duration={DEFAULT_DURATION}
       visibleToasts={MAX_VISIBLE}
       gap={8}

@@ -2,7 +2,8 @@ import { StyleSheet, View } from 'react-native';
 
 import type { ChangePayload } from '@/entities/task';
 
-import { SPACING } from '@/shared/constants';
+import { FONTS, RADII, SPACING } from '@/shared/constants';
+import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { ListRow, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
@@ -28,15 +29,41 @@ export const ChangeMechanic = ({
   onSelect,
 }: ChangeMechanicProps) => {
   const { t } = useTranslation();
+  const theme = useTheme();
 
   return (
     <View style={styles.root}>
-      <Text themeColor="textSecondary">
-        {t('tasks.change.leadIn', {
-          price: formatMoney(payload.price),
-          paid: formatMoney(payload.paid),
+      <View style={styles.tiles}>
+        {[
+          { key: 'price', value: formatMoney(payload.price) },
+          { key: 'paid', value: formatMoney(payload.paid) },
+          { key: 'change', value: '?' },
+        ].map((tile) => {
+          const isUnknown = tile.key === 'change';
+          return (
+            <View
+              key={tile.key}
+              style={[
+                styles.tile,
+                {
+                  borderColor: isUnknown ? theme.phosphor : theme.border,
+                },
+                isUnknown && styles.dashed,
+              ]}
+            >
+              <Text variant="small" themeColor="textMuted">
+                {t(`tasks.change.${tile.key}`)}
+              </Text>
+              <Text
+                variant={isUnknown ? 'machine' : 'code'}
+                style={styles.tileValue}
+              >
+                {tile.value}
+              </Text>
+            </View>
+          );
         })}
-      </Text>
+      </View>
       <Text variant="bodyBold">{t('tasks.change.question')}</Text>
       <View style={styles.options}>
         {payload.options.map((option) => (
@@ -57,12 +84,22 @@ export const ChangeMechanic = ({
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
+  dashed: { borderStyle: 'dashed' },
   options: {
     gap: SPACING.two,
   },
   root: {
-    gap: SPACING.three,
+    gap: SPACING.compact,
   },
+  tile: {
+    alignItems: 'center',
+    borderRadius: RADII.m,
+    borderWidth: 2,
+    flex: 1,
+    paddingVertical: SPACING.compact,
+  },
+  tileValue: { fontFamily: FONTS.monoStrong, fontSize: 25, lineHeight: 32 },
+  tiles: { flexDirection: 'row', gap: SPACING.two },
 });
 
 export type { ChangeMechanicProps };

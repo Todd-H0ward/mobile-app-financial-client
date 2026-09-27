@@ -1,105 +1,65 @@
 import { useEffect } from 'react';
 
-import { Image } from 'expo-image';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
+  cancelAnimation,
   Easing,
-  Keyframe,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
 
+import { SPACING } from '@/shared/constants';
+import { useTheme } from '@/shared/hooks';
+import { useMotionEnabled } from '@/shared/model';
+
+import { PixelIcon } from './pixel-icon';
+
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-const INITIAL_SCALE_FACTOR = Dimensions.get('screen').height / 90;
-
-const DURATION = 600;
-const GLOW_TURN_DURATION = 12 * 1000;
-const ICON_SIZE = 128;
-const GLOW_SIZE = 201;
-
-const LOGO = {
-  width: 76,
-  height: 71,
-};
-
-// ═══════════════════════════════════════════
-// ANIMATIONS
-// ═══════════════════════════════════════════
-
-const backgroundKeyframe = new Keyframe({
-  0: {
-    transform: [{ scale: INITIAL_SCALE_FACTOR }],
-  },
-  100: {
-    easing: Easing.elastic(0.7),
-    transform: [{ scale: 1 }],
-  },
-});
-
-const logoKeyframe = new Keyframe({
-  0: {
-    opacity: 0,
-    transform: [{ scale: 1.3 }],
-  },
-  40: {
-    easing: Easing.elastic(0.7),
-    opacity: 0,
-    transform: [{ scale: 1.3 }],
-  },
-  100: {
-    easing: Easing.elastic(0.7),
-    opacity: 1,
-    transform: [{ scale: 1 }],
-  },
-});
+const TRAVEL = 4;
+const DURATION = 1400;
 
 // ═══════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════
 
+/** Calm vertical motion; no flashing, spinning glow, or unapproved app icon. */
 export const AnimatedIcon = () => {
-  const spin = useSharedValue(0);
+  const theme = useTheme();
+  const isMotionEnabled = useMotionEnabled();
+  const offset = useSharedValue(0);
 
   useEffect(() => {
-    spin.value = withRepeat(
-      withTiming(360, { duration: GLOW_TURN_DURATION, easing: Easing.linear }),
-      -1,
-      false,
-    );
-  }, [spin]);
+    cancelAnimation(offset);
+    offset.value = isMotionEnabled
+      ? withRepeat(
+          withTiming(-TRAVEL, {
+            duration: DURATION,
+            easing: Easing.inOut(Easing.quad),
+          }),
+          -1,
+          true,
+        )
+      : 0;
+    return () => cancelAnimation(offset);
+  }, [isMotionEnabled, offset]);
 
-  const glowStyle = useAnimatedStyle(() => ({
-    transform: [{ rotateZ: `${spin.value}deg` }],
+  const iconStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: offset.value }],
   }));
 
   return (
-    <View style={styles.root}>
-      <Animated.View style={[styles.glow, glowStyle]}>
-        <Image
-          style={styles.glow}
-          source={require('@/assets/images/logo-glow.png')}
-        />
-      </Animated.View>
-
-      <Animated.View
-        entering={backgroundKeyframe.duration(DURATION)}
-        style={styles.background}
-      />
-
-      <Animated.View
-        style={styles.imageContainer}
-        entering={logoKeyframe.duration(DURATION)}
-      >
-        <Image
-          style={styles.image}
-          source={require('@/assets/images/expo-logo.png')}
-        />
-      </Animated.View>
+    <View style={[styles.root, { backgroundColor: theme.bezel }]}>
+      <View style={[styles.screen, { backgroundColor: theme.terminalScreen }]}>
+        <Animated.View style={iconStyle}>
+          <PixelIcon name="battery" size={72} tone="primary" />
+        </Animated.View>
+      </View>
+      <View style={[styles.led, { backgroundColor: theme.primary }]} />
     </View>
   );
 };
@@ -109,31 +69,19 @@ export const AnimatedIcon = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  root: {
-    alignItems: 'center',
-    height: ICON_SIZE,
-    justifyContent: 'center',
-    width: ICON_SIZE,
-    zIndex: 100,
-  },
-  glow: {
-    height: GLOW_SIZE,
+  led: {
+    alignSelf: 'center',
+    borderRadius: 2,
+    height: 3,
     position: 'absolute',
-    width: GLOW_SIZE,
+    top: 2,
+    width: 40,
   },
-  background: {
-    borderRadius: ICON_SIZE / 3.2,
-    experimental_backgroundImage: `linear-gradient(180deg, #3C9FFE, #0274DF)`,
-    height: ICON_SIZE,
-    position: 'absolute',
-    width: ICON_SIZE,
-  },
-  imageContainer: {
+  root: { borderRadius: 26, height: 128, padding: SPACING.two, width: 128 },
+  screen: {
     alignItems: 'center',
+    borderRadius: 20,
+    flex: 1,
     justifyContent: 'center',
-  },
-  image: {
-    height: LOGO.height,
-    width: LOGO.width,
   },
 });

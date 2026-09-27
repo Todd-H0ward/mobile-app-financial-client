@@ -3,10 +3,10 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { SPACING, STATIC_ROUTES } from '@/shared/constants';
+import { RADII, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { Button, Card, Screen, Text } from '@/shared/ui';
+import { Button, Screen, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
 import { useEndPeriodConfirm } from '../model';
@@ -32,14 +32,14 @@ export const EndPeriodScreen = () => {
   }
 
   return (
-    <Screen gap="three">
+    <Screen gap="compact">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
-          <Screen.Title>
-            {t('endPeriod.title', { period: confirm.periodIndex })}
-          </Screen.Title>
-          <Screen.Subtitle>{t('endPeriod.subtitle')}</Screen.Subtitle>
+          <Screen.Label>
+            {t('endPeriod.label', { period: confirm.periodIndex })}
+          </Screen.Label>
+          <Screen.Title>{t('endPeriod.title')}</Screen.Title>
         </Screen.Heading>
         <HintButton screen="end-period" />
       </Screen.Header>
@@ -47,32 +47,19 @@ export const EndPeriodScreen = () => {
       <Text themeColor="textSecondary">{t('endPeriod.lead')}</Text>
 
       {confirm.isNeedsShort && (
-        <Card
-          tone="surfaceSoft"
-          style={[styles.warn, { borderColor: theme.warning }]}
-        >
-          <Card.Content>
-            <Text variant="bodyBold" themeColor="warningStrong">
-              {t('endPeriod.warnTitle')}
-            </Text>
-            <Text themeColor="textSecondary">
-              {t('endPeriod.warnBody', {
-                count: formatMoney(confirm.needsGap),
-              })}
-            </Text>
-          </Card.Content>
-        </Card>
+        <View style={[styles.warn, { borderColor: theme.warning }]}>
+          <Text variant="machine" themeColor="warning">
+            !
+          </Text>
+          <Text style={styles.warnText}>
+            {t('endPeriod.warnBody', {
+              count: formatMoney(confirm.needsGap),
+            })}
+          </Text>
+        </View>
       )}
 
       <View style={styles.actions}>
-        <Button
-          variant="ghost"
-          size="l"
-          isFullWidth
-          onPress={() => router.back()}
-        >
-          {t('endPeriod.cancel')}
-        </Button>
         <Button
           variant="primary"
           size="l"
@@ -80,6 +67,14 @@ export const EndPeriodScreen = () => {
           onPress={confirm.confirm}
         >
           {t('endPeriod.confirm')}
+        </Button>
+        <Button
+          variant="secondary"
+          size="m"
+          isFullWidth
+          onPress={() => router.back()}
+        >
+          {t('endPeriod.cancel')}
         </Button>
       </View>
     </Screen>
@@ -93,9 +88,15 @@ export const EndPeriodScreen = () => {
 const styles = StyleSheet.create({
   actions: {
     gap: SPACING.two,
-    marginTop: 'auto',
+    marginTop: SPACING.two,
   },
   warn: {
-    borderWidth: 1.5,
+    borderRadius: RADII.m,
+    borderStyle: 'dashed',
+    borderWidth: 2,
+    flexDirection: 'row',
+    gap: SPACING.compact,
+    padding: SPACING.compact,
   },
+  warnText: { flex: 1 },
 });

@@ -5,7 +5,7 @@ import { HintButton } from '@/widgets/hint-button';
 
 import { DYNAMIC_ROUTES, SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { Button, ListRow, Screen, TasksIcon, Text } from '@/shared/ui';
+import { Button, ListRow, PixelIcon, Screen, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
 import { useTasksList } from '../model';
@@ -23,10 +23,13 @@ export const TasksScreen = () => {
   const list = useTasksList();
 
   return (
-    <Screen gap="three">
+    <Screen gap="three" terminalVariant="overseer">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
+          <Text variant="code" themeColor="overseerLcd">
+            {`// ${t('scene.watchers.overseer.name')}`}
+          </Text>
           <Screen.Title>{t('tasks.title')}</Screen.Title>
           <Screen.Subtitle>{t('tasks.subtitle')}</Screen.Subtitle>
         </Screen.Heading>
@@ -72,7 +75,7 @@ export const TasksScreen = () => {
                 <ListRow.Icon
                   tone={row.isActive ? 'primarySoft' : 'surfaceSoft'}
                 >
-                  <TasksIcon size={22} />
+                  <PixelIcon name="face" size={24} tone="overseerLcd" />
                 </ListRow.Icon>
               }
               trailing={

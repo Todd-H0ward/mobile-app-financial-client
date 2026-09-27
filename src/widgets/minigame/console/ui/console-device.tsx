@@ -37,7 +37,6 @@ export const ConsoleDevice = ({
         {
           backgroundColor: theme.arcadeShell,
           borderColor: theme.arcadeShellDeep,
-          shadowColor: theme.arcadeShellDeep,
         },
         style,
       ]}
@@ -103,16 +102,11 @@ const styles = StyleSheet.create({
     width: '36%',
   },
   root: {
-    borderBottomWidth: 5,
     borderRadius: RADII.xxxl,
-    borderWidth: 3,
-    elevation: 8,
+    borderWidth: 2,
     flex: 1,
     minHeight: 0,
     padding: SPACING.three,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
   },
   screen: {
     borderRadius: RADII.l,

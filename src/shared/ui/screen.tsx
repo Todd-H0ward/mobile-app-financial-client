@@ -24,10 +24,12 @@ import {
   type ThemeColor,
 } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
-import { useGlassEnabled } from '@/shared/model';
 import { hitSlopFor } from '@/shared/utils';
 
 import { GlassSurface } from './glass-surface';
+import { PixelIcon } from './pixel-icon';
+import { RingsBackdrop } from './rings-backdrop';
+import { TerminalPanel, type TerminalVariant } from './terminal-panel';
 import { Text, type TextProps } from './text';
 import { ThemedView } from './themed-view';
 
@@ -38,6 +40,12 @@ import { ThemedView } from './themed-view';
 interface ScreenRootProps {
   children?: ReactNode;
   variant?: ThemeColor;
+  terminalVariant?: TerminalVariant;
+  /**
+   * A strip of the pit above the terminal — the child always sees where they
+   * are. Off for the grown-ups' terminal, which is deliberately not the game.
+   */
+  isPitVisible?: boolean;
   gap?: Spacing;
   /**
    * When false, the screen does not wrap children in a `ScrollView` — use this
@@ -68,6 +76,12 @@ interface ScreenHeadingProps {
   style?: StyleProp<ViewStyle>;
 }
 
+interface ScreenLabelProps {
+  /** Machine line over the title — "настройки", "журнал". */
+  children: string;
+  voice?: TerminalVariant;
+}
+
 type ScreenTitleProps = TextProps;
 
 type ScreenSubtitleProps = TextProps;
@@ -77,7 +91,9 @@ type ScreenSubtitleProps = TextProps;
 // ═══════════════════════════════════════════
 
 /** Visual size of the back control; hitSlop expands it to HIT_SLOP_SIZE. */
-const BACK_SIZE = 40;
+const BACK_SIZE = 48;
+/** The strip of the pit above the terminal. */
+const PIT_HEIGHT = 56;
 
 // ═══════════════════════════════════════════
 // COMPONENTS
@@ -106,20 +122,36 @@ const ScreenBack = ({
 
         router.replace(STATIC_ROUTES.ENTRY);
       }}
-      style={[styles.back, { borderColor: theme.border, borderWidth: 1 }]}
+      style={[styles.back, { borderColor: theme.borderStrong }]}
     >
-      <Text variant="subtitle" themeColor={color}>
-        ‹
-      </Text>
+      <PixelIcon name="back" tone={color} />
     </GlassSurface>
   );
+};
+
+const ScreenLabel = ({ children, voice = 'keeper' }: ScreenLabelProps) => {
+  if (voice === 'overseer') {
+    return (
+      <Text variant="machine" themeColor="overseerLcd" style={styles.overseer}>
+        {`// ${children.toLocaleUpperCase()}`}
+      </Text>
+    );
+  }
+  if (voice === 'adult') {
+    return (
+      <Text variant="code" themeColor="textMuted" style={styles.adult}>
+        {children.toLocaleUpperCase()}
+      </Text>
+    );
+  }
+  return <Text variant="machine">{`> ${children.toLocaleLowerCase()}`}</Text>;
 };
 
 const ScreenTitle = ({
   children,
   variant = 'title',
   themeColor = 'text',
-  numberOfLines = 1,
+  numberOfLines,
   ...props
 }: ScreenTitleProps) => (
   <Text
@@ -157,7 +189,8 @@ const ScreenHeader = ({ children, style }: ScreenHeaderProps) => (
 
 const ScreenRoot = ({
   children,
-  variant = 'background',
+  terminalVariant = 'keeper',
+  isPitVisible = terminalVariant !== 'adult',
   gap = 'two',
   isScrollable = true,
   style,
@@ -166,8 +199,7 @@ const ScreenRoot = ({
   // clip the scroll view instead of letting content scroll past the indicator.
   // It goes on the scroll content with the home-indicator inset.
   const insets = useSafeAreaInsets();
-  const theme = useTheme();
-  const isGlass = useGlassEnabled();
+
   const bottomPad = insets.bottom + SPACING.four;
 
   const column = (
@@ -184,48 +216,43 @@ const ScreenRoot = ({
   );
 
   return (
-    <ThemedView variant={variant} style={styles.root}>
-      {isGlass ? (
-        <>
-          <View
-            pointerEvents="none"
-            style={[
-              styles.wash,
-              styles.washTop,
-              { backgroundColor: theme.primarySoft },
-            ]}
-          />
-          <View
-            pointerEvents="none"
-            style={[
-              styles.wash,
-              styles.washBottom,
-              { backgroundColor: theme.accentSoft },
-            ]}
-          />
-        </>
-      ) : null}
+    <ThemedView variant="sceneBase" style={styles.root}>
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-        {isScrollable ? (
-          <ScrollView
-            contentContainerStyle={[
-              styles.content,
-              { paddingBottom: bottomPad },
-            ]}
-          >
-            {column}
-          </ScrollView>
-        ) : (
-          <View
-            style={[
-              styles.content,
-              styles.static,
-              { paddingBottom: bottomPad },
-            ]}
-          >
-            {column}
+        {isPitVisible ? (
+          <View style={styles.pit}>
+            <RingsBackdrop centerY={0.62} />
           </View>
-        )}
+        ) : null}
+        <TerminalPanel
+          variant={terminalVariant}
+          frameStyle={styles.frame}
+          style={styles.panel}
+        >
+          <View style={styles.panelContent}>
+            {isScrollable ? (
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
+                contentContainerStyle={[
+                  styles.content,
+                  { paddingBottom: bottomPad },
+                ]}
+              >
+                {column}
+              </ScrollView>
+            ) : (
+              <View
+                style={[
+                  styles.content,
+                  styles.static,
+                  { paddingBottom: bottomPad },
+                ]}
+              >
+                {column}
+              </View>
+            )}
+          </View>
+        </TerminalPanel>
       </SafeAreaView>
     </ThemedView>
   );
@@ -237,6 +264,7 @@ const ScreenRoot = ({
 
 export const Screen = Object.assign(ScreenRoot, {
   Back: ScreenBack,
+  Label: ScreenLabel,
   Header: ScreenHeader,
   Heading: ScreenHeading,
   Title: ScreenTitle,
@@ -251,27 +279,10 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
   },
-  wash: {
-    borderRadius: 999,
-    opacity: 0.55,
-    position: 'absolute',
-  },
-  washBottom: {
-    bottom: -80,
-    height: 280,
-    right: -60,
-    width: 280,
-  },
-  washTop: {
-    height: 260,
-    left: -80,
-    top: -40,
-    width: 260,
-  },
   back: {
     alignItems: 'center',
-    borderRadius: RADII.m,
-    borderWidth: 1,
+    borderRadius: RADII.s,
+    borderWidth: 2,
     height: BACK_SIZE,
     justifyContent: 'center',
     width: BACK_SIZE,
@@ -303,15 +314,30 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
-  safeArea: {
+  frame: {
     flex: 1,
+    maxWidth: MAX_CONTENT_WIDTH + SPACING.three,
+    width: '100%',
   },
+  adult: { letterSpacing: 1 },
+  overseer: { letterSpacing: 1 },
+  panel: { flex: 1 },
+  pit: {
+    alignSelf: 'stretch',
+    height: PIT_HEIGHT - SPACING.two,
+    marginHorizontal: -SPACING.two,
+    marginTop: -SPACING.two,
+    overflow: 'hidden',
+  },
+  panelContent: { flex: 1 },
+  safeArea: { alignItems: 'center', flex: 1, padding: SPACING.two },
 });
 
 export type {
   ScreenBackProps,
   ScreenHeaderProps,
   ScreenHeadingProps,
+  ScreenLabelProps,
   ScreenRootProps,
   ScreenSubtitleProps,
   ScreenTitleProps,

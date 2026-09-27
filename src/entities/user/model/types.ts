@@ -181,10 +181,10 @@ interface SettingsSave {
   /** Animations. Turned off for a weak device and for 3.6. */
   isAnimationEnabled: boolean;
   /**
-   * Liquid-glass surfaces on cards, sheets and chrome.
+   * Terminal scanline texture. The legacy key keeps existing saves compatible.
    *
-   * Off falls back to solid theme fills. System Reduce Transparency also
-   * forces the solid path so a11y wins over the look.
+   * Off renders a clean screen. Reduce Transparency and disabled animations
+   * also suppress the texture so accessibility wins over decoration.
    */
   isGlassEnabled: boolean;
   /**

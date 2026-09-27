@@ -1,7 +1,7 @@
 import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
 
-import { RADII, SPACING } from '@/shared/constants';
+import { SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 
 import { Text } from '../text';
@@ -119,13 +119,14 @@ export const LineChart = ({
           );
         })}
 
-        {series.map((one) => {
+        {series.map((one, seriesIndex) => {
           const points = one.values.map((value, index) =>
             chartPoint(value, index, count, ceiling),
           );
 
           return (
             <Path
+              strokeDasharray={seriesIndex % 2 === 1 ? '6 4' : undefined}
               key={`${one.color}:line`}
               d={chartLine(points)}
               stroke={theme[one.color]}
@@ -162,7 +163,7 @@ export const LineChart = ({
           the app's font and scale with the reader's own type size. */}
       <View pointerEvents="none" style={styles.scale}>
         {guides.map((guide) => (
-          <Text key={guide.value} variant="label" themeColor="textMuted">
+          <Text key={guide.y} variant="label" themeColor="textMuted">
             {guide.value}
           </Text>
         ))}
@@ -181,13 +182,16 @@ export const LineChart = ({
       {series.some((one) => one.label) && (
         <View style={styles.legend}>
           {series.map(
-            (one) =>
+            (one, seriesIndex) =>
               one.label && (
                 <View key={one.label} style={styles.legendItem}>
                   <View
                     style={[
                       styles.swatch,
-                      { backgroundColor: theme[one.color] },
+                      {
+                        borderColor: theme[one.color],
+                        borderStyle: seriesIndex % 2 === 1 ? 'dashed' : 'solid',
+                      },
                     ]}
                   />
                   <Text variant="small" themeColor="textSecondary">
@@ -230,9 +234,9 @@ const styles = StyleSheet.create({
     top: 0,
   },
   swatch: {
-    borderRadius: RADII.xs,
-    height: 10,
-    width: 10,
+    borderTopWidth: 2,
+    height: 2,
+    width: 20,
   },
   ticks: {
     flexDirection: 'row',

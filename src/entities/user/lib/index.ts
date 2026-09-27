@@ -11,10 +11,15 @@ export {
   exitDemoMode,
   runDemoPeriods,
 } from './demo';
-export type { WalletHistoryRow, WalletSourceRef } from './history';
+export type {
+  SourceTranslate,
+  WalletHistoryRow,
+  WalletSourceRef,
+} from './history';
 export {
   describeWalletSource,
   getLastPeriod,
+  labelWalletSource,
   listPeriodHistory,
   listWalletHistory,
 } from './history';

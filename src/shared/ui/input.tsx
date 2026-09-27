@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 import {
   type StyleProp,
@@ -9,7 +9,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { RADII } from '@/shared/constants';
+import { FONTS, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 
 import { Text } from './text';
@@ -18,10 +18,13 @@ import { Text } from './text';
 // TYPES
 // ═══════════════════════════════════════════
 
+type InputVariant = 'default' | 'warning';
+
 interface InputProps extends TextInputProps {
-  /** Caption under the field, on the left. */
+  label?: string;
   hint?: string;
-  /** Shows "6/12" on the right when `maxLength` is set. */
+  variant?: InputVariant;
+  /** Shows "6 / 12" when `maxLength` is set. */
   isCounterVisible?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
 }
@@ -31,59 +34,89 @@ interface InputProps extends TextInputProps {
 // ═══════════════════════════════════════════
 
 export const Input = ({
+  label,
   hint,
+  variant = 'default',
   isCounterVisible = false,
   containerStyle,
   style,
   value,
   defaultValue,
   onChangeText,
+  onFocus,
+  onBlur,
+  editable = true,
   maxLength,
+  accessibilityLabel,
   ...props
 }: InputProps) => {
   const theme = useTheme();
-
-  // The counter cannot read `value` alone: an uncontrolled field leaves it
-  // undefined and the counter would sit at 0 while the user types.
+  const labelId = useId();
   const [typed, setTyped] = useState(defaultValue ?? '');
+  const [isFocused, setIsFocused] = useState(false);
   const text = value ?? typed;
+  const isWarning = variant === 'warning';
 
   return (
     <View style={[styles.root, containerStyle]}>
-      <TextInput
-        value={value}
-        defaultValue={defaultValue}
-        maxLength={maxLength}
-        onChangeText={(next) => {
-          setTyped(next);
-          onChangeText?.(next);
-        }}
-        placeholderTextColor={theme.textDisabled}
-        selectionColor={theme.primary}
+      {label != null && (
+        <Text nativeID={labelId} variant="small" themeColor="textSecondary">
+          {label}
+        </Text>
+      )}
+      <View
         style={[
-          styles.field,
+          styles.fieldContainer,
           {
-            backgroundColor: theme.surface,
-            borderColor: theme.primary,
-            color: theme.text,
+            backgroundColor: editable ? theme.surface : theme.surfaceDeep,
+            borderColor: isWarning
+              ? theme.warning
+              : isFocused
+                ? theme.primary
+                : theme.borderStrong,
           },
-          style,
+          !editable && styles.disabled,
         ]}
-        {...props}
-      />
-
-      {(hint != null || (isCounterVisible && maxLength != null)) && (
-        <View style={styles.footer}>
-          <Text variant="small" themeColor="textMuted">
-            {hint ?? ''}
+      >
+        <TextInput
+          accessibilityLabel={accessibilityLabel ?? label ?? hint}
+          accessibilityLabelledBy={label != null ? labelId : undefined}
+          value={value}
+          defaultValue={defaultValue}
+          editable={editable}
+          maxLength={maxLength}
+          onChangeText={(next) => {
+            setTyped(next);
+            onChangeText?.(next);
+          }}
+          onFocus={(event) => {
+            setIsFocused(true);
+            onFocus?.(event);
+          }}
+          onBlur={(event) => {
+            setIsFocused(false);
+            onBlur?.(event);
+          }}
+          placeholderTextColor={theme.textDisabled}
+          selectionColor={theme.primary}
+          style={[
+            styles.field,
+            { color: editable ? theme.text : theme.textDisabled },
+            style,
+          ]}
+          {...props}
+        />
+        {isCounterVisible && maxLength != null && (
+          <Text variant="code" themeColor="textMuted" style={styles.counter}>
+            {text.length} / {maxLength}
           </Text>
-
-          {isCounterVisible && maxLength != null && (
-            <Text variant="small" themeColor="textDisabled">
-              {text.length}/{maxLength}
-            </Text>
-          )}
-        </View>
+        )}
+      </View>
+      {hint != null && (
+        <Text variant="small" themeColor={isWarning ? 'warning' : 'textMuted'}>
+          {isWarning ? '! ' : ''}
+          {hint}
+        </Text>
       )}
     </View>
   );
@@ -94,24 +127,26 @@ export const Input = ({
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  root: {
-    gap: 8,
-    width: '100%',
-  },
+  counter: { flexShrink: 0, fontSize: 12, paddingRight: SPACING.two },
+  disabled: { borderStyle: 'dashed' },
   field: {
-    borderRadius: RADII.xl,
-    borderWidth: 2.5,
-    fontSize: 22,
-    fontWeight: 800,
-    minHeight: 58,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
+    flex: 1,
+    // Static font files: the weight lives in the family, not in fontWeight.
+    fontFamily: FONTS.sansStrong,
+    fontSize: 18,
+    minHeight: 52,
+    minWidth: 0,
+    paddingHorizontal: SPACING.three,
+    paddingVertical: SPACING.two,
   },
-  footer: {
+  fieldContainer: {
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 2,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 4,
+    minHeight: 56,
   },
+  root: { gap: SPACING.two, width: '100%' },
 });
 
-export type { InputProps };
+export type { InputProps, InputVariant };

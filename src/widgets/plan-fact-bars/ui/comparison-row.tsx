@@ -5,10 +5,10 @@ import { DIRECTION_LOOK } from '@/widgets/direction-look';
 import type { BudgetComparison } from '@/entities/budget';
 import { isOnPlan } from '@/entities/budget';
 
-import { RADII, SPACING } from '@/shared/constants';
+import { FONTS, RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { Shape, Text } from '@/shared/ui';
+import { PixelIcon, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
 // ═══════════════════════════════════════════
@@ -41,72 +41,68 @@ export const ComparisonRow = ({ row, barMax }: ComparisonRowProps) => {
   const look = DIRECTION_LOOK[row.direction];
   const onPlan = isOnPlan(row);
 
-  const title = t(`budgetPlan.directions.${row.direction}.title`);
+  const title = t(`boxes.${row.direction}`);
   const deltaLabel = onPlan
     ? t('periodSummary.onPlan')
     : row.delta > 0
       ? t('periodSummary.over', { count: formatMoney(row.delta) })
       : t('periodSummary.under', { count: formatMoney(Math.abs(row.delta)) });
 
+  const bar = (value: number, fill: string) => (
+    <View style={[styles.track, { backgroundColor: theme.surfaceSoft }]}>
+      <View
+        style={[
+          styles.fill,
+          { backgroundColor: fill, width: barWidth(value, barMax) },
+        ]}
+      />
+    </View>
+  );
+
   return (
     <View
       style={[
         styles.root,
-        {
-          backgroundColor: theme[look.surface],
-          borderColor: theme[look.accent],
-        },
+        { backgroundColor: theme.surface, borderColor: theme.border },
       ]}
       accessibilityLabel={`${title}. ${t('periodSummary.plan')}: ${row.planned}. ${t('periodSummary.fact')}: ${row.actual}. ${deltaLabel}`}
     >
       <View style={styles.header}>
-        <Shape variant={look.marker} size={18} color={theme[look.accent]} />
-        <Text variant="bodyBold" themeColor={look.label} style={styles.title}>
+        <PixelIcon name={look.icon} />
+        <Text variant="bodyBold" style={styles.title}>
           {title}
         </Text>
-        <Text variant="small" themeColor="textSecondary">
-          {deltaLabel}
-        </Text>
+        {onPlan ? (
+          <View style={styles.delta}>
+            <PixelIcon name="check" size={12} />
+            <Text variant="machine" style={styles.deltaText}>
+              {deltaLabel}
+            </Text>
+          </View>
+        ) : (
+          <Text variant="code" themeColor="warning" style={styles.deltaText}>
+            {`! ${deltaLabel}`}
+          </Text>
+        )}
       </View>
 
       <View style={styles.bars}>
         <View style={styles.barRow}>
-          <Text variant="label" themeColor="textMuted" style={styles.barLabel}>
+          <Text variant="small" themeColor="textMuted" style={styles.barLabel}>
             {t('periodSummary.plan')}
           </Text>
-          <View style={[styles.track, { backgroundColor: theme.surface }]}>
-            <View
-              style={[
-                styles.fill,
-                {
-                  backgroundColor: theme[look.accent],
-                  opacity: 0.45,
-                  width: barWidth(row.planned, barMax),
-                },
-              ]}
-            />
-          </View>
-          <Text variant="smallBold" style={styles.amount}>
+          {bar(row.planned, theme.borderStrong)}
+          <Text variant="code" style={styles.amount}>
             {formatMoney(row.planned)}
           </Text>
         </View>
 
         <View style={styles.barRow}>
-          <Text variant="label" themeColor="textMuted" style={styles.barLabel}>
+          <Text variant="small" themeColor="textMuted" style={styles.barLabel}>
             {t('periodSummary.fact')}
           </Text>
-          <View style={[styles.track, { backgroundColor: theme.surface }]}>
-            <View
-              style={[
-                styles.fill,
-                {
-                  backgroundColor: theme[look.accent],
-                  width: barWidth(row.actual, barMax),
-                },
-              ]}
-            />
-          </View>
-          <Text variant="smallBold" style={styles.amount}>
+          {bar(row.actual, theme.phosphor)}
+          <Text variant="code" style={styles.amount}>
             {formatMoney(row.actual)}
           </Text>
         </View>
@@ -121,11 +117,12 @@ export const ComparisonRow = ({ row, barMax }: ComparisonRowProps) => {
 
 const styles = StyleSheet.create({
   amount: {
-    minWidth: 36,
+    fontFamily: FONTS.monoStrong,
+    minWidth: 32,
     textAlign: 'right',
   },
   barLabel: {
-    minWidth: 40,
+    minWidth: 44,
   },
   barRow: {
     alignItems: 'center',
@@ -136,27 +133,30 @@ const styles = StyleSheet.create({
     gap: SPACING.one,
   },
   fill: {
-    borderRadius: RADII.pill,
+    borderRadius: RADII.xs,
     height: '100%',
   },
+  delta: { alignItems: 'center', flexDirection: 'row', gap: SPACING.one },
+  deltaText: { fontFamily: FONTS.monoStrong, fontSize: 13, lineHeight: 18 },
   header: {
     alignItems: 'center',
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: SPACING.two,
   },
   root: {
-    borderRadius: RADII.l,
-    borderWidth: 1.5,
+    borderRadius: RADII.m,
+    borderWidth: 2,
     gap: SPACING.two,
-    padding: SPACING.three,
+    padding: SPACING.compact,
   },
   title: {
     flex: 1,
   },
   track: {
-    borderRadius: RADII.pill,
+    borderRadius: RADII.xs,
     flex: 1,
-    height: 12,
+    height: 10,
     overflow: 'hidden',
   },
 });

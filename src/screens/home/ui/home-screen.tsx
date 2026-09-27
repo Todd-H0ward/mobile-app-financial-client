@@ -7,7 +7,7 @@ import {
   useLocalSearchParams,
   useRouter,
 } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { RoomScene, type SceneView } from '@/widgets/room-scene';
@@ -36,14 +36,12 @@ import {
   type WatcherPageId,
 } from '@/entities/watcher';
 
-import {
-  CONTENT_PADDING,
-  DYNAMIC_ROUTES,
-  SPACING,
-  STATIC_ROUTES,
-} from '@/shared/constants';
-import { useTranslation } from '@/shared/i18n';
-import { SettingsIcon, ThemedView } from '@/shared/ui';
+import { DYNAMIC_ROUTES, SPACING, STATIC_ROUTES } from '@/shared/constants';
+import { ThemedView } from '@/shared/ui';
+
+import { useHomeHud } from '../model';
+
+import { HomeDock, HomeHudBoard } from './home-hud';
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -75,7 +73,7 @@ const isWatcherPage = (value: unknown): value is WatcherPageId =>
 export const HomeScreen = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { t } = useTranslation();
+  const hud = useHomeHud();
   const params = useLocalSearchParams<{
     watcher?: string;
     page?: string;
@@ -218,18 +216,27 @@ export const HomeScreen = () => {
           isCameraRig={isCameraRigEnabled}
         />
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('home.settingsA11y')}
-          onPress={() => navigate(STATIC_ROUTES.SETTINGS)}
-          style={[
-            styles.settings,
-            { top: insets.top + SPACING.one, right: CONTENT_PADDING },
-          ]}
-          hitSlop={12}
-        >
-          <SettingsIcon color={SCENE_PALETTE.cellFrame} />
-        </Pressable>
+        {!talkingTo ? (
+          <>
+            <HomeHudBoard
+              hud={hud}
+              level={homeData.platformLevel}
+              charge={homeData.robotCharge}
+              top={insets.top}
+              onSettings={() => navigate(STATIC_ROUTES.SETTINGS)}
+            />
+            <HomeDock
+              hud={hud}
+              bottom={insets.bottom + SPACING.compact}
+              onOpen={(watcher, page) => {
+                setTalkingTo(watcher);
+                setTerminalPage(page);
+                setIsBonding(false);
+              }}
+              onTrial={(taskId) => navigate(DYNAMIC_ROUTES.task(taskId))}
+            />
+          </>
+        ) : null}
 
         {talkingTo && currentLine ? (
           <WatcherTerminal
@@ -251,13 +258,5 @@ export const HomeScreen = () => {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  settings: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 48,
-    minWidth: 48,
-    position: 'absolute',
-    zIndex: 2,
-  },
   world: { flex: 1 },
 });

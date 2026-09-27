@@ -319,6 +319,8 @@ export const useHomeHudSource = () =>
         savings: user.savings,
         tasks: user.tasks,
         phase: user.period.phase,
+        /** 1-based — the planning card says "период 3 · начало". */
+        periodIndex: user.period.index,
         isAnimationEnabled: user.settings.isAnimationEnabled,
       };
     }),
