@@ -64,8 +64,8 @@
 За барьером ([parents.md](./parents.md)) остаётся взрослое: отчёт, демо-режим,
 сброс и удаление профиля.
 
-- **Звук** — `settings.isSoundEnabled`; при выключении хаптики молчат (аудио
-  ещё нет — `docs/licenses.md`). Свитч на `/settings`.
+- **Звук** — `settings.isSoundEnabled`; WAV из `assets/audio` (синтез проекта,
+  см. [licenses.md](./licenses.md)). Свитч на `/settings`.
 - **Анимации** — `settings.isAnimationEnabled` плюс системное «Уменьшить
   движение». Эффективный флаг — `useIsMotionEnabled` / `MotionEnabledProvider`;
   3D-сцена, sheet, button, switch и coin его слушают.
