@@ -59,6 +59,7 @@ import { type CameraTune, DEFAULT_CAMERA_TUNE } from '../model/camera-tune';
 import { type SceneView, useSceneCamera } from '../model/use-scene-camera';
 
 import { CameraRigPanel } from './camera-rig-panel';
+import { SceneBootOverlay } from './scene-boot-overlay';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -111,6 +112,8 @@ interface RoomSceneProps {
   isAnimated?: boolean;
   /** Framing desk at the top: dial elevations / fit / platform, then paste the dump into `camera.ts`. */
   isCameraRig?: boolean;
+  /** Fired when the boot cover should show or hide — home gates the HUD on this. */
+  onReadyChange?: (isReady: boolean) => void;
 }
 
 // ═══════════════════════════════════════════
@@ -217,6 +220,7 @@ export const RoomScene = ({
   mapHud = null,
   isAnimated = true,
   isCameraRig = false,
+  onReadyChange,
 }: RoomSceneProps) => {
   const insets = useSafeAreaInsets();
   const [tune, setTune] = useState<CameraTune>(DEFAULT_CAMERA_TUNE);
@@ -236,6 +240,16 @@ export const RoomScene = ({
     width: number;
     height: number;
   } | null>(null);
+  /** False until dog + watchers settle (or fail) for the live GL context. */
+  const [isSceneReady, setSceneReady] = useState(false);
+  const readyGeneration = useRef(0);
+  const onReadyChangeRef = useRef(onReadyChange);
+  onReadyChangeRef.current = onReadyChange;
+
+  const reportReady = useCallback((isReady: boolean) => {
+    setSceneReady(isReady);
+    onReadyChangeRef.current?.(isReady);
+  }, []);
 
   const frame = useRef<number | null>(null);
   /** Bumped whenever a new GL context owns the loop — stale RAFs exit. */
@@ -473,6 +487,10 @@ export const RoomScene = ({
       model.current = null;
       renderer.current = null;
 
+      readyGeneration.current += 1;
+      const readyId = readyGeneration.current;
+      reportReady(false);
+
       const webgl = createRenderer(gl);
       // expo-gl already hands us a buffer in device pixels.
       webgl.setPixelRatio(1);
@@ -522,6 +540,11 @@ export const RoomScene = ({
       // Re-seat the orbit against the (possibly hot-reloaded) elevations.
       camera.jumpToView(viewRef.current);
       built.setNumberFace(viewRef.current === 'top' ? 'top' : 'front');
+
+      void built.whenReady.then(() => {
+        if (readyGeneration.current !== readyId) return;
+        reportReady(true);
+      });
 
       // Reused every frame: a fresh Color sixty times a second is litter.
       const clear = new Color(clearColor.current);
@@ -663,7 +686,7 @@ export const RoomScene = ({
 
       loop();
     },
-    [camera],
+    [camera, reportReady],
   );
 
   const onLayout = (event: LayoutChangeEvent) => {
@@ -936,6 +959,8 @@ export const RoomScene = ({
           )}
         </View>
       </GestureDetector>
+
+      <SceneBootOverlay isReady={isSceneReady} />
 
       {isCameraRig ? (
         <View

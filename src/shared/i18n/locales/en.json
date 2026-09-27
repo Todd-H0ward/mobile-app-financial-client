@@ -1325,6 +1325,7 @@
   "app": {
     "name": "Above Zero",
     "booting": "terminal booting",
+    "loadingScene": "raising the arena",
     "offline": "no internet · no sign-up"
   },
   "boxes": {

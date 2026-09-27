@@ -109,6 +109,7 @@ export const HomeScreen = () => {
   const [isBonding, setIsBonding] = useState(false);
   const [terminalPage, setTerminalPage] = useState<WatcherPageId>('greeting');
   const [isRobotOpen, setIsRobotOpen] = useState(false);
+  const [isSceneReady, setSceneReady] = useState(false);
   const isRobotOpenRef = useRef(false);
   const viewBeforeRobot = useRef<SceneView | null>(null);
   isRobotOpenRef.current = isRobotOpen;
@@ -319,6 +320,7 @@ export const HomeScreen = () => {
             isAnimated={isMotionEnabled}
             isCameraRig={isCameraRigEnabled}
             isCovered={isArenaCovered}
+            onReadyChange={setSceneReady}
           />
         </Animated.View>
 
@@ -331,7 +333,7 @@ export const HomeScreen = () => {
           </TerminalDock>
         ) : null}
 
-        {!talkingTo && !isRobotOpen ? (
+        {isSceneReady && !talkingTo && !isRobotOpen ? (
           <>
             <HomeHudBoard
               hud={hud}
@@ -358,7 +360,7 @@ export const HomeScreen = () => {
           </>
         ) : null}
 
-        {talkingTo && currentLine ? (
+        {talkingTo && currentLine && isSceneReady ? (
           <WatcherTerminal
             key={`${talkingTo}-${terminalPage}`}
             watcher={talkingTo}

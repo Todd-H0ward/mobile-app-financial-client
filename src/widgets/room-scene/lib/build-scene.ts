@@ -169,6 +169,11 @@ interface SceneModel {
   setMapHudStats: (stats: MapHudStats) => void;
   /** Moves the arena under the look-at point (camera-rig knob). */
   setPlatformY: (y: number) => void;
+  /**
+   * Settles when the dog and both watchers have loaded or failed — the boot
+   * cover waits on this so models do not pop in over an empty pit.
+   */
+  whenReady: Promise<void>;
   /** Frees every buffer the GL context is holding. */
   dispose: () => void;
 }
@@ -432,6 +437,18 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     console.warn('[room-scene] robot dog coat failed to load', error);
   };
 
+  /** Dog + watchers; dispose also settles so a torn-down scene never hangs the cover. */
+  let pendingAssets = 2;
+  let settleReady: () => void = () => {};
+  const whenReady = new Promise<void>((resolve) => {
+    settleReady = resolve;
+  });
+  const markAssetSettled = () => {
+    if (pendingAssets <= 0) return;
+    pendingAssets -= 1;
+    if (pendingAssets === 0) settleReady();
+  };
+
   // Three and a half megabytes of robot dog — dynamic import so a missing or broken GLB cannot take.
   const characterMount = new Group();
   let character: CenterCharacter | null = null;
@@ -468,7 +485,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       })
       .catch((error: unknown) => {
         console.warn('[room-scene] center character failed to load', error);
-      });
+      })
+      .finally(markAssetSettled);
   };
 
   loadCharacter();
@@ -492,8 +510,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     })
     .catch((error: unknown) => {
       console.warn('[room-scene] watchers failed to load', error);
-    });
-
+    })
+    .finally(markAssetSettled);
   const rooms: MeshPhongMaterial[] = [];
   const geometries: BufferGeometry[] = [];
   const frames: LineBasicMaterial[] = [];
@@ -1154,6 +1172,9 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   };
 
   const dispose = () => {
+    // Unblock any boot cover waiting on this instance.
+    pendingAssets = 0;
+    settleReady();
     watchersDisposed = true;
     watchers?.dispose();
     watchers = null;
@@ -1226,6 +1247,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       mapHud.setStats(stats);
     },
     setPlatformY,
+    whenReady,
     dispose,
   };
 };
