@@ -58,7 +58,8 @@ const WATCHER_UNITS_PER_METRE = 58;
  * Read in the overhead view's frame, which the rig is aligned to: X is
  * sideways, Y up, Z towards the camera. The strict one takes the right, the
  * kind one the left, and both hang high enough to be above the rim rather
- * than in front of it.
+ * than in front of it — but not so high that the Home HUD on a phone clips
+ * their faces (y 420 clears the top board; 500 did not).
  *
  * They are pushed out towards the corners as far as the frame allows and no
  * further, which is why the two numbers differ. The camera sits some 2 200
@@ -69,8 +70,8 @@ const WATCHER_UNITS_PER_METRE = 58;
  * watcher with its face off the screen is not watching.
  */
 const WATCHER_PLACEMENT = {
-  overseer: { x: 250, y: 500, z: 260 },
-  keeper: { x: -222, y: 500, z: 260 },
+  overseer: { x: 250, y: 420, z: 260 },
+  keeper: { x: -222, y: 420, z: 260 },
 } as const;
 
 /**
