@@ -76,7 +76,7 @@ export const EntryScreen = () => {
         <Button
           size="l"
           isFullWidth
-          onPress={() => router.replace(STATIC_ROUTES.HOME)}
+          onPress={() => router.dismissTo(STATIC_ROUTES.HOME)}
         >
           {t('returning.continue')}
         </Button>

@@ -16,11 +16,10 @@ src/
 │   ├── index.tsx             # → screens/entry
 │   ├── home.tsx
 │   ├── lesson/[cellId].tsx
-│   ├── budget-plan.tsx
 │   ├── end-period.tsx
 │   ├── period-summary.tsx
 │   ├── recovery.tsx
-│   ├── shop/ · savings/ · tasks/ · games/
+│   ├── modules.tsx · savings/ · tasks/[taskId] · games/
 │   ├── history.tsx · glossary.tsx
 │   └── settings.tsx · parents.tsx · ui-kit.tsx
 ├── _app/
@@ -29,14 +28,13 @@ src/
 │   ├── entry/                # / → гостевой профиль → /home
 │   ├── home/                 # 3D-яма с робопсом (2.5.3)
 │   ├── lesson/               # урок за клеткой сцены
-│   ├── budget-plan/          # план по трём направлениям (2.5.5)
 │   ├── end-period/           # мягкое подтверждение конца дня
 │   ├── period-summary/       # план vs факт (2.5.5)
 │   ├── recovery/             # путь после периода (2.5.9)
-│   ├── shop/                 # каталог покупок (2.5.6)
+│   ├── modules/              # установка купленных модулей
 │   ├── savings/              # цели и копилка (2.5.7)
-│   ├── tasks/                # задания (2.5.8)
-│   ├── games/                # аркада за chores
+│   ├── tasks/                # экран испытания (2.5.8)
+│   ├── games/                # мини-игры Смотрителя
 │   ├── history/ · glossary/  # 2.5.11
 │   ├── settings/ · parents/  # ребёнок / взрослый (2.5.12)
 │   └── ui-kit/               # витрина дизайн-системы

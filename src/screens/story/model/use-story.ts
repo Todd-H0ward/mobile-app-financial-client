@@ -39,7 +39,7 @@ export const useStory = () => {
     if (id && user) {
       updateUser((current) => markStorySeen(current, id));
     }
-    router.replace(STATIC_ROUTES.HOME);
+    router.dismissTo(STATIC_ROUTES.HOME);
   };
 
   return {

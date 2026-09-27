@@ -18,5 +18,4 @@ export {
   RADII,
   SPACING,
   SPACING_BASE,
-  TERMINAL,
 } from './theme';

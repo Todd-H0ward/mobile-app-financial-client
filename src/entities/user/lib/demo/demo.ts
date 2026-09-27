@@ -1,4 +1,4 @@
-import { listCatalogue } from '@/entities/catalogue';
+import { listCatalogue, pickBuyable } from '@/entities/catalogue';
 import { getGoalById } from '@/entities/goal';
 import {
   DEFAULT_ROBOT_DOG_ACTION,
@@ -120,7 +120,11 @@ const playDemoPeriod = (user: UserSave, time: TimeSource): UserSave => {
     const result = applyCompleteTask(next, task.id, time);
     if (result.ok) next = result.user;
   }
-  for (const item of DEMO_BASKET) {
+  for (const basketItem of DEMO_BASKET) {
+    // One-time things (modules, looks) are bought once; later periods reach
+    // for the nearest one still in the shop, so every period shows a want.
+    const item = pickBuyable(basketItem.id, next.ownedItemIds);
+    if (!item) continue;
     const direction = item.kind === 'need' ? 'needs' : 'wants';
     if (next.period.fact[direction] > 0) continue;
     const result = applyPurchase(next, item.id, time);
@@ -150,7 +154,8 @@ const stepDemoPeriod = (user: UserSave, time: TimeSource): UserSave => {
   switch (user.period.phase) {
     case 'planning': {
       const needs = Math.min(user.wallet.balance, DEMO_BASKET[0].price);
-      const wants = Math.min(user.wallet.balance - needs, DEMO_BASKET[1].price);
+      const want = pickBuyable(DEMO_BASKET[1].id, user.ownedItemIds);
+      const wants = Math.min(user.wallet.balance - needs, want?.price ?? 0);
       const savings = user.wallet.balance - needs - wants;
       return startPeriod(
         {

@@ -80,7 +80,7 @@ export const GamesScreen = () => {
             variant="secondary"
             isFullWidth
             onPress={() =>
-              router.push(DYNAMIC_ROUTES.watcher('keeper', 'shop'))
+              router.dismissTo(DYNAMIC_ROUTES.watcher('keeper', 'shop'))
             }
           >
             {t('games.puzzle.goToys')}
@@ -88,7 +88,7 @@ export const GamesScreen = () => {
           <Button
             variant="ghost"
             isFullWidth
-            onPress={() => router.replace(STATIC_ROUTES.HOME)}
+            onPress={() => router.dismissTo(STATIC_ROUTES.HOME)}
           >
             {t('common.back')}
           </Button>

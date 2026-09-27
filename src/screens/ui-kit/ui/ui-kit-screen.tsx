@@ -5,48 +5,28 @@ import { HintButton } from '@/widgets/hint-button';
 import { SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import {
-  AnimatedIcon,
-  BackIcon,
   Button,
   Card,
   ChamferCard,
-  CheckIcon,
   Chip,
-  CloseIcon,
   Coin,
   CoinBadge,
-  CoinIcon,
-  Collapsible,
   clearToasts,
   dismissToast,
-  ExternalLink,
-  GlassSurface,
-  HelpIcon,
-  HintRow,
-  HomeIcon,
   Input,
-  LineChart,
   ListGroup,
   ListRow,
-  MeterCard,
-  MinusIcon,
-  PawIcon,
   PIXEL_ICON_NAMES,
-  PiggyIcon,
   PixelIcon,
-  PlusIcon,
   ProgressBar,
   RingsBackdrop,
-  ScratchCard,
   Screen,
   Segmented,
   Shape,
   Sheet,
-  ShopIcon,
   Slider,
   SplashOverlay,
   Switch,
-  TasksIcon,
   TerminalDock,
   TerminalPanel,
   Text,
@@ -63,14 +43,7 @@ import { KitSection } from './kit-section';
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-const BUTTON_VARIANTS = [
-  'primary',
-  'accent',
-  'success',
-  'secondary',
-  'ghost',
-  'warning',
-] as const;
+const BUTTON_VARIANTS = ['primary', 'secondary', 'ghost', 'warning'] as const;
 
 const BUTTON_SIZES = ['xl', 'l', 'm', 's'] as const;
 
@@ -103,25 +76,6 @@ const CHIP_VARIANTS = [
   'rule',
   'locked',
 ] as const;
-
-/** The whole icon set, in the order the kit shows it. */
-const ICONS = [
-  ['HomeIcon', HomeIcon],
-  ['ShopIcon', ShopIcon],
-  ['TasksIcon', TasksIcon],
-  ['PiggyIcon', PiggyIcon],
-  ['PawIcon', PawIcon],
-  ['BackIcon', BackIcon],
-  ['PlusIcon', PlusIcon],
-  ['MinusIcon', MinusIcon],
-  ['CheckIcon', CheckIcon],
-  ['CloseIcon', CloseIcon],
-  ['HelpIcon', HelpIcon],
-  ['CoinIcon', CoinIcon],
-] as const;
-
-/** Sizes an icon is asked for today: inline, default, and a tab bar's. */
-const ICON_SIZES = [12, 24, 36] as const;
 
 const SHAPE_VARIANTS = [
   'circle',
@@ -172,27 +126,28 @@ export const UiKitScreen = () => {
           title="Playground"
           caption="Переключатели действуют на все секции сразу"
         >
-          <HintRow>
-            <HintRow.Title>Loading</HintRow.Title>
-            <HintRow.Hint>
-              <Switch
-                label="Loading"
-                isChecked={playground.isLoading}
-                onChange={playground.setIsLoading}
-              />
-            </HintRow.Hint>
-          </HintRow>
-
-          <HintRow>
-            <HintRow.Title>Disabled</HintRow.Title>
-            <HintRow.Hint>
-              <Switch
-                label="Disabled"
-                isChecked={playground.isDisabled}
-                onChange={playground.setIsDisabled}
-              />
-            </HintRow.Hint>
-          </HintRow>
+          <ListGroup style={styles.fullWidth}>
+            <ListGroup.Item
+              title="Loading"
+              trailing={
+                <Switch
+                  label="Loading"
+                  isChecked={playground.isLoading}
+                  onChange={playground.setIsLoading}
+                />
+              }
+            />
+            <ListGroup.Item
+              title="Disabled"
+              trailing={
+                <Switch
+                  label="Disabled"
+                  isChecked={playground.isDisabled}
+                  onChange={playground.setIsDisabled}
+                />
+              }
+            />
+          </ListGroup>
         </KitSection>
 
         <KitSection
@@ -421,7 +376,7 @@ export const UiKitScreen = () => {
           ))}
 
           <KitSection.Row label="themeColor перебивает цвет варианта">
-            <Text variant="linkPrimary" themeColor="accentStrong">
+            <Text variant="linkPrimary" themeColor="coin">
               Ссылка акцентным цветом
             </Text>
           </KitSection.Row>
@@ -518,7 +473,7 @@ export const UiKitScreen = () => {
             </Button>
           </KitSection.Row>
           <KitSection.Row label="Button.Label рядом с иконкой">
-            <Button variant="accent" onPress={() => toast('Покупка')}>
+            <Button variant="primary" onPress={() => toast('Покупка')}>
               <Shape variant="circle" size={18} color={theme.coin} />
               <Button.Label>Купить за 15</Button.Label>
             </Button>
@@ -528,26 +483,6 @@ export const UiKitScreen = () => {
             <Button isFullWidth onPress={() => toast('Во всю ширину')}>
               Во всю ширину
             </Button>
-          </KitSection.Row>
-        </KitSection>
-
-        <KitSection
-          title="GlassSurface"
-          caption="Сплошные поверхности без стекла; прежний API сохранён"
-        >
-          <KitSection.Row label="surface / surfaceSoft">
-            <GlassSurface
-              tone="surface"
-              style={{ padding: 16, borderRadius: 16 }}
-            >
-              <Text>Поверхность</Text>
-            </GlassSurface>
-            <GlassSurface
-              tone="surfaceSoft"
-              style={{ padding: 16, borderRadius: 16 }}
-            >
-              <Text>Приподнятая поверхность</Text>
-            </GlassSurface>
           </KitSection.Row>
         </KitSection>
 
@@ -657,80 +592,6 @@ export const UiKitScreen = () => {
         </KitSection>
 
         <KitSection
-          title="ScratchCard"
-          caption="Сотри защитный слой пальцем — как на лотерейном билете"
-        >
-          <ScratchCard foilLabel="Потри пальцем">
-            <Coin size={40} isActive />
-            <CoinBadge amount={100} label="стартовые" />
-          </ScratchCard>
-        </KitSection>
-
-        <KitSection
-          title="Collapsible"
-          caption="Неуправляемый и управляемый — реальное раскрытие"
-        >
-          <KitSection.Row label="uncontrolled">
-            <Collapsible style={styles.fullWidth}>
-              <Collapsible.Trigger>Как начисляются монеты</Collapsible.Trigger>
-              <Collapsible.Content>
-                <Text themeColor="textSecondary">
-                  Задания приносят больше, чем игры, — иначе игры вытеснят
-                  задания.
-                </Text>
-              </Collapsible.Content>
-            </Collapsible>
-          </KitSection.Row>
-
-          <KitSection.Row label="controlled — состояние в use-playground">
-            <Collapsible
-              isOpen={playground.isCollapsibleOpen}
-              onOpenChange={playground.setIsCollapsibleOpen}
-              style={styles.fullWidth}
-            >
-              <Collapsible.Trigger>
-                <Text variant="smallBold">
-                  {playground.isCollapsibleOpen ? 'Свернуть' : 'Развернуть'}
-                </Text>
-              </Collapsible.Trigger>
-              <Collapsible.Content>
-                <Text themeColor="textSecondary">
-                  Триггер принимает не только строку, но и любой узел.
-                </Text>
-              </Collapsible.Content>
-            </Collapsible>
-          </KitSection.Row>
-        </KitSection>
-
-        <KitSection
-          title="ExternalLink"
-          caption="Открывается во встроенном браузере, не уводит из приложения"
-        >
-          <KitSection.Row>
-            <ExternalLink
-              href="https://docs.expo.dev/versions/v57.0.0/"
-              asChild
-            >
-              <Text variant="linkPrimary">Документация Expo SDK 57</Text>
-            </ExternalLink>
-          </KitSection.Row>
-        </KitSection>
-
-        <KitSection title="HintRow" caption="Заголовок слева, пилюля справа">
-          <HintRow>
-            <HintRow.Title>Сегодня заработано</HintRow.Title>
-            <HintRow.Hint>45 монет</HintRow.Hint>
-          </HintRow>
-
-          <HintRow>
-            <HintRow.Title>Внутри пилюли — компонент</HintRow.Title>
-            <HintRow.Hint>
-              <CoinBadge amount={45} variant="plain" coinSize={16} />
-            </HintRow.Hint>
-          </HintRow>
-        </KitSection>
-
-        <KitSection
           title="Input"
           caption="Подпись, счётчик, плейсхолдер и предел длины"
         >
@@ -778,8 +639,8 @@ export const UiKitScreen = () => {
               title="Полить цветы"
               subtitle="15 монет"
               icon={
-                <ListRow.Icon tone="successSoft">
-                  <Shape variant="leaf" size={22} color={theme.success} />
+                <ListRow.Icon tone="surfaceSoft">
+                  <Shape variant="leaf" size={22} color={theme.phosphor} />
                 </ListRow.Icon>
               }
               trailing={<CoinBadge amount={15} variant="plain" coinSize={16} />}
@@ -798,39 +659,13 @@ export const UiKitScreen = () => {
         </KitSection>
 
         <KitSection
-          title="MeterCard"
-          caption="Три тона и крайние значения; уровень — ползунком ниже"
-        >
-          <KitSection.Row label="default / low / idle" isInline>
-            <MeterCard
-              label="Сытость"
-              value={playground.meterValue}
-              icon={<Shape variant="circle" size={20} color={theme.warning} />}
-            />
-            <MeterCard
-              label="Настроение"
-              value={playground.meterValue}
-              tone="low"
-              color="accent"
-            />
-            <MeterCard label="Сон" value={playground.meterValue} tone="idle" />
-          </KitSection.Row>
-
-          <KitSection.Row label="ноль, максимум и длинная подпись" isInline>
-            <MeterCard label="Пусто" value={0} />
-            <MeterCard label="Полно" value={1} color="success" />
-            <MeterCard label="Очень длинная подпись метра" value={0.5} />
-          </KitSection.Row>
-        </KitSection>
-
-        <KitSection
           title="ProgressBar"
           caption="Значения за пределами 0…1 обрезаются"
         >
           <KitSection.Row label="0 / текущее / 1 / 2 (обрезано)">
             <ProgressBar value={0} />
             <ProgressBar value={playground.meterValue} color="primary" />
-            <ProgressBar value={1} color="accent" />
+            <ProgressBar value={1} color="warning" />
             <ProgressBar value={2} color="warning" />
           </KitSection.Row>
 
@@ -856,107 +691,6 @@ export const UiKitScreen = () => {
           </KitSection.Row>
         </KitSection>
 
-        <KitSection
-          title="Icons"
-          caption="24×24, обводка 2 — цвет по умолчанию читаемый"
-        >
-          <KitSection.Row label="весь набор" isInline>
-            {ICONS.map(([name, Icon]) => (
-              <View key={name} style={styles.iconCell}>
-                <Icon />
-                <Text variant="label" themeColor="textMuted">
-                  {name.replace('Icon', '')}
-                </Text>
-              </View>
-            ))}
-          </KitSection.Row>
-
-          <KitSection.Row label="размеры — 16, 24, 32" isInline>
-            {ICON_SIZES.map((size) => (
-              <HomeIcon key={size} size={size} />
-            ))}
-          </KitSection.Row>
-
-          <KitSection.Row label="цвет — проп перебивает тему" isInline>
-            <CoinIcon color={theme.coin} />
-            <CheckIcon color={theme.success} />
-            <CloseIcon color={theme.textMuted} />
-            <PawIcon color={theme.primary} />
-          </KitSection.Row>
-
-          <KitSection.Row label="иконка рядом с подписью — 3.6" isInline>
-            <Button variant="accent" onPress={() => toast('Куплено')}>
-              <CoinIcon size={18} color={theme.inverseText} />
-              <Button.Label>Купить за 15</Button.Label>
-            </Button>
-          </KitSection.Row>
-
-          <KitSection.Row label="на цветной подложке" isInline>
-            <View
-              style={[styles.iconPlate, { backgroundColor: theme.primary }]}
-            >
-              <HomeIcon color={theme.inverseText} />
-            </View>
-            <View
-              style={[styles.iconPlate, { backgroundColor: theme.surfaceDeep }]}
-            >
-              <HomeIcon color={theme.textMuted} />
-            </View>
-          </KitSection.Row>
-        </KitSection>
-
-        <KitSection
-          title="LineChart"
-          caption="Одна и две серии, один замер, ровная линия и пусто"
-        >
-          <KitSection.Row label="две серии с легендой">
-            <LineChart
-              series={[
-                {
-                  values: [12, 30, 24, 41, 38, 52],
-                  color: 'success',
-                  label: 'Пришло',
-                },
-                {
-                  values: [8, 22, 31, 19, 40, 27],
-                  color: 'accent',
-                  label: 'Ушло',
-                },
-              ]}
-              labels={['1', '2', '3', '4', '5', '6']}
-              style={styles.fullWidth}
-            />
-          </KitSection.Row>
-
-          <KitSection.Row label="одна серия">
-            <LineChart
-              series={[{ values: [5, 18, 9, 27], color: 'primary' }]}
-              labels={['1', '2', '3', '4']}
-              style={styles.fullWidth}
-            />
-          </KitSection.Row>
-
-          <KitSection.Row label="один замер — точка по центру, не у края">
-            <LineChart
-              series={[{ values: [14], color: 'primary' }]}
-              labels={['1']}
-              style={styles.fullWidth}
-            />
-          </KitSection.Row>
-
-          <KitSection.Row label="всё по нулям — линия по низу, а не пустота">
-            <LineChart
-              series={[{ values: [0, 0, 0, 0], color: 'primary' }]}
-              labels={['1', '2', '3', '4']}
-              style={styles.fullWidth}
-            />
-          </KitSection.Row>
-
-          <KitSection.Row label="без данных">
-            <LineChart series={[]} style={styles.fullWidth} />
-          </KitSection.Row>
-        </KitSection>
-
         <KitSection title="Shape" caption="6 геометрий, заливка и обводка">
           <KitSection.Row label="заливка" isInline>
             {SHAPE_VARIANTS.map((variant) => (
@@ -975,7 +709,7 @@ export const UiKitScreen = () => {
                 key={variant}
                 variant={variant}
                 size={32}
-                color={theme.accent}
+                color={theme.warning}
                 isOutlined
               />
             ))}
@@ -1057,7 +791,7 @@ export const UiKitScreen = () => {
               min={5}
               max={95}
               step={10}
-              color="accent"
+              color="warning"
               onChange={(value) => playground.setMeterValue(value / 100)}
             />
           </KitSection.Row>
@@ -1068,7 +802,7 @@ export const UiKitScreen = () => {
               min={0}
               max={1}
               step={0.1}
-              color="success"
+              color="primary"
               onChange={playground.setMeterValue}
             />
           </KitSection.Row>
@@ -1079,9 +813,9 @@ export const UiKitScreen = () => {
               min={0}
               max={100}
               step={5}
-              color="accent"
+              color="warning"
               isThumbFilled
-              track={[theme.surface, theme.surfaceDeep, theme.accent]}
+              track={[theme.surface, theme.surfaceDeep, theme.warning]}
               onChange={playground.setSliderValue}
             />
           </KitSection.Row>
@@ -1150,7 +884,7 @@ export const UiKitScreen = () => {
             </Button>
             <Button
               size="s"
-              variant="accent"
+              variant="primary"
               onPress={() => toast('Не хватает монет', { variant: 'warning' })}
             >
               warning
@@ -1188,15 +922,9 @@ export const UiKitScreen = () => {
         </KitSection>
 
         <KitSection
-          title="AnimatedIcon / SplashOverlay"
-          caption="Обе анимации играют по-настоящему"
+          title="SplashOverlay"
+          caption="Терминал включается над ямой — проигрывается по-настоящему"
         >
-          <KitSection.Row label="AnimatedIcon — свечение вращается бесконечно">
-            <View style={styles.iconStage}>
-              <AnimatedIcon />
-            </View>
-          </KitSection.Row>
-
           <KitSection.Row label="SplashOverlay — проигрывается один раз">
             <Button
               size="s"
@@ -1268,24 +996,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   stack: { gap: SPACING.two, width: '100%' },
-  iconCell: {
-    alignItems: 'center',
-    gap: SPACING.half,
-    width: 62,
-  },
-  iconPlate: {
-    alignItems: 'center',
-    borderRadius: SPACING.two,
-    height: 44,
-    justifyContent: 'center',
-    width: 44,
-  },
-  iconStage: {
-    alignItems: 'center',
-    alignSelf: 'stretch',
-    height: 220,
-    justifyContent: 'center',
-  },
   swatch: {
     alignItems: 'center',
     borderRadius: SPACING.two,

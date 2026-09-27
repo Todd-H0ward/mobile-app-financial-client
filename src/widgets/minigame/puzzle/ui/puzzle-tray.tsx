@@ -131,7 +131,7 @@ export const PuzzleTray = ({
           accessibilityRole="button"
           accessibilityLabel={t('games.puzzle.reshuffle')}
         >
-          <Text variant="small" themeColor="accent">
+          <Text variant="small" themeColor="phosphor">
             {t('games.puzzle.reshuffle')}
           </Text>
         </Pressable>

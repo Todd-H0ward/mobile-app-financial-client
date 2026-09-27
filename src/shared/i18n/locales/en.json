@@ -367,36 +367,6 @@
     },
     "label": "hint"
   },
-  "budgetPlan": {
-    "title": "Budget plan",
-    "available": "Available this period: {{count}}",
-    "remainder": "Left to allocate: {{count}}",
-    "remainderHint": "You do not have to allocate every coin — the remainder carries into the next period.",
-    "brokeHint": "The wallet is empty — earn on chores first, then open the plan again.",
-    "progressA11y": "Plan laid out: {{percent}} percent",
-    "confirm": "Confirm plan",
-    "confirmBroke": "Start the day and earn",
-    "stepperMinusA11y": "Remove coin: {{label}}",
-    "stepperPlusA11y": "Add coin: {{label}}",
-    "needsZeroTitle": "Nothing set aside for needs",
-    "needsZeroBody": "There will be nothing to buy food and other needs with. Confirm the plan anyway?",
-    "needsZeroKeep": "Back to the plan",
-    "needsZeroConfirm": "Confirm anyway",
-    "directions": {
-      "needs": {
-        "title": "Needs",
-        "example": "Food, soap"
-      },
-      "wants": {
-        "title": "Wants",
-        "example": "Toy car, stickers"
-      },
-      "savings": {
-        "title": "Savings",
-        "example": "Saving for a scooter"
-      }
-    }
-  },
   "periodSummary": {
     "title": "Period {{period}} — totals",
     "subtitle": "Plan next to fact",
@@ -1237,7 +1207,6 @@
         "wallet": "wallet: {{count}}",
         "jarLeft": "{{count}} left to hit the jar plan",
         "supportBody": "The plan is slipping — that is fine. Fix charge or modules, then we go on.",
-        "openPlan": "open plan",
         "support": "support",
         "spent": "spent",
         "of": "of",

@@ -19,16 +19,14 @@ import {
 import {
   CONTENT_PADDING,
   MAX_CONTENT_WIDTH,
-  RADII,
   SPACING,
   type Spacing,
   STATIC_ROUTES,
   type ThemeColor,
 } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
-import { hitSlopFor } from '@/shared/utils';
 
-import { GlassSurface } from './glass-surface';
+import { Button } from './button';
 import { PixelIcon } from './pixel-icon';
 import { RingsBackdrop } from './rings-backdrop';
 import { TerminalPanel, type TerminalVariant } from './terminal-panel';
@@ -66,8 +64,6 @@ interface ScreenRootProps {
 }
 
 interface ScreenBackProps {
-  tone?: ThemeColor;
-  color?: ThemeColor;
   accessibilityLabel?: string;
 }
 
@@ -100,8 +96,6 @@ type ScreenSubtitleProps = TextProps;
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** Visual size of the back control; hitSlop expands it to HIT_SLOP_SIZE. */
-const BACK_SIZE = 48;
 /** The strip of the pit above the terminal. */
 const PIT_HEIGHT = 56;
 /**
@@ -114,33 +108,26 @@ const SHEET_TOP_CLEARANCE = 104;
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-const ScreenBack = ({
-  tone = 'surface',
-  color = 'text',
-  accessibilityLabel,
-}: ScreenBackProps) => {
+/** UI kit 04 "иконки 48": the bordered square, same as in every terminal. */
+const ScreenBack = ({ accessibilityLabel }: ScreenBackProps) => {
   const { t } = useTranslation();
-  const theme = useTheme();
   const router = useRouter();
 
   return (
-    <GlassSurface
-      tone={tone}
-      accessibilityRole="button"
+    <Button
+      variant="icon"
       accessibilityLabel={accessibilityLabel ?? t('common.back')}
-      hitSlop={hitSlopFor(BACK_SIZE)}
       onPress={() => {
         if (router.canGoBack()) {
           router.back();
           return;
         }
 
-        router.replace(STATIC_ROUTES.HOME);
+        router.dismissTo(STATIC_ROUTES.HOME);
       }}
-      style={[styles.back, { borderColor: theme.borderStrong }]}
     >
-      <PixelIcon name="back" tone={color} />
-    </GlassSurface>
+      <PixelIcon name="back" />
+    </Button>
   );
 };
 
@@ -241,7 +228,7 @@ const ScreenRoot = ({
   if (presentation === 'sheet') {
     const close = () => {
       if (router.canGoBack()) router.back();
-      else router.replace(STATIC_ROUTES.HOME);
+      else router.dismissTo(STATIC_ROUTES.HOME);
     };
     const maxHeight = Math.max(
       320,
@@ -370,14 +357,6 @@ export const Screen = Object.assign(ScreenRoot, {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-  },
-  back: {
-    alignItems: 'center',
-    borderRadius: RADII.s,
-    borderWidth: 2,
-    height: BACK_SIZE,
-    justifyContent: 'center',
-    width: BACK_SIZE,
   },
   column: {
     maxWidth: MAX_CONTENT_WIDTH,

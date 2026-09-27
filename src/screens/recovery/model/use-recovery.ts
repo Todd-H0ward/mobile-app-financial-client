@@ -8,7 +8,7 @@ import {
 } from '@/entities/budget';
 import { endPeriod, useCommitUser, useUser } from '@/entities/user';
 
-import { STATIC_ROUTES } from '@/shared/constants';
+import { DYNAMIC_ROUTES, STATIC_ROUTES } from '@/shared/constants';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -26,10 +26,10 @@ interface RecoveryController {
 // HELPERS
 // ═══════════════════════════════════════════
 
-const routeFor = (destination: RecoveryDestination) => {
-  if (destination === 'budgetPlan') return STATIC_ROUTES.BUDGET_PLAN;
-  return STATIC_ROUTES.HOME;
-};
+const routeFor = (destination: RecoveryDestination) =>
+  destination === 'budgetPlan'
+    ? DYNAMIC_ROUTES.watcher('keeper', 'plan')
+    : STATIC_ROUTES.HOME;
 
 // ═══════════════════════════════════════════
 // HOOK
@@ -52,16 +52,10 @@ export const useRecovery = (): RecoveryController | null => {
   const settleAndGo = (destination: RecoveryDestination) => {
     if (!commitUser(user, endPeriod(user))) return;
 
-    const next = routeFor(destination);
-
-    // Pop summary/recovery off the stack first. `replace` alone left those
-    // screens underneath budget-plan, so Back reopened a stale summary that
-    // Redirects to home — looks like the back button is broken.
-    if (router.canDismiss()) {
-      router.dismissTo(STATIC_ROUTES.HOME);
-    }
-    if (next === STATIC_ROUTES.HOME) return;
-    router.push(next);
+    // Pop summary/recovery off the stack onto the one arena, never a second
+    // copy of it: a pushed home would build another 3D scene on top, and
+    // Back would reopen a stale summary that redirects home.
+    router.dismissTo(routeFor(destination));
   };
 
   return {

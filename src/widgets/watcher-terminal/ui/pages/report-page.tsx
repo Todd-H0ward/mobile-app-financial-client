@@ -209,13 +209,6 @@ export const ReportPage = ({ frame }: ReportPageProps) => {
             label={t('watcher.terminal.report.history')}
             onPress={() => router.push(STATIC_ROUTES.HISTORY as Href)}
           />
-          {isSlipping ? (
-            <TerminalMenuRow
-              icon="plan"
-              label={t('watcher.terminal.report.openPlan')}
-              onPress={() => router.push(STATIC_ROUTES.BUDGET_PLAN as Href)}
-            />
-          ) : null}
         </TerminalMenu>
       </ScrollView>
     </TerminalShell>

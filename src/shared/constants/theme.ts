@@ -27,39 +27,18 @@ const TERMINAL_COLORS = {
   onAccent: '#0B1A12',
   primary: '#9EF0A8',
   primaryPressed: '#7FD08A',
-  primaryShadow: '#4E8C5E',
   primarySoft: '#1B3A26',
   primaryStrong: '#9EF0A8',
-  // Legacy action roles resolve to green: orange belongs to the Overseer's voice.
-  accent: '#9EF0A8',
-  accentPressed: '#7DCE8A',
-  accentShadow: '#4E8C5E',
-  accentSoft: '#1B3A26',
-  accentStrong: '#9EF0A8',
-  success: '#9EF0A8',
-  successPressed: '#7DCE8A',
-  successShadow: '#4E8C5E',
-  successSoft: '#1B3A26',
-  successStrong: '#9EF0A8',
   warning: '#F2C879',
   warningSoft: '#302B1C',
-  warningStrong: '#F2C879',
   coin: '#F2C879',
-  coinBorder: '#F2C879',
-  coinSoft: '#302B1C',
   parent: '#8CC596',
-  parentBackground: '#0E2016',
-  parentSurface: '#132B1C',
-  parentBorder: '#2F5E3E',
-  parentText: '#E3F7E5',
-  parentTextSecondary: '#A9D8B0',
   disabled: '#1B3A26',
   onDisabled: '#6FA87A',
   overlay: 'rgba(11, 26, 18, 0.72)',
   /** Light veil behind a sheet: the game stays readable underneath. */
   scrim: 'rgba(11, 26, 18, 0.32)',
   scanline: 'rgba(158, 240, 168, 0.04)',
-  vignette: 'rgba(0, 0, 0, 0.32)',
   glow: 'rgba(158, 240, 168, 0.45)',
   inverseSurface: '#9EF0A8',
   inverseText: '#0B1A12',
@@ -71,11 +50,8 @@ const TERMINAL_COLORS = {
   arcadeLcd: '#9EF0A8',
   arcadeLcdDim: '#8CC596',
   overseerLcd: '#F5A55A',
-  overseerLcdDim: '#A9D8B0',
-  overseerScreen: '#0E2016',
   /** The Overseer's task card and speech bubble — amber-tinted screen. */
   overseerSurface: '#1F2416',
-  overseerScreenGlow: '#1B3A26',
   arcadeButtonA: '#9EF0A8',
   arcadeButtonB: '#A9D8B0',
   arcadeDpad: '#1E2A22',
@@ -89,21 +65,6 @@ export const COLORS = {
   light: TERMINAL_COLORS,
   dark: TERMINAL_COLORS,
 } as const;
-
-/** Compatibility names for lesson renderers, sharing the single palette. */
-export const TERMINAL = {
-  void: TERMINAL_COLORS.terminalScreen,
-  panel: TERMINAL_COLORS.surface,
-  panelRaised: TERMINAL_COLORS.surfaceSoft,
-  rule: TERMINAL_COLORS.border,
-  ruleLive: TERMINAL_COLORS.phosphor,
-  amber: TERMINAL_COLORS.phosphor,
-  amberDim: TERMINAL_COLORS.textMuted,
-  cyan: TERMINAL_COLORS.phosphor,
-  text: TERMINAL_COLORS.text,
-  textDim: TERMINAL_COLORS.textSecondary,
-  scanline: TERMINAL_COLORS.scanline,
-};
 
 export const LESSON_FADE_MS = 240;
 

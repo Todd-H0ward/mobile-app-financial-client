@@ -31,7 +31,7 @@ describe('optional module equipment', () => {
     if (!result.ok) throw Error('Task failed');
     expect(result.reward).toBe(rewardForUserTask(fitted, task));
     expect(result.reward).toBeGreaterThan(rewardForTask(task));
-    expect(fitted.robot).toBe(before.robot);
+    expect(fitted.robot).toBe(purchase.user.robot);
     expect(fitted.wallet).toBe(purchase.user.wallet);
     expect(fitted.period).toBe(purchase.user.period);
     const removed = setModuleInstalled(fitted, 'module-sensor', false);

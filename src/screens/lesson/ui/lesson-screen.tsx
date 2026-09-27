@@ -185,7 +185,7 @@ export const LessonScreen = () => {
       return;
     }
 
-    router.replace(STATIC_ROUTES.HOME);
+    router.dismissTo(STATIC_ROUTES.HOME);
   };
 
   const { lesson, stage } = lessonState;

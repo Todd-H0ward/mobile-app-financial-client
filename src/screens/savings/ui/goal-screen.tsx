@@ -3,7 +3,13 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { FONTS, RADII, SPACING, STATIC_ROUTES } from '@/shared/constants';
+import {
+  DYNAMIC_ROUTES,
+  FONTS,
+  RADII,
+  SPACING,
+  STATIC_ROUTES,
+} from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import {
@@ -213,7 +219,9 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
           <Button
             size="m"
             isFullWidth
-            onPress={() => router.push(STATIC_ROUTES.BUDGET_PLAN)}
+            onPress={() =>
+              router.dismissTo(DYNAMIC_ROUTES.watcher('keeper', 'plan'))
+            }
           >
             {t('savings.goPlan')}
           </Button>
@@ -308,7 +316,7 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
             isFullWidth
             onPress={() => {
               goal.dismissSheet();
-              router.push(STATIC_ROUTES.BUDGET_PLAN);
+              router.dismissTo(DYNAMIC_ROUTES.watcher('keeper', 'plan'));
             }}
           >
             {t('savings.goPlan')}

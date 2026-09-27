@@ -58,7 +58,7 @@ export const ModulesScreen = () => {
   if (!user) return <Redirect href={STATIC_ROUTES.ENTRY} />;
   const id = MODULE_SLOTS[slot];
   const item = getCatalogueItem(id);
-  if (!item) return <Redirect href={STATIC_ROUTES.ROBOT} />;
+  if (!item) return <Redirect href={STATIC_ROUTES.HOME} />;
   const isOwned = user.modules.owned.includes(id);
   const isInstalled = user.modules.installed.includes(id);
   const preview = setModuleInstalled(user, id, isSelected);
@@ -177,7 +177,7 @@ export const ModulesScreen = () => {
           <Button
             isFullWidth
             onPress={() =>
-              router.push(DYNAMIC_ROUTES.watcher('keeper', 'shop'))
+              router.dismissTo(DYNAMIC_ROUTES.watcher('keeper', 'shop'))
             }
           >
             {t('equipment.buy')}

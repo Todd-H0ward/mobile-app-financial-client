@@ -2,7 +2,7 @@ import { Redirect, useLocalSearchParams } from 'expo-router';
 
 import { TaskRouteScreen } from '@/screens/tasks';
 
-import { STATIC_ROUTES } from '@/shared/constants';
+import { DYNAMIC_ROUTES } from '@/shared/constants';
 
 const asString = (value: string | string[] | undefined): string | null => {
   if (typeof value === 'string' && value.length > 0) return value;
@@ -18,7 +18,7 @@ export default function TaskRoute() {
   );
 
   if (!taskId) {
-    return <Redirect href={STATIC_ROUTES.TASKS} />;
+    return <Redirect href={DYNAMIC_ROUTES.watcher('overseer', 'trials')} />;
   }
 
   return <TaskRouteScreen taskId={taskId} />;

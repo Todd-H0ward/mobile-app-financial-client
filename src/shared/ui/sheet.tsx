@@ -28,7 +28,6 @@ import { MAX_CONTENT_WIDTH, RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useMotionEnabled } from '@/shared/model';
 
-import { GlassSurface } from './glass-surface';
 import { Text, type TextProps } from './text';
 
 // ═══════════════════════════════════════════
@@ -131,11 +130,11 @@ const SheetRoot = ({
   const theme = useTheme();
 
   return (
-    <GlassSurface
-      tone="surface"
+    <View
       style={[
         styles.root,
         {
+          backgroundColor: theme.surface,
           borderColor: variant === 'warning' ? theme.warning : theme.primary,
         },
         style,
@@ -148,7 +147,7 @@ const SheetRoot = ({
       )}
 
       {children}
-    </GlassSurface>
+    </View>
   );
 };
 

@@ -35,14 +35,12 @@ import { Text, type TextProps } from './text';
 // ═══════════════════════════════════════════
 
 /**
- * Accent and success remain aliases so every existing action uses phosphor.
- * `stepper` is the ±48 square of the plan rows; `icon` the bordered 48 square.
+ * One filled action (`primary`) per screen, `secondary` outline, `ghost` the
+ * "[ system link ]", `warning` the amber irreversible choice. `stepper` is the ±48 square of the plan rows; `icon` the bordered 48 square.
  * `warning` is the amber frame of an irreversible choice — never red.
  */
 type ButtonVariant =
   | 'primary'
-  | 'accent'
-  | 'success'
   | 'secondary'
   | 'ghost'
   | 'icon'

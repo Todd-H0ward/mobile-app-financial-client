@@ -1,11 +1,16 @@
 import { memo, type ReactNode } from 'react';
 
-import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
+import {
+  Pressable,
+  type StyleProp,
+  StyleSheet,
+  View,
+  type ViewStyle,
+} from 'react-native';
 
 import { SPACING, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 
-import { GlassSurface } from './glass-surface';
 import { Text, type TextProps } from './text';
 
 // ═══════════════════════════════════════════
@@ -111,16 +116,26 @@ const CardRoot = memo(
       style,
     ];
 
+    if (!onPress) {
+      return (
+        <View style={[cardStyle, { backgroundColor: theme[tone] }]}>
+          {children}
+        </View>
+      );
+    }
+
     return (
-      <GlassSurface
-        tone={tone}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ selected: isSelected }}
         onPress={onPress}
-        accessibilityRole={onPress ? 'button' : undefined}
-        accessibilityState={onPress ? { selected: isSelected } : undefined}
-        style={cardStyle}
+        style={({ pressed }) => [
+          cardStyle,
+          { backgroundColor: pressed ? theme.surfaceSoft : theme[tone] },
+        ]}
       >
         {children}
-      </GlassSurface>
+      </Pressable>
     );
   },
 );

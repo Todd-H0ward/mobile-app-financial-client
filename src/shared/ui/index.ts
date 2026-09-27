@@ -1,4 +1,3 @@
-export { AnimatedIcon } from './animated-icon';
 export type {
   ButtonLabelProps,
   ButtonProps,
@@ -15,74 +14,24 @@ export type {
 export { Card } from './card';
 export type { ChamferCardProps, ChamferVariant } from './chamfer-card';
 export { ChamferCard } from './chamfer-card';
-export type { ChartPoint, ChartSeries, LineChartProps } from './charts';
-export {
-  CHART_HEIGHT,
-  CHART_WIDTH,
-  chartArea,
-  chartCeiling,
-  chartLength,
-  chartLine,
-  chartPoint,
-  LineChart,
-} from './charts';
 export type { ChipProps, ChipVariant } from './chip';
 export { Chip } from './chip';
 export type { CoinProps } from './coin';
 export { Coin } from './coin';
 export type { CoinBadgeProps, CoinBadgeVariant } from './coin-badge';
 export { CoinBadge } from './coin-badge';
-export type {
-  CollapsibleContentProps,
-  CollapsibleRootProps,
-  CollapsibleTriggerProps,
-} from './collapsible';
-export { Collapsible } from './collapsible';
-export type { ExternalLinkProps } from './external-link';
-export { ExternalLink } from './external-link';
-export type { GlassSurfaceProps } from './glass-surface';
-export { GlassSurface } from './glass-surface';
-export type {
-  HintRowHintProps,
-  HintRowRootProps,
-  HintRowTitleProps,
-} from './hint-row';
-export { HintRow } from './hint-row';
-export type { IconProps } from './icons';
-export {
-  BackIcon,
-  CheckIcon,
-  CloseIcon,
-  CoinIcon,
-  HelpIcon,
-  HomeIcon,
-  ICON_SIZE,
-  ICON_STROKE,
-  MinusIcon,
-  PawIcon,
-  PiggyIcon,
-  PlusIcon,
-  SettingsIcon,
-  ShopIcon,
-  TasksIcon,
-  useIconColor,
-} from './icons';
 export type { InputProps, InputVariant } from './input';
 export { Input } from './input';
 export type { ListGroupItemProps, ListGroupRootProps } from './list-group';
 export { ListGroup } from './list-group';
 export type { ListRowIconProps, ListRowRootProps } from './list-row';
 export { ListRow } from './list-row';
-export type { MeterCardProps, MeterTone } from './meter-card';
-export { MeterCard } from './meter-card';
 export type { PixelIconName, PixelIconProps } from './pixel-icon';
 export { PIXEL_ICON_NAMES, PixelIcon } from './pixel-icon';
 export type { ProgressBarProps } from './progress-bar';
 export { ProgressBar } from './progress-bar';
 export type { RingsBackdropProps } from './rings-backdrop';
 export { RingsBackdrop } from './rings-backdrop';
-export type { ScratchCardProps } from './scratch-card';
-export { ScratchCard } from './scratch-card';
 export type {
   ScreenBackProps,
   ScreenHeaderProps,

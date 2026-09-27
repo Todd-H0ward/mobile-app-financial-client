@@ -19,7 +19,7 @@ interface Playground {
   /** Live value of the `Slider` section, 0…100. */
   sliderValue: number;
   setSliderValue: (sliderValue: number) => void;
-  /** Feeds `ProgressBar` and `MeterCard` so one drag moves all three. */
+  /** Feeds `ProgressBar` and the sliders, so one drag moves them all. */
   meterValue: number;
   setMeterValue: (meterValue: number) => void;
   /** Text of the `Input` section, so the counter has something to count. */
@@ -36,8 +36,6 @@ interface Playground {
   /** Whether that sheet can be dragged or tapped away. */
   isSheetDismissible: boolean;
   setIsSheetDismissible: (isSheetDismissible: boolean) => void;
-  isCollapsibleOpen: boolean;
-  setIsCollapsibleOpen: (isCollapsibleOpen: boolean) => void;
   /** Chosen tab of the `Segmented` section — a real switch, not a picture. */
   segment: 'need' | 'want' | 'save';
   setSegment: (segment: 'need' | 'want' | 'save') => void;
@@ -76,7 +74,6 @@ export const usePlayground = (): Playground => {
   const [isRowSelected, setIsRowSelected] = useState(false);
   const [isSheetVisible, setIsSheetVisible] = useState(false);
   const [isSheetDismissible, setIsSheetDismissible] = useState(true);
-  const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
   const [splashRun, setSplashRun] = useState(0);
 
   return {
@@ -104,8 +101,6 @@ export const usePlayground = (): Playground => {
     setIsSheetVisible,
     isSheetDismissible,
     setIsSheetDismissible,
-    isCollapsibleOpen,
-    setIsCollapsibleOpen,
     segment,
     setSegment,
     stepperValue,

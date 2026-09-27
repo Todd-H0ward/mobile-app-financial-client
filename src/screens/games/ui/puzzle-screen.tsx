@@ -89,7 +89,7 @@ export const PuzzleScreen = ({ puzzleId }: PuzzleScreenProps) => {
 
       <Sheet.Modal
         isVisible={reward != null}
-        onClose={() => router.replace(STATIC_ROUTES.HOME)}
+        onClose={() => router.dismissTo(STATIC_ROUTES.HOME)}
       >
         <Sheet.Title>{t('games.puzzle.completeTitle')}</Sheet.Title>
         <Text themeColor="textSecondary">
@@ -102,7 +102,10 @@ export const PuzzleScreen = ({ puzzleId }: PuzzleScreenProps) => {
             },
           )}
         </Text>
-        <Button isFullWidth onPress={() => router.replace(STATIC_ROUTES.HOME)}>
+        <Button
+          isFullWidth
+          onPress={() => router.dismissTo(STATIC_ROUTES.HOME)}
+        >
           {t('games.puzzle.completeClose')}
         </Button>
       </Sheet.Modal>

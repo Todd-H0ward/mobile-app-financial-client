@@ -19,7 +19,7 @@ import {
   scoreQuiz,
 } from '@/entities/task';
 
-import { SPACING, STATIC_ROUTES } from '@/shared/constants';
+import { DYNAMIC_ROUTES, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import {
   Button,
@@ -86,7 +86,7 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
   const [choiceId, setChoiceId] = useState<string | null>(null);
 
   if (!play) {
-    return <Redirect href={STATIC_ROUTES.TASKS} />;
+    return <Redirect href={DYNAMIC_ROUTES.watcher('overseer', 'trials')} />;
   }
 
   const { task } = play;
@@ -146,7 +146,7 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
       // Back to wherever the trial was picked — the Overseer's list or the
       // pit's dock — so the debrief sheet opens over familiar ground.
       if (router.canGoBack()) router.back();
-      else router.replace(STATIC_ROUTES.HOME);
+      else router.dismissTo(STATIC_ROUTES.HOME);
     }
   };
 
@@ -171,7 +171,7 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
           accessibilityLabel={t('common.close')}
           onPress={() => {
             if (router.canGoBack()) router.back();
-            else router.replace(STATIC_ROUTES.HOME);
+            else router.dismissTo(STATIC_ROUTES.HOME);
           }}
         >
           <PixelIcon name="close" />
@@ -279,7 +279,7 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
             isFullWidth
             onPress={() => {
               play.dismissSheet();
-              router.push(STATIC_ROUTES.BUDGET_PLAN);
+              router.dismissTo(DYNAMIC_ROUTES.watcher('keeper', 'plan'));
             }}
           >
             {t('tasks.goPlan')}
@@ -292,7 +292,7 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
 
 export const TaskRouteScreen = ({ taskId }: { taskId: string }) => {
   if (!taskId) {
-    return <Redirect href={STATIC_ROUTES.TASKS} />;
+    return <Redirect href={DYNAMIC_ROUTES.watcher('overseer', 'trials')} />;
   }
 
   return <TaskScreen taskId={taskId} />;

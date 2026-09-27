@@ -103,7 +103,6 @@ export const HomeScreen = () => {
   const params = useLocalSearchParams<{
     watcher?: string;
     page?: string;
-    panel?: string;
   }>();
   const robotSkin = useRobotSkin();
   const chosenAction = useRobotAction();
@@ -173,15 +172,7 @@ export const HomeScreen = () => {
     return () => subscription.remove();
   });
 
-  // Deep-link from /shop or /budget-plan redirects.
-  useEffect(() => {
-    if (params.panel !== 'robot') return;
-    setTalkingTo(null);
-    setView((current) => (current === 'top' ? 0 : current));
-    setIsBonding(true);
-    setIsRobotOpen(true);
-  }, [params.panel]);
-
+  // Deep-link into a terminal page — sheets send the child here with `dismissTo`.
   useEffect(() => {
     if (!isWatcherId(params.watcher)) return;
     setTalkingTo(params.watcher);

@@ -5,6 +5,7 @@ export {
   isShopId,
   listCatalogue,
   listCatalogueByShop,
+  pickBuyable,
 } from './lib';
 export type {
   CatalogueFile,

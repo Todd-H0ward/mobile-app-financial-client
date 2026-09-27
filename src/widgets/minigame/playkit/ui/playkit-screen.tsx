@@ -127,7 +127,9 @@ export const PlaykitScreen = ({ gameId }: PlaykitScreenProps) => {
       round={index}
       hint={t(`playkit.games.${gameId}.blurb`)}
       action={index === 3 ? t('common.back') : t('financeGame.check')}
-      onAction={index === 3 ? () => router.replace(STATIC_ROUTES.HOME) : check}
+      onAction={
+        index === 3 ? () => router.dismissTo(STATIC_ROUTES.HOME) : check
+      }
       isDisabled={index < 3 && !isReady}
     >
       {index === 3 ? <TrialReadout isPrompt>{result}</TrialReadout> : scene}

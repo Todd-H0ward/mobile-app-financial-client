@@ -1,18 +1,13 @@
 export const STATIC_ROUTES = {
   ENTRY: '/',
   HOME: '/home',
-  ROBOT: '/robot',
   MODULES: '/modules',
-  BUDGET_PLAN: '/budget-plan',
   END_PERIOD: '/end-period',
   PERIOD_SUMMARY: '/period-summary',
   RECOVERY: '/recovery',
-  /** Deep-link alias — redirects into the Keeper terminal shop page. */
-  SHOP: '/shop',
   GAMES_MARKET: '/games/market',
   GAMES_WEEKLY: '/games/weekly',
   SAVINGS: '/savings',
-  TASKS: '/tasks',
   GAMES: '/games',
   GAMES_CONSOLE: '/games/console',
   GAMES_SPACEWAR: '/games/spacewar',
@@ -28,13 +23,6 @@ export const STATIC_ROUTES = {
 export type RoutePath = (typeof STATIC_ROUTES)[keyof typeof STATIC_ROUTES];
 
 export const DYNAMIC_ROUTES = {
-  shop: (shopId: string) => `${STATIC_ROUTES.SHOP}/${shopId}` as const,
-  /** Opens home on the dog's close-up with the diagnostics docked below. */
-  robotPanel: () =>
-    ({
-      pathname: '/home' as const,
-      params: { panel: 'robot' },
-    }) as const,
   /** Opens home focused on a watcher terminal page. */
   watcher: (watcher: 'keeper' | 'overseer', page?: string) =>
     ({
