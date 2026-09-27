@@ -11,20 +11,9 @@ import type {
 // ═══════════════════════════════════════════
 
 /**
- * Every value an enum-shaped save field may hold.
- *
- * They are runtime tuples, not bare unions, because `isUserSave` has to check
- * membership: a save is JSON, so `phase: "banana"` is as likely as a typo in a
- * hand-edited file, and a string check alone would let it reach the screens.
- *
- * Two sets live elsewhere for the same reason: the budget directions in
- * `entities/economy` and the robot's stages and coats in `entities/robot-dog`,
- * because the budget screens and the 3D scene need them without needing the
- * save. Plan/fact shapes live in
- * `entities/budget` — the leaf that owns the allocation rules.
+ * Runtime tuples for enum-shaped save fields — `isUserSave` must check
+ * membership because a save is JSON. Phases the machine can actually be in.
  */
-
-/** Phases the machine can actually be in. See docs/game-period.md. */
 const PERIOD_PHASES = ['planning', 'active', 'summary'] as const;
 
 // ═══════════════════════════════════════════
@@ -32,14 +21,12 @@ const PERIOD_PHASES = ['planning', 'active', 'summary'] as const;
 // ═══════════════════════════════════════════
 
 /**
- * Phase of the period state machine. See docs/game-period.md.
- *
- * Settlement is deliberately absent: it is the work `acknowledgeSummary` does
+ * Period state machine phase. Settlement is deliberately absent: it is work
  * between `summary` and the next `planning`, never a state a save can hold.
  */
 type PeriodPhase = (typeof PERIOD_PHASES)[number];
 
-/** The robot dog: what it is called, how far it is built, how it feels. */
+/** The robot dog: name, build stage, charge and spirit. */
 interface RobotSave {
   /** Three independently selected modules, each indexed 0…2. */
   assembly: import('@/entities/robot-dog').RobotAssembly;
@@ -77,7 +64,7 @@ interface WalletEntry {
   at: number;
 }
 
-/** The wallet: balance and recent operations. */
+/** The wallet: balance and recent named operations. */
 interface WalletSave {
   /**
    * Balance in coins. Never below zero — 2.5.6.
@@ -232,11 +219,7 @@ interface PlatformSave {
   receipts: PlatformReceipt[];
 }
 
-/**
- * One save for the whole app. Written in full on every change, read once at
- * startup. The profile is local and guest-only — no account, no sign-up,
- * see docs/privacy.md.
- */
+/** Shared arcade payout limit and durable session identity. */
 interface ArcadeSave {
   /** Personal high scores; reset and demo isolation follow the profile. */
   scores: {
@@ -287,6 +270,7 @@ interface ModulesSave {
   tier: 0 | 1 | 2 | 3;
 }
 
+/** One local guest save — written in full on every change, read once at startup. */
 interface UserSave {
   /** Schema version. Bumped on every incompatible change. */
   version: number;

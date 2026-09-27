@@ -141,10 +141,10 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 2,
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     minHeight: CHIP_VISUAL_HEIGHT,
-    paddingHorizontal: SPACING.compact,
-    paddingVertical: SPACING.one,
+    paddingHorizontal: SPACING.COMPACT,
+    paddingVertical: SPACING.ONE,
   },
   rule: { borderStyle: 'dashed' },
 });

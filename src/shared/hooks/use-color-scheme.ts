@@ -2,18 +2,13 @@ import { useColorScheme as useSystemColorScheme } from 'react-native';
 
 import { useThemePreference } from '@/shared/model';
 
-/**
- * The scheme the app actually paints with.
- *
- * The saved preference wins over the device; `'system'` — the default — falls
- * back to the device appearance, and to light when it says nothing.
- */
+/** Saved preference wins; `'system'` falls back to device (light if unset). */
 export const useColorScheme = (): 'light' | 'dark' => {
   const preference = useThemePreference();
   const system = useSystemColorScheme();
 
   if (preference !== 'system') return preference;
 
-  // The device says `'unspecified'` when it has no opinion — that is light.
+  // Device `'unspecified'` → light.
   return system === 'dark' ? 'dark' : 'light';
 };

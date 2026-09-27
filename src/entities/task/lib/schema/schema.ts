@@ -263,8 +263,8 @@ const assertTask = (task: unknown, path: string): TaskContent => {
 // ═══════════════════════════════════════════
 
 /**
- * Validates `content/tasks.json` (or a fixture shaped like it).
- * Broken content must fail in tests, never on the device — 2.5.14 / 3.2.
+ * Validates `content/tasks.json` (or a fixture shaped like it). Broken content must fail
+ * in tests, never on the device — 2.5.14 / 3.2.
  */
 export const assertTasksContent = (data: unknown): TasksFile => {
   if (!isRecord(data)) {

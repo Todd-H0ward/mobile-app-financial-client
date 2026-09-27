@@ -29,7 +29,7 @@ export const ConsoleScreen = () => {
   }
 
   return (
-    <Screen gap="two" isScrollable={false}>
+    <Screen gap={SPACING.TWO} isScrollable={false}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -80,7 +80,7 @@ export const ConsoleScreen = () => {
         <View style={styles.screenBody}>
           <Text
             variant="smallBold"
-            style={{ color: theme.arcadeLcd, marginBottom: SPACING.two }}
+            style={{ color: theme.arcadeLcd, marginBottom: SPACING.TWO }}
           >
             {t('games.console.menu')}
           </Text>
@@ -144,8 +144,8 @@ const styles = StyleSheet.create({
   cart: {
     borderRadius: RADII.m,
     borderWidth: 1,
-    gap: SPACING.one,
-    padding: SPACING.three,
+    gap: SPACING.ONE,
+    padding: SPACING.THREE,
   },
   device: {
     flex: 1,
@@ -154,10 +154,10 @@ const styles = StyleSheet.create({
   fakeFaces: {
     alignItems: 'flex-end',
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   list: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   screenBody: {
     flex: 1,
@@ -168,6 +168,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.two,
+    paddingHorizontal: SPACING.TWO,
   },
 });

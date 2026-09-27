@@ -46,10 +46,7 @@ const SWIPE_THRESHOLD = 24;
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Endless snake on the handheld LCD — swipes and D-pad. Cash out after
- * {@link CLAIM_APPLES}; bumps restart the body and keep the score.
- */
+/** Endless snake on the handheld LCD — swipes and D-pad. */
 export const SnakeScene = ({ onComplete }: SnakeSceneProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -123,7 +120,7 @@ export const SnakeScene = ({ onComplete }: SnakeSceneProps) => {
       >
         <Text
           variant="smallBold"
-          style={{ color: theme.arcadeLcd, marginBottom: SPACING.two }}
+          style={{ color: theme.arcadeLcd, marginBottom: SPACING.TWO }}
         >
           {t('games.snake.progress', {
             eaten: session.applesEaten,
@@ -179,7 +176,7 @@ export const SnakeScene = ({ onComplete }: SnakeSceneProps) => {
 
         <Text
           variant="small"
-          style={{ color: theme.arcadeLcdDim, marginTop: SPACING.two }}
+          style={{ color: theme.arcadeLcdDim, marginTop: SPACING.TWO }}
         >
           {t('games.snake.hint')}
         </Text>
@@ -192,7 +189,7 @@ export const SnakeScene = ({ onComplete }: SnakeSceneProps) => {
 // STYLES
 // ═══════════════════════════════════════════
 
-const SHELL_INSET = SPACING.five * 2 + SPACING.three * 2;
+const SHELL_INSET = SPACING.FIVE * 2 + SPACING.THREE * 2;
 
 const styles = StyleSheet.create({
   apple: {
@@ -218,7 +215,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     minHeight: 0,
-    paddingHorizontal: SPACING.two,
+    paddingHorizontal: SPACING.TWO,
   },
   segment: {
     borderRadius: RADII.xs,

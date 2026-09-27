@@ -27,19 +27,7 @@ interface LessonPlacement {
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * Where every lesson goes, read off the lessons themselves.
- *
- * Each lesson names its **theme** (`sector` — the bay) and its **step**
- * (`level`, `1` just above the platform). A row is every lesson with the
- * same pair, in the order they appear in the file, and the scene spreads it
- * over the whole of its arc. Adding a lesson is one entry in `lessons.json`:
- * its row grows by a cell, the numbers after it move up, nothing else
- * changes (requirement 2.5.14 / 3.2).
- *
- * The schema has already turned away a theme or step that does not exist
- * and a row too full to read, so every lesson here has a cell.
- */
+/** Where every lesson goes, read off the lessons themselves. */
 const placeLessons = (lessons: readonly Lesson[]): LessonPlacement => {
   const counts = Array.from({ length: SCENE_SEGMENT_COUNT }, () =>
     Array.from({ length: SCENE_TERRACE_COUNT }, () => 0),
@@ -104,13 +92,7 @@ const assertOrdinal = (cellOrdinal: number) => {
   }
 };
 
-/**
- * Lesson indices on one cell, in play order.
- *
- * One each: every lesson names its own row, so a new lesson gets a cell of
- * its own rather than stacking on someone else's. A list, so a future
- * layered cell does not change the callers.
- */
+/** Lesson indices on one cell, in play order. */
 const lessonIndicesForCell = (cellOrdinal: number): number[] => {
   assertOrdinal(cellOrdinal);
   const index = PLACEMENT.lessonOf[cellOrdinal];
@@ -122,9 +104,7 @@ const lessonsForCell = (cellOrdinal: number): readonly Lesson[] => {
   return lessonIndicesForCell(cellOrdinal).map((index) => lessons[index]);
 };
 
-/**
- * First unfinished lesson index on the cell, or `null` when it is done.
- */
+/** First unfinished lesson index on the cell, or `null` when it is done. */
 const activeLessonIndexForCell = (
   cellOrdinal: number,
   completedLessonIds: readonly string[],
@@ -138,12 +118,7 @@ const activeLessonIndexForCell = (
   return null;
 };
 
-/**
- * `1`-based number drawn on the tile: its place in the arena.
- *
- * Counted per theme and up its steps — the first theme is 1…30, the next
- * carries on from there — which is also what the lesson screen shows.
- */
+/** `1`-based number drawn on the tile: its place in the arena. */
 const displayNumberForCell = (
   cellOrdinal: number,
   _completedLessonIds: readonly string[] = [],

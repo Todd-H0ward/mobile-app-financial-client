@@ -42,12 +42,7 @@ const parseAmount = (raw: string | undefined): number | null => {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Separate confirm screen before taking coins from the jar — 1.15 / 2.5.7.
- *
- * Shows recalculated consequences (remaining before/after, progress bars,
- * period estimate) so the child sees the price of the choice, not a ban.
- */
+/** Confirm shows the price of withdrawing — never a ban. */
 export const WithdrawScreen = ({ goalId, amount }: WithdrawScreenProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -87,7 +82,7 @@ export const WithdrawScreen = ({ goalId, amount }: WithdrawScreenProps) => {
   ];
 
   return (
-    <Screen presentation="sheet" gap="compact" terminalVariant="keeper">
+    <Screen presentation="sheet" gap={SPACING.COMPACT} terminalVariant="keeper">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -172,10 +167,6 @@ export const WithdrawScreen = ({ goalId, amount }: WithdrawScreenProps) => {
   );
 };
 
-/**
- * Resolves `/savings/[goalId]/withdraw?amount=…`. Bad params fall back home
- * to the goal jar.
- */
 export const WithdrawRouteScreen = ({
   goalId,
   amountParam,
@@ -202,20 +193,20 @@ export const WithdrawRouteScreen = ({
 
 const styles = StyleSheet.create({
   actions: {
-    gap: SPACING.two,
-    marginTop: SPACING.one,
+    gap: SPACING.TWO,
+    marginTop: SPACING.ONE,
   },
   bigNumber: { fontSize: 25, lineHeight: 32 },
   compare: {
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   compareCol: {
     borderRadius: RADII.m,
     borderWidth: 2,
     flex: 1,
-    gap: SPACING.two,
-    padding: SPACING.compact,
+    gap: SPACING.TWO,
+    padding: SPACING.COMPACT,
   },
   dashed: { borderStyle: 'dashed' },
   of: { fontSize: 14 },

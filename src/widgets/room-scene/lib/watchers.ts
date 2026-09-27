@@ -37,35 +37,21 @@ import { loadGlTexture, readAssetBytes } from './local-asset';
 // ═══════════════════════════════════════════
 
 interface Watchers {
-  /** Advances both clips — call once per frame with the frame delta. */
   tick: (deltaSec: number) => void;
-  /** Crossfades one screen into another state. */
   play: (watcher: WatcherId, action: WatcherAction) => void;
-  /** What a tap ray is tested against — `null` until the model has loaded. */
+  /** Tap target; `null` until loaded. */
   root: (watcher: WatcherId) => Object3D | null;
-  /**
-   * Where the camera stands to talk to one, and what it looks at.
-   *
-   * Read off the model rather than computed from the placement: the screen
-   * is wherever its pivot ended up, and the eye is straight out in front of
-   * it, so a change of yaw moves the shot with the face instead of leaving
-   * the camera staring at the back of a television.
-   */
+  /** Shot from the live face mesh, not bind-pose placement. */
   focus: (watcher: WatcherId) => WatcherFocus | null;
-  /**
-   * Raises the focused machine so the React terminal fits under the face.
-   * Pass `null` to restore both to their map height.
-   */
+  /** Raise focused machine for the terminal; `null` restores map height. */
   setLifted: (watcher: WatcherId | null) => void;
-  /** Hides both machines when the camera is in a segment, not on the map. */
+  /** Hide on segment views; show on the map. */
   setVisible: (isVisible: boolean) => void;
   dispose: () => void;
 }
 
 interface WatcherFocus {
-  /** World point the camera aims at: the middle of the screen. */
   anchor: Vector3;
-  /** World point the camera flies to, `WATCHER_FOCUS_DISTANCE` in front. */
   eye: Vector3;
 }
 
@@ -73,25 +59,13 @@ interface WatcherFocus {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * Model files, resolved by Metro at build time.
- *
- * Relative `require` on purpose: the `@/*` alias points at `src/`, so it never
- * reaches `assets/`, and `.glb` only resolves because `metro.config.js` lists
- * it under `assetExts`.
- */
+/** Relative `require` — `@/*` does not reach `assets/`. */
 const WATCHER_MODELS: Record<WatcherId, number> = {
   overseer: require('../../../../assets/scene/watchers/overseer.glb') as number,
   keeper: require('../../../../assets/scene/watchers/keeper.glb') as number,
 };
 
-/**
- * The face on the screen, one per state.
- *
- * The artist ships a frame per clip and says to swap it into the `Screen`
- * material when the animation changes (`*.README.txt` beside the models) —
- * without that the strict one rages with a resting face on.
- */
+/** Face texture per clip — must swap with the action or anger keeps an idle face. */
 const WATCHER_SCREENS: Record<WatcherId, Record<WatcherAction, number>> = {
   overseer: {
     idle: require('../../../../assets/scene/watchers/screens/overseer/idle.png') as number,
@@ -109,42 +83,22 @@ const WATCHER_SCREENS: Record<WatcherId, Record<WatcherAction, number>> = {
   },
 };
 
-/** The material the artist put the face on, in both models. */
 const SCREEN_MATERIAL = 'Screen';
 
-/**
- * The scene has a key, a fill and ambient — no environment map.
- *
- * Metalness of 1 with nothing to reflect renders as black, which is how a
- * chrome case turns into a silhouette.
- */
+/** Cap metalness — no env map, so 1.0 reads as black silhouette. */
 const MAX_METALNESS = 0.3;
 
-/** How brightly a screen glows on its own, with no lamp pointed at it. */
 const SCREEN_GLOW = 1.1;
 
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * A face for the screen.
- *
- * Faces are the one texture where a flip is not a subtlety: upside down, the
- * keeper's smile arches over its eyes as a frown. expo-gl hands the pixels
- * to GL the way stb read them — top row first — so the screen has to be
- * turned back over, unlike the dog's coats where nobody could tell.
- */
+/** Face texture — flipped: without it the smile reads as a frown under expo-gl. */
 const loadFace = (module: number): Promise<Texture> =>
   loadGlTexture(module, { isFlipped: true });
 
-/**
- * Brings the artist's PBR down to what this scene can light, and lights the
- * face from inside.
- *
- * The screen is the whole point of these two: it is the only part that says
- * which of them is being kind to you.
- */
+/** Tone down PBR for this scene's lights; emissive face on `Screen`. */
 const dress = (root: Object3D, face: Texture): MeshStandardMaterial | null => {
   let screen: MeshStandardMaterial | null = null;
 
@@ -197,17 +151,7 @@ const disposeTree = (root: Object3D) => {
 // FACTORY
 // ═══════════════════════════════════════════
 
-/**
- * The two screens that watch the arena.
- *
- * They hang in the world, over the far side of the arena — the strict one on
- * the right, the kind one on the left — and they stay there. An earlier
- * version turned the pair to follow the camera, which kept them in frame but
- * read as a sticker on the lens: they never moved, so they never looked like
- * objects. Fixed, they slide past as the child walks to another room, and the
- * rig is aligned to the overhead view once so the pose is composed for the
- * shot the child opens on.
- */
+/** Hang both watchers in world space, aligned to the overhead map (`TOP_AZIMUTH`). */
 const attachWatchers = async (mount: Group): Promise<Watchers> => {
   const rig = new Group();
   rig.rotation.y = (TOP_AZIMUTH * Math.PI) / 180;
@@ -218,18 +162,13 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
   const clips = new Map<WatcherId, Map<WatcherAction, AnimationAction>>();
   const current = new Map<WatcherId, AnimationAction>();
   const roots: Object3D[] = [];
-  /** One per watcher, sitting exactly on its screen — the focus point. */
   const pivots = new Map<WatcherId, Group>();
-  /** The display itself, which the clips move: what the camera really aims at. */
   const faces = new Map<WatcherId, Object3D>();
-  /** The `Screen` material of each, so a state change can repaint the face. */
   const screens = new Map<WatcherId, MeshStandardMaterial>();
-  /** Every face already on the GPU, by watcher and state. */
   const looks = new Map<WatcherId, Map<WatcherAction, Texture>>();
 
   const play = (watcher: WatcherId, action: WatcherAction) => {
-    // The face changes even when the clip does not: a state the model has no
-    // animation for still has something to say on the screen.
+    // Swap the face even when this action has no clip.
     const look = looks.get(watcher)?.get(action);
     const screen = screens.get(watcher);
     if (look && screen && screen.map !== look) {
@@ -270,18 +209,13 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
       if (screenMaterial) screens.set(watcher, screenMaterial);
       root.scale.setScalar(WATCHER_UNITS_PER_METRE);
 
-      // Hang each one by its screen: the bracket's own origin is wherever
-      // the artist left it, and what has to land in the corner of the frame
-      // is the face, not the hardware behind it.
+      // Pivot on the face, not the artist's bracket origin.
       const screen =
         root.getObjectByName('Screen') ?? root.getObjectByName('Head') ?? root;
       const box = new Box3().setFromObject(screen);
       const centre = new Vector3();
       box.getCenter(centre);
 
-      // Hang the pivot where the face has to be and push the model back by
-      // the same offset, so the yaw below turns the machine about its own
-      // screen rather than swinging it across the frame.
       const spot = WATCHER_PLACEMENT[watcher];
       const pivot = new Group();
       pivot.position.set(spot.x, spot.y, spot.z);
@@ -313,25 +247,17 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
     const face = faces.get(watcher);
     if (!pivot || !face) return null;
 
-    // The display, where it is this frame. The pivot is where it was in the
-    // bind pose, and both machines drift a long way off that — the overseer
-    // hovers, the keeper swings on its bracket — so aiming at the pivot
-    // leaves the camera staring at the cable below an empty sky.
+    // Aim at the live face — clips move it off the bind-pose pivot.
     face.updateWorldMatrix(true, false);
     const centre = new Box3().setFromObject(face).getCenter(new Vector3());
-    // Aim under the face so it sits in the upper band above the React terminal.
     const anchor = centre.clone();
     anchor.y -= WATCHER_FOCUS_AIM_DOWN;
 
-    // +Z is the way a screen faces in its own space, so this is the seat
-    // directly in front of it however the rig and the yaw have turned it.
-    // Taken off the pivot rather than the face: the clips rock the machine,
-    // and a camera that copied that would rock with it.
+    // Eye from pivot yaw so clip rocking does not shake the camera.
     const ahead = new Vector3(0, 0, 1)
       .applyQuaternion(pivot.getWorldQuaternion(new Quaternion()))
       .multiplyScalar(WATCHER_FOCUS_DISTANCE);
 
-    // Eye stays level with the face, not the depressed aim point.
     const eye = centre.clone().add(ahead);
 
     return { anchor, eye };

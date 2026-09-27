@@ -13,8 +13,8 @@ const HINTS = assertHintsContent(HINTS_CONTENT).hints;
 export const listHints = (): readonly HintContent[] => HINTS;
 
 /**
- * The hint for one screen. The schema guarantees a row for every screen id,
- * so the widget can render without a fallback branch.
+ * The hint for one screen. The schema guarantees a row for every screen id, so the widget
+ * can render without a fallback branch.
  */
 export const getHint = (screen: HintScreenId): HintContent =>
   HINTS.find((hint) => hint.id === screen) as HintContent;

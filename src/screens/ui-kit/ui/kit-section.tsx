@@ -10,16 +10,13 @@ import { Text, ThemedView } from '@/shared/ui';
 // ═══════════════════════════════════════════
 
 interface KitSectionProps {
-  /** Name of the component, exactly as it is exported from `@/shared/ui`. */
   title: string;
-  /** What the section is checking — states, edge cases, the interaction. */
   caption?: string;
   children?: ReactNode;
   style?: StyleProp<ViewStyle>;
 }
 
 interface KitRowProps {
-  /** Names the state being shown, e.g. "disabled" or "длинный текст". */
   label?: string;
   children?: ReactNode;
   /** Lay the examples out in a row instead of a column. */
@@ -86,25 +83,25 @@ export const KitSection = Object.assign(KitSectionRoot, {
 
 const styles = StyleSheet.create({
   root: {
-    borderRadius: SPACING.three,
-    gap: SPACING.three,
-    padding: SPACING.three,
+    borderRadius: SPACING.THREE,
+    gap: SPACING.THREE,
+    padding: SPACING.THREE,
   },
   heading: {
-    gap: SPACING.half,
+    gap: SPACING.HALF,
   },
   inline: {
     alignItems: 'center',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   row: {
-    gap: SPACING.one,
+    gap: SPACING.ONE,
   },
   stack: {
     alignItems: 'flex-start',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
 });
 

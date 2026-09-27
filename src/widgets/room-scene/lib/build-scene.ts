@@ -102,10 +102,7 @@ interface SceneModel {
   scene: Scene;
   /** Highlights one bay; the others and the gears ease out. `null` shows all. */
   highlight: (segment: number | null, isImmediate?: boolean) => void;
-  /**
-   * Where the platform stands on its way out of the pit: `0` on the floor,
-   * `1` clear of the rim. Turns the gear train to match.
-   */
+  /** Where the platform stands on its way out of the pit: `0` on the floor, `1` clear of the rim. */
   setLevelProgress: (progress: number) => void;
   /** Throws dust and sparks for one level-up: the ring landing and the gears. */
   burstLift: (level: number) => void;
@@ -115,20 +112,13 @@ interface SceneModel {
   tick: (timeSec: number, deltaSec: number) => void;
   /** Current module assembly and earned visual growth stage. */
   setCharacterAssembly: (assembly: RobotAssembly, stage: RobotDogStage) => void;
-  /**
-   * Swaps the dog's coat. Every skin is the same mesh and the same clips, so
-   * a model already standing there only changes its textures.
-   */
+  /** Swaps the dog's coat. */
   setCharacterSkin: (skin: RobotDogSkin) => void;
   /** What the dog settles into whenever nothing interrupts it. */
   playCharacterAction: (action: RobotDogAction) => void;
   /** One-shot reaction to a tap; the dog returns to its state afterwards. */
   reactCharacter: (action: RobotDogAction, fallback: RobotDogAction) => void;
-  /**
-   * Bond-mode reaction: clip + particle burst above the head.
-   *
-   * Pure show — mood only picks the clip/burst; charge and spirit stay put.
-   */
+  /** Bond-mode reaction: clip + particle burst above the head. */
   reactBond: (
     kind: BondKind,
     mood: RobotDogMoodName | null,
@@ -136,20 +126,9 @@ interface SceneModel {
   ) => void;
   /** What a tap ray is tested against — `null` until the model has loaded. */
   characterRoot: () => Object3D | null;
-  /**
-   * Close-up shot on the dog for bond mode — same shape as a watcher focus.
-   *
-   * `azimuthDeg` is the orbit heading the child was standing on, so the
-   * lens still approaches from their side of the pit.
-   */
+  /** Close-up shot on the dog for bond mode — same shape as a watcher focus. */
   characterFocus: (azimuthDeg: number) => WatcherFocus | null;
-  /**
-   * Turns the robot to face the camera, in radians.
-   *
-   * It stands on the axis with three segments around it, so there is no
-   * direction it could face that is right from all of them: it faces the
-   * child instead, wherever the child has walked to.
-   */
+  /** Turns the robot to face the camera, in radians. */
   setCharacterFacing: (azimuthRad: number) => void;
   /** The row buffers a tap ray is tested against, one per bay and terrace. */
   cellTargets: () => Object3D[];
@@ -158,8 +137,8 @@ interface SceneModel {
   /** Picks one cell out of its row, or clears the pick with `null`. */
   selectCell: (cell: SceneCell | null) => void;
   /**
-   * Starts the hold-to-enter fill on a cell — a translucent block that will
-   * rise with `setCellHoldProgress` so the child sees the press is landing.
+   * Starts the hold-to-enter fill on a cell — a translucent block that will rise with
+   * `setCellHoldProgress` so the child sees the press is landing.
    */
   beginCellHold: (cell: SceneCell) => void;
   /** `0…1` how full the hold fill is. */
@@ -169,14 +148,11 @@ interface SceneModel {
   /** Refreshes availability colour and the lesson number on each cell. */
   setCellAccess: (completedLessonIds: readonly string[], level: number) => void;
   /**
-   * Which numbers show: on the tile tops for the map, on the cell fronts for
-   * a bay — each is the face the camera there actually sees.
+   * Which numbers show: on the tile tops for the map, on the cell fronts for a bay — each is
+   * the face the camera there actually sees.
    */
   setNumberFace: (face: NumberFace) => void;
-  /**
-   * Lights up the cells whose lesson has been passed; the rest go back to
-   * their locked or open look. Nothing moves — the lift takes the steps away.
-   */
+  /** Lights up the cells whose lesson has been passed; the rest go back to their locked or open look. */
   setCellsDone: (doneKeys: readonly string[]) => void;
   /** Same, for one of the two screens overhead. */
   watcherRoot: (watcher: WatcherId) => Object3D | null;
@@ -188,10 +164,7 @@ interface SceneModel {
   setWatcherLifted: (watcher: WatcherId | null) => void;
   /** Shows or hides the watcher models */
   setWatchersVisible: (isVisible: boolean) => void;
-  /**
-   * The three map boards (coins / tier / battery). Visible only on the
-   * overhead shot — `setMapHudVisible` and `setMapHudStats` keep them in sync.
-   */
+  /** The three map boards (coins / tier / battery). */
   setMapHudVisible: (isVisible: boolean) => void;
   setMapHudStats: (stats: MapHudStats) => void;
   /** Moves the arena under the look-at point (camera-rig knob). */
@@ -220,11 +193,9 @@ interface CellRecord {
   arc: RingArc;
   /** Availability — drives the number colour and the tile tint. */
   status: LessonStatus;
-  /** The outline the selection borrows while the cell is picked. */
   outline: BufferGeometry;
   /** Its slice of the row's tile buffer — what the tint is painted on. */
   tile: Slice;
-  /** Its slice of the row's frame buffer. */
   frame: Slice;
   /** Whether its lesson is passed — it lights up green, and stays put. */
   isDone: boolean;
@@ -236,21 +207,20 @@ interface RowRecord {
   /** Step index — once the step is flush with the floor, its front is gone. */
   step: number;
   /**
-   * The row's numbers lying on the tile tops, turned to the map camera, as
-   * one buffer — what the overhead shot reads.
+   * The row's numbers lying on the tile tops, turned to the map camera, as one buffer — what
+   * the overhead shot reads.
    */
   numbers: Mesh;
   /**
-   * The same numbers on the tops, turned to the camera of the row's own bay:
-   * what that bay reads once the step has gone flush and has no front.
+   * The same numbers on the tops, turned to the camera of the row's own bay: what that bay
+   * reads once the step has gone flush and has no front.
    */
   flats: Mesh;
   /**
-   * The same numbers standing on the cell fronts — what a bay camera reads
-   * from across the pit, where a tile top is a sliver.
+   * The same numbers standing on the cell fronts — what a bay camera reads from across the
+   * pit, where a tile top is a sliver.
    */
   fronts: Mesh;
-  /** The row's cells, left to right as seen from the bay. */
   cells: CellRecord[];
 }
 
@@ -261,27 +231,15 @@ type NumberFace = 'top' | 'front';
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * How dark a locked tile reads against its bay.
- *
- * Multiplies the vertex colour; diffuse takes the hit, emissive stays soft
- * so the locked tiles sink without going black. A bare terrace — a bay's
- * content ran out below it — wears the same tint: nothing there to press.
- */
+/** How dark a locked tile reads against its bay. */
 const LOCKED_CELL_TINT = 0.28;
 
-/**
- * How much a passed tile brightens against its bay.
- *
- * A passed cell used to drop a step, which read as a hole in the floor. It
- * stays where it is now and lights up instead: the tile a touch brighter,
- * the frame and the number the HUD's green.
- */
+/** How much a passed tile brightens against its bay. */
 const DONE_CELL_TINT = 1.18;
 
 /**
- * Bond-mode close-up: ~0.38 of the segment shot, so the dog fills the frame
- * without clipping the platform under its paws.
+ * Bond-mode close-up: ~0.38 of the segment shot, so the dog fills the frame without
+ * clipping the platform under its paws.
  */
 const CHARACTER_FOCUS_DISTANCE = SCENE_SEGMENT_DISTANCE * 0.38;
 
@@ -294,15 +252,14 @@ const HOLD_FILL_OPACITY = 0.62;
 /** The hold fill never grows shorter than this, so it shows at once. */
 const HOLD_MIN_HEIGHT = 0.02;
 
-/** Key light sits above and in front, so the wedges keep a readable top face. */
 const KEY_LIGHT_POSITION = [0.6, 1, 0.45];
 
 /** Fill comes from the opposite side at a third of the strength. */
 const FILL_LIGHT_POSITION = [-0.7, 0.35, -0.6];
 
 /**
- * Cinematic pit light: warm sodium key, cool fill, low ambient so concrete
- * emissive and amber haze read as glow — Blade Runner, not a bright corridor.
+ * Cinematic pit light: warm sodium key, cool fill, low ambient so concrete emissive and
+ * amber haze read as glow — Blade Runner, not a bright corridor.
  */
 const KEY_LIGHT_INTENSITY = 1.95;
 const FILL_LIGHT_INTENSITY = 1.25;
@@ -328,12 +285,6 @@ const CELL_NUMBER_LIFT = 3;
 /** How solid a resting frame is drawn; the selected one is opaque. */
 const CELL_FRAME_OPACITY = 0.5;
 
-/**
- * Share of a highlight fade still left after a second.
- *
- * Matched to the camera ease so the unused bays and gears melt out while the
- * orbit is still settling, rather than popping or lingering after the shot.
- */
 const HIGHLIGHT_SMOOTHING = 0.002;
 
 /** Below this a faded piece is dropped from the draw and the raycast. */
@@ -343,10 +294,7 @@ const HIGHLIGHT_EPSILON = 0.02;
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * White vertex colours so a locked cell can be tinted later without splitting
- * the row into a mesh per cell.
- */
+/** White vertex colours so a locked cell can be tinted later without splitting the row into a mesh per cell. */
 const fillVertexColors = (geometry: BufferGeometry) => {
   const count = geometry.getAttribute('position').count;
   const colors = new Float32Array(count * 3);
@@ -405,12 +353,7 @@ const nodesOf = (segment: number, step: number): SceneNode[] =>
     (node) => node.segment === segment && node.step === step,
   );
 
-/**
- * Paints one slice's vertices: a grey factor, or one factor per channel.
- *
- * Vertex colours multiply the material's, so a frame can be turned any
- * colour by the ratio of that colour to the frame's own.
- */
+/** Paints one slice's vertices: a grey factor, or one factor per channel. */
 const tintSlice = (
   part: Slice,
   tint: number | readonly [number, number, number],
@@ -434,13 +377,7 @@ const rgbOf = (hex: string): [number, number, number] => {
   return [color.r, color.g, color.b];
 };
 
-/**
- * Whether a fading material goes through the transparent pass.
- *
- * Only while it fades. A solid arena drawn as transparent is sorted back to
- * front every frame and loses the early depth test that lets the GPU skip
- * hidden pixels — on a fill-bound phone that is most of the frame.
- */
+/** Whether a fading material goes through the transparent pass. */
 const setFade = (material: Material, presence: number) => {
   const isFading = presence < 1 - HIGHLIGHT_EPSILON;
   material.opacity = presence;
@@ -455,13 +392,12 @@ const roomMaterial = (hex: string): MeshPhongMaterial =>
   new MeshPhongMaterial({
     color: new Color(hex),
     emissive: new Color(hex),
-    // Soft — locked tiles darken via vertex colours, and a strong emissive
-    // would light them back up through the tint.
+    // Soft — locked tiles darken via vertex colours, and a strong emissive would light them
+    // back up through the tint.
     emissiveIntensity: PLATFORM_EMISSIVE,
     shininess: 28,
     specular: new Color(SCENE_PALETTE.specular),
-    // The wedges are thin shells in places; a missing back face reads as a
-    // hole in the floor.
+    // The wedges are thin shells in places; a missing back face reads as a hole in the floor.
     side: DoubleSide,
     // Opaque until a fade starts — `setFade` flips it only while it melts.
     transparent: false,
@@ -475,27 +411,18 @@ const roomMaterial = (hex: string): MeshPhongMaterial =>
 // ═══════════════════════════════════════════
 
 /**
- * The whole arena as one scene: the gears and the floor from the model, the
- * cells built here, and what stands on the axis.
- *
- * The cells are not in the model. The FBX carried eighteen fixed discs per
- * ring; the game carries as many lessons as `lessons.json` holds, so the
- * rows are cut from `ARENA_LAYOUT` and a bay that ends on a short row
- * stretches its last cells over the whole arc.
- *
- * Built once per GL context. Nothing here reads React state — the component
- * only moves the camera, so a re-render never rebuilds a buffer.
+ * The whole arena as one scene: the gears and the floor from the model, the cells built
+ * here, and what stands on the axis.
  */
 const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   const scene = new Scene();
   const root = new Group();
-  // Drop the arena under the look-at point so it reads in the lower half of
-  // the frame at horizon elevation, not centred on the crosshair.
+  // Drop the arena under the look-at point so it reads in the lower half of the frame at
+  // horizon elevation, not centred on the crosshair.
   root.position.y = SCENE_PLATFORM_Y;
   scene.add(root);
 
-  // Sky sphere owns the backdrop (gradient + animated mist). No scene.fog —
-  // that would wash the arena itself; haze stays on the background only.
+  // Sky sphere owns the backdrop (gradient + animated mist).
   scene.background = null;
 
   const haze = createHazeBackdrop();
@@ -505,9 +432,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     console.warn('[room-scene] robot dog coat failed to load', error);
   };
 
-  // Three and a half megabytes of robot dog — dynamic import so a missing or
-  // broken GLB cannot take down the arena bundle, and so the arena paints
-  // first. Parented to the platform further down, once the platform exists.
+  // Three and a half megabytes of robot dog — dynamic import so a missing or broken GLB cannot take.
   const characterMount = new Group();
   let character: CenterCharacter | null = null;
   let characterDisposed = false;
@@ -535,9 +460,6 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         character?.dispose();
         character = loaded;
 
-        // The coat and the state can both change while the dog is in flight
-        // — the profile finishes loading, or the child taps a tile. Whatever
-        // they settled on wins over what this load started with.
         if (characterSkin !== loadingSkin) {
           void loaded.setSkin(characterSkin).catch(warnCoat);
         }
@@ -574,7 +496,6 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
 
   const rooms: MeshPhongMaterial[] = [];
   const geometries: BufferGeometry[] = [];
-  /** One outline material per bay, so a muted bay's frames mute with it. */
   const frames: LineBasicMaterial[] = [];
   /** One number material per bay: colours ride on the vertices. */
   const numberMaterials: MeshBasicMaterial[] = [];
@@ -597,12 +518,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   selection.visible = false;
   let selected: SceneCell | null = null;
 
-  /**
-   * Rising fill shown while the child holds a cell to open its lesson.
-   *
-   * A short tap on a crowded bay is too easy to miss; the block growing
-   * inside the tile is what tells them the press is counting.
-   */
+  /** Rising fill shown while the child holds a cell to open its lesson. */
   const holdMaterial = new MeshBasicMaterial({
     color: new Color(SCENE_PALETTE.cellFrameActive),
     transparent: true,
@@ -617,15 +533,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   let holdBaseY = 0;
   let holdFullHeight = 1;
 
-  /**
-   * The three wheels standing around the bowl — the machine that lifts the
-   * floor.
-   *
-   * Each is its own group so it can turn about its own axle. The mesh is
-   * shifted back by the wheel's centre, because a wheel turning about the
-   * middle of the whole arena would swing around the bowl instead of
-   * spinning where it stands.
-   */
+  /** The three wheels standing around the bowl — the machine that lifts the floor. */
   const gears: Group[] = [];
 
   /** One group per terrace — the rings that merge into the floor as it rises. */
@@ -642,15 +550,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   /** The floor: the disc on the axis and the platform ring round it. */
   const sharedMaterial = roomMaterial(SCENE_PALETTE.shared);
 
-  /**
-   * A ring with no cells on it, drawn whole in the floor's colour.
-   *
-   * Ring `0` is the platform the robot stands on — level with the floor, so
-   * it is floor, not a step. A step can end up bare too when the content is
-   * short; it is dimmed then, so it reads as out of play, but it has to be
-   * there — the pit is a bowl, not a staircase with missing treads. Neither
-   * belongs to a bay, so neither fades with one.
-   */
+  /** A ring with no cells on it, drawn whole in the floor's colour. */
   const buildPlainRing = (step: number) => {
     const ring = SCENE_TILE_RINGS[step];
     if (!ring) return;
@@ -708,8 +608,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     for (const solid of solids) solid.dispose();
     geometries.push(tiles.geometry, frame.geometry);
 
-    // One buffer for the row; `starts` is how a ray that comes back with a
-    // triangle number turns into a cell.
+    // One buffer for the row; `starts` is how a ray that comes back with a triangle number
+    // turns into a cell.
     const tileMesh = new Mesh(tiles.geometry, material);
     tileMesh.userData = { segment, step, starts: tiles.starts, count };
     const frameLines = new LineSegments(frame.geometry, frameMaterial);
@@ -723,8 +623,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       cells.set(record.key, record);
     });
 
-    // The numbers are not in `segmentParts`: which set shows depends on the
-    // view and on the lift as well as on the bay (`applyNumbers`).
+    // The numbers are not in `segmentParts`: which set shows depends on the view and on the
+    // lift as well as on the bay (`applyNumbers`).
     terraces[step].add(tileMesh, frameLines, numbers, flats, fronts);
     segmentParts[segment].push(tileMesh, frameLines);
     cellMeshes.push(tileMesh);
@@ -741,8 +641,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         vertexColors: true,
       }),
     );
-    // Opaque: ninety digits in the transparent pass depth-wrote each other
-    // away. A locked number is told apart by its colour, not by alpha.
+    // Opaque: ninety digits in the transparent pass depth-wrote each other away.
     numberMaterials.push(
       new MeshBasicMaterial({
         // A neutral multiplier: the colour is on the vertices.
@@ -766,9 +665,6 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     gears.push(gear);
     root.add(gear);
 
-    // A terrace is a full ring across all three bays, so its rows hang off a
-    // group of their own: the floor takes the rings it passes up with it,
-    // and a ring split per bay would be torn into three arcs.
     for (let terrace = 0; terrace < SCENE_TERRACE_COUNT; terrace += 1) {
       buildRow(segment, terrace);
     }
@@ -779,12 +675,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     if (isBare) buildPlainRing(terrace);
   }
 
-  /**
-   * Which way the tops of the digits on the tiles point on the map: away from
-   * its camera. The map is a fixed shot (`TOP_AZIMUTH`), so the direction
-   * never changes — and a number facing outward from the axis, as they used
-   * to, is upside down on the near rim.
-   */
+  /** Which way the tops of the digits on the tiles point on the map: away from its camera. */
   const mapUp = new Vector3(
     -Math.sin((TOP_AZIMUTH * Math.PI) / 180),
     0,
@@ -792,8 +683,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   );
 
   /**
-   * The same for a bay's own camera, which stands across the pit from the
-   * bay's middle: away from it is straight out through that middle.
+   * The same for a bay's own camera, which stands across the pit from the bay's middle: away
+   * from it is straight out through that middle.
    */
   const bayUp = (segment: number): Vector3 => {
     const middle =
@@ -808,13 +699,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   /** Steps already flush with the floor — their fronts are under it. */
   let flushCount = 0;
 
-  /**
-   * Rebuilds a row's three sets of numbers, one buffer each.
-   *
-   * The colours change when a row unlocks or a lesson is passed, which is
-   * rare enough that rebuilding a row of glyphs beats keeping a mesh (and a
-   * draw call) per number.
-   */
+  /** Rebuilds a row's three sets of numbers, one buffer each. */
   const rebuildNumbers = (row: RowRecord) => {
     const labels = row.cells.map(
       (record) => displayNumberForCell(record.ordinal) - 1,
@@ -853,12 +738,6 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     }
   };
 
-  /**
-   * The platform: the floor the robot stands on.
-   *
-   * The character and the dust hang off it rather than off the arena, so the
-   * whole cargo climbs together and nothing has to be moved twice.
-   */
   const platform = new Group();
   root.add(platform);
   platform.add(characterMount);
@@ -876,8 +755,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     platform.add(new Mesh(geometry, sharedMaterial));
   }
 
-  // Mounted on the arena, not on the platform: the wheels stand out here and
-  // the dust belongs to the floor the ring lands on.
+  // Mounted on the arena, not on the platform: the wheels stand out here and the dust
+  // belongs to the floor the ring lands on.
   const effects: LiftEffects = createLiftEffects(
     root,
     gears.map((gear) => gear.position),
@@ -911,27 +790,13 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   );
   centre.position.set(0, SCENE_PLATFORM_Y + POINT_LIGHT_HEIGHT + 40, 0);
 
-  /*
-   * Five lights, and only one of them costs anything.
-   *
-   * Every point or spot light is another full lighting calculation for every
-   * pixel the arena covers, and the arena covers the screen; directional,
-   * hemisphere and ambient have no position to attenuate from and are
-   * effectively free. Adding a point light back is the one change here that
-   * can halve the frame rate, so measure it: the camera rig panel shows the
-   * frames (docs/scene.md).
-   */
+  /** Five lights, and only one of them costs anything. */
   scene.add(key, fill, hemisphere, centre);
   scene.add(
     new AmbientLight(new Color(SCENE_PALETTE.ambientLight), AMBIENT_INTENSITY),
   );
 
-  /**
-   * How present each bay and the gear train are: `1` solid, `0` gone.
-   *
-   * `highlight` only writes the targets; `tick` walks the live values so a
-   * cut between map and bay melts instead of popping.
-   */
+  /** How present each bay and the gear train are: `1` solid, `0` gone. */
   const segmentPresence = Array.from({ length: SCENE_SEGMENT_COUNT }, () => 1);
   const segmentPresenceTarget = [...segmentPresence];
   let gearPresence = 1;
@@ -946,8 +811,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       const isShown = presence > HIGHLIGHT_EPSILON;
       for (const part of segmentParts[index]) part.visible = isShown;
     });
-    // Numbers ride with their bay — visible whenever the bay is, including
-    // the overhead map, so the lesson ordinal is never a hidden gesture.
+    // Numbers ride with their bay — visible whenever the bay is, including the overhead map,
+    // so the lesson ordinal is never a hidden gesture.
     applyNumbers();
 
     setFade(gearMaterial, gearPresence);
@@ -1014,13 +879,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     if (didChange) applyPresence();
   };
 
-  /**
-   * Which cell a ray landed on.
-   *
-   * The cells of a row share one mesh, so the hit alone says nothing: what
-   * identifies the tile is the triangle number, checked against the ranges
-   * written onto the mesh when it was merged.
-   */
+  /** Which cell a ray landed on. */
   const cellAt = (object: Object3D, faceIndex: number): SceneCell | null => {
     const data = object.userData as {
       segment?: number;
@@ -1046,8 +905,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     });
 
   /**
-   * The frame colour of a passed cell, as the factor that turns the frame
-   * material's own colour into the HUD's green.
+   * The frame colour of a passed cell, as the factor that turns the frame material's own
+   * colour into the HUD's green.
    */
   const doneFrame = (() => {
     const frameColor = new Color(SCENE_PALETTE.cellFrame);
@@ -1071,11 +930,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     tintSlice(record.frame, tint);
   };
 
-  /**
-   * Lights up the cells whose lesson is passed. They stay where they are —
-   * a passed cell used to drop a step, and a hole in the floor read as a bug,
-   * not a reward. What takes the steps away is the lift (`setLevelProgress`).
-   */
+  /** Lights up the cells whose lesson is passed. */
   const setCellsDone = (doneKeys: readonly string[]) => {
     const done = new Set(doneKeys);
     for (const [cellId, record] of cells) {
@@ -1086,13 +941,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     }
   };
 
-  /**
-   * Picks one cell out of its row, or clears the pick.
-   *
-   * The outline is one object that borrows the chosen cell's edges and moves
-   * into its terrace, so the arena carries a single extra draw call however
-   * many cells there turn out to be.
-   */
+  /** Picks one cell out of its row, or clears the pick. */
   const selectCell = (next: SceneCell | null) => {
     if (isSameCell(next, selected)) return;
     selected = next;
@@ -1120,8 +969,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     const record = cells.get(cellKey(cell));
     if (!record) return;
 
-    // Unit-tall and shaped like the cell — a box would not follow a
-    // stretched cell's curve — then grown with `scale.y`.
+    // Unit-tall and shaped like the cell — a box would not follow a stretched cell's curve —
+    // then grown with `scale.y`.
     const previous = holdMesh.geometry;
     holdMesh.geometry = holdSolid(record.arc);
     previous.dispose();
@@ -1145,8 +994,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   const applyNumbers = () => {
     for (const row of rows) {
       const isShown = segmentPresence[row.segment] > HIGHLIGHT_EPSILON;
-      // A step the lift has laid flush has no front above the floor, so a
-      // bay reads that row's numbers off the tops, turned to its camera.
+      // A step the lift has laid flush has no front above the floor, so a bay reads that row's
+      // numbers off the tops, turned to its camera.
       const isFlush = row.step <= flushCount;
       row.numbers.visible = isShown && numberFace === 'top';
       row.flats.visible = isShown && numberFace === 'front' && isFlush;
@@ -1200,8 +1049,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     if (progress === appliedProgress) return;
     appliedProgress = progress;
 
-    // The pit sinks around the robot rather than lifting them out of it: each
-    // paid lift lays one more step flush with the platform.
+    // The pit sinks around the robot rather than lifting them out of it: each paid lift lays
+    // one more step flush with the platform.
     terraces.forEach((terrace, index) => {
       terrace.position.y = terraceSinkY(index, progress);
     });
@@ -1221,16 +1070,13 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   };
 
   const burstLift = (level: number) => {
-    // Lift `N` lays step `N` flush with the platform: its rim is where the
-    // dust has to come from. The fifth lift has nothing left to lower and
-    // throws it off the outer edge on the way out.
+    // Lift `N` lays step `N` flush with the platform: its rim is where the dust has to come from.
     const landed = clamp(level, 1, SCENE_TERRACE_RADII.length - 1);
 
     effects.burst(SCENE_TERRACE_RADII[landed]);
   };
 
-  // World height, not the platform's own: the whole arena is offset under the
-  // look-at point, and a camera aimed at the local value misses by that much.
+  // World Y: arena is offset under look-at; local platform Y would miss by that much.
   const platformHeight = () => root.position.y + platform.position.y;
 
   const tick = (timeSec: number, deltaSec: number) => {
@@ -1245,8 +1091,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   const setCharacterSkin = (next: RobotDogSkin) => {
     if (next === characterSkin) return;
     characterSkin = next;
-    // A model still loading reconciles when it lands; one already standing
-    // there only needs its textures changed.
+    // A model still loading reconciles when it lands; one already standing there only needs
+    // its textures changed.
     void character?.setSkin(next).catch(warnCoat);
   };
 

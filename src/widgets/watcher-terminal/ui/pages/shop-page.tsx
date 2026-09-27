@@ -126,11 +126,7 @@ const ItemCard = ({ item, shortfall, isOwned, onPress }: ItemCardProps) => {
   );
 };
 
-/**
- * The workshop (concept D1, D2, screen 16). Two tabs are the two boxes of the
- * plan; above the grid, how much of that box is already spent. An item the
- * child cannot afford stays pressable — it opens three ways out, not a wall.
- */
+/** The workshop (concept D1, D2, screen 16). */
 export const ShopPage = ({ frame }: ShopPageProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -486,14 +482,14 @@ const styles = StyleSheet.create({
   dashed: { borderStyle: 'dashed' },
   // Keeps an odd last card in its column instead of stretching it.
   filler: { flexBasis: '46%', flexGrow: 1 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.two },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.TWO },
   item: {
     borderRadius: RADII.m,
     borderWidth: 2,
     flexBasis: '46%',
     flexGrow: 1,
-    gap: SPACING.two,
-    padding: SPACING.compact,
+    gap: SPACING.TWO,
+    padding: SPACING.COMPACT,
   },
   itemTitle: { lineHeight: 20 },
   picture: {
@@ -505,17 +501,17 @@ const styles = StyleSheet.create({
   planned: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.compact,
+    gap: SPACING.COMPACT,
     justifyContent: 'space-between',
   },
   price: { alignItems: 'center', flexDirection: 'row', gap: 6 },
   priceNumber: { fontFamily: FONTS.monoStrong, fontSize: 16, lineHeight: 22 },
   sheetAction: { flex: 1 },
-  sheetActions: { flexDirection: 'row', gap: SPACING.two },
+  sheetActions: { flexDirection: 'row', gap: SPACING.TWO },
   sheetHead: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.compact,
+    gap: SPACING.COMPACT,
   },
   sheetHeadCopy: { flex: 1, gap: 2 },
   sheetPicture: {
@@ -526,16 +522,16 @@ const styles = StyleSheet.create({
     width: 88,
   },
   sheetPrice: { fontSize: 20, lineHeight: 26 },
-  stack: { gap: SPACING.compact, paddingBottom: SPACING.two },
+  stack: { gap: SPACING.COMPACT, paddingBottom: SPACING.TWO },
   table: { borderRadius: RADII.s, borderWidth: 2 },
   tableDivider: { borderTopWidth: 1 },
   tableNumber: { fontFamily: FONTS.monoStrong, fontSize: 15 },
   tableRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.compact,
+    gap: SPACING.COMPACT,
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.compact,
+    paddingHorizontal: SPACING.COMPACT,
     paddingVertical: 10,
   },
   tableValueText: { flex: 1, textAlign: 'right' },

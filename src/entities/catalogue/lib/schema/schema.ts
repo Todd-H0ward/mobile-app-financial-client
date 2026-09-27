@@ -82,12 +82,7 @@ const assertItem = (item: unknown, path: string): CatalogueItem => {
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/**
- * Validates `content/catalogue.json` (or a fixture shaped like it).
- *
- * ≥8 items of both kinds, every street shop stocked — 2.5.6. Broken content
- * must fail in tests, not mid-purchase on the device — 2.5.14 / 3.2.
- */
+/** Validates `content/catalogue.json` (or a fixture shaped like it). */
 export const assertCatalogueContent = (data: unknown): CatalogueFile => {
   if (!isRecord(data)) {
     throw new Error('catalogue content: must be an object');
@@ -135,6 +130,5 @@ export const assertCatalogueContent = (data: unknown): CatalogueFile => {
 export const directionForKind = (kind: CatalogueKind): BudgetDirection =>
   kind === 'need' ? 'needs' : 'wants';
 
-/** Whether a string is a known street shop id. */
 export const isShopId = (value: string): value is ShopId =>
   (SHOP_IDS as readonly string[]).includes(value);

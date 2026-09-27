@@ -26,23 +26,15 @@ interface SliderProps {
   step?: number;
   onChange: (value: number) => void;
   /**
-   * Fires once when the finger lifts (or a screen-reader step lands).
-   * Use this to persist — calling a store write from `onChange` while
-   * dragging freezes the thumb behind SQLite.
+   * Persist here — store writes from `onChange` while dragging freeze the thumb.
    */
   onChangeEnd?: (value: number) => void;
-  /** Colours of the track, from the low end to the high end. */
+  /** Track colours, low → high. */
   track?: [string, string, string];
   color?: ThemeColor;
-  /**
-   * Fills the thumb with `color` instead of a white disc — use on soft
-   * tinted surfaces where a hairline border disappears.
-   */
+  /** Solid thumb fill — hairline borders vanish on soft tinted surfaces. */
   isThumbFilled?: boolean;
-  /**
-   * Horizontal is the default. Vertical grows upward: bottom is `min`,
-   * top is `max` — the parent must give the control a height.
-   */
+  /** Vertical: bottom = min, top = max; parent must give a height. */
   orientation?: SliderOrientation;
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
@@ -59,14 +51,7 @@ const TRACK_THICKNESS = 14;
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/**
- * A value slider.
- *
- * The thumb follows the finger on the UI thread; only the snapped value crosses
- * back to JS, so dragging never depends on how busy React is. Horizontal only
- * activates on sideways movement (so a scroll view keeps the scroll);
- * vertical only activates on up/down.
- */
+/** Thumb on UI thread; only snapped values cross to JS. */
 export const Slider = ({
   value,
   min,
@@ -94,10 +79,7 @@ export const Slider = ({
 
   const usable = Math.max(length - THUMB_SIZE, 1);
 
-  /**
-   * Horizontal: 0 at the left (= min). Vertical: 0 at the top of the
-   * control, but min lives at the bottom — so the thumb offset is flipped.
-   */
+  // Horizontal: 0 at left (= min). Vertical: min at bottom, so offset flips.
   const offsetFromValue = isVertical ? (1 - ratio) * usable : ratio * usable;
 
   const snap = (along: number) => {

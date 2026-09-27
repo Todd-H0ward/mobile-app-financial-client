@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 20,
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
 });
 

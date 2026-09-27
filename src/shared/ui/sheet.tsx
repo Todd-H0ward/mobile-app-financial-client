@@ -67,10 +67,7 @@ interface SheetModalProps {
   onClose: () => void;
   /** Disables the drag handle and the tap-outside dismissal. */
   isDismissible?: boolean;
-  /**
-   * When false, the sheet appears without slide timing — for the grown-up's
-   * "animations off" switch. Defaults to true.
-   */
+  /** False skips slide timing (animations-off). */
   isAnimated?: boolean;
   style?: StyleProp<ViewStyle>;
 }
@@ -151,13 +148,7 @@ const SheetRoot = ({
   );
 };
 
-/**
- * Bottom sheet in a native Modal.
- *
- * Unmounts as soon as `isVisible` is false — keeping the Modal mounted through
- * a close animation stacked under FeedbackHost (another Modal) freezes native
- * touch handling after a shop purchase.
- */
+/** Unmounts when hidden — stacked Modals under FeedbackHost freeze touch otherwise. */
 const SheetModal = ({
   children,
   isVisible,
@@ -267,7 +258,7 @@ const SheetModal = ({
             isGrabberVisible={false}
             style={[
               styles.attached,
-              { paddingBottom: Math.max(insets.bottom, SPACING.three) },
+              { paddingBottom: Math.max(insets.bottom, SPACING.THREE) },
               style,
             ]}
           >
@@ -310,7 +301,7 @@ export const Sheet = Object.assign(SheetRoot, {
 
 const styles = StyleSheet.create({
   actions: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   // Pinned to the bottom edge: only the top carries the lamp-coloured rule.
   attached: {
@@ -323,9 +314,9 @@ const styles = StyleSheet.create({
   root: {
     borderRadius: RADII.xl,
     borderWidth: 2,
-    gap: SPACING.compact,
-    paddingBottom: SPACING.three,
-    paddingHorizontal: SPACING.three,
+    gap: SPACING.COMPACT,
+    paddingBottom: SPACING.THREE,
+    paddingHorizontal: SPACING.THREE,
     paddingTop: 10,
   },
   grabber: {

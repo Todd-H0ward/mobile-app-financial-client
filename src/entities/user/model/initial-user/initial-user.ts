@@ -41,11 +41,8 @@ interface CreateUserInput {
 // ═══════════════════════════════════════════
 
 /**
- * The starting profile: first period in planning, the starting wallet, goals
- * from content at zero progress.
- *
- * The same value is the result of a reset (2.5.12) and the base of the demo
- * profile (2.5.13), so the factory is pure: no `Date.now()`, no store reads.
+ * The starting profile: first period in planning, the starting wallet, goals from content
+ * at zero progress.
  */
 export const createInitialUser = ({
   playerName = DEFAULT_PLAYER_NAME,
@@ -80,12 +77,12 @@ export const createInitialUser = ({
     spirit: 1,
     ...robot,
   },
-  // Credited, not materialized: the starting balance is named income too —
-  // 2.5.4 makes no exception for the very first coin.
+  // Credited, not materialized: the starting balance is named income too — 2.5.4 makes no
+  // exception for the very first coin.
   wallet: startingWallet(createdAt),
   savings: {
-    // Goals come from the validated catalogue, never straight from the JSON:
-    // a broken row must fail in tests, not end up inside a child's save.
+    // Goals come from the validated catalogue, never straight from the JSON: a broken row must
+    // fail in tests, not end up inside a child's save.
     goals: listGoals().map((goal) => ({
       goalId: goal.id,
       saved: 0,

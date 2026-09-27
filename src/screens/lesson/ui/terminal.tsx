@@ -29,21 +29,12 @@ interface TerminalRowProps {
   style?: ViewStyle;
 }
 
-/**
- * What an option says once the question is answered.
- *
- * `right` is the answer, whoever picked it; `wrong` is the child's pick when
- * it was not. Every other option is left plain — a mark on an option nobody
- * chose reads as "this one was correct too".
- */
 type ChoiceMark = 'right' | 'wrong';
 
 interface TerminalChoiceProps {
   children?: string;
   index: number;
-  /** Set once answered; the row stops taking presses from then on. */
   mark?: ChoiceMark | null;
-  /** Answered already — no option can be pressed again. */
   isAnswered?: boolean;
   onPress: () => void;
 }
@@ -109,8 +100,7 @@ const TerminalChoice = ({
           <PixelIcon name="close" size={16} tone="warning" />
         ) : null
       }
-      // Not `isSelected`: that draws its own check on the left, and the
-      // two marks belong on the same side so they read as one column.
+      // Not `isSelected` — its check sits left; keep both marks in one column.
       style={
         mark === 'right'
           ? { backgroundColor: theme.surfaceSoft, borderColor: theme.primary }
@@ -159,7 +149,7 @@ export const Terminal = Object.assign(TerminalPanel, {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  rule: { height: SPACING.one },
+  rule: { height: SPACING.ONE },
 });
 
 export type {

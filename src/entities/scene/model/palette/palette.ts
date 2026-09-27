@@ -2,21 +2,9 @@
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * The model's own colours — art data, not design tokens.
- *
- * Blade Runner night + Smash Hit solids + brutalist concrete — a step brighter
- * so the pit reads through the amber haze without going candy. Soft Phong
- * wedges; no textures in the FBX. This file remains the only place in the
- * slice allowed to write a hex (AGENTS.md); a test asserts it.
- */
+/** The model's own colours — art data, not design tokens. */
 const SCENE_PALETTE = {
-  /**
-   * The three wedges, in `segmentAngles` order.
-   *
-   * Brutalist slabs: cold slate, oxidized steel, rusted concrete — lifted a
-   * notch so emissive glow and haze stay readable.
-   */
+  /** The three wedges, in `segmentAngles` order. */
   segments: ['#4E5A68', '#3A5256', '#5E4A40'],
   /** Dimmed twin while the camera looks elsewhere. */
   segmentsMuted: ['#343C48', '#28383C', '#403028'],
@@ -28,10 +16,7 @@ const SCENE_PALETTE = {
   cellFrameMuted: '#5A6674',
   /** Selected cell — sodium-amber neon, not pastel gold. */
   cellFrameActive: '#FFC45A',
-  /**
-   * The number on a passed cell — the HUD's phosphor green. It used to be a
-   * bay colour, which vanished into the tile it was painted on.
-   */
+  /** The number on a passed cell — the HUD's phosphor green. */
   cellDone: '#9EF0A8',
   /** Map-HUD panel face — dark slab under the overhead shot. */
   hudPanel: '#1A2030',
@@ -41,10 +26,6 @@ const SCENE_PALETTE = {
   hudPanelEdge: '#4A5668',
   /** Map-HUD ink for digits and icons. */
   hudInk: '#E4EAF2',
-  /**
-   * The coin on the wallet board — the same gold as the coin in the HUD
-   * over the scene, so the two read as one number.
-   */
   hudCoin: '#F2C879',
   /** A lit charge cell — the HUD's phosphor, for the same reason. */
   hudBattery: '#9EF0A8',

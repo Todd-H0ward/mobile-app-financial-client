@@ -19,9 +19,8 @@ export const getCatalogueItem = (id: string): CatalogueItem | undefined =>
   ITEMS.find((item) => item.id === id);
 
 /**
- * What a child buys instead when the item is a one-time thing already owned:
- * the unowned item of the same kind closest in price. Repeatable items (no
- * `ownedId`) come back as they are; `undefined` when nothing is left to buy.
+ * What a child buys instead when the item is a one-time thing already owned: the unowned
+ * item of the same kind closest in price.
  */
 export const pickBuyable = (
   id: string,

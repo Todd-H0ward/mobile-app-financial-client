@@ -13,7 +13,6 @@ import { formatMoney } from '@/shared/utils';
 // ═══════════════════════════════════════════
 
 interface EarningsChartProps {
-  /** Oldest period first — the chart reads left to right like a calendar. */
   rows: PeriodEarnings[];
 }
 
@@ -21,23 +20,14 @@ interface EarningsChartProps {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** How many periods fit before the chart starts dropping the oldest. */
 const MAX_POINTS = 6;
-/** Height of the tallest column, in points. */
 const CHART_HEIGHT = 88;
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Coins in and out over the periods, as pairs of columns (G2).
- *
- * Two columns rather than one net number: "earned 40, spent 35" and "earned
- * 5, spent 0" net out the same and mean nothing alike. "Came in" is filled,
- * "went out" is an outline, so the pair reads without colour — and nothing
- * here is ever red (docs/budget.md).
- */
+/** In/out columns, not a net — same net can mean opposite stories; never red. */
 export const EarningsChart = ({ rows }: EarningsChartProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -127,21 +117,21 @@ const styles = StyleSheet.create({
   chart: {
     alignItems: 'flex-end',
     flexDirection: 'row',
-    gap: SPACING.compact,
+    gap: SPACING.COMPACT,
     minHeight: CHART_HEIGHT + 20,
   },
-  group: { alignItems: 'center', flex: 1, gap: SPACING.one },
+  group: { alignItems: 'center', flex: 1, gap: SPACING.ONE },
   label: { fontSize: 12, lineHeight: 16 },
-  legend: { flexDirection: 'row', gap: SPACING.three },
-  legendItem: { alignItems: 'center', flexDirection: 'row', gap: SPACING.one },
+  legend: { flexDirection: 'row', gap: SPACING.THREE },
+  legendItem: { alignItems: 'center', flexDirection: 'row', gap: SPACING.ONE },
   pair: {
     alignItems: 'flex-end',
     flexDirection: 'row',
-    gap: SPACING.one,
+    gap: SPACING.ONE,
     justifyContent: 'center',
     width: '100%',
   },
-  root: { gap: SPACING.two },
+  root: { gap: SPACING.TWO },
   swatch: { borderWidth: 2, height: 12, width: 12 },
 });
 

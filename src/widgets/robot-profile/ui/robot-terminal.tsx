@@ -72,10 +72,10 @@ export const RobotTerminal = ({
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  content: { flexGrow: 1, gap: SPACING.compact, padding: SPACING.three },
+  content: { flexGrow: 1, gap: SPACING.COMPACT, padding: SPACING.THREE },
   frame: {
     flex: 1,
-    maxWidth: MAX_CONTENT_WIDTH + SPACING.three,
+    maxWidth: MAX_CONTENT_WIDTH + SPACING.THREE,
     width: '100%',
   },
   hero: {
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   },
   panel: { flex: 1 },
   root: { flex: 1 },
-  safe: { alignItems: 'center', flex: 1, padding: SPACING.two },
+  safe: { alignItems: 'center', flex: 1, padding: SPACING.TWO },
 });
 
 export type { RobotTerminalProps };

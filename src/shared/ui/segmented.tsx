@@ -33,10 +33,7 @@ interface SegmentedProps<Value extends string> {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Two or three tabs in one frame (concept D1): the chosen one is filled with
- * phosphor, the rest stay dark. The word is always there — never icon-only.
- */
+/** Always labeled — never icon-only (concept D1). */
 export const Segmented = <Value extends string>({
   options,
   value,
@@ -95,18 +92,18 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 2,
     flexDirection: 'row',
-    gap: SPACING.one,
-    padding: SPACING.one,
+    gap: SPACING.ONE,
+    padding: SPACING.ONE,
   },
   tab: {
     alignItems: 'center',
     borderRadius: RADII.s,
     flex: 1,
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     justifyContent: 'center',
     minHeight: 44,
-    paddingHorizontal: SPACING.one,
+    paddingHorizontal: SPACING.ONE,
   },
 });
 

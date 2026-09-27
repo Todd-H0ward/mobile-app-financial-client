@@ -15,15 +15,11 @@ interface LessonQuestion {
 
 interface Lesson {
   /**
-   * The theme, and with it the bay the lesson sits in: `0` money basics,
-   * `1` saving plans, `2` buying decisions.
+   * The theme, and with it the bay the lesson sits in: `0` money basics, `1` saving plans,
+   * `2` buying decisions.
    */
   sector: number;
-  /**
-   * The step it sits on, `1` just above the platform … `4` the rim. The
-   * higher the step, the later it opens: a step opens once the platform has
-   * climbed to it and the row below it in the same theme is done.
-   */
+  /** The step it sits on, `1` just above the platform … `4` the rim. */
   level: number;
   shortDescription?: string;
   learningObjective?: string;

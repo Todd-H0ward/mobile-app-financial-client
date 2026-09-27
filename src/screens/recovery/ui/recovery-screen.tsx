@@ -15,12 +15,7 @@ import { useRecovery } from '../model';
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Choosable recovery path after the period totals — 2.5.9 / roadmap 1.19.
- *
- * Options come from `pickRecoveryOptions`: one or two concrete steps, no
- * shame, no wipe. Skipping is allowed — progress is never held hostage.
- */
+/** Options come from `pickRecoveryOptions`: one or two concrete steps, no shame, no wipe */
 export const RecoveryScreen = () => {
   const { t } = useTranslation();
   const recovery = useRecovery();
@@ -30,13 +25,12 @@ export const RecoveryScreen = () => {
     return <Redirect href={STATIC_ROUTES.HOME} />;
   }
 
-  // The step picked by the deviation stands first and is preselected (F2).
   const chosen =
     recovery.options.find((option) => option.id === chosenId) ??
     recovery.options[0];
 
   return (
-    <Screen gap="compact" terminalVariant="keeper">
+    <Screen gap={SPACING.COMPACT} terminalVariant="keeper">
       <Screen.Header>
         <Screen.Heading>
           <Screen.Label>{t('recovery.label')}</Screen.Label>
@@ -84,10 +78,10 @@ export const RecoveryScreen = () => {
 
 const styles = StyleSheet.create({
   list: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   actions: {
-    gap: SPACING.one,
-    marginTop: SPACING.two,
+    gap: SPACING.ONE,
+    marginTop: SPACING.TWO,
   },
 });

@@ -31,8 +31,8 @@ export const EMPTY_ARCADE_SCORES: ArcadeScoresSave = {
 // ═══════════════════════════════════════════
 
 /**
- * Insert a snake score into the top list (higher apples win).
- * Returns a new array — never mutates the input.
+ * Insert a snake score into the top list (higher apples win). Returns a new array — never
+ * mutates the input.
  */
 export const recordSnakeScore = (
   scores: readonly number[],
@@ -45,10 +45,7 @@ export const recordSnakeScore = (
     .slice(0, ARCADE_SCORE_LIMIT);
 };
 
-/**
- * Insert a Spacewar clear time (lower ms wins).
- * Returns a new array — never mutates the input.
- */
+/** Insert a Spacewar clear time (lower ms wins). Returns a new array — never mutates the input. */
 export const recordSpacewarTime = (
   timesMs: readonly number[],
   elapsedMs: number,

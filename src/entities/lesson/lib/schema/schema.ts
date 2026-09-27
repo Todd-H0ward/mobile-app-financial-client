@@ -122,12 +122,7 @@ const assertLesson = (lesson: unknown, path: string): Lesson => {
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/**
- * Validates `content/lessons.json`.
- *
- * A lesson is the only thing behind a cell, so a broken row is a cell the
- * child can never sink. It must fail in tests, not on the device.
- */
+/** Validates `content/lessons.json`. */
 export const assertLessonContent = (data: unknown): LessonFile => {
   if (!isRecord(data)) {
     throw new Error('lesson content: must be an object');
@@ -149,8 +144,7 @@ export const assertLessonContent = (data: unknown): LessonFile => {
     return parsed;
   });
 
-  // A row is one step of one theme; past its capacity the numbers stop
-  // fitting on the cells. Say so here, where adding the lesson happened.
+  // A row is one step of one theme; past its capacity the numbers stop fitting on the cells. Say so here, where adding the lesson happened.
   const rows = new Map<string, number>();
   for (const { sector, level } of lessons) {
     const key = `${sector}:${level}`;

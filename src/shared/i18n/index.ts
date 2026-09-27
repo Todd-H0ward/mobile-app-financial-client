@@ -10,13 +10,7 @@ import type { AppLanguage, LanguagePreference } from '@/shared/types';
 
 const SUPPORTED_LANGUAGES = ['en', 'ru'] as const;
 
-/**
- * Lazy locale loaders: only the active language is parsed at startup.
- *
- * `require()` is synchronous and bundled, but the JSON is only parsed when
- * the function runs. The second language loads on demand when the user
- * switches — saving ~60 KB of upfront JSON parsing.
- */
+/** Lazy loaders — only the active language is parsed at startup (~60 KB saved). */
 const LOCALE_LOADERS: Record<AppLanguage, () => Record<string, string>> = {
   en: () => require('./locales/en.json'),
   ru: () => require('./locales/ru.json'),

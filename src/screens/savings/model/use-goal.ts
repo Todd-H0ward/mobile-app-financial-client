@@ -36,7 +36,6 @@ interface GoalController {
   progressLabel: string;
   isActive: boolean;
   isReached: boolean;
-  /** Wallet balance — ceiling for a deposit. */
   balance: number;
   /** True only while the period is `active`. */
   canTransfer: boolean;
@@ -46,7 +45,6 @@ interface GoalController {
   canLift: boolean;
   /** Next platform level the jar would buy, or `null`. */
   nextTier: number | null;
-  /** Coins staged for deposit or withdraw. */
   amount: number;
   maxDeposit: number;
   maxWithdraw: number;
@@ -68,10 +66,6 @@ interface GoalController {
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * One goal's jar — deposit here; withdraw goes to its own confirm screen.
- * The lift jar also pays the next platform tier after a confirm.
- */
 export const useGoal = (goalId: string): GoalController | null => {
   const user = useUser();
   const commitUser = useCommitUser();

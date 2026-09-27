@@ -28,7 +28,6 @@ interface TrialChipProps {
   isSelected?: boolean;
   onPress?: () => void;
   disabled?: boolean;
-  /** Optional glyph left of the label. */
   glyph?: string;
   /** Compact dial / ± without flex grow. */
   isCompact?: boolean;
@@ -180,9 +179,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: RADII.m,
     borderWidth: 2,
-    gap: SPACING.half,
+    gap: SPACING.HALF,
     justifyContent: 'center',
-    padding: SPACING.two,
+    padding: SPACING.TWO,
   },
   chipCompact: {
     minHeight: 52,
@@ -214,14 +213,14 @@ const styles = StyleSheet.create({
   },
   lamps: {
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   panel: {
     borderRadius: RADII.m,
     borderWidth: 2,
     flex: 1,
     overflow: 'hidden',
-    padding: SPACING.three,
+    padding: SPACING.THREE,
   },
   readout: {
     fontFamily: FONTS.mono,

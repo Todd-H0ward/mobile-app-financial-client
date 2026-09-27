@@ -28,7 +28,6 @@ interface TaskPlayController {
   canPlay: boolean;
   isDone: boolean;
   sheet: TaskSheet;
-  /** Returns true when the chore was credited and feedback opened. */
   complete: (rewardShare: number, isCorrect: boolean) => boolean;
   dismissSheet: () => void;
 }
@@ -64,7 +63,6 @@ const isSamePeriod = (
 // HOOKS
 // ═══════════════════════════════════════════
 
-/** Showcase of every catalogue chore for the period. */
 export const useTasksList = (): TasksListController => {
   const user = useUser();
   const commitUser = useCommitUser();
@@ -93,7 +91,6 @@ export const useTasksList = (): TasksListController => {
   };
 };
 
-/** One chore play session — mechanic scores, then `applyCompleteTask`. */
 export const useTaskPlay = (taskId: string): TaskPlayController | null => {
   const user = useUser();
   const commitUser = useCommitUser();
@@ -116,8 +113,7 @@ export const useTaskPlay = (taskId: string): TaskPlayController | null => {
     sheet,
 
     complete: (rewardShare, _isCorrect) => {
-      // A second press may arrive before React renders the updated save.
-      // Validate and credit the latest state synchronously, before feedback.
+      // A second press may arrive before React renders the updated save
       const current = useUserStore.getState().user;
       if (!isSamePeriod(current, user)) return false;
       if (current.period.phase === 'planning') {

@@ -1,8 +1,6 @@
 import type { WatcherLine } from './dialogue';
 
-/**
- * The Overseer — chores and the arcade. Soft help lives with the Keeper.
- */
+/** The Overseer — chores and the arcade. */
 export const OVERSEER_LINES: WatcherLine[] = [
   {
     id: 'overseer-planning',

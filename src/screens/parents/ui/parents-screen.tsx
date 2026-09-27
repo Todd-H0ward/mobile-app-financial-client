@@ -21,14 +21,6 @@ import { ThemeTallyRows } from './theme-tally-rows';
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * The grown-up's section — 2.5.12, docs/parents.md.
- *
- * The one screen with a grown-up's look and the only place with numbers about
- * the child. Everything here is read back out of what the child already sees:
- * the same wallet history and the same period totals, counted a second way.
- * Nothing extra is collected and nothing leaves the device (docs/privacy.md).
- */
 export const ParentsScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -47,7 +39,7 @@ export const ParentsScreen = () => {
   const report = parents.report;
 
   return (
-    <Screen gap="compact" terminalVariant="adult">
+    <Screen gap={SPACING.COMPACT} terminalVariant="adult">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -193,12 +185,12 @@ const styles = StyleSheet.create({
     borderRadius: RADII.m,
     borderStyle: 'dashed',
     borderWidth: 2,
-    gap: SPACING.two,
-    padding: SPACING.compact,
+    gap: SPACING.TWO,
+    padding: SPACING.COMPACT,
   },
-  privacy: { alignItems: 'flex-start', flexDirection: 'row', gap: SPACING.two },
+  privacy: { alignItems: 'flex-start', flexDirection: 'row', gap: SPACING.TWO },
   privacyText: { flex: 1 },
   section: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
 });

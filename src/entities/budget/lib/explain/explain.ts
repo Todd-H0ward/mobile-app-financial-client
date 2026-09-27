@@ -10,10 +10,7 @@ import { pickRecoveryOptions, type RecoveryTipId } from '../recovery';
 
 /** What the summary screen says after comparing plan and fact. */
 interface SummaryExplain {
-  /**
-   * One short story that ties the deltas together — money moved, it did not
-   * vanish. Empty when every direction landed on plan.
-   */
+  /** One short story that ties the deltas together — money moved, it did not vanish. */
   storyKey:
     | 'allOnPlan'
     | 'wantsAteSavings'
@@ -25,9 +22,8 @@ interface SummaryExplain {
   /** Directions that finished under plan. */
   underspent: BudgetDirection[];
   /**
-   * Concrete next-period tips (2.5.9). Never empty: even a perfect period gets
-   * a gentle habit tip so the screen never ends on a shrug.
-   * Chosen by `pickRecoveryOptions` — the recovery screen owns the actions.
+   * Concrete next-period tips (2.5.9). Never empty: even a perfect period gets a gentle
+   * habit tip so the screen never ends on a shrug.
    */
   tipKeys: RecoveryTipId[];
 }
@@ -36,12 +32,7 @@ interface SummaryExplain {
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/**
- * Turns comparison rows into a child-readable story and recovery tips.
- *
- * Colour is not used as the carrier — the keys map to copy with `+` / `−`
- * and plain verbs, see docs/budget.md and docs/accessibility.md.
- */
+/** Turns comparison rows into a child-readable story and recovery tips. */
 export const explainSummary = (rows: BudgetComparison[]): SummaryExplain => {
   const overspent = rows
     .filter((row) => row.delta > 0)

@@ -39,10 +39,7 @@ const KNOB = 26;
 const PADDING = 1;
 const TRACK_BORDER = 2;
 
-/**
- * How far the knob travels. The border eats into the content box on both
- * sides, so leaving it out overshoots the track by 2px at the "on" end.
- */
+/** Border eats into the content box — omit it and "on" overshoots by 2px. */
 const TRAVEL = TRACK_WIDTH - TRACK_BORDER * 2 - KNOB - PADDING * 2;
 const DURATION = 160;
 

@@ -63,7 +63,6 @@ const keyExtractor = (row: WalletHistoryRow): string => row.entry.id;
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** UI kit 11: the machine says the log is empty, a person says what to do. */
 const EmptyState = ({ title, body }: EmptyStateProps) => {
   const { t } = useTranslation();
   return (
@@ -77,10 +76,6 @@ const EmptyState = ({ title, body }: EmptyStateProps) => {
   );
 };
 
-/**
- * One finished period (screen 14). Its status has a shape of its own:
- * filled for "сбылся", an amber outline with "!" for "разошёлся".
- */
 const PeriodCard = ({ period }: PeriodCardProps) => {
   const { t } = useTranslation();
 
@@ -136,14 +131,7 @@ const PeriodCard = ({ period }: PeriodCardProps) => {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * The log — 2.5.11 (screen 14): finished periods, every coin with its source,
- * and the trials passed. Empty tabs are honest, not blank.
- *
- * Coin lines use `FlatList` (docs/performance.md) — up to
- * `WALLET_HISTORY_LIMIT` rows must not mount at once inside `Screen`'s
- * `ScrollView`.
- */
+/** FlatList for coins — WALLET_HISTORY_LIMIT must not mount inside ScrollView. */
 export const HistoryScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -159,7 +147,6 @@ export const HistoryScreen = () => {
   const lastIndex = rows.length - 1;
   const renderItem: ListRenderItem<WalletHistoryRow> = useCallback(
     ({ item, index }) => (
-      // The rows read as one framed list, like the kit's history block.
       <View
         style={[
           styles.cell,
@@ -199,7 +186,7 @@ export const HistoryScreen = () => {
 
   if (tab === 'periods') {
     return (
-      <Screen presentation="sheet" gap="compact">
+      <Screen presentation="sheet" gap={SPACING.COMPACT}>
         {header}
         {receipts && receipts.length > 0 ? (
           <Card>
@@ -233,7 +220,7 @@ export const HistoryScreen = () => {
   }
 
   return (
-    <Screen presentation="sheet" gap="compact" isScrollable={false}>
+    <Screen presentation="sheet" gap={SPACING.COMPACT} isScrollable={false}>
       <FlatList
         data={rows}
         keyExtractor={keyExtractor}
@@ -265,8 +252,8 @@ export const HistoryScreen = () => {
 
 const styles = StyleSheet.create({
   box: { flex: 1, gap: 2 },
-  boxes: { flexDirection: 'row', gap: SPACING.two },
-  boxLabel: { alignItems: 'center', flexDirection: 'row', gap: SPACING.one },
+  boxes: { flexDirection: 'row', gap: SPACING.TWO },
+  boxLabel: { alignItems: 'center', flexDirection: 'row', gap: SPACING.ONE },
   boxValue: { fontSize: 15 },
   cell: { borderLeftWidth: 2, borderRightWidth: 2 },
   cellFirst: {
@@ -279,18 +266,18 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: RADII.m,
     borderBottomWidth: 2,
   },
-  empty: { gap: SPACING.two, paddingVertical: SPACING.three },
-  headerBlock: { gap: SPACING.compact },
+  empty: { gap: SPACING.TWO, paddingVertical: SPACING.THREE },
+  headerBlock: { gap: SPACING.COMPACT },
   list: { flex: 1, width: '100%' },
   listContent: {
     flexGrow: 1,
-    paddingBottom: SPACING.two,
+    paddingBottom: SPACING.TWO,
   },
-  listHeader: { marginBottom: SPACING.compact },
+  listHeader: { marginBottom: SPACING.COMPACT },
   periodHead: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     justifyContent: 'space-between',
   },
   periodTitle: { flexShrink: 1 },

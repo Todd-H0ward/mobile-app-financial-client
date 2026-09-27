@@ -4,8 +4,8 @@ import { listTasks } from '@/entities/task';
 
 import { makeDemoTimeSource, type TimeSource } from '@/shared/lib/time-source';
 
-// The types module and the factory, not the slice barrel: the barrel carries
-// the store, and with it `expo-sqlite`, which the node test runner cannot parse.
+// The types module and the factory, not the slice barrel: the barrel carries the store,
+// and with it `expo-sqlite`, which the node test runner cannot parse.
 import { createInitialUser } from '../../model/initial-user';
 import type { UserSave } from '../../model/types';
 import { DEMO_RUN_PERIODS } from '../demo';
@@ -44,9 +44,7 @@ interface SimPeriod {
   saved: number;
   /** Balance once the period is settled — never below zero, 2.5.6. */
   balance: number;
-  /** Whether the fact stayed inside the plan in all three directions. */
   isPlanKept: boolean;
-  /** Whether every item the profile meant to buy was affordable. */
   isShoppingDone: boolean;
   /** Purchases the wallet refused for want of coins. */
   refusals: number;
@@ -56,7 +54,6 @@ interface SimPeriod {
 interface SimRun {
   /** The profile that was played. */
   profile: SimProfile;
-  /** The save at the end, for anything the summary below does not carry. */
   user: UserSave;
   /** One row per finished period, in order. */
   periods: SimPeriod[];
@@ -71,11 +68,7 @@ interface SimRun {
 interface SimOptions {
   /** How many periods to play. The demo run's five by default — 2.5.13. */
   periods?: number;
-  /**
-   * Save to carry on from, in the `planning` phase. A fresh profile by
-   * default; passing the end of another run asks whether a child can climb
-   * back out of where that run left them.
-   */
+  /** Save to carry on from, in the `planning` phase. */
   start?: UserSave;
   /** Clock the run stamps history with. A fresh demo clock by default. */
   time?: TimeSource & { tick: () => void };
@@ -85,13 +78,7 @@ interface SimOptions {
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * The chores this profile finishes, in catalogue order.
- *
- * Whole chores only: half a chore pays nothing, and a share that rounds to
- * zero means a child who did none — which is a scenario worth running, not an
- * error.
- */
+/** The chores this profile finishes, in catalogue order. */
 const choresFor = (profile: SimProfile): readonly string[] => {
   const all = listTasks();
   return all
@@ -136,14 +123,6 @@ const roomFor = (user: UserSave, goalId: string): number => {
   return goal && row ? goal.price - row.saved : 0;
 };
 
-/**
- * Puts `budget` coins away, filling the nearest goal and then looking at the
- * next one.
- *
- * A deposit larger than the goal's room is refused outright, so the split is
- * worked out here — the same thing the jar screen does when the child drags
- * past the top of the bar.
- */
 const putAside = (
   user: UserSave,
   budget: number,
@@ -181,18 +160,6 @@ const putAside = (
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/**
- * Plays one imagined child through several periods and reports what the
- * balance table did to them.
- *
- * Everything runs through the real appliers — `applyCompleteTask`,
- * `applyPurchase`, `applyDeposit` and the period machine — so the run answers
- * for the shipped rules rather than for a second copy of the formulas that
- * would quietly drift from them. Nothing here reads the clock or the store:
- * the same profile always produces the same run.
- *
- * See docs/economy.md §Симуляция баланса for what the numbers must come to.
- */
 export const simulate = (
   profile: SimProfile,
   {
@@ -231,8 +198,8 @@ export const simulate = (
     let spentWants = 0;
     let refusals = 0;
     for (const itemId of profile.buys) {
-      // A one-time item already owned is swapped for the nearest one still
-      // in the shop — the child keeps the same habit, not the same thing.
+      // A one-time item already owned is swapped for the nearest one still in the shop — the
+      // child keeps the same habit, not the same thing.
       const item = pickBuyable(itemId, user.ownedItemIds);
       if (!item) continue;
       const bought = applyPurchase(user, item.id, time);
@@ -261,8 +228,8 @@ export const simulate = (
 
     user = finishPeriod(user);
 
-    // The bonus is read off the settlement rather than restated here: the rule
-    // for it lives in `endPeriod`, and a second copy would drift.
+    // The bonus is read off the settlement rather than restated here: the rule for it lives in
+    // `endPeriod`, and a second copy would drift.
     const beforeSettlement = user.wallet.balance;
     user = endPeriod(user);
     earned += user.wallet.balance - beforeSettlement;

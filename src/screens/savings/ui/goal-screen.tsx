@@ -53,7 +53,6 @@ const MAX_CELLS = 15;
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** UI kit 08 "сколько положить": a big number between − and +. */
 const AmountStepper = ({ value, max, onAdd, onRemove }: AmountStepperProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -107,11 +106,6 @@ const AmountStepper = ({ value, max, onAdd, onRemove }: AmountStepperProps) => {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * One goal's jar (concept E1, E2). The chosen goal is framed and labelled
- * "✓ ЦЕЛЬ"; putting coins in is the main action, taking them out a quiet link
- * whose cost is spelled out on the next screen.
- */
 export const GoalScreen = ({ goalId }: GoalScreenProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -130,7 +124,7 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
     goal.canTransfer && goal.amount > 0 && goal.amount <= goal.maxDeposit;
 
   return (
-    <Screen presentation="sheet" gap="compact" terminalVariant="keeper">
+    <Screen presentation="sheet" gap={SPACING.COMPACT} terminalVariant="keeper">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -400,9 +394,6 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
   );
 };
 
-/**
- * Resolves `/savings/[goalId]`. Unknown ids fall back to the showcase.
- */
 export const GoalRouteScreen = ({ goalId }: { goalId: string }) => {
   if (!goalId) {
     return <Redirect href={STATIC_ROUTES.SAVINGS} />;
@@ -417,8 +408,8 @@ export const GoalRouteScreen = ({ goalId }: { goalId: string }) => {
 
 const styles = StyleSheet.create({
   actions: {
-    gap: SPACING.one,
-    marginTop: SPACING.one,
+    gap: SPACING.ONE,
+    marginTop: SPACING.ONE,
   },
   amount: {
     borderBottomWidth: 2,
@@ -432,7 +423,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     flexDirection: 'row',
     gap: 6,
-    paddingHorizontal: SPACING.two,
+    paddingHorizontal: SPACING.TWO,
     paddingVertical: 3,
   },
   badgeText: { fontSize: 12, lineHeight: 16 },
@@ -456,8 +447,8 @@ const styles = StyleSheet.create({
     width: KEY_SIZE,
   },
   keySign: { fontFamily: FONTS.sans, fontSize: 26, lineHeight: 32 },
-  lockLine: { alignItems: 'center', flexDirection: 'row', gap: SPACING.one },
-  quick: { flexDirection: 'row', gap: SPACING.two },
+  lockLine: { alignItems: 'center', flexDirection: 'row', gap: SPACING.ONE },
+  quick: { flexDirection: 'row', gap: SPACING.TWO },
   quickAll: { flex: 1.6 },
   quickChip: {
     alignItems: 'center',
@@ -475,9 +466,9 @@ const styles = StyleSheet.create({
   stepper: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.three,
+    gap: SPACING.THREE,
     justifyContent: 'center',
-    paddingVertical: SPACING.two,
+    paddingVertical: SPACING.TWO,
   },
   table: { borderRadius: RADII.s, borderWidth: 2 },
   tableDivider: { borderTopWidth: 1 },
@@ -485,7 +476,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.compact,
+    paddingHorizontal: SPACING.COMPACT,
     paddingVertical: 10,
   },
   tableValue: { fontFamily: FONTS.monoStrong, fontSize: 16 },

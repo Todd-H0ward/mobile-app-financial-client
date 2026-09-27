@@ -1,6 +1,5 @@
 import type { PlaykitRound } from './rounds';
 
-/** Whether the child's locked answer matches the round. */
 export const isPlaykitAnswerCorrect = (
   round: PlaykitRound,
   answer: unknown,

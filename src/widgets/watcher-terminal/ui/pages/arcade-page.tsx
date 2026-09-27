@@ -126,5 +126,5 @@ export const ArcadePage = ({ frame }: ArcadePageProps) => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  stack: { gap: SPACING.two, paddingBottom: SPACING.two },
+  stack: { gap: SPACING.TWO, paddingBottom: SPACING.TWO },
 });

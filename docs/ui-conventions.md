@@ -73,7 +73,7 @@ always accepts `style` and merges it last so callers can adjust spacing.
 **Variants over booleans.** A look is a `variant` prop whose values map 1:1 to
 style keys (`styles[variant]`), not `isLarge` / `isPrimary` flags.
 
-**Tokens over literals.** `SPACING.three`, `theme.backgroundElement`,
+**Tokens over literals.** `SPACING.THREE`, `theme.backgroundElement`,
 `FONTS.mono`. Raw hex is allowed only for brand-fixed surfaces (e.g. the splash
 background). Fixed sizes go through `()` so they follow the device —
 see [layout.md](./layout.md).

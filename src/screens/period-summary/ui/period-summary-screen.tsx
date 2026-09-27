@@ -15,13 +15,7 @@ import { usePeriodSummary } from '../model';
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Plan vs fact for the period that just ended — 2.5.5 / roadmap 1.11.
- *
- * Comparison + story + Keeper line + robot readout; the recovery path
- * (2.5.9) is its own screen so the child can pick a concrete next step
- * without wiping progress.
- */
+/** Recovery is a separate screen so the child can pick a next step without wiping progress. */
 export const PeriodSummaryScreen = () => {
   const { t } = useTranslation();
   const summary = usePeriodSummary();
@@ -47,7 +41,7 @@ export const PeriodSummaryScreen = () => {
   );
 
   return (
-    <Screen gap="compact" terminalVariant="keeper">
+    <Screen gap={SPACING.COMPACT} terminalVariant="keeper">
       <Screen.Header>
         <Screen.Heading>
           <Screen.Label>
@@ -170,10 +164,10 @@ export const PeriodSummaryScreen = () => {
 
 const styles = StyleSheet.create({
   button: {
-    marginTop: SPACING.two,
+    marginTop: SPACING.TWO,
   },
   value: { fontFamily: FONTS.monoStrong, fontSize: 16, lineHeight: 22 },
   rows: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
 });

@@ -7,10 +7,7 @@ import type { UserSave } from '@/entities/user';
 /** How the display formats before/after numbers. */
 type ChangeFormat = 'money' | 'percent' | 'count';
 
-/**
- * One measurable thing that moved — numbers only, never copy.
- * The UI maps `labelKey` through i18n.
- */
+/** One measurable delta — numbers only; UI i18ns `labelKey`. */
 interface ChangeLine {
   id: string;
   /** i18n key, usually `feedback.metrics.*`. */
@@ -20,24 +17,21 @@ interface ChangeLine {
   format: ChangeFormat;
 }
 
-/** What the child just did — picks the title / default why keys. */
+/** Picks title / default why keys. */
 type FeedbackAction = 'purchase' | 'deposit' | 'withdraw' | 'task' | 'plan';
 
-/**
- * Numbers `describeChange` cares about. Built from a save via `snapshotUser`
- * so the helper stays free of the full profile shape.
- */
+/** Snapshot for diffs — via `snapshotUser`, not the full profile. */
 interface FeedbackSnapshot {
   balance: number;
   savingsTotal: number;
   factNeeds: number;
   factWants: number;
   factSavings: number;
-  /** Robot charge 0…1. */
+  /** 0…1 */
   charge: number;
-  /** Robot spirit 0…1. */
+  /** 0…1 */
   spirit: number;
-  /** How many bought items the child owns — toys, the console. */
+  /** Owned catalogue items. */
   ownedCount: number;
 }
 
@@ -45,35 +39,25 @@ interface DescribeChangeInput {
   before: FeedbackSnapshot;
   after: FeedbackSnapshot;
   action: FeedbackAction;
-  /**
-   * Ready-made why text from content (task explanation, item influence).
-   * Wins over `whyKey` when set.
-   */
+  /** Content-authored why; wins over `whyKey` when set. */
   whyText?: string;
-  /** Override the default `feedback.why.<action>` key. */
+  /** Override default `feedback.why.<action>`. */
   whyKey?: string;
-  /** Params for title / why interpolation (item name, reward, …). */
+  /** Title / why interpolation params. */
   params?: Record<string, string | number>;
-  /**
-   * Purchase pushed fact over plan by this many coins — switches the why
-   * key to `purchaseOverPlan` when > 0.
-   */
+  /** Coins over plan on purchase — switches why to `purchaseOverPlan` when > 0. */
   overPlanBy?: number;
 }
 
-/**
- * Structured «что изменилось и почему» — 2.5.9 / roadmap 1.18.
- * Pure: no i18n, no UI.
- */
+/** «Что изменилось» report — pure, no i18n/UI (2.5.9). */
 interface FeedbackReport {
   action: FeedbackAction;
   titleKey: string;
-  /** i18n key for the why paragraph, or null when `whyText` is used. */
+  /** Null when `whyText` is used. */
   whyKey: string | null;
-  /** Content-authored why, when the catalogue / task already wrote it. */
   whyText: string | null;
   params: Record<string, string | number>;
-  /** Only lines that actually moved. */
+  /** Only lines that moved. */
   changes: ChangeLine[];
 }
 
@@ -114,11 +98,7 @@ export const snapshotUser = (user: UserSave): FeedbackSnapshot => ({
   ownedCount: user.ownedItemIds.length,
 });
 
-/**
- * Diffs two snapshots into the lines a child can read: balance, jar, fact,
- * charge, spirit, owned items. The why comes from the action context —
- * never invented here.
- */
+/** Diff snapshots into readable lines; why comes from action context only. */
 export const describeChange = (input: DescribeChangeInput): FeedbackReport => {
   const { before, after, action } = input;
   const params = { ...(input.params ?? {}) };

@@ -16,7 +16,6 @@ import { formatMoney } from '@/shared/utils';
 
 interface WalletHistoryRowViewProps {
   row: WalletHistoryRow;
-  /** Draws the hairline above — every row but the first. */
   isDivided?: boolean;
 }
 
@@ -35,7 +34,6 @@ const DIRECTION_SHAPE: Record<string, ShapeVariant> = {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/** UI kit 07 "строка истории": a coin always has a source. */
 export const WalletHistoryRowView = memo(
   ({ row, isDivided = false }: WalletHistoryRowViewProps) => {
     const { t } = useTranslation();
@@ -45,7 +43,7 @@ export const WalletHistoryRowView = memo(
       ? DIRECTION_SHAPE[row.entry.direction]
       : undefined;
     const source = labelWalletSource(row.source, t);
-    // Source labels are written mid-sentence; a row starts one.
+    // Source labels are mid-sentence; a row title needs a capital.
     const title = source.charAt(0).toLocaleUpperCase() + source.slice(1);
     const amount = `${isEarn ? '+' : '−'}${formatMoney(row.entry.amount)}`;
 
@@ -94,7 +92,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 10,
-    paddingHorizontal: SPACING.compact,
+    paddingHorizontal: SPACING.COMPACT,
     paddingVertical: 10,
   },
 });

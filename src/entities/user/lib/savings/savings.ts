@@ -55,12 +55,7 @@ const withGoalSaved = (
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/**
- * Moves coins from the wallet into one goal's jar.
- *
- * Debits the wallet, bumps `fact.savings`, increments `depositsThisPeriod`
- * (feeds the regularity bonus), and marks the goal reached when full — 2.5.7.
- */
+/** Moves coins from the wallet into one goal's jar. */
 export const applyDeposit = (
   user: UserSave,
   goalId: string,
@@ -130,13 +125,7 @@ export const applyDeposit = (
   };
 };
 
-/**
- * Moves coins from one goal's jar back to the wallet.
- *
- * Always call after the child confirms the consequence sheet — 2.5.7 forbids
- * a silent take. Lowers `fact.savings` and clears `reachedInPeriod` if the
- * jar drops below the price again.
- */
+/** Moves coins from one goal's jar back to the wallet. */
 export const applyWithdraw = (
   user: UserSave,
   goalId: string,
@@ -190,9 +179,6 @@ export const applyWithdraw = (
   };
 };
 
-/**
- * Picks which goal the home HUD and the jar focus on.
- */
 export const setActiveGoal = (
   user: UserSave,
   goalId: string,

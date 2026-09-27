@@ -5,24 +5,19 @@ import { useState } from 'react';
 // ═══════════════════════════════════════════
 
 interface Playground {
-  /** Drives every `isLoading` on the screen at once. */
   isTextureEnabled: boolean;
   setIsTextureEnabled: (isEnabled: boolean) => void;
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
-  /** Drives every `isDisabled` / `disabled` on the screen at once. */
   isDisabled: boolean;
   setIsDisabled: (isDisabled: boolean) => void;
-  /** Toggled by the `Switch` section; also feeds the disabled example. */
   isChecked: boolean;
   setIsChecked: (isChecked: boolean) => void;
-  /** Live value of the `Slider` section, 0…100. */
+  /** 0…100. */
   sliderValue: number;
   setSliderValue: (sliderValue: number) => void;
-  /** Feeds `ProgressBar` and the sliders, so one drag moves them all. */
   meterValue: number;
   setMeterValue: (meterValue: number) => void;
-  /** Text of the `Input` section, so the counter has something to count. */
   inputValue: string;
   setInputValue: (inputValue: string) => void;
   selectedChip: number | null;
@@ -33,19 +28,15 @@ interface Playground {
   setIsRowSelected: (isRowSelected: boolean) => void;
   isSheetVisible: boolean;
   setIsSheetVisible: (isSheetVisible: boolean) => void;
-  /** Whether that sheet can be dragged or tapped away. */
   isSheetDismissible: boolean;
   setIsSheetDismissible: (isSheetDismissible: boolean) => void;
-  /** Chosen tab of the `Segmented` section — a real switch, not a picture. */
+  /** Real Segmented switch, not a static picture. */
   segment: 'need' | 'want' | 'save';
   setSegment: (segment: 'need' | 'want' | 'save') => void;
-  /** Stepper value of the plan row example, in coins, 0…50. */
+  /** Plan-row stepper, coins 0…50. */
   stepperValue: number;
   setStepperValue: (stepperValue: number) => void;
-  /**
-   * Bumped to remount `SplashOverlay`, which plays once and then unmounts
-   * itself — the only way to watch its animation a second time.
-   */
+  /** Bump to remount SplashOverlay (plays once, then unmounts). */
   splashRun: number;
   replaySplash: () => void;
 }
@@ -54,11 +45,7 @@ interface Playground {
 // HOOKS
 // ═══════════════════════════════════════════
 
-/**
- * Every switchable value on the UI-kit screen lives here rather than in the
- * sections, so a component is never hardcoded into one state and the screen
- * stays a playground instead of a gallery.
- */
+/** Shared switches so kit sections stay a playground, not hardcoded states. */
 export const usePlayground = (): Playground => {
   const [isTextureEnabled, setIsTextureEnabled] = useState(true);
   const [isLoading, setIsLoading] = useState(false);

@@ -108,7 +108,7 @@ export const SnakeScreen = () => {
             <View style={styles.menuBody}>
               <Text
                 variant="subtitle"
-                style={{ color: theme.arcadeLcd, marginBottom: SPACING.two }}
+                style={{ color: theme.arcadeLcd, marginBottom: SPACING.TWO }}
               >
                 {t('games.snake.title')}
               </Text>
@@ -116,7 +116,7 @@ export const SnakeScreen = () => {
                 variant="small"
                 style={{
                   color: theme.arcadeLcdDim,
-                  marginBottom: SPACING.three,
+                  marginBottom: SPACING.THREE,
                 }}
               >
                 {t('games.snake.blurb')}
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   menu: {
     flex: 1,
     minHeight: 0,
-    paddingHorizontal: SPACING.two,
+    paddingHorizontal: SPACING.TWO,
   },
   menuBody: {
     flex: 1,

@@ -67,12 +67,7 @@ const PANEL_DEPTH = 14;
 /** Outermost ring — the boards hang off its rim and ride with it as it sinks. */
 const TOP_TERRACE = SCENE_TERRACE_COUNT - 1;
 
-/**
- * Mid-azimuth of the bay the top shot looks into.
- *
- * Gears stand at the bay's edges; the boards sit between them on the
- * top terrace so the composed map always finds them under the outer deck.
- */
+/** Mid-azimuth of the bay the top shot looks into. */
 const mapBayAzimuth = (): number => {
   const arc = 360 / SCENE_SEGMENT_COUNT;
   for (const from of SCENE_GEAR_ANGLES) {
@@ -87,32 +82,21 @@ const HUD_AZIMUTH = mapBayAzimuth();
 /** Outer radius of the top terrace — boards hug that contour. */
 const HUD_RADIUS = SCENE_TERRACE_RADII[TOP_TERRACE] ?? SCENE_TERRACE_RADII[0];
 
-/**
- * Just under the top terrace's deck.
- *
- * Authored height of ring `n` is `n * SCENE_TERRACE_RISE`; hanging the
- * panel centre half a board below that puts the top edge flush with the rim.
- */
+/** Panel centre half a board below ring height — top edge flush with the rim. */
 const HUD_Y = TOP_TERRACE * SCENE_TERRACE_RISE - PANEL_HEIGHT / 2;
 
-/**
- * Angular step between neighbouring board centres, in degrees.
- *
- * Derived from width + gap on the rim so the three stay packed along the
- * contour without overlapping or floating off into the bay.
- */
+/** Angular step between neighbouring board centres, in degrees. */
 const PANEL_STEP_DEG =
   ((PANEL_WIDTH + PANEL_GAP) / HUD_RADIUS) * (180 / Math.PI);
 
-/** Digit height on a board. */
 const DIGIT_HEIGHT = 28;
 
-/** Ink floats just in front of the slab face. */
+/** Slightly in front of the slab face — avoids z-fighting. */
 const INK_Z = PANEL_DEPTH / 2 + 0.4;
 
 /**
- * Cells in the charge readout — the HUD's five, so a child comparing the
- * board with the bar over the scene counts the same thing on both.
+ * Cells in the charge readout — the HUD's five, so a child comparing the board with the
+ * bar over the scene counts the same thing on both.
  */
 const CHARGE_CELLS = 5;
 
@@ -184,12 +168,7 @@ const panelBoxEdges = (
   return values;
 };
 
-/**
- * Battery outline in local XY: body + terminal nub.
- *
- * Drawn as line segments — the fill plane carries the charge, the outline
- * just frames it.
- */
+/** Battery outline in local XY: body + terminal nub. */
 const batteryOutlineLines = (
   width: number,
   height: number,
@@ -248,16 +227,7 @@ const batteryOutlineLines = (
 // FACTORY
 // ═══════════════════════════════════════════
 
-/**
- * Three boards hugging the top terrace rim between the two gears of the bay
- * the top shot looks into — coins, tier, battery — each read the way the
- * HUD over the scene reads it: the same coin, the same tier count, the same
- * five charge cells.
- *
- * Parent is the outermost terrace group, so they sink with that ring. Each
- * board sits on its own azimuth and faces outward, following the disc's
- * contour instead of a flat chord under it.
- */
+/** Coins / tier / battery boards on the top-terrace rim (map view only). */
 const createMapHud = (): MapHud => {
   const root = new Group();
   root.visible = false;
@@ -321,8 +291,8 @@ const createMapHud = (): MapHud => {
     // Face out along the rim — that is what wraps the contour.
     group.rotation.y = radians;
 
-    // Slab body: face material on the front/back, cooler tint on the sides
-    // so the isometric shot reads thickness instead of a flat card.
+    // Slab body: face material on the front/back, cooler tint on the sides so the isometric
+    // shot reads thickness instead of a flat card.
     const box = new BoxGeometry(PANEL_WIDTH, PANEL_HEIGHT, PANEL_DEPTH);
     geometries.push(box);
     const board = new Mesh(box, [

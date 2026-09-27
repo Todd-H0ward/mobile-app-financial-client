@@ -66,10 +66,7 @@ export const DYNAMIC_ROUTES = {
     }) as const,
 };
 
-/**
- * Routes shown as a terminal sheet over the live pit (`transparentModal`).
- * Names are expo-router file routes; `isSheetPath` matches their URLs.
- */
+/** Terminal sheets over the live pit (`transparentModal`). */
 export const SHEET_ROUTE_NAMES = [
   'settings',
   'history',

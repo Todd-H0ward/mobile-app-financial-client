@@ -59,7 +59,7 @@ export const Toaster = () => {
   return (
     <SonnerToaster
       position="top-center"
-      offset={insets.top + SPACING.three}
+      offset={insets.top + SPACING.THREE}
       duration={DEFAULT_DURATION}
       visibleToasts={MAX_VISIBLE}
       gap={8}
@@ -77,7 +77,7 @@ export const Toaster = () => {
 
 const styles = StyleSheet.create({
   positioner: {
-    paddingHorizontal: SPACING.three,
+    paddingHorizontal: SPACING.THREE,
   },
   toast: {
     width: '100%',

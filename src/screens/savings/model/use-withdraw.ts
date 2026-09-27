@@ -16,7 +16,6 @@ interface WithdrawController {
   goalId: string;
   title: string;
   amount: number;
-  /** Recalculated consequences for the confirm screen. */
   explain: WithdrawExplain;
   /** False when amount is illegal or the period is not active. */
   canConfirm: boolean;
@@ -27,10 +26,7 @@ interface WithdrawController {
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * Withdraw confirm controller — recalculates consequences, never mutates until
- * `confirm` (2.5.7 / roadmap 1.15).
- */
+/** Withdraw confirm controller — recalculates consequences, never mutates until `confirm` (2.5.7 / roadmap 1.15) */
 export const useWithdraw = (
   goalId: string,
   amount: number,

@@ -23,8 +23,8 @@ interface PuzzleLevel {
   /** Pack grouping for unlock ladders. */
   pack: string;
   /**
-   * Key into the widget image map. Entity stays free of `require()` so node
-   * tests can import the catalogue without RN assets.
+   * Key into the widget image map. Entity stays free of `require()` so node tests can import
+   * the catalogue without RN assets.
    */
   imageKey: string;
 }

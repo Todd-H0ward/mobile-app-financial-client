@@ -39,9 +39,8 @@ interface UserPersistedState {
   /** The whole save, or `null` — no profile yet; the entry screen makes one. */
   user: UserSave | null;
   /**
-   * The child's save, parked while demo mode runs; `null` whenever demo mode is
-   * off. It is persisted on purpose: a demo can outlive an app restart, and the
-   * child's progress must still come back when the grown-up switches demo off.
+   * Child's save parked while demo runs; `null` when demo is off. Persisted on
+   * purpose so a demo can outlive a restart and still restore progress.
    */
   demoBackup: UserSave | null;
 }
@@ -52,17 +51,15 @@ interface UserStore extends UserPersistedState {
   /** Creates the guest profile. Overwrites an existing one. */
   createUser: (input: CreateUserInput) => void;
   /**
-   * The only way to change the save. It takes a pure function because the rules
-   * live in their own slices (`wallet`, `savings`, `period`) — the store just
-   * holds the result and writes it to disk.
+   * The only way to change the save. Takes a pure function because the rules
+   * live in their own slices — the store just holds the result and writes it.
    */
   updateUser: (update: (user: UserSave) => UserSave) => void;
   /** Commits a reviewed action only if its source snapshot is still current. */
   commitUser: (before: UserSave, after: UserSave) => boolean;
   /**
-   * Turns demo mode on and off, 2.5.13. Switching on parks the child's save in
-   * `demoBackup` and plays a demo profile; switching off gives the parked save
-   * back untouched. Nothing the child earned is lost to a demonstration.
+   * Turns demo mode on/off (2.5.13). On: parks the save in `demoBackup` and
+   * plays a demo profile; off: restores the parked save untouched.
    */
   setDemoMode: (isOn: boolean) => void;
   /** Reset to the starting state, 2.5.12. Name, looks and settings survive. */
@@ -75,21 +72,7 @@ interface UserStore extends UserPersistedState {
 // STORE
 // ═══════════════════════════════════════════
 
-/**
- * One save for the whole app, see docs/game-state.md.
- *
- * `durablePersist` serialises the snapshot and hands it to storage before
- * publishing to subscribers. The storage layer (`createPersistStorage`) fires
- * the actual SQLite write asynchronously, so disk I/O never blocks the JS
- * thread: `JSON.stringify` is still synchronous (fast), but the native write
- * is fire-and-forget. A crash during the async write loses at most one
- * action — acceptable for a game.
- *
- * Reads stay synchronous (`getItemSync`), so the save is already there on the
- * first render: `user === null` always means "no profile", never "not loaded
- * yet". The absence of a `hasHydrated` flag and of any waiting at startup is
- * deliberate.
- */
+/** App save via durablePersist; sync reads so `null` means no profile, not loading. */
 export const useUserStore = create<UserStore>()(
   durablePersist(
     (set, get) => ({
@@ -161,9 +144,8 @@ export const useUserStore = create<UserStore>()(
       },
 
       deleteUser: () => {
-        // Order matters: `set` writes `{ user: null }` to storage first, and
-        // only then `clearStorage` removes the key. The other way around would
-        // leave a key holding an empty profile instead of a clean device.
+        // Order matters: `set` writes `{ user: null }` to storage first, and only then
+        // `clearStorage` removes the key.
         set({ user: null, demoBackup: null });
         if (get().user !== null) return;
         useUserStore.persist.clearStorage();
@@ -220,9 +202,8 @@ export const useUserStore = create<UserStore>()(
         }
         return migrated;
       },
-      // `migrate` only runs when the version changed, `merge` always does, so
-      // the shape is checked here: a save of the current version can be broken
-      // too.
+      // `migrate` only runs when the version changed, `merge` always does, so the shape is
+      // checked here: a save of the current version can be broken too.
       merge: (persisted, current) => {
         const saved = persisted as Partial<UserPersistedState> | undefined;
         if (
@@ -239,8 +220,8 @@ export const useUserStore = create<UserStore>()(
         return {
           ...current,
           user: readSave(saved?.user),
-          // A broken backup only costs the parked profile, never the launch:
-          // leaving demo mode then hands out a clean starting profile.
+          // A broken backup only costs the parked profile, never the launch: leaving demo mode then
+          // hands out a clean starting profile.
           demoBackup: readSave(saved?.demoBackup),
         };
       },
@@ -284,11 +265,8 @@ const EMPTY_COMPLETED_CELLS: string[] = [];
 const EMPTY_COMPLETED_LESSONS: string[] = [];
 
 /**
- * The cells whose every lesson is done, worked out from the lesson ids.
- *
- * Not read off `completedLessonCells`: the ids are the record, and a cell key
- * only means something for the arena it was written for. Deriving it here
- * keeps the sunk tiles right whenever the layout is re-cut, save or no save.
+ * Done cells derived from lesson ids — not `completedLessonCells` — so a
+ * layout re-cut keeps sunk tiles correct.
  */
 export const useDoneCells = () => {
   const lessonIds = useUserStore(
@@ -310,12 +288,11 @@ export const useDoneLessonIds = () =>
 export const useCompleteLesson = () =>
   useUserStore((state) => state.completeLesson);
 
-/** The robot slice of the save, or `undefined` before there is a profile. */
 export const useUserRobot = () => useUserStore((state) => state.user?.robot);
 
 /**
- * Home HUD fields only — wallet balance ticks must not rebuild the robot's
- * mood when charge / spirit did not change, and vice versa.
+ * Home HUD fields only — wallet balance ticks must not rebuild the robot's mood when
+ * charge / spirit did not change, and vice versa.
  */
 export const useHomeHudSource = () =>
   useUserStore(
@@ -340,7 +317,6 @@ export const useHomeHudSource = () =>
     }),
   );
 
-/** Creates the guest profile. Overwrites an existing one. */
 export const useCreateUser = () => useUserStore((state) => state.createUser);
 
 /** The only way to change the save — takes a pure update function. */

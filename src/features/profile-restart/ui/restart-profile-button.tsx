@@ -14,7 +14,7 @@ import { useProfileRestart } from '../model';
 // ═══════════════════════════════════════════
 
 interface RestartProfileButtonProps {
-  /** Label of the button itself. The sheet always speaks in full sentences. */
+  /** Button label; the sheet always speaks in full sentences. */
   label?: string;
   variant?: 'warning' | 'secondary';
 }
@@ -29,13 +29,7 @@ const HOLD_MS = 2000;
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Deletes the profile and starts a fresh one — 2.5.12.
- *
- * The confirmation names what goes before it goes: this is the one action in
- * the app that wipes progress, and it must never happen on a single tap — it
- * takes a two-second hold (screen 26).
- */
+/** Wipe progress — requires a 2s hold, never a single tap (screen 26 / 2.5.12). */
 export const RestartProfileButton = ({
   label,
   variant = 'warning',
@@ -86,8 +80,7 @@ export const RestartProfileButton = ({
         </Sheet.Description>
 
         <Sheet.Actions>
-          {/* Screen 26: a deliberate two-second hold, so a stray tap can
-              never wipe a profile. The safe choice is the filled one. */}
+          {/* 2s hold so a stray tap cannot wipe (screen 26). */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('profileRestart.confirm')}

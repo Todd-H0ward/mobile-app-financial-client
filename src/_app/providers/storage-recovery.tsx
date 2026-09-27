@@ -2,7 +2,7 @@ import { type ReactNode, useState } from 'react';
 
 import { useUserStore } from '@/entities/user';
 
-import { STORAGE_KEYS } from '@/shared/constants';
+import { SPACING, STORAGE_KEYS } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import {
   quarantineStorage,
@@ -49,7 +49,7 @@ export const StorageRecovery = ({ children }: StorageRecoveryProps) => {
     }
   };
   return (
-    <Screen gap="three">
+    <Screen gap={SPACING.THREE}>
       <Screen.Title>{t('storageRecovery.title')}</Screen.Title>
       <Text>{t(`storageRecovery.${issue.kind}`)}</Text>
       <Button

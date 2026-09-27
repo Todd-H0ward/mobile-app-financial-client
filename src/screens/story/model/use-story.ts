@@ -20,11 +20,7 @@ const isCutsceneId = (value: unknown): value is StoryCutsceneId =>
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * Drives the placeholder cutscene screen: load by route id, finish → home.
- *
- * When real mp4s land, the same `finish` path stays — only the player changes.
- */
+/** When real mp4s land, the same `finish` path stays — only the player changes */
 export const useStory = () => {
   const router = useRouter();
   const user = useUser();

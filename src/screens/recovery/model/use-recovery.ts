@@ -35,10 +35,7 @@ const routeFor = (destination: RecoveryDestination) =>
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * Recovery path after the period summary — pick a next step, never wipe
- * progress (2.5.9 / roadmap 1.19).
- */
+/** Recovery path after the period summary — pick a next step, never wipe progress (2.5.9 / roadmap 1.19) */
 export const useRecovery = (): RecoveryController | null => {
   const router = useRouter();
   const user = useUser();
@@ -52,9 +49,7 @@ export const useRecovery = (): RecoveryController | null => {
   const settleAndGo = (destination: RecoveryDestination) => {
     if (!commitUser(user, endPeriod(user))) return;
 
-    // Pop summary/recovery off the stack onto the one arena, never a second
-    // copy of it: a pushed home would build another 3D scene on top, and
-    // Back would reopen a stale summary that redirects home.
+    // dismissTo, not push — a second home would mount another 3D scene.
     router.dismissTo(routeFor(destination));
   };
 

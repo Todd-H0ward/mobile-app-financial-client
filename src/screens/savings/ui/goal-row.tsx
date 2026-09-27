@@ -20,7 +20,6 @@ interface GoalRowProps {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** One goal on the savings showcase — progress bar and price. */
 export const GoalRow = ({ goal, onPress }: GoalRowProps) => {
   const { t } = useTranslation();
 
@@ -64,7 +63,7 @@ export const GoalRow = ({ goal, onPress }: GoalRowProps) => {
 const styles = StyleSheet.create({
   trailing: {
     alignItems: 'flex-end',
-    gap: SPACING.one,
+    gap: SPACING.ONE,
     minWidth: 72,
   },
 });

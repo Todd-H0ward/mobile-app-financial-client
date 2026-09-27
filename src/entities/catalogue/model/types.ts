@@ -14,8 +14,8 @@ interface CatalogueItem {
   /** Price in coins, positive integer. */
   price: number;
   /**
-   * Need → `needs` fact, want → `wants` fact. Never `savings` — the jar is
-   * not a shop aisle (docs/economy.md).
+   * Need → `needs` fact, want → `wants` fact. Never `savings` — the jar is not a shop aisle
+   * (docs/economy.md).
    */
   kind: CatalogueKind;
   shop: ShopId;
@@ -24,8 +24,8 @@ interface CatalogueItem {
   /** Optional bump to the robot's charge, 0…1. */
   chargeDelta?: number;
   /**
-   * Optional id the purchase leaves in `ownedItemIds` — what a bought toy or
-   * the console unlocks in the arcade.
+   * Optional id the purchase leaves in `ownedItemIds` — what a bought toy or the console
+   * unlocks in the arcade.
    */
   ownedId?: string;
   /** Module tier (1, 2, or 3). Only present for module items. */

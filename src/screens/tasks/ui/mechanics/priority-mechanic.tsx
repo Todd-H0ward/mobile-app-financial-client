@@ -29,11 +29,7 @@ const KEY_SIZE = 48;
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/**
- * Reorder the list — needs should sit above wants.
- *
- * Up/down keys rather than drag: same rule, works with a screen reader.
- */
+/** Up/down keys rather than drag: same rule, works with a screen reader */
 export const PriorityMechanic = ({
   payload,
   orderedIds,
@@ -147,18 +143,18 @@ const styles = StyleSheet.create({
   index: { minWidth: 14 },
   keys: {
     flexDirection: 'row',
-    gap: SPACING.one,
+    gap: SPACING.ONE,
   },
   root: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   row: {
     alignItems: 'center',
     borderRadius: RADII.m,
     borderWidth: 2,
     flexDirection: 'row',
-    gap: SPACING.two,
-    padding: SPACING.two,
+    gap: SPACING.TWO,
+    padding: SPACING.TWO,
   },
   text: {
     flex: 1,

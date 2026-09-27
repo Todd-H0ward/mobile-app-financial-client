@@ -4,12 +4,7 @@ import { ROBOT_DOG_STAGES, type RobotDogStage } from '../../model';
 // TYPES
 // ═══════════════════════════════════════════
 
-/**
- * What the child has actually decided, counted across every finished period.
- *
- * Deliberately three counters and no dates: growth is earned by decisions, not
- * by how long the app stayed open — see the first property below.
- */
+/** What the child has actually decided, counted across every finished period. */
 interface GrowthFacts {
   /** Periods finished. Counts the whole history, never resets. */
   periods: number;
@@ -37,19 +32,7 @@ interface GrowthProgress {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * The growth formula, docs/robot-dog.md.
- *
- * Three properties hold, and each is a rule about the child rather than about
- * the numbers:
- *
- * 1. **Waiting is not a condition.** Every counter is a decision the child
- *    made; none of them is a clock. Holding the app open earns nothing.
- * 2. **Stages never go backwards** — requirement 2.2 forbids wiping progress.
- *    `growRobotDog` enforces it even when the facts say otherwise.
- * 3. **The reason is always nameable**, which is what `progressToNextStage`
- *    exists for: the screen shows what is missing in whole numbers.
- */
+/** The growth formula, docs/robot-dog.md. */
 const GROWTH_RULES: Record<RobotDogStage, GrowthRule> = {
   basic: { periods: 0, goalsReached: 0, plansKept: 0 },
   upgraded: { periods: 2, goalsReached: 1, plansKept: 1 },
@@ -60,7 +43,6 @@ const GROWTH_RULES: Record<RobotDogStage, GrowthRule> = {
 // HELPERS
 // ═══════════════════════════════════════════
 
-/** Whether the facts clear every condition of a stage. */
 const isEarned = (stage: RobotDogStage, facts: GrowthFacts) => {
   const rule = GROWTH_RULES[stage];
 
@@ -78,22 +60,12 @@ const rank = (stage: RobotDogStage) => ROBOT_DOG_STAGES.indexOf(stage);
 // GROWTH
 // ═══════════════════════════════════════════
 
-/**
- * The highest stage the facts have earned.
- *
- * Reads the tuple from the far end, so a child who cleared the complete
- * conditions is complete even if they somehow skipped an upgraded condition.
- */
+/** The highest stage the facts have earned. */
 export const stageFor = (facts: GrowthFacts): RobotDogStage =>
   [...ROBOT_DOG_STAGES].reverse().find((stage) => isEarned(stage, facts)) ??
   'basic';
 
-/**
- * The stage the dog holds after settlement.
- *
- * Only ever upwards: a reset, a refund or a corrected history may lower the
- * facts, and none of that may take a stage away from a child — 2.2.
- */
+/** The stage the dog holds after settlement. */
 export const growRobotDog = (
   current: RobotDogStage,
   facts: GrowthFacts,
@@ -103,12 +75,7 @@ export const growRobotDog = (
   return rank(earned) > rank(current) ? earned : current;
 };
 
-/**
- * What is still missing before the next stage, or `null` at the last one.
- *
- * Whole numbers, because they are read aloud to a child: «ещё одна достигнутая
- * цель», never a percentage and never a bar.
- */
+/** What is still missing before the next stage, or `null` at the last one. */
 export const progressToNextStage = (
   current: RobotDogStage,
   facts: GrowthFacts,

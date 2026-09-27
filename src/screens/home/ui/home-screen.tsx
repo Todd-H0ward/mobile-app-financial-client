@@ -67,7 +67,6 @@ import { HomeDock, HomeHudBoard } from './home-hud';
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** How far the canvas rides up under the diagnostics, share of the window. */
 const ROBOT_PANEL_SHIFT = 0.24;
 const SCENE_SHIFT_MS = 340;
 
@@ -92,12 +91,6 @@ const isWatcherPage = (value: unknown): value is WatcherPageId =>
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * The arena is the home screen: the map, the robot, the two AIs.
- *
- * Plan, jar and shop live on the Keeper terminal; trials and arcade on the
- * Overseer. On the overhead map three boards show coins, tier and charge.
- */
 export const HomeScreen = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -115,24 +108,19 @@ export const HomeScreen = () => {
   const [talkingTo, setTalkingTo] = useState<WatcherId | null>(null);
   const [isBonding, setIsBonding] = useState(false);
   const [terminalPage, setTerminalPage] = useState<WatcherPageId>('greeting');
-  /** Diagnostics docked under the dog's close-up (screen 10). */
   const [isRobotOpen, setIsRobotOpen] = useState(false);
   const isRobotOpenRef = useRef(false);
-  /** Where the camera stood before the close-up, to walk back to it. */
   const viewBeforeRobot = useRef<SceneView | null>(null);
   isRobotOpenRef.current = isRobotOpen;
   const isNavigating = useRef(false);
-  // A sheet over home takes focus but leaves the pit in view; only an opaque
-  // route may stop the scene, or coming back from one lands on an empty frame.
+  // Sheets leave the pit visible; only opaque routes may stop the GL scene.
   const pathname = usePathname();
   const isArenaCovered =
     pathname !== STATIC_ROUTES.HOME && !isSheetPath(pathname);
   const { height: windowHeight } = useWindowDimensions();
   const sceneShift = useSharedValue(0);
 
-  // The close-up centres the dog on the canvas; with the diagnostics docked
-  // below, the canvas rides up so the face sits above the panel. Only the
-  // canvas moves — the scene and its camera are left as they are.
+  // Shift the canvas under diagnostics; leave the Three.js camera alone.
   useEffect(() => {
     sceneShift.value = withTiming(
       isRobotOpen ? -windowHeight * ROBOT_PANEL_SHIFT : 0,
@@ -153,8 +141,7 @@ export const HomeScreen = () => {
     useCallback(() => {
       isNavigating.current = false;
       return () => {
-        // The modules sheet opens over the diagnostics: keep the close-up
-        // behind it instead of flying the camera back under the sheet.
+        // Modules sheet opens over diagnostics — keep the close-up behind it.
         if (!isRobotOpenRef.current) setIsBonding(false);
       };
     }, []),
@@ -174,7 +161,7 @@ export const HomeScreen = () => {
     return () => subscription.remove();
   });
 
-  // Deep-link into a terminal page — sheets send the child here with `dismissTo`.
+  // Deep-link: sheets open a terminal via `dismissTo` + query params.
   useEffect(() => {
     if (!isWatcherId(params.watcher)) return;
     setTalkingTo(params.watcher);
@@ -186,7 +173,6 @@ export const HomeScreen = () => {
     );
   }, [params.watcher, params.page]);
 
-  // Soft talk blip whenever a watcher opens or flips to another page.
   useEffect(() => {
     if (!talkingTo) return;
     void terminalPage;
@@ -315,7 +301,6 @@ export const HomeScreen = () => {
             mapHud={{
               balance: homeData.balance,
               tier: homeData.platformLevel,
-              // The HUD's total, so the board and the bar count the same climb.
               tierTotal: PLATFORM_LEVEL_COUNT,
               charge: homeData.robotCharge,
             }}
@@ -358,7 +343,7 @@ export const HomeScreen = () => {
             />
             <HomeDock
               hud={hud}
-              bottom={insets.bottom + SPACING.compact}
+              bottom={insets.bottom + SPACING.COMPACT}
               onOpen={(watcher, page) => {
                 playSfx(
                   watcher === 'keeper' ? SOUNDS.KEEPER_ON : SOUNDS.OVERSEER_ON,

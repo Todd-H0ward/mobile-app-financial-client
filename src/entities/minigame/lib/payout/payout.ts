@@ -21,10 +21,6 @@ type GameId = ClassicGameId | PlaykitGameId;
 
 interface PayoutInput {
   gameId: GameId;
-  /**
-   * Whether the sitting was answered / finished correctly.
-   * A miss still pays {@link WRONG_ROUND_SHARE} — nothing can be failed.
-   */
   isCorrect: boolean;
 }
 
@@ -47,8 +43,8 @@ export const PLAYKIT_GAME_IDS: readonly PlaykitGameId[] = [
 ] as const;
 
 /**
- * Coins for a correct sitting. Kept under a medium chore on purpose — chores
- * must out-earn games (AGENTS.md arcade rules).
+ * Coins for a correct sitting. Kept under a medium chore on purpose — chores must out-earn
+ * games (AGENTS.md arcade rules).
  */
 export const GAME_REWARDS: Record<GameId, number> = {
   market: 8,
@@ -78,9 +74,7 @@ export const WRONG_ROUND_SHARE = 0.5;
 export const isPlaykitGameId = (value: string): value is PlaykitGameId =>
   (PLAYKIT_GAME_IDS as readonly string[]).includes(value);
 
-/**
- * Coins for one sitting. Always at least 1 — a silent zero reads as a bug.
- */
+/** Coins for one sitting. Always at least 1 — a silent zero reads as a bug. */
 export const payoutFor = ({ gameId, isCorrect }: PayoutInput): number => {
   const full = GAME_REWARDS[gameId];
   const share = isCorrect ? 1 : WRONG_ROUND_SHARE;

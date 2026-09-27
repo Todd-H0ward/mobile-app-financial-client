@@ -44,7 +44,6 @@ interface HomeDockProps {
 interface HudCableProps {
   side: 'left' | 'right';
   offset: number;
-  /** From the top edge of the screen to the hanging part. */
   length: number;
 }
 
@@ -64,11 +63,9 @@ const ACTIONS: {
   { page: 'jar', watcher: 'keeper', icon: 'piggy', key: 'home.hud.jar' },
 ];
 
-/** The board and its two buttons hang this far below the top edge. */
 const CABLE_LENGTH = 18;
 const CONTROL_SIZE = 44;
 const SIDE_INSET = 14;
-/** The board sits between the two hanging buttons. */
 const BOARD_INSET = 70;
 const CHARGE_CELLS = 5;
 
@@ -93,11 +90,6 @@ const HudCable = ({ side, offset, length }: HudCableProps) => {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/**
- * The board on cables (UI kit 10, concept B1): wallet, jar and charge on the
- * first line, the tier and what is left to the lift in words on the second.
- * Settings hang on the left, "?" on the right.
- */
 export const HomeHudBoard = ({
   hud,
   level,
@@ -108,7 +100,6 @@ export const HomeHudBoard = ({
 }: HomeHudBoardProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
-  // The cables start at the very top edge, through the status bar.
   const hang = top + CABLE_LENGTH;
   const litCells = Math.floor(
     Math.min(Math.max(charge, 0), 1) * CHARGE_CELLS + Number.EPSILON,
@@ -122,22 +113,22 @@ export const HomeHudBoard = ({
       <HudCable
         side="left"
         offset={SIDE_INSET + CONTROL_SIZE / 2 - 1}
-        length={hang + SPACING.one}
+        length={hang + SPACING.ONE}
       />
       <HudCable
         side="right"
         offset={SIDE_INSET + CONTROL_SIZE / 2 - 1}
-        length={hang + SPACING.one}
+        length={hang + SPACING.ONE}
       />
       <HudCable
         side="left"
         offset={BOARD_INSET + 26}
-        length={hang + SPACING.one}
+        length={hang + SPACING.ONE}
       />
       <HudCable
         side="right"
         offset={BOARD_INSET + 26}
-        length={hang + SPACING.one}
+        length={hang + SPACING.ONE}
       />
 
       <Pressable
@@ -238,10 +229,7 @@ export const HomeHudBoard = ({
   );
 };
 
-/**
- * The bottom dock: one card saying what to do next, and the action bar.
- * Before the plan only "План" is open; the others wear a pixel lock.
- */
+/** Before the plan only "План" is open; */
 export const HomeDock = ({
   hud,
   bottom,
@@ -262,7 +250,7 @@ export const HomeDock = ({
         styles.dock,
         {
           bottom,
-          width: Math.min(width - 2 * SPACING.compact, MAX_CONTENT_WIDTH),
+          width: Math.min(width - 2 * SPACING.COMPACT, MAX_CONTENT_WIDTH),
         },
       ]}
     >
@@ -427,8 +415,8 @@ const styles = StyleSheet.create({
   amount: { alignItems: 'center', flexDirection: 'row', gap: 5 },
   bar: {
     flexDirection: 'row',
-    gap: SPACING.one,
-    padding: SPACING.one,
+    gap: SPACING.ONE,
+    padding: SPACING.ONE,
   },
   board: {
     left: BOARD_INSET,
@@ -453,7 +441,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-    padding: SPACING.compact,
+    padding: SPACING.COMPACT,
   },
   cardCopy: { flexBasis: 180, flexGrow: 1, flexShrink: 1, minWidth: 0, gap: 2 },
   cardTitle: { fontSize: 17, lineHeight: 22 },
@@ -467,18 +455,18 @@ const styles = StyleSheet.create({
   controlLeft: {
     borderRadius: 12,
     left: SIDE_INSET,
-    padding: SPACING.one,
+    padding: SPACING.ONE,
   },
   controlRight: { right: SIDE_INSET },
   controlScreen: {
     alignItems: 'center',
-    borderRadius: SPACING.two,
+    borderRadius: SPACING.TWO,
     flex: 1,
     justifyContent: 'center',
   },
   dock: {
     alignSelf: 'center',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     maxWidth: MAX_CONTENT_WIDTH,
     position: 'absolute',
   },
@@ -500,7 +488,7 @@ const styles = StyleSheet.create({
   },
   lockBadge: {
     alignItems: 'center',
-    borderRadius: SPACING.one,
+    borderRadius: SPACING.ONE,
     height: 16,
     justifyContent: 'center',
     left: '50%',
@@ -513,14 +501,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexWrap: 'wrap',
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     justifyContent: 'space-between',
   },
   overseerLabel: { letterSpacing: 1 },
   readout: {
-    gap: SPACING.one,
+    gap: SPACING.ONE,
     paddingHorizontal: 10,
-    paddingVertical: SPACING.two,
+    paddingVertical: SPACING.TWO,
   },
   robotStatus: {
     alignItems: 'center',
@@ -528,11 +516,11 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     maxWidth: '100%',
     minHeight: 44,
-    paddingHorizontal: SPACING.compact,
-    paddingVertical: SPACING.two,
+    paddingHorizontal: SPACING.COMPACT,
+    paddingVertical: SPACING.TWO,
   },
   statusText: { flexShrink: 1 },
   tab: {
@@ -548,7 +536,7 @@ const styles = StyleSheet.create({
   tabIconLocked: { opacity: 0.55 },
   tabLabel: { fontSize: 13, lineHeight: 17, paddingHorizontal: 2 },
   trialCard: { flexWrap: 'nowrap' },
-  trialMeta: { alignItems: 'center', flexDirection: 'row', gap: SPACING.one },
+  trialMeta: { alignItems: 'center', flexDirection: 'row', gap: SPACING.ONE },
 });
 
 export type { HomeDockProps, HomeHudBoardProps };

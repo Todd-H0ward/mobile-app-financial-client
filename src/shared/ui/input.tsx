@@ -127,7 +127,7 @@ export const Input = ({
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  counter: { flexShrink: 0, fontSize: 12, paddingRight: SPACING.two },
+  counter: { flexShrink: 0, fontSize: 12, paddingRight: SPACING.TWO },
   disabled: { borderStyle: 'dashed' },
   field: {
     flex: 1,
@@ -136,8 +136,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     minHeight: 52,
     minWidth: 0,
-    paddingHorizontal: SPACING.three,
-    paddingVertical: SPACING.two,
+    paddingHorizontal: SPACING.THREE,
+    paddingVertical: SPACING.TWO,
   },
   fieldContainer: {
     alignItems: 'center',
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     minHeight: 56,
   },
-  root: { gap: SPACING.two, width: '100%' },
+  root: { gap: SPACING.TWO, width: '100%' },
 });
 
 export type { InputProps, InputVariant };

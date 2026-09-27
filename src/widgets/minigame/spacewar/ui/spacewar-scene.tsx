@@ -41,7 +41,7 @@ const TARGET_SOURCE = require('@/assets/images/games/spacewar-target.png');
 const SHIP_W = 44;
 const SHIP_H = 44;
 const TARGET_SIZE = 36;
-const SHELL_INSET = SPACING.five * 2 + SPACING.three * 2;
+const SHELL_INSET = SPACING.FIVE * 2 + SPACING.THREE * 2;
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
@@ -128,7 +128,7 @@ export const SpacewarScene = ({ onComplete }: SpacewarSceneProps) => {
       >
         <Text
           variant="smallBold"
-          style={{ color: theme.arcadeLcd, marginBottom: SPACING.two }}
+          style={{ color: theme.arcadeLcd, marginBottom: SPACING.TWO }}
         >
           {t('games.spacewar.progress', {
             hits: session.hits,
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   controls: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     justifyContent: 'space-between',
   },
   field: {
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     minHeight: 0,
-    paddingHorizontal: SPACING.two,
+    paddingHorizontal: SPACING.TWO,
   },
   ship: {
     height: SHIP_H,

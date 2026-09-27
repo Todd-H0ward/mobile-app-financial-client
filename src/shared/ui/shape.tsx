@@ -21,10 +21,7 @@ interface ShapeProps extends ViewProps {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/**
- * Geometric icon placeholder. The icon set is not drawn yet, so the kit ships
- * the shapes the mockups use; swap this for the real icon component later.
- */
+/** Placeholder geometry until the real icon set lands. */
 export const Shape = ({
   variant = 'square',
   size = 22,

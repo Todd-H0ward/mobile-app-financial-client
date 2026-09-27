@@ -19,8 +19,7 @@ import { useTaskPlay, useTasksList } from './use-task';
 
 import { createRequire } from 'node:module';
 
-// Only the server renderer is used; this project ships react-dom for Expo web
-// but does not otherwise need its DOM type declarations.
+// Only the server renderer is used;
 const { renderToString } = createRequire(import.meta.url)(
   'react-dom/server',
 ) as {
@@ -47,7 +46,6 @@ vi.mock('expo-sqlite/kv-store', () => ({
   default: {
     getItemSync: (key: string) => storage.get(key) ?? null,
     setItemSync: (key: string, value: string) => storage.set(key, value),
-    /** The async variant used by persist-storage for non-blocking writes. */
     setItem: async (key: string, value: string) => storage.set(key, value),
     setItemAsync: async (key: string, value: string) => storage.set(key, value),
     removeItemSync: (key: string) => storage.delete(key),
@@ -68,8 +66,7 @@ vi.mock('@/shared/lib', () => ({
   useTimeSource: () => makeDemoTimeSource(),
 }));
 
-// Only React subscriptions are replaced. Transitions, persistence and the
-// store updater stay real, including the state change between two presses.
+// Only React subscriptions are replaced
 vi.mock('@/entities/user', async (importOriginal) => {
   const original = await importOriginal<typeof import('@/entities/user')>();
   return {
@@ -91,8 +88,6 @@ const activeUser = () => {
   });
 };
 
-// Rendering captures the same callbacks that a mounted screen retains until
-// React renders again. No native view or emulator is needed for this race.
 const captureHook = <T>(hook: () => T): T => {
   const result: T[] = [];
   const Probe = () => {

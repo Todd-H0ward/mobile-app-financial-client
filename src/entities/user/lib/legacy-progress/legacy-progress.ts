@@ -4,12 +4,7 @@ import { isRecord } from '@/shared/utils';
 
 import type { UserSave } from '../../model/types';
 
-/**
- * A key of the old arena grid: three bays × five rows × six cells.
- *
- * Only for data written before the arena was re-cut — the current layout
- * decides its own keys (`lessonOrdinalForKey`).
- */
+/** A key of the old arena grid: three bays × five rows × six cells. */
 export const isCompletedCellKey = (value: unknown): value is string =>
   typeof value === 'string' && /^[0-2]-[0-4]-[0-5]$/.test(value);
 

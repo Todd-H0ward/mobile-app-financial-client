@@ -22,7 +22,6 @@ interface ChangeMechanicProps {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** Pick how much change comes back. */
 export const ChangeMechanic = ({
   payload,
   selectedId,
@@ -86,20 +85,20 @@ export const ChangeMechanic = ({
 const styles = StyleSheet.create({
   dashed: { borderStyle: 'dashed' },
   options: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   root: {
-    gap: SPACING.compact,
+    gap: SPACING.COMPACT,
   },
   tile: {
     alignItems: 'center',
     borderRadius: RADII.m,
     borderWidth: 2,
     flex: 1,
-    paddingVertical: SPACING.compact,
+    paddingVertical: SPACING.COMPACT,
   },
   tileValue: { fontFamily: FONTS.monoStrong, fontSize: 25, lineHeight: 32 },
-  tiles: { flexDirection: 'row', gap: SPACING.two },
+  tiles: { flexDirection: 'row', gap: SPACING.TWO },
 });
 
 export type { ChangeMechanicProps };

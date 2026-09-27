@@ -36,24 +36,7 @@ const toHex = (value: number) =>
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/**
- * A darker or lighter version of a color.
- *
- * Mixes towards black for a negative amount and towards white for a positive
- * one, so one base color yields the tones a drawing needs — the darker one
- * carves an underside, the lighter one lifts a top. A new coat then costs no
- * new artwork.
- *
- * A color it cannot read comes back unchanged: a wrong shade is a cosmetic
- * defect, and throwing here would take a screen down over one.
- *
- * @param color raw color string
- * @param amount -1…1 (clamped); 0 leaves the color alone
- *
- * @example
- * shade('#E8C48A', -0.22); // a shaded flank
- * shade('#E8C48A', 0.16);  // a lit back
- */
+/** Mix toward black/white by `amount` (−1…1). Unreadable input returns unchanged. */
 export const shade = (color: string, amount: number): string => {
   const rgb = channels(color);
   if (!rgb) return color;

@@ -108,8 +108,8 @@ const BoxCard = ({ direction, plan, fact }: BoxCardProps) => {
 };
 
 /**
- * The live period report (screen 12): plan and fact while the period runs,
- * the latest coin movements, and a quiet way to finish the period.
+ * The live period report (screen 12): plan and fact while the period runs, the latest coin
+ * movements, and a quiet way to finish the period.
  */
 export const ReportPage = ({ frame }: ReportPageProps) => {
   const { t } = useTranslation();
@@ -223,16 +223,16 @@ const styles = StyleSheet.create({
   boxFact: { fontFamily: FONTS.monoStrong },
   boxHeader: { alignItems: 'center', flexDirection: 'row', gap: 10 },
   boxName: { flex: 1 },
-  recent: { gap: 0, paddingVertical: SPACING.one },
+  recent: { gap: 0, paddingVertical: SPACING.ONE },
   recentAmount: { fontSize: 16 },
   recentLabel: { flex: 1 },
   recentRow: {
     alignItems: 'center',
     flexDirection: 'row',
     gap: 10,
-    paddingVertical: SPACING.two,
+    paddingVertical: SPACING.TWO,
   },
-  stack: { gap: SPACING.two, paddingBottom: SPACING.two },
+  stack: { gap: SPACING.TWO, paddingBottom: SPACING.TWO },
 });
 
 export type { ReportPageProps };

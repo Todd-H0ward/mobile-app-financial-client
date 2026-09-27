@@ -19,24 +19,13 @@ const ROBOT_DOG_MOOD_LOW = 0.35;
 /** At or above this on both axes the dog is proud. 0…1. */
 const ROBOT_DOG_MOOD_HIGH = 0.7;
 
-/**
- * Share of the gap an axis closes per settlement step, 0…1.
- *
- * The inertia docs/robot-dog.md makes mandatory: a face that follows the meter within
- * one frame reads as an indicator, not as a creature. At 0.35 a full swing
- * takes roughly three periods to land — a number worth one pass on a device.
- */
+/** Share of the gap an axis closes per settlement step, 0…1. */
 const ROBOT_DOG_EASE_RATE = 0.35;
 
 /** Closer than this and the value snaps, so easing lands instead of crawling. */
 const ROBOT_DOG_EASE_EPSILON = 0.001;
 
-/**
- * The cause used when the caller names none.
- *
- * Coarser than what settlement knows — it cannot tell a flat battery from a skipped charge — but
- * never absent: a dog with nothing to say is a bug, not silence (docs/robot-dog.md).
- */
+/** The cause used when the caller names none. */
 const DEFAULT_REASONS: Record<RobotDogMoodName, RobotDogReason> = {
   proud: 'plan-kept',
   content: 'charged',
@@ -57,14 +46,7 @@ const belowShare = (value: number) =>
 const aboveShare = (value: number) =>
   (value - ROBOT_DOG_MOOD_HIGH) / (1 - ROBOT_DOG_MOOD_HIGH);
 
-/**
- * The cause to speak: the hint for the axis that decided, else the coarse one.
- *
- * A drained dog is charged before it is cheered up, so the charge cause wins
- * whenever both axes are down. A proud dog is proud of what the
- * child decided, not of a full battery, so there the heart cause leads.
-
- */
+/** The cause to speak: the hint for the axis that decided, else the coarse one. */
 const reasonFor = (
   name: RobotDogMoodName,
   axis: RobotDogMoodAxis,
@@ -82,16 +64,7 @@ const reasonFor = (
 // MOOD
 // ═══════════════════════════════════════════
 
-/**
- * The state the two axes add up to, with the cause that is spoken aloud.
- *
- * Total and pure: every pair of numbers maps to a mood, and every mood carries
- * a reason — 2.5.10 asks for the explanation, not just the face.
- *
- * @param charge the battery: needs paid for this period, 0…1 (clamped)
- * @param spirit goal proximity, tasks done, how the period ended, 0…1 (clamped)
- * @param causes what settlement observed, when it knows more than the numbers
- */
+/** The state the two axes add up to, with the cause that is spoken aloud. */
 export const moodFor = (
   charge: number,
   spirit: number,
@@ -141,15 +114,7 @@ export const moodFor = (
 // INERTIA
 // ═══════════════════════════════════════════
 
-/**
- * Moves a value part of the way to its target — the inertia of docs/robot-dog.md.
- *
- * Never overshoots and never jumps: with a rate below 1 a full swing always
- * takes more than one call, which is the whole point. Snaps within an epsilon
- * so the value lands on the target instead of crawling towards it forever.
- *
- * @param rate share of the gap closed by this call, 0…1 (clamped)
- */
+/** Moves a value part of the way to its target — the inertia of docs/robot-dog.md. */
 export const easeTowards = (
   current: number,
   target: number,
@@ -160,14 +125,7 @@ export const easeTowards = (
   return Math.abs(target - next) < ROBOT_DOG_EASE_EPSILON ? target : next;
 };
 
-/**
- * Both axes eased towards their targets at once, clamped back into 0…1.
- *
- * What settlement calls: it works out where the dog *should* be after the
- * period, hands it in as `target`, and stores what comes back. Where the target
- * comes from is not this slice's business, which is what keeps `entities/robot-dog`
- * free of any import from `entities/user`.
- */
+/** Both axes eased towards their targets at once, clamped back into 0…1. */
 export const easeRobotDogAxes = (
   current: RobotDogAxes,
   target: RobotDogAxes,

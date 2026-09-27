@@ -13,17 +13,13 @@ export const planSum = (plan: BudgetPlan): number =>
   BUDGET_DIRECTIONS.reduce((total, direction) => total + plan[direction], 0);
 
 /**
- * Coins not yet assigned. Leaving some is allowed — the task is not to spend
- * everything, see docs/budget.md.
+ * Coins not yet assigned. Leaving some is allowed — the task is not to spend everything,
+ * see docs/budget.md.
  */
 export const remainder = (available: number, plan: BudgetPlan): number =>
   available - planSum(plan);
 
-/**
- * Puts an exact amount into one direction without letting the plan exceed
- * `available`. The slider "hits the wall" at the remainder — the child never
- * learns about the overspend after confirming.
- */
+/** Puts an exact amount into one direction without letting the plan exceed `available`. */
 export const allocate = (
   plan: BudgetPlan,
   direction: BudgetDirection,
@@ -59,12 +55,6 @@ export const removeCoin = (
 export const zeroDirections = (plan: BudgetPlan): BudgetDirection[] =>
   BUDGET_DIRECTIONS.filter((direction) => plan[direction] === 0);
 
-/**
- * Whether the plan can start a period. Matches the guard on `startPeriod`:
- * at least one direction must hold something — unless the wallet is empty,
- * in which case an empty plan is the only way into `active` to earn on chores
- * (otherwise period 2 softlocks after a spent-down day).
- */
 export const canConfirm = (
   plan: BudgetPlan,
   available = Number.POSITIVE_INFINITY,
@@ -73,10 +63,7 @@ export const canConfirm = (
   (BUDGET_DIRECTIONS.some((direction) => plan[direction] > 0) ||
     available === 0);
 
-/**
- * Shape and remainder check. Screens use `allocate` so this should always
- * hold for anything that reached the UI — the test suite pins the property.
- */
+/** Shape and remainder check. */
 export const isValidPlan = (plan: BudgetPlan, available: number): boolean =>
   BUDGET_DIRECTIONS.every(
     (direction) => Number.isInteger(plan[direction]) && plan[direction] >= 0,

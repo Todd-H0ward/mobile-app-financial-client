@@ -2,21 +2,10 @@
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * What the robot dog can be doing, in the order the picker shows them.
- *
- * Four is all the model has: the artist exported one clip per state and every
- * skin carries the same four.
- */
+/** What the robot dog can be doing, in the order the picker shows them. */
 const ROBOT_DOG_ACTIONS = ['idle', 'walk', 'joy', 'sad'] as const;
 
-/**
- * Clip names inside the GLB, exactly as exported.
- *
- * The file spells them half in Russian (`Idle_Pokoy`); the game says `idle`.
- * This table is the only place the two meet, so renaming a clip in the art is
- * a one-line change here.
- */
+/** Clip names inside the GLB, exactly as exported. */
 const ROBOT_DOG_CLIPS = {
   idle: 'Idle_Pokoy',
   walk: 'Walk_Hodba',
@@ -27,12 +16,7 @@ const ROBOT_DOG_CLIPS = {
 /** What plays when nothing else asks for anything. */
 const DEFAULT_ROBOT_DOG_ACTION = 'idle';
 
-/**
- * Seconds a tap's reaction holds before the dog settles back.
- *
- * Long enough for a seven-year-old to connect their tap with the wag, short
- * enough that tapping again feels like it answered.
- */
+/** Seconds a tap's reaction holds before the dog settles back. */
 const ROBOT_DOG_REACTION_SEC = 2.4;
 
 /** Seconds one clip takes to blend into the next. Never a hard cut. */

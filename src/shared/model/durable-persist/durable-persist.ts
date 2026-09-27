@@ -20,11 +20,7 @@ type DurableOptions<State, Saved> = Omit<
   partialize: (state: State) => Saved;
 };
 
-/**
- * Keep Zustand's hydration, migrations and persist API, but commit actions to
- * synchronous storage before publishing to subscribers. A failed disk write
- * leaves both memory and the previous durable snapshot unchanged.
- */
+/** Persist before notify; a failed write leaves memory and disk unchanged. */
 export const durablePersist =
   <State extends object, Saved>(
     initializer: StateCreator<State, [], []>,
@@ -34,10 +30,13 @@ export const durablePersist =
     const commit: typeof set = (partial, replace) => {
       const current = get();
       const update = typeof partial === 'function' ? partial(current) : partial;
+
       if (Object.is(update, current)) return;
+
       const next = replace
         ? (update as State)
         : Object.assign({}, current, update);
+
       try {
         options.storage.setItem(options.name, {
           state: options.partialize(next),
@@ -60,6 +59,7 @@ export const durablePersist =
     )(set, get, api);
     // External setState must obey the same ordering as actions from initializer.
     api.setState = commit;
+
     return initial;
   };
 

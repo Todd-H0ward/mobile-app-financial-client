@@ -72,9 +72,6 @@ const moveId = (
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * One chore with its mechanic — quiz, change, basket, priority or dialog.
- */
 export const TaskScreen = ({ taskId }: TaskScreenProps) => {
   const { t } = useTranslation();
   const router = useRouter();
@@ -143,15 +140,13 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
     }
 
     if (didComplete) {
-      // Back to wherever the trial was picked — the Overseer's list or the
-      // pit's dock — so the debrief sheet opens over familiar ground.
       if (router.canGoBack()) router.back();
       else router.dismissTo(STATIC_ROUTES.HOME);
     }
   };
 
   return (
-    <Screen presentation="sheet" gap="three" terminalVariant="overseer">
+    <Screen presentation="sheet" gap={SPACING.THREE} terminalVariant="overseer">
       <Screen.Header>
         <Screen.Heading>
           <Text
@@ -303,7 +298,7 @@ export const TaskRouteScreen = ({ taskId }: { taskId: string }) => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  brief: { gap: SPACING.one, paddingHorizontal: 14, paddingVertical: 14 },
+  brief: { gap: SPACING.ONE, paddingHorizontal: 14, paddingVertical: 14 },
   briefTitle: { fontSize: 20, lineHeight: 25 },
   overseerLabel: { letterSpacing: 1 },
   reward: {

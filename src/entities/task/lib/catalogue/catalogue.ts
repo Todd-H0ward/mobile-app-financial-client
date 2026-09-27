@@ -21,8 +21,8 @@ export const listTasksByTheme = (theme: TaskTheme): readonly TaskContent[] =>
   TASKS.filter((task) => task.theme === theme);
 
 /**
- * Coin payout for a task. Difficulty comes from content; the amount comes
- * from the economy table — never from the JSON row.
+ * Coin payout for a task. Difficulty comes from content; the amount comes from the economy
+ * table — never from the JSON row.
  */
 export const rewardForTask = (task: TaskContent): number =>
   TASK_REWARD[task.difficulty];

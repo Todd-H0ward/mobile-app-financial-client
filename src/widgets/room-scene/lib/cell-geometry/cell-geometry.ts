@@ -35,13 +35,7 @@ interface MergedParts {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * Widest facet an arc is drawn with, in degrees.
- *
- * The model's discs were flat chords, one per 17° cell. Half that keeps a
- * six-cell row looking like the model while a stretched top-row cell, three
- * times as wide, still reads as part of a ring instead of a polygon.
- */
+/** Widest facet an arc is drawn with, in degrees. */
 const MAX_FACET_DEG = 8.6;
 
 /** Share of a cell the hold fill leaves as a margin on every side. */
@@ -53,7 +47,6 @@ const HOLD_INSET = 0.06;
 
 const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
 
-/** A point on the ring at a heading, radius and height. */
 const at = (heading: number, radius: number, y: number): Vector3 => {
   const radians = toRadians(heading);
   return new Vector3(Math.sin(radians) * radius, y, Math.cos(radians) * radius);
@@ -79,21 +72,15 @@ const cellArc = (
 };
 
 /**
- * A whole ring, gear to gear and round again — what the platform ring and a
- * step with nothing on it are drawn as.
+ * A whole ring, gear to gear and round again — what the platform ring and a step with
+ * nothing on it are drawn as.
  */
 const fullArc = (ring: SceneTileRing): RingArc => {
   const start = SCENE_GEAR_ANGLES[0] ?? 0;
   return { from: start, to: start + 360, ring };
 };
 
-/**
- * A block of ring as triangles with flat normals: top, both risers and ends.
- *
- * No underside — nothing ever looks up at the arena. Non-indexed, so a
- * cell's vertices are one contiguous run once merged, which is what lets a
- * finished cell sink without a mesh of its own.
- */
+/** A block of ring as triangles with flat normals: top, both risers and ends. */
 const arcSolid = ({ from, to, ring }: RingArc): BufferGeometry => {
   const position: number[] = [];
   const normal: number[] = [];
@@ -173,13 +160,7 @@ const arcSolid = ({ from, to, ring }: RingArc): BufferGeometry => {
   return geometry;
 };
 
-/**
- * The outline of a block of ring, lifted clear of it.
- *
- * An edge sitting exactly on the face it came from is a coin toss per pixel
- * on a phone GPU, and the frame comes out dashed and crawling; `lift` units
- * of daylight settle it.
- */
+/** The outline of a block of ring, lifted clear of it. */
 const arcEdges = (
   { from, to, ring }: RingArc,
   lift: number,
@@ -213,12 +194,7 @@ const arcEdges = (
   return geometry;
 };
 
-/**
- * The block that rises inside a held cell, `0 … 1` tall.
- *
- * Unit height so the scene can grow it with `scale.y`; inset a little so it
- * reads as filling the cell rather than as the cell itself.
- */
+/** The block that rises inside a held cell, `0 … 1` tall. */
 const holdSolid = ({ from, to, ring }: RingArc): BufferGeometry => {
   const arcInset = (to - from) * HOLD_INSET;
   const radialInset = (ring.outer - ring.inner) * HOLD_INSET;
@@ -239,15 +215,7 @@ const holdSolid = ({ from, to, ring }: RingArc): BufferGeometry => {
 const arcAnchor = ({ from, to, ring }: RingArc, lift: number): Vector3 =>
   at((from + to) / 2, (ring.inner + ring.outer) / 2, ring.top + lift);
 
-/**
- * Lays several parts into one buffer, end to end.
- *
- * Each part keeps a contiguous run of vertices, so it can still be moved on
- * its own (a sinking cell) and found again (a ray hit). Every vertex gets
- * its part's colour — white for tiles, which a locked cell then tints, or a
- * status colour for the numbers, so one material serves the whole row.
- * Indexed parts are expanded so all of them share one layout.
- */
+/** Lays several parts into one buffer, end to end. */
 const mergeParts = (
   parts: BufferGeometry[],
   colors?: readonly (readonly [number, number, number])[],

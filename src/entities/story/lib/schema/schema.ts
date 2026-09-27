@@ -74,13 +74,7 @@ const assertCutscene = (raw: unknown, path: string): StoryCutscene => {
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/**
- * Validates `content/story.json`.
- *
- * A broken cutscene must fail in tests, not open an empty story screen on
- * the device. Both intro and finale have to be present — the entry and the
- * lift routes key off those ids.
- */
+/** Validates `content/story.json`. */
 export const assertStoryContent = (data: unknown): StoryFile => {
   if (!isRecord(data)) {
     throw new Error('story content: must be an object');

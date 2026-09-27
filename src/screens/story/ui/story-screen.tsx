@@ -23,13 +23,7 @@ import { FinaleScreen } from './finale-screen';
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Intro / finale cutscene (screen 03): the pit, subtitles in a terminal
- * below, a tap moves one frame on and "[ пропустить ]" is always visible.
- *
- * Until `assets/story/*.mp4` are wired, the beats of `content/story.json`
- * are the frames — the same exit a real video would use.
- */
+/** Placeholder frames from story.json until mp4 assets are wired. */
 export const StoryScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -127,9 +121,9 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     justifyContent: 'space-between',
-    padding: SPACING.compact,
+    padding: SPACING.COMPACT,
   },
-  screen: { gap: SPACING.compact, padding: SPACING.three },
+  screen: { gap: SPACING.COMPACT, padding: SPACING.THREE },
   skip: { borderRadius: 12 },
   top: { alignItems: 'flex-end' },
 });

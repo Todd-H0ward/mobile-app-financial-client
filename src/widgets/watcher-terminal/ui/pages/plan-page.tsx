@@ -162,10 +162,7 @@ const DirectionRow = ({
   );
 };
 
-/**
- * Period plan in the Keeper terminal — concept B2 (±10 steps). A plan with
- * nothing on charge is allowed, but a warning sheet asks first (screen 11).
- */
+/** Period plan in the Keeper terminal — concept B2 (±10 steps). */
 export const PlanPage = ({ frame, onDone }: PlanPageProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -380,10 +377,10 @@ const styles = StyleSheet.create({
     columnGap: 10,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingLeft: SPACING.compact,
+    paddingLeft: SPACING.COMPACT,
     paddingRight: 10,
     paddingVertical: 10,
-    rowGap: SPACING.two,
+    rowGap: SPACING.TWO,
   },
   rowCopy: { flex: 1, minWidth: 0 },
   // Icon plus "Копилка" on one line; below that the stepper wraps under it.
@@ -395,16 +392,16 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   rowTitle: { fontSize: 17, lineHeight: 21 },
-  rows: { gap: SPACING.two },
-  stack: { gap: SPACING.compact, paddingBottom: SPACING.two },
+  rows: { gap: SPACING.TWO },
+  stack: { gap: SPACING.COMPACT, paddingBottom: SPACING.TWO },
   stepper: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.one,
+    gap: SPACING.ONE,
     marginLeft: 'auto',
   },
-  // Button's root sits at flex-start for column layouts; in a row that
-  // lifts the keys above the amount between them.
+  // Button's root sits at flex-start for column layouts; in a row that lifts the keys above
+  // the amount between them.
   stepperKey: { alignSelf: 'center' },
   table: { borderRadius: RADII.s, borderWidth: 2 },
   tableDivider: { borderTopWidth: 1 },
@@ -413,7 +410,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 10,
-    paddingHorizontal: SPACING.compact,
+    paddingHorizontal: SPACING.COMPACT,
     paddingVertical: 10,
   },
   tableValue: { fontFamily: FONTS.monoStrong, fontSize: 16 },

@@ -45,12 +45,7 @@ interface PlaykitScreenProps {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Three gesture rounds for one Overseer playkit game.
- *
- * Same arcade contract as finance: start on mount, complete after round 3,
- * miss still pays a share.
- */
+/** Three gesture rounds for one Overseer playkit game. */
 export const PlaykitScreen = ({ gameId }: PlaykitScreenProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -141,7 +136,7 @@ export const PlaykitScreen = ({ gameId }: PlaykitScreenProps) => {
           fontFamily: FONTS.mono,
           fontSize: 11,
           letterSpacing: 1,
-          marginTop: SPACING.one,
+          marginTop: SPACING.ONE,
         }}
       >
         {t('playkit.ui.noPenalty')}

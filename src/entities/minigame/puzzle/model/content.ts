@@ -4,13 +4,7 @@ import type { PuzzleLevel } from './types';
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * First playable puzzle — room art until dedicated puzzle assets land.
- * One id keeps the sitting seed stable across launches.
- *
- * `id` matches the catalogue `ownedId` so buying the toy unlocks this
- * level via `ownedItemIds`.
- */
+/** First playable puzzle — room art until dedicated puzzle assets land. */
 export const PUZZLE_STUB: PuzzleLevel = {
   id: 'rooms-living',
   difficulty: 'easy',

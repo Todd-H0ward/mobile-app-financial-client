@@ -31,32 +31,14 @@ interface HazeBackdrop {
 /** Soft shell behind the arena — night void + amber smog. */
 const SKY_RADIUS = SCENE_RADIUS * 2.4;
 
-/**
- * How much the drifting mist lifts off the gradient (0…1).
- * Dense enough to read as atmosphere without washing the wedges.
- */
+/** How much the drifting mist lifts off the gradient (0…1). */
 const HAZE_STRENGTH = 0.34;
 
-/**
- * Longitude and latitude cuts of the sky sphere.
- *
- * The mist is worked out per vertex, so the mesh is its resolution: fine
- * enough that the drifting banks stay soft blobs, still only ~2k vertices —
- * nothing next to the two and a half million pixels it used to be run for.
- */
+/** Longitude and latitude cuts of the sky sphere. */
 const SKY_WIDTH_SEGMENTS = 64;
 const SKY_HEIGHT_SEGMENTS = 32;
 
-/*
- * The whole sky is computed in the vertex shader.
- *
- * It used to run in the fragment shader: fifteen octaves of value noise —
- * sixty `sin` calls — for every pixel of a sphere that sits behind the whole
- * screen, every frame. On a phone that was a large share of the frame spent
- * on a backdrop of soft, slow haze whose detail nobody could see. The
- * gradient and the mist are both low-frequency, so interpolating them across
- * a triangle looks the same and costs nothing per pixel.
- */
+/** Sky colour in the vertex shader — per-pixel noise was fill-bound on phones. */
 const SKY_VERTEX = /* glsl */ `
 uniform float uTime;
 uniform vec3 uSkyTop;
@@ -141,8 +123,8 @@ void main() {
 // ═══════════════════════════════════════════
 
 /**
- * Inward sky sphere: Blade Runner void + amber particulate haze.
- * One draw call, no post-process (those melt mid-range Android).
+ * Inward sky sphere: Blade Runner void + amber particulate haze. One draw call, no
+ * post-process (those melt mid-range Android).
  */
 const createHazeBackdrop = (): HazeBackdrop => {
   const uniforms: Record<string, IUniform> = {
@@ -159,8 +141,7 @@ const createHazeBackdrop = (): HazeBackdrop => {
     uniforms,
     vertexShader: SKY_VERTEX,
     fragmentShader: SKY_FRAGMENT,
-    // Opaque sky: mist is painted into the backdrop only, never as a
-    // transparent pass over the arena.
+    // Opaque sky: mist is painted into the backdrop only, never as a transparent pass over the arena.
     depthWrite: false,
     depthTest: false,
     side: BackSide,

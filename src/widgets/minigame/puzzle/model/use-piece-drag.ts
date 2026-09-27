@@ -29,8 +29,8 @@ interface UsePieceDragOptions {
   getLayout: () => BoardLayout | null;
   getBody: (id: number) => PieceBody | null;
   /**
-   * Window origin of the ghost overlay. Hit-testing stays in window space;
-   * shared values for the ghost view are converted to overlay-local coords.
+   * Window origin of the ghost overlay. Hit-testing stays in window space; shared values for
+   * the ghost view are converted to overlay-local coords.
    */
   getOverlayOrigin: () => OverlayOrigin;
   onDrop: (id: number, ghost: DragGhost) => void;
@@ -94,13 +94,7 @@ const sizeAt = (
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * Drag one piece with a screen-space ghost.
- *
- * Position lives only in shared values during the pan — React state updates
- * on every move remounted `Gesture.Pan()` instances and froze the release.
- * Gestures are cached per piece id for the same reason.
- */
+/** Drag one piece with a screen-space ghost. */
 export const usePieceDrag = ({
   cols,
   getLayout,
@@ -162,8 +156,8 @@ export const usePieceDrag = ({
       isEndingRef.current = false;
 
       let body = getBodyRef.current(id);
-      // measureInWindow is async — a re-grab can race the layout callback and
-      // see a stale tray body (or none). Fall back to a cell under the finger.
+      // measureInWindow is async — a re-grab can race the layout callback and see a stale tray
+      // body (or none). Fall back to a cell under the finger.
       if (!body || body.size <= 0) {
         const layout = getLayoutRef.current();
         const size = layout
@@ -175,8 +169,8 @@ export const usePieceDrag = ({
           size,
         };
       } else {
-        // Prefer a live cell size when the piece already sits on the board so
-        // snap math matches the silhouette under the finger.
+        // Prefer a live cell size when the piece already sits on the board so snap math matches
+        // the silhouette under the finger.
         const layout = getLayoutRef.current();
         if (layout) {
           const cell =
@@ -284,8 +278,8 @@ export const usePieceDrag = ({
     [beginGrab, cancelDrag, endGhost, moveGhost],
   );
 
-  // Drop cached detectors when the JS handlers are rebuilt so a remount
-  // does not keep a stale worklet→JS bridge after a hot reload.
+  // Drop cached detectors when the JS handlers are rebuilt so a remount does not keep a
+  // stale worklet→JS bridge after a hot reload.
   const panForRef = useRef(panFor);
   if (panForRef.current !== panFor) {
     gesturesRef.current.clear();

@@ -42,21 +42,11 @@ interface CenterCharacter {
   root: Object3D;
   /** Advances the clip — call once per frame with the frame delta. */
   tick: (deltaSec: number) => void;
-  /**
-   * Changes the coat without touching the model.
-   *
-   * Every skin is the same mesh and the same clips, so a swap is three new
-   * textures — not three and a half megabytes of GLB parsed again.
-   */
+  /** Changes the coat without touching the model. */
   setSkin: (skin: RobotDogSkin) => Promise<void>;
   /** Crossfades into another clip. Same clip twice is a no-op. */
   play: (action: RobotDogAction) => void;
-  /**
-   * Plays a clip through once and settles back into `fallback`.
-   *
-   * This is what a tap gets: the dog answers, then goes back to whatever its
-   * state says it should be doing.
-   */
+  /** Plays a clip through once and settles back into `fallback`. */
   playOnce: (action: RobotDogAction, fallback: RobotDogAction) => void;
   /** Rebuilds only attached modules; animation and textures stay alive. */
   setAssembly: (assembly: RobotAssembly, stage: RobotDogStage) => void;
@@ -67,16 +57,9 @@ interface CenterCharacter {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** Target height in arena units, so the dog reads next to the discs. */
 const CHARACTER_HEIGHT = 95;
 
-/**
- * The scene has a key, a fill and ambient — no environment map.
- *
- * A metalness of 1 with nothing to reflect renders as black, which is how a
- * chrome robot turns into a silhouette. Clamping it keeps the metal reading
- * as metal under the three lights we do have.
- */
+/** The scene has a key, a fill and ambient — no environment map. */
 const MAX_METALNESS = 0.3;
 
 /** Below this a clamped-metal surface goes mirror-flat and loses its edges. */
@@ -129,14 +112,7 @@ const loadSkinTextures = async (
   return textures;
 };
 
-/**
- * Dresses the model in a coat and brings its PBR down to what we can light.
- *
- * The albedo is the coat — without it all seven skins are the same white dog.
- * Normal, roughness and metalness maps go: they cost two to four times the
- * texture memory for a model this size, and the 3D brief puts them outside
- * the first-stage budget (docs/design-brief-3d.md).
- */
+/** Dresses the model in a coat and brings its PBR down to what we can light. */
 const tameMaterials = (root: Object3D): MeshStandardMaterial[] => {
   const painted = new Set<MeshStandardMaterial>();
 
@@ -151,8 +127,8 @@ const tameMaterials = (root: Object3D): MeshStandardMaterial[] => {
       entry.roughness = Math.max(entry.roughness, MIN_ROUGHNESS);
       entry.needsUpdate = true;
 
-      // A material with no coat of its own keeps the flat colour the artist
-      // gave it — `Glow` and `Accent` were never painted.
+      // A material with no coat of its own keeps the flat colour the artist gave it — `Glow` and
+      // `Accent` were never painted.
       if (ROBOT_DOG_MATERIAL_SLOTS[entry.name]) painted.add(entry);
     }
   });
@@ -196,12 +172,6 @@ const disposeTree = (root: Object3D) => {
 // FACTORY
 // ═══════════════════════════════════════════
 
-/**
- * The robot dog at the arena centre.
- *
- * Loads async so the GL context can paint the arena first — the model is five
- * megabytes and parsing it on the first frame would cost the cold start.
- */
 export const attachCenterCharacter = async (
   mount: Group,
   skin: RobotDogSkin,

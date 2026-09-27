@@ -48,13 +48,13 @@ interface WatcherTerminalProps {
 // ═══════════════════════════════════════════
 
 /**
- * The greeting is a dialogue: the panel never climbs above this share of the
- * window, so the watcher's face stays in view above its line.
+ * The greeting is a dialogue: the panel never climbs above this share of the window, so
+ * the watcher's face stays in view above its line.
  */
 const DIALOGUE_MAX_SHARE = 0.56;
 /**
- * A page (plan, shop, …) is a form and may rise nearly to the
- * top — the status board hides during a talk — so nothing is hidden.
+ * A page (plan, shop, …) is a form and may rise nearly to the top — the status board hides
+ * during a talk — so nothing is hidden.
  */
 const PAGE_TOP_CLEARANCE = 48;
 /** How far the panel rises from as it appears. */
@@ -65,13 +65,7 @@ const ENTER_MS = 280;
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * CRT panel under the focused AI face.
- *
- * Docked to the bottom edge and sized by its content. The greeting is a
- * dialogue kept under the face; a page may rise to the status board so the
- * whole form fits.
- */
+/** CRT panel under the focused AI face. */
 export const WatcherTerminal = ({
   watcher,
   line,
@@ -98,8 +92,8 @@ export const WatcherTerminal = ({
       )
     : pageMaxHeight;
   const side = Math.max(
-    SPACING.two,
-    (windowWidth - MAX_CONTENT_WIDTH - SPACING.three) / 2,
+    SPACING.TWO,
+    (windowWidth - MAX_CONTENT_WIDTH - SPACING.THREE) / 2,
   );
 
   // Rises from the bottom edge once, as the talk starts.
@@ -153,8 +147,8 @@ export const WatcherTerminal = ({
         enterStyle,
         {
           left: side,
-          maxHeight: maxHeight + insets.bottom + SPACING.two,
-          paddingBottom: insets.bottom + SPACING.two,
+          maxHeight: maxHeight + insets.bottom + SPACING.TWO,
+          paddingBottom: insets.bottom + SPACING.TWO,
           right: side,
         },
       ]}
@@ -171,8 +165,8 @@ export const WatcherTerminal = ({
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  // Anchored to the bottom edge and as tall as its content — a short line
-  // leaves no empty terminal, a long page scrolls inside it.
+  // Anchored to the bottom edge and as tall as its content — a short line leaves no empty
+  // terminal, a long page scrolls inside it.
   root: {
     bottom: 0,
     position: 'absolute',

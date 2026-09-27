@@ -11,8 +11,8 @@ import { nextTaskId } from '@/entities/task';
 
 import { clamp } from '@/shared/utils';
 
-// The types module, not the slice barrel: the barrel carries the store,
-// and with it `expo-sqlite`, which the node test runner cannot parse.
+// The types module, not the slice barrel: the barrel carries the store, and with it
+// `expo-sqlite`, which the node test runner cannot parse.
 import type { PeriodRecord, UserSave } from '../../model';
 import { buildPeriodReport, computeAdjustment } from '../period-report';
 import { creditWallet } from '../wallet';
@@ -21,30 +21,17 @@ import { creditWallet } from '../wallet';
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * True when the plan has at least one direction with a non-zero allocation.
- * The "End day" button is available only then — see docs/game-period.md.
- */
+/** True when the plan has at least one direction with a non-zero allocation. */
 const hasPlanEntry = (user: UserSave): boolean =>
   user.period.plan.needs > 0 ||
   user.period.plan.wants > 0 ||
   user.period.plan.savings > 0;
 
-/**
- * History / phase stamps. Optional `at` is for tests and demos; production
- * callers pass nothing and get a monotonic counter from the save — the
- * period engine never reads the wall clock (0.3-R).
- */
+/** History / phase stamps. */
 const stampAt = (user: UserSave, at?: number): number =>
   at ?? user.period.phaseEnteredAt + 1;
 
-/**
- * What the child has decided across every finished period.
- *
- * Counted from the history rather than kept as three counters in the save:
- * the history is the record, and a counter that can drift from it is a bug
- * waiting for a refund or a corrected period.
- */
+/** What the child has decided across every finished period. */
 export const growthFacts = (history: PeriodRecord[]): GrowthFacts => ({
   periods: history.length,
   goalsReached: new Set(history.flatMap((record) => record.reachedGoalIds))
@@ -56,15 +43,7 @@ export const growthFacts = (history: PeriodRecord[]): GrowthFacts => ({
 // STATE MACHINE TRANSITIONS
 // ═══════════════════════════════════════════
 
-/**
- * `planning → active`
- *
- * The child has set their budget plan and confirmed it. The period is now live:
- * facts start accumulating, purchases are charged to the plan.
- *
- * @throws {Error} If the current phase is not `planning`.
- * @throws {Error} If the plan is all-zeros.
- */
+/** `planning → active` */
 export const startPeriod = (user: UserSave, at?: number): UserSave => {
   if (user.period.phase !== 'planning') {
     throw new Error(
@@ -87,9 +66,8 @@ export const startPeriod = (user: UserSave, at?: number): UserSave => {
     );
   }
 
-  // Empty plan is only legal when there is nothing to allocate — the child
-  // enters `active` to earn on chores. A non-empty wallet still requires a
-  // real plan (docs/budget.md).
+  // Empty plan is only legal when there is nothing to allocate — the child enters `active`
+  // to earn on chores. A non-empty wallet still requires a real plan (docs/budget.md).
   if (!hasPlanEntry(user) && user.wallet.balance > 0) {
     throw new Error(
       'startPeriod: plan must have at least one non-zero direction',
@@ -107,14 +85,7 @@ export const startPeriod = (user: UserSave, at?: number): UserSave => {
   };
 };
 
-/**
- * `active → summary`
- *
- * The child confirmed "End day". Plan and fact freeze for the summary screen;
- * settlement runs later in `endPeriod`.
- *
- * @throws {Error} If the current phase is not `active`.
- */
+/** `active → summary` */
 export const finishPeriod = (user: UserSave, at?: number): UserSave => {
   if (user.period.phase !== 'active') {
     throw new Error(
@@ -132,16 +103,7 @@ export const finishPeriod = (user: UserSave, at?: number): UserSave => {
   };
 };
 
-/**
- * `summary → planning`, settling the finished period on the way (0.3-R).
- *
- * One action-driven step — no wall clock, no offline catch-up:
- *
- * 1. Need decay for charge / spirit (table, not a tick).
- * 2. History row, regularity bonus, stage, wipe plan/fact/tasks, index++.
- *
- * @throws {Error} If the current phase is not `summary`.
- */
+/** `summary → planning`, settling the finished period on the way (0.3-R). */
 export const endPeriod = (user: UserSave, at?: number): UserSave => {
   if (user.period.phase !== 'summary') {
     throw new Error(
@@ -160,8 +122,8 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
     .filter((g) => g.reachedInPeriod === period.index)
     .map((g) => g.goalId);
 
-  // Spending the completed jar buys permanent progress; it must not erase
-  // the goal achievement used for this period's growth calculation.
+  // Spending the completed jar buys permanent progress; it must not erase the goal
+  // achievement used for this period's growth calculation.
   if (
     user.platform.receipts.some(
       (receipt) => receipt.periodIndex === period.index,
@@ -184,10 +146,8 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
         })
       : user.wallet;
 
-  // Budget adherence consequence: bonus for meeting the plan, penalty for
-  // overspending. Levels and non-liquid savings are never touched (ТЗ §2.2).
-  // Penalty is taken from the post-bonus liquid balance so a child who
-  // deposited still feels the miss on what they kept in the wallet.
+  // Budget adherence consequence: bonus for meeting the plan, penalty for overspending.
+  // Levels and non-liquid savings are never touched (ТЗ §2.2).
   const adjustment = computeAdjustment(isPlanKept, walletAfterBonus.balance);
   const wallet =
     adjustment > 0
@@ -208,9 +168,8 @@ export const endPeriod = (user: UserSave, at?: number): UserSave => {
   const charge = clamp(user.robot.charge - PERIOD_NEED_DECAY.charge, 0, 1);
   const spirit = clamp(user.robot.spirit - PERIOD_NEED_DECAY.spirit, 0, 1);
 
-  // Facts are counted on the full append first: trimming must not shrink the
-  // counters that just earned a stage (goals that aged out of the window stay
-  // reflected in `robot.stage`, which never goes backwards).
+  // Facts are counted on the full append first: trimming must not shrink the counters that
+  // just earned a stage (goals that aged out of the window stay reflected in `robot.stage`,
   const history: PeriodRecord[] = [
     ...user.history,
     {
@@ -270,31 +229,17 @@ export const acknowledgeSummary = endPeriod;
 // GUARDS
 // ═══════════════════════════════════════════
 
-/**
- * Whether the "End day" button can start the confirm flow.
- *
- * Active phase only. An empty plan is legal when the wallet was empty at
- * `startPeriod` (earn-first softlock escape), so we no longer require a
- * non-zero plan here — docs/game-period.md still gates spending behind
- * planning when there was something to allocate.
- */
 export const canFinishPeriod = (user: UserSave): boolean =>
   user.period.phase === 'active';
 
 /**
- * Whether planned needs are covered by fact — drives the warn state on the
- * End day button (soft warning, never a block).
+ * Whether planned needs are covered by fact — drives the warn state on the End day button
+ * (soft warning, never a block).
  */
 export const areNeedsMet = (user: UserSave): boolean =>
   user.period.fact.needs >= user.period.plan.needs;
 
-/**
- * HUD status for the End day control (0.3-R).
- *
- * - `disabled` — cannot end (wrong phase / empty plan)
- * - `ready` — needs covered
- * - `warn` — can end, but needs are under plan
- */
+/** HUD status for the End day control (0.3-R). */
 export type EndPeriodStatus = 'disabled' | 'ready' | 'warn';
 
 export const endPeriodStatus = (user: UserSave): EndPeriodStatus => {

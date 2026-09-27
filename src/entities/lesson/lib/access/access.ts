@@ -22,26 +22,11 @@ export const lessonCellKey = (ordinal: number): string => {
   return cell ? cellKey(cell) : '';
 };
 
-/** The ordinal a key names, or `null` for a cell this arena does not have. */
 export const lessonOrdinalForKey = (key: string): number | null => {
   const cell = cellFromKey(key, ARENA_LAYOUT);
   return cell ? layoutOrdinal(ARENA_LAYOUT, cell) : null;
 };
 
-/**
- * Whether a cell may be held, and how it paints.
- *
- * A row — one step of one bay — opens as a whole: the platform has to have
- * climbed to that step and the row below it in the same bay has to be done.
- * The three bays climb side by side. Both rules come from `ARENA_LAYOUT`,
- * not from `unlockCondition` in `lessons.json`, which names cells of the old
- * six-to-a-row cut; a rule that lives in the layout keeps holding however
- * the content grows. The first unfinished cell of an open row is the one
- * suggested.
- *
- * Unlock rules read the **base** lesson on the cell (layer 0). Extra lessons
- * stacked from `lessons.json` play on the same cell once it is open.
- */
 export const lessonAccess = (
   cellOrdinal: number,
   completedLessonIds: readonly string[],

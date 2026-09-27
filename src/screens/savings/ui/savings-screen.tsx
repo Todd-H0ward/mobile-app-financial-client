@@ -15,18 +15,13 @@ import { GoalRow } from './goal-row';
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Savings showcase — every goal with progress (2.5.7 / roadmap 1.14).
- *
- * Tapping a row opens that goal's jar screen for deposit and withdraw.
- */
 export const SavingsScreen = () => {
   const { t } = useTranslation();
   const router = useRouter();
   const savings = useSavings();
 
   return (
-    <Screen presentation="sheet" gap="three" terminalVariant="keeper">
+    <Screen presentation="sheet" gap={SPACING.THREE} terminalVariant="keeper">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -76,11 +71,11 @@ export const SavingsScreen = () => {
 
 const styles = StyleSheet.create({
   list: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   stats: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
 });

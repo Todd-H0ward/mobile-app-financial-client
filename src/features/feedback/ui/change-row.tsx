@@ -32,6 +32,7 @@ const formatValue = (value: number, format: ChangeLine['format']): string => {
 /** One before → after line of «что изменилось». */
 export const ChangeRow = ({ line }: ChangeRowProps) => {
   const { t } = useTranslation();
+
   const before = formatValue(line.before, line.format);
   const after = formatValue(line.after, line.format);
 
@@ -71,9 +72,9 @@ const styles = StyleSheet.create({
   root: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.two,
-    paddingHorizontal: SPACING.compact,
-    paddingVertical: SPACING.two,
+    gap: SPACING.TWO,
+    paddingHorizontal: SPACING.COMPACT,
+    paddingVertical: SPACING.TWO,
   },
   value: { fontFamily: FONTS.monoStrong, fontSize: 16, lineHeight: 22 },
 });

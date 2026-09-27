@@ -9,10 +9,7 @@ import type { PeriodRecord, UserSave, WalletEntry } from '../../model';
 // TYPES
 // ═══════════════════════════════════════════
 
-/**
- * Named wallet source for history / HUD — never a bare id on screen.
- * The UI maps this through i18n; content titles ride along when known.
- */
+/** Named wallet source for history / HUD — never a bare id on screen. */
 type WalletSourceRef =
   | { kind: 'startingWallet' }
   | { kind: 'regularityBonus' }
@@ -38,9 +35,7 @@ interface WalletHistoryRow {
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/**
- * Finished periods, newest first — the grown-up's and child's report (2.5.11).
- */
+/** Finished periods, newest first — the grown-up's and child's report (2.5.11). */
 export const listPeriodHistory = (user: UserSave): readonly PeriodRecord[] =>
   [...user.history].reverse();
 
@@ -50,12 +45,7 @@ export const getLastPeriod = (user: UserSave): PeriodRecord | null => {
   return user.history[user.history.length - 1] ?? null;
 };
 
-/**
- * Resolves a wallet `source` string into a labeled ref for the UI.
- *
- * Static rule sources use `WALLET_SOURCES`; dynamic ones carry a content title
- * so the screen never shows a bare `task:…` id (2.5.4 / 2.5.11).
- */
+/** Resolves a wallet `source` string into a labeled ref for the UI. */
 export const describeWalletSource = (source: string): WalletSourceRef => {
   if (source === WALLET_SOURCES.startingWallet) {
     return { kind: 'startingWallet' };
@@ -121,8 +111,8 @@ export const describeWalletSource = (source: string): WalletSourceRef => {
 };
 
 /**
- * Wallet operations newest first, each with a resolved source label.
- * The array is already newest-first in the save; we only attach labels.
+ * Wallet operations newest first, each with a resolved source label. The array is already
+ * newest-first in the save; we only attach labels.
  */
 export const listWalletHistory = (
   user: UserSave,

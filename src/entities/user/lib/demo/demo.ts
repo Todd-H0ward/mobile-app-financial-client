@@ -37,10 +37,7 @@ const DEMO_BASKET = ['need', 'want'].map((kind) => {
 /** How many periods one button press advances — 2.5.13 requires five. */
 export const DEMO_RUN_PERIODS = 5;
 
-/**
- * Hard cap on state-machine steps inside one run. Three transitions per period
- * plus a few to leave a mid-period phase; anything above means a bug.
- */
+/** Hard cap on state-machine steps inside one run. */
 const DEMO_RUN_STEP_LIMIT = DEMO_RUN_PERIODS * 3 + 6;
 
 // ═══════════════════════════════════════════
@@ -48,9 +45,8 @@ const DEMO_RUN_STEP_LIMIT = DEMO_RUN_PERIODS * 3 + 6;
 // ═══════════════════════════════════════════
 
 /**
- * A pre-filled starting profile for demo mode (2.5.13).
- *
- * Demo is a test profile + reset — no accelerated clock, no formula fork (0.3-R).
+ * A pre-filled starting profile for demo mode (2.5.13). Demo is a test profile + reset —
+ * no accelerated clock, no formula fork (0.3-R).
  */
 export const createDemoProfile = (
   settings?: Partial<UserSave['settings']>,
@@ -85,8 +81,8 @@ const carryDeviceSettings = (
   isGlassEnabled: from.isGlassEnabled,
   isCameraRigEnabled: from.isCameraRigEnabled,
   isDemoMode,
-  // The coat is the child's, not the profile's: a demo run should not undress
-  // the dog they picked, and leaving demo should not undo a coat picked in it.
+  // The coat is the child's, not the profile's: a demo run should not undress the dog they
+  // picked, and leaving demo should not undo a coat picked in it.
   robotSkin: from.robotSkin,
   robotAction: from.robotAction,
 });
@@ -121,8 +117,7 @@ const playDemoPeriod = (user: UserSave, time: TimeSource): UserSave => {
     if (result.ok) next = result.user;
   }
   for (const basketItem of DEMO_BASKET) {
-    // One-time things (modules, looks) are bought once; later periods reach
-    // for the nearest one still in the shop, so every period shows a want.
+    // One-time things (modules, looks) are bought once; later periods reach for the nearest one still in the shop, so every period shows a want.
     const item = pickBuyable(basketItem.id, next.ownedItemIds);
     if (!item) continue;
     const direction = item.kind === 'need' ? 'needs' : 'wants';
@@ -172,11 +167,7 @@ const stepDemoPeriod = (user: UserSave, time: TimeSource): UserSave => {
   }
 };
 
-/**
- * Advance by `count` finished periods without waiting for real time (0.3-R).
- *
- * No DemoTimeSource: stamps are a local counter so history stays ordered.
- */
+/** Advance by `count` finished periods without waiting for real time (0.3-R). */
 export const runDemoPeriods = (
   user: UserSave,
   count = DEMO_RUN_PERIODS,

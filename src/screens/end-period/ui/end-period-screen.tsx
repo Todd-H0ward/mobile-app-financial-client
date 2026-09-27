@@ -15,12 +15,7 @@ import { useEndPeriodConfirm } from '../model';
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Soft confirm before ending the day — never blocks the action (0.3-R).
- *
- * When planned needs are still open, the card names the gap; the child can
- * still finish and read the totals. Shame is not a mechanic.
- */
+/** Soft confirm before ending the day — never blocks the action (0.3-R) */
 export const EndPeriodScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -32,7 +27,7 @@ export const EndPeriodScreen = () => {
   }
 
   return (
-    <Screen presentation="sheet" gap="compact">
+    <Screen presentation="sheet" gap={SPACING.COMPACT}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -87,16 +82,16 @@ export const EndPeriodScreen = () => {
 
 const styles = StyleSheet.create({
   actions: {
-    gap: SPACING.two,
-    marginTop: SPACING.two,
+    gap: SPACING.TWO,
+    marginTop: SPACING.TWO,
   },
   warn: {
     borderRadius: RADII.m,
     borderStyle: 'dashed',
     borderWidth: 2,
     flexDirection: 'row',
-    gap: SPACING.compact,
-    padding: SPACING.compact,
+    gap: SPACING.COMPACT,
+    padding: SPACING.COMPACT,
   },
   warnText: { flex: 1 },
 });

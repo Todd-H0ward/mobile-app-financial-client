@@ -37,11 +37,7 @@ import { ThemedView } from './themed-view';
 // TYPES
 // ═══════════════════════════════════════════
 
-/**
- * `full` owns the whole window. `sheet` is a terminal rising from the bottom
- * over the live game — the route must be a `transparentModal` for the scene
- * to show through, see `src/app/_layout.tsx`.
- */
+/** `sheet` needs `transparentModal` so the pit shows through (`_layout`). */
 type ScreenPresentation = 'full' | 'sheet';
 
 interface ScreenRootProps {
@@ -49,16 +45,10 @@ interface ScreenRootProps {
   variant?: ThemeColor;
   terminalVariant?: TerminalVariant;
   presentation?: ScreenPresentation;
-  /**
-   * A strip of the pit above the terminal — the child always sees where they
-   * are. Off for the grown-ups' terminal, which is deliberately not the game.
-   */
+  /** Pit strip above the terminal; off for parents (not the game). */
   isPitVisible?: boolean;
   gap?: Spacing;
-  /**
-   * When false, the screen does not wrap children in a `ScrollView` — use this
-   * when a child owns scrolling (`FlatList`), so lists stay virtualized.
-   */
+  /** False when a child owns scroll (`FlatList`) so lists stay virtualized. */
   isScrollable?: boolean;
   style?: StyleProp<ViewStyle>;
 }
@@ -67,11 +57,7 @@ interface ScreenBackProps {
   accessibilityLabel?: string;
 }
 
-/**
- * The header is a row: an optional leading control, the heading, an optional
- * trailing one. Children are laid out in the order they are written, so the
- * arrangement is readable at the call site instead of hidden behind slots.
- */
+/** Header is children-in-order: leading, heading, trailing — no hidden slots. */
 interface ScreenHeaderProps {
   children?: ReactNode;
   style?: StyleProp<ViewStyle>;
@@ -96,12 +82,9 @@ type ScreenSubtitleProps = TextProps;
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** The strip of the pit above the terminal. */
+/** Pit strip above the terminal. */
 const PIT_HEIGHT = 56;
-/**
- * How much of the top a sheet leaves free: the status board that hangs on
- * cables at the top of the game stays readable above the tallest sheet.
- */
+/** Top gap so the status board stays readable above the tallest sheet. */
 const SHEET_TOP_CLEARANCE = 104;
 
 // ═══════════════════════════════════════════
@@ -194,7 +177,7 @@ const ScreenRoot = ({
   terminalVariant = 'keeper',
   presentation = 'full',
   isPitVisible = terminalVariant !== 'adult',
-  gap = 'two',
+  gap = SPACING.TWO,
   isScrollable = true,
   style,
 }: ScreenRootProps) => {
@@ -210,14 +193,14 @@ const ScreenRoot = ({
   // sheet measures the space it really has instead.
   const [areaHeight, setAreaHeight] = useState<number | null>(null);
 
-  const bottomPad = insets.bottom + SPACING.four;
+  const bottomPad = insets.bottom + SPACING.FOUR;
 
   const column = (
     <View
       style={[
         styles.column,
         !isScrollable && styles.columnFill,
-        { gap: SPACING[gap] },
+        { gap },
         style,
       ]}
     >
@@ -236,7 +219,7 @@ const ScreenRoot = ({
         insets.top -
         SHEET_TOP_CLEARANCE -
         insets.bottom -
-        SPACING.two,
+        SPACING.TWO,
     );
 
     return (
@@ -254,7 +237,7 @@ const ScreenRoot = ({
           pointerEvents="box-none"
           style={[
             styles.sheetArea,
-            { paddingBottom: insets.bottom + SPACING.two },
+            { paddingBottom: insets.bottom + SPACING.TWO },
           ]}
         >
           <TerminalPanel
@@ -272,7 +255,7 @@ const ScreenRoot = ({
                 keyboardDismissMode="on-drag"
                 contentContainerStyle={[
                   styles.content,
-                  { paddingBottom: SPACING.three },
+                  { paddingBottom: SPACING.THREE },
                 ]}
               >
                 {column}
@@ -282,7 +265,7 @@ const ScreenRoot = ({
                 style={[
                   styles.content,
                   styles.static,
-                  { paddingBottom: SPACING.two },
+                  { paddingBottom: SPACING.TWO },
                 ]}
               >
                 {column}
@@ -369,7 +352,7 @@ const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
     paddingHorizontal: CONTENT_PADDING,
-    paddingTop: SPACING.three,
+    paddingTop: SPACING.THREE,
     flexGrow: 1,
   },
   static: {
@@ -387,7 +370,7 @@ const styles = StyleSheet.create({
   },
   frame: {
     flex: 1,
-    maxWidth: MAX_CONTENT_WIDTH + SPACING.three,
+    maxWidth: MAX_CONTENT_WIDTH + SPACING.THREE,
     width: '100%',
   },
   adult: { letterSpacing: 1 },
@@ -395,22 +378,22 @@ const styles = StyleSheet.create({
   panel: { flex: 1 },
   pit: {
     alignSelf: 'stretch',
-    height: PIT_HEIGHT - SPACING.two,
-    marginHorizontal: -SPACING.two,
-    marginTop: -SPACING.two,
+    height: PIT_HEIGHT - SPACING.TWO,
+    marginHorizontal: -SPACING.TWO,
+    marginTop: -SPACING.TWO,
     overflow: 'hidden',
   },
   panelContent: { flex: 1 },
-  safeArea: { alignItems: 'center', flex: 1, padding: SPACING.two },
+  safeArea: { alignItems: 'center', flex: 1, padding: SPACING.TWO },
   sheetArea: {
     alignItems: 'center',
     flex: 1,
     justifyContent: 'flex-end',
-    paddingHorizontal: SPACING.two,
+    paddingHorizontal: SPACING.TWO,
   },
   sheetFrame: {
     flexShrink: 1,
-    maxWidth: MAX_CONTENT_WIDTH + SPACING.three,
+    maxWidth: MAX_CONTENT_WIDTH + SPACING.THREE,
     width: '100%',
   },
   sheetPanel: { flexShrink: 1 },

@@ -26,10 +26,7 @@ interface PuzzleScreenProps {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * One puzzle sitting. Completing the board credits the arcade payout once and
- * opens a short debrief — no ads, no double-coins.
- */
+/** Completing the board credits the arcade payout once and opens a short debrief — no ads, no double-coins */
 export const PuzzleScreen = ({ puzzleId }: PuzzleScreenProps) => {
   const { t } = useTranslation();
   const router = useRouter();

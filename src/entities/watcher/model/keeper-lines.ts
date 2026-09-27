@@ -1,10 +1,6 @@
 import type { WatcherLine } from './dialogue';
 
-/**
- * The Keeper — plan, jar, workshop, day close and the report.
- *
- * Actions open terminal pages; chores and the arcade belong to the Overseer.
- */
+/** The Keeper — plan, jar, workshop, day close and the report. */
 export const KEEPER_LINES: WatcherLine[] = [
   {
     id: 'keeper-plan',

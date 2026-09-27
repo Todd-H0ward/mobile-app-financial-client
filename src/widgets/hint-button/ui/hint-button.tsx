@@ -30,10 +30,7 @@ interface HintButtonProps {
   /** Screen whose hint opens. Every screen id has content — see 2.5.1. */
   screen: HintScreenId;
   variant?: HintButtonVariant;
-  /**
-   * Draws attention once, right after mount. Used on the first screen a child
-   * ever sees, so that "help is always here" is learned instead of announced.
-   */
+  /** Draws attention once, right after mount. */
   isPulsing?: boolean;
 }
 
@@ -41,7 +38,6 @@ interface HintButtonProps {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** Visual size of the control; hitSlop expands the target to HIT_SLOP_SIZE. */
 const BUTTON_SIZE = 48;
 const HUD_SIZE = 44;
 
@@ -55,11 +51,8 @@ const PULSE_COUNT = 2;
 // ═══════════════════════════════════════════
 
 /**
- * The "?" that sits in the header of every screen, always in the same corner —
- * requirement 2.5.1, help available at any moment.
- *
- * It owns no words: the text comes from `content/hints.json` through
- * `entities/hint`, so a screen's hint is rewritten without opening a `.tsx`.
+ * The "?" that sits in the header of every screen, always in the same corner — requirement
+ * 2.5.1, help available at any moment.
  */
 export const HintButton = ({
   screen,
@@ -78,8 +71,7 @@ export const HintButton = ({
   });
   const body = Array.isArray(rawBody) ? (rawBody as string[]) : hint.body;
 
-  // The grown-up's switch and the system Reduce Motion decide — 3.6, weak
-  // devices.
+  // The grown-up's switch and the system Reduce Motion decide — 3.6, weak devices.
   const isMotionEnabled = useIsMotionEnabled();
 
   const scale = useSharedValue(1);
@@ -203,19 +195,19 @@ const styles = StyleSheet.create({
     width: 36,
   },
   body: {
-    gap: SPACING.compact,
+    gap: SPACING.COMPACT,
   },
   heading: { alignItems: 'center', flexDirection: 'row', gap: 10 },
   headingCopy: { flex: 1 },
   hud: {
     borderRadius: 12,
     height: HUD_SIZE,
-    padding: SPACING.one,
+    padding: SPACING.ONE,
     width: HUD_SIZE,
   },
   hudScreen: {
     alignItems: 'center',
-    borderRadius: SPACING.two,
+    borderRadius: SPACING.TWO,
     flex: 1,
     justifyContent: 'center',
   },
@@ -230,7 +222,7 @@ const styles = StyleSheet.create({
   step: {
     alignItems: 'flex-start',
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   stepNumber: { fontSize: 15, lineHeight: 22 },
   stepText: { flex: 1 },

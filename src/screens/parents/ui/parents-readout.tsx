@@ -19,7 +19,6 @@ interface ParentsReadoutProps {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** The three skills, wearing the signs the child sees in the game. */
 const PURPOSES: { key: 'plan' | 'priority' | 'save'; icon: PixelIconName }[] = [
   { key: 'plan', icon: 'plan' },
   { key: 'priority', icon: 'battery' },
@@ -30,11 +29,6 @@ const PURPOSES: { key: 'plan' | 'priority' | 'save'; icon: PixelIconName }[] = [
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * The top of the grown-ups' section (4b): three numbers and what the app is
- * for. 2.5.12 asks for the goals next to the progress, so they come first.
- * Nothing here judges the child — counts and names only.
- */
 export const ParentsReadout = ({ status }: ParentsReadoutProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -118,17 +112,17 @@ export const ParentsReadout = ({ status }: ParentsReadoutProps) => {
 const styles = StyleSheet.create({
   purpose: { alignItems: 'flex-start', flexDirection: 'row', gap: 10 },
   purposeText: { flex: 1 },
-  root: { gap: SPACING.compact },
+  root: { gap: SPACING.COMPACT },
   tile: {
     borderRadius: RADII.m,
     borderWidth: 2,
     flex: 1,
     gap: 2,
     paddingHorizontal: 10,
-    paddingVertical: SPACING.two,
+    paddingVertical: SPACING.TWO,
   },
   tileValue: { fontSize: 22, lineHeight: 28 },
-  tiles: { flexDirection: 'row', gap: SPACING.two },
+  tiles: { flexDirection: 'row', gap: SPACING.TWO },
 });
 
 export type { ParentsReadoutProps };

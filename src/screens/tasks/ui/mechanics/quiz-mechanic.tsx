@@ -13,7 +13,6 @@ interface QuizMechanicProps {
   payload: QuizPayload;
   selectedId: string | null;
   onSelect: (optionId: string) => void;
-  /** Optional lead-in above the question (e.g. price and paid for change). */
   leadIn?: string;
 }
 
@@ -21,7 +20,6 @@ interface QuizMechanicProps {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** Tap one option — used by quiz and change. */
 export const QuizMechanic = ({
   payload,
   selectedId,
@@ -52,10 +50,10 @@ export const QuizMechanic = ({
 
 const styles = StyleSheet.create({
   options: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   root: {
-    gap: SPACING.three,
+    gap: SPACING.THREE,
   },
 });
 

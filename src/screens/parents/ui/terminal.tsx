@@ -116,25 +116,25 @@ const styles = StyleSheet.create({
   bar: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.two,
-    paddingBottom: SPACING.two,
+    gap: SPACING.TWO,
+    paddingBottom: SPACING.TWO,
   },
   cursor: { height: 24, width: 10 },
   name: { flex: 1, minWidth: 0 },
   root: {
     borderRadius: RADII.m,
     borderWidth: 2,
-    gap: SPACING.two,
-    padding: SPACING.compact,
+    gap: SPACING.TWO,
+    padding: SPACING.COMPACT,
   },
   row: {
     alignItems: 'baseline',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     justifyContent: 'space-between',
   },
-  rule: { borderTopWidth: 2, marginVertical: SPACING.two },
+  rule: { borderTopWidth: 2, marginVertical: SPACING.TWO },
   value: { flexShrink: 1, textAlign: 'right' },
 });
 

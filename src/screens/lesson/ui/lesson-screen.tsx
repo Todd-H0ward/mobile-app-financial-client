@@ -13,7 +13,6 @@ import { Terminal } from './terminal';
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** One paragraph of theory, with the machine counting them off. */
 const Theory = ({
   paragraph,
   index,
@@ -44,12 +43,6 @@ const Theory = ({
   );
 };
 
-/**
- * One question, answered once.
- *
- * The verdict stays on screen until the child moves on: a test that silently
- * advances is a test nobody learns from.
- */
 const Test = ({
   question,
   options,
@@ -124,7 +117,6 @@ const Test = ({
   );
 };
 
-/** The readout at the end: the score, the verdict, and one way onward. */
 const Result = ({
   correct,
   total,
@@ -173,21 +165,13 @@ const Result = ({
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/** Lessons share the same readable terminal as the rest of the game. */
 export const LessonScreen = () => {
   const router = useRouter();
   const { t } = useTranslation();
   const { cellId } = useLocalSearchParams<{ cellId: string }>();
   const lessonState = useLesson(cellId ?? '');
 
-  /**
-   * Back to the world, whether or not there is a world to go back to.
-   *
-   * A lesson is normally pushed over the arena, and `back` is right. But it
-   * is also a route with an address, and opened at that address — a deep
-   * link, a notification, a cold start — there is no screen underneath and
-   * `back` is an error rather than a no-op.
-   */
+  // Deep link / cold start may have no screen underneath — dismissTo home then.
   const leave = () => {
     if (router.canGoBack()) {
       router.back();
@@ -206,7 +190,7 @@ export const LessonScreen = () => {
 
   return (
     <Screen
-      gap="three"
+      gap={SPACING.THREE}
       terminalVariant={
         stage === 'test' || stage === 'scenario' ? 'overseer' : 'keeper'
       }
@@ -305,9 +289,9 @@ export const LessonScreen = () => {
 
 const styles = StyleSheet.create({
   body: {
-    gap: SPACING.three,
+    gap: SPACING.THREE,
   },
   options: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
 });

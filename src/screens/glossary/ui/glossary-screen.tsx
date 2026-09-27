@@ -15,7 +15,6 @@ import { useGlossary } from '../model';
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** A word tied to a sign in the game wears that sign. */
 const TERM_ICON: Record<string, PixelIconName> = {
   plan: 'plan',
   needs: 'battery',
@@ -30,10 +29,7 @@ const TERM_ICON: Record<string, PixelIconName> = {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Child-facing glossary — terms from `content/glossary.json` (2.5.11).
- * Screen 15: a word opens in place, so the list never loses its reader.
- */
+/** Screen 15: a word opens in place, so the list never loses its reader */
 export const GlossaryScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -41,7 +37,7 @@ export const GlossaryScreen = () => {
   const [openId, setOpenId] = useState<string | null>(null);
 
   return (
-    <Screen presentation="sheet" gap="compact">
+    <Screen presentation="sheet" gap={SPACING.COMPACT}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -56,8 +52,10 @@ export const GlossaryScreen = () => {
           const title = t(`glossary.terms.${term.id}.title`, {
             defaultValue: term.title,
           });
+
           const isOpen = term.id === openId;
           const icon = TERM_ICON[term.id];
+
           return (
             <Pressable
               key={term.id}
@@ -106,15 +104,15 @@ export const GlossaryScreen = () => {
 
 const styles = StyleSheet.create({
   list: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   term: {
     borderRadius: RADII.m,
     borderWidth: 2,
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     minHeight: 56,
     paddingHorizontal: 14,
-    paddingVertical: SPACING.compact,
+    paddingVertical: SPACING.COMPACT,
   },
   termHead: { alignItems: 'center', flexDirection: 'row', gap: 10 },
   termTitle: { flex: 1 },

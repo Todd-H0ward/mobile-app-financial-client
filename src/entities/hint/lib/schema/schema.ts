@@ -47,13 +47,7 @@ const assertHint = (hint: unknown, path: string): HintContent => {
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/**
- * Validates `content/hints.json` (or a fixture shaped like it).
- *
- * "Available at any moment" is only true if every screen has something to say,
- * so a missing screen is an error here rather than a "?" that opens an empty
- * sheet on the device — 2.5.1.
- */
+/** Validates `content/hints.json` (or a fixture shaped like it). */
 export const assertHintsContent = (data: unknown): HintsFile => {
   if (!isRecord(data)) {
     throw new Error('hints content: must be an object');

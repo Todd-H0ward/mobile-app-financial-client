@@ -36,10 +36,7 @@ const RING_STEP = 22;
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Concentric bands of concrete — the terraces of the scene seen from above,
- * the backdrop every terminal hangs over. Decorative, never read aloud.
- */
+/** Decorative pit terraces — never read aloud. */
 export const RingsBackdrop = memo(
   ({
     centerY = 0.6,

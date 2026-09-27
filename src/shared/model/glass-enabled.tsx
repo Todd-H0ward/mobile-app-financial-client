@@ -2,11 +2,7 @@ import { createContext, type ReactNode, useContext } from 'react';
 
 const GlassEnabledContext = createContext(false);
 
-/**
- * Legacy saved preference now controls the static terminal texture.
- * Wired in Providers from settings + Reduce Transparency.
- * Shared UI reads this — never imports `@/entities/user`.
- */
+/** Wired in Providers — shared UI must not import `@/entities/user`. */
 export const GlassEnabledProvider = ({
   isEnabled,
   children,
@@ -19,5 +15,5 @@ export const GlassEnabledProvider = ({
   </GlassEnabledContext.Provider>
 );
 
-/** Whether terminal screens should render their subtle static texture. */
+/** Terminal static texture on when preference + transparency allow it. */
 export const useGlassEnabled = (): boolean => useContext(GlassEnabledContext);

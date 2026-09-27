@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   cell: { height: 10, width: 18 },
   cells: { flexDirection: 'row', gap: 3 },
   frame: { width: 300 },
-  offline: { bottom: SPACING.six, fontSize: 12, position: 'absolute' },
+  offline: { bottom: SPACING.SIX, fontSize: 12, position: 'absolute' },
   root: {
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
@@ -81,8 +81,8 @@ const styles = StyleSheet.create({
   },
   screen: {
     alignItems: 'center',
-    gap: SPACING.compact,
-    paddingVertical: SPACING.six,
+    gap: SPACING.COMPACT,
+    paddingVertical: SPACING.SIX,
   },
   title: { fontSize: 38, lineHeight: 44 },
 });

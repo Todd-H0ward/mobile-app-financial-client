@@ -21,9 +21,7 @@ interface WatcherLineCondition {
   minCharge?: number;
   /** Max charge threshold (0…1). */
   maxCharge?: number;
-  /** Whether there's an active task. */
   hasActiveTask?: boolean;
-  /** Whether needs are met in budget. */
   areNeedsMet?: boolean;
 }
 
@@ -67,9 +65,7 @@ interface WatcherGameState {
   charge: number;
   /** Current spirit (0…1). */
   spirit: number;
-  /** Whether there's an active task. */
   hasActiveTask: boolean;
-  /** Whether needs are met in budget. */
   areNeedsMet: boolean;
   /** Current balance. */
   balance: number;
