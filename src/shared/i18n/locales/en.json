@@ -515,10 +515,6 @@
       "puzzle-arena": {
         "title": "Arena puzzle",
         "note": "Buy it — the puzzle unlocks in the mini-games."
-      },
-      "game-console": {
-        "title": "Game console",
-        "note": "Buy it — Spacewar and snake unlock in the mini-games."
       }
     }
   },

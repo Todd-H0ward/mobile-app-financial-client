@@ -6,7 +6,3 @@ export {
   recordSnakeScore,
   recordSpacewarTime,
 } from './lib';
-export {
-  CONSOLE_OWNED_ID,
-  isConsoleOwned,
-} from './model';

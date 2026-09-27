@@ -1,11 +1,9 @@
-import { Redirect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ConsoleDevice, ConsoleVolumeButton } from '@/widgets/minigame/console';
 
 import { GAME_REWARDS } from '@/entities/minigame';
-import { isConsoleOwned } from '@/entities/minigame/console';
-import { useUser } from '@/entities/user';
 
 import { RADII, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
@@ -17,16 +15,11 @@ import { formatMoney } from '@/shared/utils';
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
+/** Hub for snake + spacewar — always open from the Overseer's arcade. */
 export const ConsoleScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
   const router = useRouter();
-  const user = useUser();
-  const ownedItemIds = user?.ownedItemIds ?? [];
-
-  if (!isConsoleOwned(ownedItemIds)) {
-    return <Redirect href={STATIC_ROUTES.HOME} />;
-  }
 
   return (
     <Screen gap={SPACING.TWO} isScrollable={false}>
