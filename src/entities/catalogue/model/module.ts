@@ -4,14 +4,12 @@ import type { CatalogueItem } from './types';
 interface ModuleBonus {
   /** Multiplier for task rewards. 1.0 = no bonus. */
   rewardMultiplier: number;
-  /** Extra hints in minigames. */
-  extraHints: number;
 }
 
 const MODULE_BONUSES: Record<string, ModuleBonus> = {
-  'module-sensor': { rewardMultiplier: 1.1, extraHints: 0 },
-  'module-antenna': { rewardMultiplier: 1.0, extraHints: 1 },
-  'module-core': { rewardMultiplier: 1.15, extraHints: 2 },
+  'module-sensor': { rewardMultiplier: 1.1 },
+  'module-antenna': { rewardMultiplier: 1.05 },
+  'module-core': { rewardMultiplier: 1.15 },
 };
 
 const MODULE_IDS = Object.keys(MODULE_BONUSES);
@@ -24,20 +22,18 @@ function getModuleBonus(moduleId: string): ModuleBonus | null {
 }
 
 /**
- * Combines bonuses from all owned modules.
- * Multipliers are multiplied together, extra hints are added.
+ * Combines only the installed modules. Ownership alone never activates a bonus.
  */
-function computeEffectiveBonus(ownedModuleIds: string[]): ModuleBonus {
-  return ownedModuleIds.reduce(
+function computeEffectiveBonus(installedModuleIds: string[]): ModuleBonus {
+  return installedModuleIds.reduce(
     (acc, id) => {
       const bonus = getModuleBonus(id);
       if (bonus) {
         acc.rewardMultiplier *= bonus.rewardMultiplier;
-        acc.extraHints += bonus.extraHints;
       }
       return acc;
     },
-    { rewardMultiplier: 1.0, extraHints: 0 },
+    { rewardMultiplier: 1.0 },
   );
 }
 
@@ -48,7 +44,7 @@ function isModuleItem(item: CatalogueItem): boolean {
   return item.category === 'module' || item.moduleTier !== undefined;
 }
 
-export type { ModuleBonus };
+export type { ModuleBonus, ModuleSlot };
 export {
   computeEffectiveBonus,
   getModuleBonus,
@@ -56,3 +52,11 @@ export {
   MODULE_BONUSES,
   MODULE_IDS,
 };
+
+/** Each optional electronic module has one physical mounting point. */
+export const MODULE_SLOTS = {
+  head: 'module-antenna',
+  body: 'module-core',
+  legs: 'module-sensor',
+} as const;
+type ModuleSlot = keyof typeof MODULE_SLOTS;

@@ -50,15 +50,21 @@ export const DemoModeCard = () => {
 
   return (
     <>
-      <Card tone="surfaceSoft">
-        <Card.Title>{t('demoMode.title')}</Card.Title>
-        <Card.Content style={styles.content}>
+      <Card>
+        <View style={styles.head}>
+          <View style={styles.headCopy}>
+            <Card.Title>{t('demoMode.title')}</Card.Title>
+            <Text variant="small" themeColor="textMuted">
+              {t('demoMode.switchLabel')}
+            </Text>
+          </View>
           <Switch
             isChecked={isDemoMode}
             onChange={onSwitchChange}
             label={t('demoMode.switchLabel')}
           />
-
+        </View>
+        <Card.Content style={styles.content}>
           <Text variant="small" themeColor="textSecondary">
             {t('demoMode.periodInfo', { periodIndex, finishedPeriods })}
           </Text>
@@ -83,12 +89,12 @@ export const DemoModeCard = () => {
             </Button>
             <Button
               size="m"
-              variant="secondary"
+              variant="warning"
               isFullWidth
               disabled={!isDemoMode}
               onPress={resetProfile}
             >
-              {t('demoMode.resetProfile')}
+              {`! ${t('demoMode.resetProfile')}`}
             </Button>
           </View>
         </Card.Footer>
@@ -101,15 +107,16 @@ export const DemoModeCard = () => {
         <Sheet.Title>{t('demoMode.confirmTitle')}</Sheet.Title>
         <Sheet.Description>{t('demoMode.confirmDesc')}</Sheet.Description>
         <Sheet.Actions>
+          <Button isFullWidth onPress={confirmEnable}>
+            {t('demoMode.confirmEnable')}
+          </Button>
           <Button
             variant="ghost"
+            size="s"
             isFullWidth
             onPress={() => setIsConfirmVisible(false)}
           >
-            {t('demoMode.confirmCancel')}
-          </Button>
-          <Button isFullWidth onPress={confirmEnable}>
-            {t('demoMode.confirmEnable')}
+            {t('demoMode.confirmCancel').toLocaleLowerCase()}
           </Button>
         </Sheet.Actions>
       </Sheet.Modal>
@@ -129,4 +136,6 @@ const styles = StyleSheet.create({
   content: {
     gap: SPACING.two,
   },
+  head: { alignItems: 'center', flexDirection: 'row', gap: SPACING.compact },
+  headCopy: { flex: 1, gap: 2 },
 });

@@ -1,17 +1,15 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import type { GateChallenge } from '@/entities/settings';
 
-import { FONTS, SPACING } from '@/shared/constants';
+import { FONTS, RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { Screen, Text } from '@/shared/ui';
 
 import { applyGateInput } from '../lib';
-
-import { Terminal } from './terminal';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -27,15 +25,24 @@ interface ParentGateProps {
 }
 
 // ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/** Our own keypad (4a): the system keyboard would make the screen jump. */
+const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'erase', '0', 'ok'];
+/** The second way in from 2.5.12 — a long, deliberate hold. */
+const HOLD_MS = 3000;
+
+// ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
 /**
  * The arithmetic barrier — 2.5.12, docs/parents.md.
  *
- * Dressed as the service terminal of the scene's AI monitor, but it behaves
- * exactly like before: a multiplication rather than a PIN, nothing to forget
- * and nothing to store. A wrong answer only clears the field and prints a calm
+ * The service terminal (4a): a multiplication on our own keypad, or a
+ * three-second hold — the two ways 2.5.12 allows. Nothing to forget and
+ * nothing to store. A wrong answer only clears the field and prints a calm
  * line — no lockout, no attempt counter, no "warning", because this stops a
  * child wandering in rather than defending an account (docs/privacy.md). The
  * retro-terminal reference is borrowed for the look only, never its threats.
@@ -43,9 +50,9 @@ interface ParentGateProps {
 export const ParentGate = ({ challenge, onPass, onMiss }: ParentGateProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const inputRef = useRef<TextInput>(null);
   const [typed, setTyped] = useState('');
   const [isMissed, setIsMissed] = useState(false);
+  const [isHolding, setIsHolding] = useState(false);
 
   const question = t('parents.gate.question', {
     left: challenge.left,
@@ -67,87 +74,114 @@ export const ParentGate = ({ challenge, onPass, onMiss }: ParentGateProps) => {
     }
   };
 
+  const pressKey = (key: string) => {
+    if (key === 'erase') {
+      setTyped((current) => current.slice(0, -1));
+      return;
+    }
+    if (key === 'ok') {
+      // A short answer is a full try too: clear it and ask a new sum.
+      if (typed.length === 0) return;
+      setTyped('');
+      setIsMissed(true);
+      onMiss();
+      return;
+    }
+    handleChange(typed + key);
+  };
+
   return (
-    <Screen gap="three" variant="arcadeDpad">
+    <Screen gap="compact" terminalVariant="adult">
       <Screen.Header>
-        <Screen.Back tone="arcadeScreen" color="arcadeLcd" />
+        <Screen.Back />
         <Screen.Heading>
-          <Screen.Title themeColor="arcadeLcd" style={styles.title}>
-            {t('parents.gate.title')}
-          </Screen.Title>
+          <Screen.Label voice="adult">{t('parents.gate.label')}</Screen.Label>
+          <Screen.Title>{t('parents.gate.heading')}</Screen.Title>
         </Screen.Heading>
       </Screen.Header>
 
-      <Terminal label={t('parents.terminal.label')}>
-        <Terminal.Line isPrompt order={0}>
-          {t('parents.gate.bootAccess')}
-        </Terminal.Line>
-        <Terminal.Line isPrompt tone="dim" order={1}>
-          {t('parents.gate.subtitle')}
-        </Terminal.Line>
+      <Text themeColor="textSecondary">{t('parents.gate.leadKeypad')}</Text>
 
-        <Terminal.Rule />
-
-        {/* The whole row focuses the field: a thumb aimed at the sum still
-            reaches the keyboard, not only a 2-digit-wide box. */}
-        <Pressable
-          onPress={() => inputRef.current?.focus()}
-          style={styles.sum}
-          accessible={false}
-        >
-          <Text
-            themeColor="arcadeLcd"
-            style={styles.sumText}
-            importantForAccessibility="no"
-            accessibilityElementsHidden
-          >
-            {`${challenge.left} × ${challenge.right} =`}
-          </Text>
-
-          <TextInput
-            ref={inputRef}
-            value={typed}
-            onChangeText={handleChange}
-            keyboardType="number-pad"
-            maxLength={2}
-            autoFocus
-            caretHidden
-            selectionColor={theme.arcadeLcd}
-            placeholder="__"
-            placeholderTextColor={theme.arcadeLcdDim}
-            accessibilityLabel={question}
-            accessibilityHint={t('parents.gate.prompt')}
-            style={[
-              styles.answer,
-              { borderColor: theme.arcadeLcdDim, color: theme.arcadeLcd },
-            ]}
-          />
-
-          <Terminal.Cursor />
-        </Pressable>
-
-        <View
-          style={styles.feedback}
-          accessibilityLiveRegion="polite"
-          accessibilityRole="text"
-        >
-          {isMissed ? (
-            <Terminal.Line isPrompt tone="alert">
-              {t('parents.gate.miss')}
-            </Terminal.Line>
-          ) : (
-            <Terminal.Line isPrompt tone="dim">
-              {t('parents.gate.prompt')}
-            </Terminal.Line>
-          )}
-        </View>
-      </Terminal>
-
-      <View style={styles.note}>
-        <Text variant="small" themeColor="arcadeDpadFace">
-          {t('parents.gate.note')}
+      <View
+        accessible
+        accessibilityLabel={`${question} ${typed}`}
+        accessibilityLiveRegion="polite"
+        style={[styles.sumBox, { borderColor: theme.border }]}
+      >
+        <Text variant="code" style={styles.sumText}>
+          {`${challenge.left} × ${challenge.right} =`}
         </Text>
+        <View
+          style={[
+            styles.answer,
+            { borderColor: isMissed ? theme.warning : theme.phosphor },
+          ]}
+        >
+          <Text variant="machine" style={styles.answerText}>
+            {`${typed}_`}
+          </Text>
+        </View>
       </View>
+
+      <View style={styles.feedback} accessibilityLiveRegion="polite">
+        {isMissed ? (
+          <Text variant="small" themeColor="warning">
+            {`! ${t('parents.gate.miss')}`}
+          </Text>
+        ) : null}
+      </View>
+
+      <View style={styles.keypad}>
+        {KEYS.map((key) => (
+          <Pressable
+            key={key}
+            accessibilityRole="button"
+            accessibilityLabel={
+              key === 'erase'
+                ? t('parents.gate.erase')
+                : key === 'ok'
+                  ? t('parents.gate.ok')
+                  : key
+            }
+            onPress={() => pressKey(key)}
+            style={({ pressed }) => [
+              styles.key,
+              {
+                backgroundColor: pressed ? theme.surfaceSoft : undefined,
+                borderColor: theme.border,
+              },
+            ]}
+          >
+            <Text variant="code" style={styles.keyText}>
+              {key === 'erase' ? '⌫' : key === 'ok' ? 'OK' : key}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('parents.gate.hold')}
+        delayLongPress={HOLD_MS}
+        onPressIn={() => setIsHolding(true)}
+        onPressOut={() => setIsHolding(false)}
+        onLongPress={onPass}
+        style={[
+          styles.hold,
+          {
+            backgroundColor: isHolding ? theme.surfaceSoft : undefined,
+            borderColor: theme.borderStrong,
+          },
+        ]}
+      >
+        <Text variant="bodyBold" themeColor="textSecondary">
+          {isHolding ? t('parents.gate.holding') : t('parents.gate.hold')}
+        </Text>
+      </Pressable>
+
+      <Text variant="small" themeColor="textMuted">
+        {t('parents.gate.note')}
+      </Text>
     </Screen>
   );
 };
@@ -158,36 +192,45 @@ export const ParentGate = ({ challenge, onPass, onMiss }: ParentGateProps) => {
 
 const styles = StyleSheet.create({
   answer: {
-    borderBottomWidth: 2,
-    fontFamily: FONTS.mono,
-    fontSize: 32,
-    lineHeight: 40,
-    minWidth: 64,
-    paddingHorizontal: SPACING.one,
-    paddingVertical: SPACING.one,
-    textAlign: 'center',
-  },
-  feedback: {
+    alignItems: 'center',
+    borderRadius: RADII.s,
+    borderWidth: 2,
     justifyContent: 'center',
-    minHeight: 48,
-  },
-  note: {
+    minHeight: 52,
+    minWidth: 72,
     paddingHorizontal: SPACING.two,
   },
-  sum: {
+  answerText: { fontSize: 28, lineHeight: 36 },
+  feedback: { minHeight: 20 },
+  hold: {
     alignItems: 'center',
+    borderRadius: RADII.m,
+    borderStyle: 'dashed',
+    borderWidth: 2,
+    justifyContent: 'center',
+    minHeight: 52,
+  },
+  key: {
+    alignItems: 'center',
+    borderRadius: RADII.s,
+    borderWidth: 2,
+    flexBasis: '30%',
+    flexGrow: 1,
+    justifyContent: 'center',
+    minHeight: 56,
+  },
+  keyText: { fontFamily: FONTS.monoStrong, fontSize: 20, lineHeight: 26 },
+  keypad: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.two },
+  sumBox: {
+    alignItems: 'center',
+    borderRadius: RADII.m,
+    borderWidth: 2,
     flexDirection: 'row',
-    gap: SPACING.two,
-    minHeight: 64,
+    gap: SPACING.compact,
+    justifyContent: 'center',
+    paddingVertical: SPACING.compact,
   },
-  sumText: {
-    fontFamily: FONTS.mono,
-    fontSize: 32,
-    lineHeight: 40,
-  },
-  title: {
-    fontFamily: FONTS.mono,
-  },
+  sumText: { fontFamily: FONTS.monoStrong, fontSize: 32, lineHeight: 40 },
 });
 
 export type { ParentGateProps };

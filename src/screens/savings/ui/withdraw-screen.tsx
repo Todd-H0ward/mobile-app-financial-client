@@ -3,9 +3,15 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { DYNAMIC_ROUTES, SPACING, STATIC_ROUTES } from '@/shared/constants';
+import {
+  DYNAMIC_ROUTES,
+  RADII,
+  SPACING,
+  STATIC_ROUTES,
+} from '@/shared/constants';
+import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { Button, Card, ProgressBar, Screen, Text } from '@/shared/ui';
+import { Button, ProgressBar, Screen, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
 import { useWithdraw } from '../model';
@@ -44,6 +50,7 @@ const parseAmount = (raw: string | undefined): number | null => {
  */
 export const WithdrawScreen = ({ goalId, amount }: WithdrawScreenProps) => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const router = useRouter();
   const withdraw = useWithdraw(goalId, amount);
 
@@ -60,97 +67,105 @@ export const WithdrawScreen = ({ goalId, amount }: WithdrawScreenProps) => {
     router.replace(DYNAMIC_ROUTES.goal(goalId));
   };
 
+  const columns = [
+    {
+      key: 'now',
+      label: t('savings.withdrawNow'),
+      saved: explain.savedBefore,
+      progress: explain.progressBefore,
+      periods: explain.periodsBefore,
+      isAfter: false,
+    },
+    {
+      key: 'after',
+      label: t('savings.withdrawAfter'),
+      saved: explain.savedAfter,
+      progress: explain.progressAfter,
+      periods: explain.periodsAfter,
+      isAfter: true,
+    },
+  ];
+
   return (
-    <Screen gap="three">
+    <Screen presentation="sheet" gap="compact" terminalVariant="keeper">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
-          <Screen.Title>{t('savings.withdrawTitle')}</Screen.Title>
-          <Screen.Subtitle>
-            {t('savings.withdrawSubtitle', {
+          <Text variant="machine" themeColor="warning">
+            {`! ${t('savings.withdrawLabel')}`}
+          </Text>
+          <Screen.Title>
+            {t('savings.withdrawQuestion', {
               count: formatMoney(explain.amount),
               goal: title,
             })}
-          </Screen.Subtitle>
+          </Screen.Title>
         </Screen.Heading>
         <HintButton screen="savings" />
       </Screen.Header>
 
-      <Card tone="surfaceSoft">
-        <Card.Content>
-          <Text variant="bodyBold">{t('savings.withdrawConsequence')}</Text>
-          <Text themeColor="textSecondary">
-            {t('savings.withdrawBody', {
-              count: formatMoney(explain.amount),
-              goal: title,
-              before: formatMoney(explain.remainingBefore),
-              after: formatMoney(explain.remainingAfter),
-            })}
-          </Text>
-          {explain.periodsAfter != null ? (
-            <Text themeColor="textSecondary">
-              {explain.periodsBefore != null
-                ? t('savings.withdrawPeriodsCompare', {
-                    after: explain.periodsAfter,
-                    before: explain.periodsBefore,
-                  })
-                : t('savings.withdrawPeriods', {
-                    count: explain.periodsAfter,
-                  })}
-            </Text>
-          ) : null}
-        </Card.Content>
-      </Card>
-
       <View style={styles.compare}>
-        <View style={styles.compareCol}>
-          <Text variant="smallBold">{t('savings.withdrawNow')}</Text>
-          <ProgressBar value={explain.progressBefore} height={10} />
-          <Text variant="small" themeColor="textMuted">
-            {t('home.goal.progress', {
-              saved: formatMoney(explain.savedBefore),
-              price: formatMoney(explain.price),
-            })}
-          </Text>
-          <Text variant="small" themeColor="textSecondary">
-            {t('savings.remaining', {
-              count: formatMoney(explain.remainingBefore),
-            })}
-          </Text>
-        </View>
-
-        <View style={styles.compareCol}>
-          <Text variant="smallBold">{t('savings.withdrawAfter')}</Text>
-          <ProgressBar value={explain.progressAfter} height={10} />
-          <Text variant="small" themeColor="textMuted">
-            {t('home.goal.progress', {
-              saved: formatMoney(explain.savedAfter),
-              price: formatMoney(explain.price),
-            })}
-          </Text>
-          <Text variant="small" themeColor="textSecondary">
-            {t('savings.remaining', {
-              count: formatMoney(explain.remainingAfter),
-            })}
-          </Text>
-        </View>
+        {columns.map((column) => (
+          <View
+            key={column.key}
+            style={[
+              styles.compareCol,
+              {
+                borderColor: column.isAfter ? theme.warning : theme.border,
+              },
+              column.isAfter && styles.dashed,
+            ]}
+          >
+            <Text variant="small" themeColor="textSecondary">
+              {column.label}
+            </Text>
+            <Text
+              variant="machine"
+              themeColor={column.isAfter ? 'warning' : 'phosphor'}
+              style={styles.bigNumber}
+            >
+              {formatMoney(column.saved)}
+              <Text variant="code" themeColor="textMuted" style={styles.of}>
+                {` /${formatMoney(explain.price)}`}
+              </Text>
+            </Text>
+            <ProgressBar
+              value={column.progress}
+              segmentCount={Math.min(
+                15,
+                Math.max(1, Math.ceil(explain.price / 10)),
+              )}
+              height={8}
+              color={column.isAfter ? 'warning' : 'primary'}
+              trackColor="surfaceSoft"
+            />
+            {column.periods != null ? (
+              <Text variant="small" themeColor="textSecondary">
+                {t('savings.withdrawPeriodsShort', { count: column.periods })}
+              </Text>
+            ) : null}
+          </View>
+        ))}
       </View>
 
-      <Text themeColor="textSecondary">{t('savings.withdrawSoft')}</Text>
+      <Text variant="small" themeColor="textSecondary">
+        {t('savings.withdrawSoft')}
+      </Text>
 
       <View style={styles.actions}>
-        <Button variant="ghost" isFullWidth onPress={backToGoal}>
+        <Button variant="primary" isFullWidth onPress={backToGoal}>
           {t('savings.withdrawKeep')}
         </Button>
         <Button
-          variant="accent"
+          variant="secondary"
+          size="m"
           isFullWidth
           disabled={!withdraw.canConfirm}
           onPress={() => {
             if (withdraw.confirm()) backToGoal();
           }}
         >
-          {t('savings.withdrawConfirm')}
+          {t('savings.withdrawTake', { count: formatMoney(explain.amount) })}
         </Button>
       </View>
     </Screen>
@@ -188,15 +203,22 @@ export const WithdrawRouteScreen = ({
 const styles = StyleSheet.create({
   actions: {
     gap: SPACING.two,
+    marginTop: SPACING.one,
   },
+  bigNumber: { fontSize: 25, lineHeight: 32 },
   compare: {
     flexDirection: 'row',
-    gap: SPACING.three,
-  },
-  compareCol: {
-    flex: 1,
     gap: SPACING.two,
   },
+  compareCol: {
+    borderRadius: RADII.m,
+    borderWidth: 2,
+    flex: 1,
+    gap: SPACING.two,
+    padding: SPACING.compact,
+  },
+  dashed: { borderStyle: 'dashed' },
+  of: { fontSize: 14 },
 });
 
 export type { WithdrawScreenProps };

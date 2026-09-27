@@ -1,77 +1,65 @@
 import { useState } from 'react';
 
-import { Image } from 'expo-image';
 import * as SplashScreen from 'expo-splash-screen';
 import { StyleSheet, View } from 'react-native';
-import Animated, { Easing, Keyframe } from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
+
+import { SPACING } from '@/shared/constants';
+import { useTheme } from '@/shared/hooks';
+import { useTranslation } from '@/shared/i18n';
+
+import { RingsBackdrop } from './rings-backdrop';
+import { TerminalPanel } from './terminal-panel';
+import { Text } from './text';
 
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-const DURATION = 600;
+/** Five cells, three lit: a boot scale with no percentages (screen 01). */
+const BOOT_CELLS = [true, true, true, false, false];
 
 // ═══════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════
 
+/** The terminal switching on over the pit — the first look at the style. */
 export const SplashOverlay = () => {
-  const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-
+  const theme = useTheme();
+  const { t } = useTranslation();
   if (!isVisible) return null;
-
-  const splashKeyframe = new Keyframe({
-    0: {
-      opacity: 1,
-      transform: [{ scale: 1 }],
-    },
-    20: {
-      opacity: 1,
-    },
-    70: {
-      easing: Easing.elastic(0.7),
-      opacity: 0,
-    },
-    100: {
-      easing: Easing.elastic(0.7),
-      opacity: 0,
-      transform: [{ scale: 1 }],
-    },
-  });
-
-  const image = (
-    <Image
-      style={styles.image}
-      source={require('@/assets/images/expo-logo.png')}
-    />
-  );
-
-  return isAnimating ? (
-    <Animated.View
-      entering={splashKeyframe.duration(DURATION).withCallback((finished) => {
-        'worklet';
-        if (finished) {
-          scheduleOnRN(setIsVisible, false);
-        }
-      })}
-      style={styles.root}
-    >
-      {image}
-    </Animated.View>
-  ) : (
+  return (
     <View
       onLayout={() => {
-        SplashScreen.hideAsync()
+        void SplashScreen.hideAsync()
           .catch(() => {})
-          .finally(() => {
-            setIsAnimating(true);
-          });
+          .finally(() => setIsVisible(false));
       }}
       style={styles.root}
     >
-      {image}
+      <RingsBackdrop centerY={0.5} />
+      <TerminalPanel frameStyle={styles.frame} style={styles.screen}>
+        <Text variant="display" style={styles.title}>
+          {t('app.name')}
+        </Text>
+        <Text variant="machine">{`> ${t('app.booting')}`}</Text>
+        <View style={styles.cells}>
+          {BOOT_CELLS.map((isLit, index) => (
+            <View
+              key={index}
+              style={[
+                styles.cell,
+                {
+                  backgroundColor: isLit ? theme.phosphor : theme.surfaceSoft,
+                },
+              ]}
+            />
+          ))}
+        </View>
+      </TerminalPanel>
+      <Text variant="code" themeColor="textDisabled" style={styles.offline}>
+        {t('app.offline')}
+      </Text>
     </View>
   );
 };
@@ -81,15 +69,20 @@ export const SplashOverlay = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
+  cell: { height: 10, width: 18 },
+  cells: { flexDirection: 'row', gap: 3 },
+  frame: { width: 300 },
+  offline: { bottom: SPACING.six, fontSize: 12, position: 'absolute' },
   root: {
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
-    backgroundColor: '#208AEF',
     justifyContent: 'center',
     zIndex: 1000,
   },
-  image: {
-    height: 71,
-    width: 76,
+  screen: {
+    alignItems: 'center',
+    gap: SPACING.compact,
+    paddingVertical: SPACING.six,
   },
+  title: { fontSize: 38, lineHeight: 44 },
 });

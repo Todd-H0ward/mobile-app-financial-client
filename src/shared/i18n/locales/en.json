@@ -13,11 +13,11 @@
     "english": "English",
     "interface": "Interface",
     "animations": "Animations",
-    "animationsSubtitle": "Smooth transitions and robot movement. Honours system Reduce Motion",
+    "animationsSubtitle": "Scene and sheet motion",
     "sound": "Sound",
-    "soundSubtitle": "Haptics and future audio — one switch for both",
-    "glass": "Liquid glass",
-    "glassSubtitle": "Frosted cards and sheets. Off keeps solid surfaces. Honours Reduce Transparency",
+    "soundSubtitle": "Clicks and AI voices",
+    "glass": "Lines on screens",
+    "glassSubtitle": "Like an old monitor. Off together with animation.",
     "development": "Development",
     "cameraRig": "Camera rig",
     "cameraRigSubtitle": "Sliders for framing the arena — paste values into camera.ts",
@@ -32,7 +32,7 @@
     "glossaryDescription": "Short explanations of the game words.",
     "parents": "Grown-ups",
     "parentsDescription": "A report on the child's decisions, demo mode and profile management. Entry through a multiplication.",
-    "openParents": "Open the section",
+    "openParents": "For grown-ups",
     "robot": "Robot dog",
     "robotSkin": "Robot dog coat",
     "petSkinSubtitle": "Looks only — it changes nothing in the game",
@@ -53,7 +53,10 @@
       "walk": "Walk",
       "joy": "Joy",
       "sad": "Sad"
-    }
+    },
+    "label": "settings",
+    "appearance": "Names and look",
+    "appearanceSubtitle": "Repaint Bolt or give a new name"
   },
   "demoMode": {
     "title": "Demo mode",
@@ -82,7 +85,11 @@
     "modalWarning": "It cannot be restored — the game will start from scratch.",
     "keepAsIs": "Keep as is",
     "confirm": "Delete and restart",
-    "toastDeleted": "Profile deleted — the game starts again"
+    "toastDeleted": "Profile deleted — the game starts again",
+    "label": "irreversible",
+    "hold": "Hold for 2 seconds",
+    "holding": "keep holding…",
+    "cancel": "Cancel"
   },
   "home": {
     "settingsA11y": "Settings",
@@ -97,11 +104,26 @@
       "allDone": "Every chore this period is done — well done"
     },
     "planBannerAction": "Make a plan",
-    "endBannerAction": "End day",
+    "endBannerAction": "Finish the period",
     "hud": {
-      "liquid": "on hand {{count}}",
-      "jar": "jar {{count}}",
-      "lastCredit": "+{{amount}} · {{reason}}"
+      "plan": "Plan",
+      "trials": "Trials",
+      "shop": "Workshop",
+      "jar": "Savings",
+      "balance": "Balance: {{count}} coins",
+      "saved": "Saved: {{count}} coins",
+      "charge": "Charge",
+      "tier": "tier {{level}} / {{total}}",
+      "finished": "exit open",
+      "remaining": "{{count}} to lift",
+      "planFirst": "Make a plan before spending",
+      "planCardLabel": "period {{index}} · start",
+      "planCardTitle": "Make a budget plan",
+      "planCardBody": "First we decide where the coins go.",
+      "planCardAction": "Make a plan",
+      "activeTrial": "active trial",
+      "trialMeta": "{{theme}} · up to +{{count}}",
+      "trialOpenA11y": "Open the trial “{{title}}”"
     }
   },
   "parents": {
@@ -114,11 +136,20 @@
       "prompt": "Type the answer in digits",
       "miss": "not that one — the sum refreshed, try again",
       "note": "A barrier against wandering in, not account security: there is no data about the child here and nothing is ever sent anywhere.",
-      "bootAccess": "service access: grown-ups section"
+      "bootAccess": "service access: grown-ups section",
+      "access": "service access",
+      "lead": "A short sum first",
+      "label": "service access",
+      "heading": "For grown-ups",
+      "leadKeypad": "Solve the sum to enter. It stops a stray tap, it is not a password.",
+      "hold": "or hold for 3 seconds",
+      "holding": "keep holding…",
+      "erase": "Erase",
+      "ok": "Check the answer"
     },
     "report": {
       "earningsTitle": "Coins by period",
-      "earningsNote": "Left to right, from the first period to the current one. Green came in, orange went out.",
+      "earningsNote": "Left to right, from the first period to the current one. Filled came in, outlined went out.",
       "earned": "In",
       "spent": "Out",
       "periodA11y": "Period {{period}}: {{earned}} in, {{spent}} out",
@@ -141,21 +172,39 @@
       }
     },
     "terminal": {
-      "label": "FINNI · SERVICE TERMINAL",
+      "label": "ABOVE ZERO · SERVICE TERMINAL",
       "statusTitle": "game status",
       "player": "player",
       "robot": "robot",
       "period": "period",
       "finished": "periods finished",
       "tasks": "tasks done",
-      "purposeTitle": "what the game teaches",
+      "purposeTitle": "What the game teaches",
       "purpose": {
-        "plan": "plan a budget before spending",
-        "priority": "tell needs from wants",
-        "save": "save towards a goal and watch it grow"
+        "plan": "Decide where money goes before spending.",
+        "priority": "Charge every period, modules when wanted.",
+        "save": "Put aside and wait."
       },
-      "role": "A grown-up supports and talks it through, but does not decide for the child."
-    }
+      "role": "A grown-up supports and talks it through, but does not decide for the child.",
+      "tileFinished": "periods done",
+      "tileTasks": "trials",
+      "tilePeriod": "current period",
+      "purposeLead": {
+        "plan": "Plan.",
+        "priority": "Tell needs apart.",
+        "save": "Save for a goal."
+      },
+      "team": "{{robot}} and {{player}}"
+    },
+    "service": "ABOVE ZERO · FOR GROWN-UPS",
+    "sections": {
+      "overview": "Overview",
+      "topics": "Topics",
+      "manage": "Manage"
+    },
+    "discuss": "Talk together: “What did you buy first when you had few coins? Why?”",
+    "privacy": "We do not grade or compare children. All data stays on this device.",
+    "profileLabel": "profile data"
   },
   "scene": {
     "level": "Level {{level}} of {{total}}",
@@ -188,7 +237,7 @@
     "source": {
       "startingWallet": "starting wallet",
       "regularityBonus": "regularity bonus",
-      "task": "chore «{{title}}»",
+      "task": "trial “{{title}}”",
       "purchase": "bought {{title}}",
       "savingsDeposit": "saved into «{{title}}»",
       "savingsWithdraw": "took from «{{title}}»",
@@ -315,48 +364,19 @@
         "The remainder stays on screen — the plan cannot go below zero.",
         "When you press Confirm, the period goes live and you can spend."
       ]
-    }
-  },
-  "budgetPlan": {
-    "title": "Budget plan",
-    "available": "Available this period: {{count}}",
-    "remainder": "Left to allocate: {{count}}",
-    "remainderHint": "You do not have to allocate every coin — the remainder carries into the next period.",
-    "brokeHint": "The wallet is empty — earn on chores first, then open the plan again.",
-    "progressA11y": "Plan laid out: {{percent}} percent",
-    "confirm": "Confirm plan",
-    "confirmBroke": "Start the day and earn",
-    "stepperMinusA11y": "Remove coin: {{label}}",
-    "stepperPlusA11y": "Add coin: {{label}}",
-    "needsZeroTitle": "Nothing set aside for needs",
-    "needsZeroBody": "There will be nothing to buy food and other needs with. Confirm the plan anyway?",
-    "needsZeroKeep": "Back to the plan",
-    "needsZeroConfirm": "Confirm anyway",
-    "directions": {
-      "needs": {
-        "title": "Needs",
-        "example": "Food, soap"
-      },
-      "wants": {
-        "title": "Wants",
-        "example": "Toy car, stickers"
-      },
-      "savings": {
-        "title": "Savings",
-        "example": "Saving for a scooter"
-      }
-    }
+    },
+    "label": "hint"
   },
   "periodSummary": {
     "title": "Period {{period}} — totals",
     "subtitle": "Plan next to fact",
     "plan": "Plan",
     "fact": "Fact",
-    "onPlan": "on plan",
-    "over": "+{{count}} over plan",
-    "under": "−{{count}} under plan",
+    "onPlan": "as planned",
+    "over": "+{{count}} to plan",
+    "under": "−{{count}} to plan",
     "whatHappened": "What happened",
-    "continue": "What you can do next",
+    "continue": "What next",
     "detailTitle": "Where the coins went",
     "earned": "Earned: {{count}}",
     "spentCharge": "Spent on charge: {{count}}",
@@ -391,16 +411,31 @@
       "protectNeeds": "Keep enough for needs before spending on wants",
       "keepHabit": "Keep checking the plan before you spend",
       "checkPlan": "Look at the three boxes again when you make the next plan"
+    },
+    "label": "report · period {{period}}",
+    "heading": "How the period went",
+    "keeperLabel": "keeper",
+    "table": {
+      "earned": "Earned",
+      "charge": "On charge",
+      "modules": "On modules and looks",
+      "saved": "Into the jar",
+      "bonus": "Plan bonus",
+      "penalty": "Slip penalty",
+      "goal": "Goal",
+      "charge2": "Bolt’s charge",
+      "tier": "Tier"
     }
   },
   "endPeriod": {
-    "title": "Period {{period}} — end the day",
+    "title": "Finish and see the results?",
     "subtitle": "Confirm first, then see the totals",
-    "lead": "After this, plan and fact freeze so you can see where the coins went.",
+    "lead": "Plan and fact will freeze, and I will show where the coins went.",
     "warnTitle": "Needs are still under plan",
-    "warnBody": "{{count}} still missing. You can finish anyway — the totals will just show the gap. That is not a failure.",
-    "confirm": "End the day",
-    "cancel": "Not yet"
+    "warnBody": "Charge is {{count}} below the plan so far. You can finish anyway — the results will just show the difference.",
+    "confirm": "Finish the period",
+    "cancel": "Not yet",
+    "label": "end of period {{period}}"
   },
   "shop": {
     "title": "Shop",
@@ -451,15 +486,15 @@
       },
       "module-sensor": {
         "title": "Sensor module",
-        "note": "First module: +10% chore rewards."
+        "note": "Trial rewards increase by 10% while installed. Optional purchase."
       },
       "module-antenna": {
         "title": "Antenna module",
-        "note": "Second module: +1 hint in mini-games."
+        "note": "Trial rewards increase by 5% while installed. Optional purchase."
       },
       "module-core": {
         "title": "Core module",
-        "note": "Third module: +15% rewards and +2 hints."
+        "note": "Trial rewards increase by 15% while installed. Optional purchase."
       },
       "visor-red": {
         "title": "Red visor",
@@ -532,7 +567,33 @@
       "lift": {
         "title": "Next tier"
       }
-    }
+    },
+    "jar": {
+      "label": "jar",
+      "mainGoal": "Main goal",
+      "otherGoal": "Another goal",
+      "goalBadge": "goal",
+      "left": "{{count}} to go",
+      "putLabel": "Put into the jar",
+      "putAction": "Put {{count}}",
+      "putHint": "{{count}} in the wallet",
+      "all": "All: {{count}}",
+      "withdrawLink": "take from the jar",
+      "liftLabel": "jar full · {{saved}} / {{price}}",
+      "liftTitle": "Start the lift?",
+      "liftFrom": "From the jar",
+      "liftLeft": "Left in the jar",
+      "liftRise": "Bolt goes up",
+      "liftTier": "tier {{from}} → {{to}}",
+      "liftNote": "The tier stays for good.",
+      "liftAction": "Start the lift",
+      "liftLater": "not yet",
+      "title": "What are we saving for?"
+    },
+    "withdrawLabel": "cost of the choice",
+    "withdrawQuestion": "Take {{count}} from the jar “{{goal}}”?",
+    "withdrawPeriodsShort": "≈ {{count}} periods",
+    "withdrawTake": "Take {{count}}"
   },
   "tasks": {
     "title": "Tasks",
@@ -553,7 +614,8 @@
     "basket": {
       "budget": "Budget: {{count}}",
       "total": "In the basket: {{count}}",
-      "over": "over budget"
+      "over": "over budget",
+      "inBasket": "In the basket"
     },
     "priority": {
       "hint": "Put needs above wants — use the arrows.",
@@ -564,7 +626,10 @@
     },
     "change": {
       "leadIn": "Price {{price}}, you paid {{paid}}.",
-      "question": "How much change do you get back?"
+      "question": "How much change do you get back?",
+      "price": "price",
+      "paid": "paid",
+      "change": "change"
     },
     "items": {
       "enough-for-all": {
@@ -598,7 +663,21 @@
         "explanation": "Compare prices, not only names."
       }
     },
-    "openGames": "Arcade"
+    "openGames": "Arcade",
+    "themes": {
+      "planning": "planning",
+      "savings": "saving",
+      "payments": "payments"
+    },
+    "doneShort": "done",
+    "filters": {
+      "planning": "Plan",
+      "savings": "Save",
+      "payments": "Pay"
+    },
+    "trialLabel": "trial no. {{index}} · {{theme}}",
+    "reward": "Reward",
+    "rewardUpTo": "up to +{{count}}"
   },
   "history": {
     "title": "History",
@@ -613,7 +692,20 @@
     "planKept": "Stayed on plan",
     "planMissed": "Plan and fact differed",
     "goalsReached": "{{count}} goal(s) reached",
-    "walletPeriod": "Period {{period}}"
+    "walletPeriod": "Period {{period}}",
+    "label": "log",
+    "tabPeriods": "Periods",
+    "tabCoins": "Coins",
+    "tabTrials": "Trials",
+    "emptyLabel": "log empty_",
+    "emptyTitle": "No finished periods yet",
+    "emptyBody": "Finish the first one — the plan will show up next to the fact.",
+    "emptyTrials": "No trials yet. The Overseer is waiting.",
+    "kept": "plan kept",
+    "missed": "drifted",
+    "goals": "Goals reached: {{count}}",
+    "goalsMeta": "period {{period}}",
+    "coinMeta": "period {{period}}"
   },
   "glossary": {
     "title": "Glossary",
@@ -667,13 +759,16 @@
         "title": "Jar withdrawal",
         "definition": "You can take coins back from the jar, but first you see the consequence: the goal moves farther away."
       }
-    }
+    },
+    "label": "glossary",
+    "wordsTitle": "Words of the game",
+    "expandA11y": "Show the explanation"
   },
   "recovery": {
     "title": "Period {{period}} — next steps",
     "subtitle": "Pick one thing for the next period",
     "lead": "Progress stays. These are gentle next steps — not a grade and not a wipe.",
-    "skip": "Continue without picking",
+    "skip": "no choice",
     "options": {
       "saveFirst": {
         "title": "Put coins in the jar first",
@@ -695,7 +790,10 @@
         "title": "Make the next plan carefully",
         "body": "Open planning and lay out needs, wants and the jar again."
       }
-    }
+    },
+    "label": "keeper online",
+    "heading": "One step for the next period",
+    "start": "Start period {{period}}"
   },
   "feedback": {
     "whatChanged": "What changed",
@@ -891,21 +989,21 @@
     "practiceAvailable": "Games are open for practice. No extra coins are paid right now."
   },
   "lesson": {
-    "header": "LESSON {{number}} / 30",
+    "header": "lesson {{number}} / 30",
     "theoryOf": "THEORY {{index}} / {{total}}",
     "questionOf": "QUESTION {{index}} / {{total}}",
-    "next": "NEXT",
-    "toTest": "START THE TEST",
-    "nextQuestion": "NEXT QUESTION",
-    "toResult": "RESULT",
+    "next": "Next",
+    "toTest": "Start the test",
+    "nextQuestion": "Next question",
+    "toResult": "Result",
     "right": "Correct.",
-    "wrong": "Wrong. The answer was: {{answer}}",
+    "wrong": "Almost. The answer was: {{answer}}",
     "resultLabel": "RESULT",
-    "score": "{{correct}} OF {{total}}",
+    "score": "{{correct}} of {{total}}",
     "passedText": "Passed. The cell has sunk — the pit is one step shallower.",
     "failedText": "Not passed. At least {{needed}} must be right. Read it again.",
-    "retry": "TAKE IT AGAIN",
-    "back": "LEAVE"
+    "retry": "Take it again",
+    "back": "leave"
   },
   "setup": {
     "welcome": "Let’s find our way out!",
@@ -944,7 +1042,24 @@
         "2": "Wide stabilisers",
         "title": "Feet"
       }
-    }
+    },
+    "storyLabel": "keeper online",
+    "formLabel": "building the robodog",
+    "boxes": {
+      "needs": {
+        "title": "Charge — needed",
+        "hint": "Without it the dog gets tired"
+      },
+      "wants": {
+        "title": "Modules — wanted",
+        "hint": "Nice, but can wait"
+      },
+      "savings": {
+        "title": "Jar — the goal",
+        "hint": "It pays for the lift"
+      }
+    },
+    "nameHint": "Make up a name. Do not use your real one."
   },
   "story": {
     "skip": "Continue",
@@ -964,7 +1079,10 @@
         "climb": "The last tier is behind. The rim is close.",
         "reunion": "They are together again. The story is not over — more adventures wait."
       }
-    }
+    },
+    "skipLink": "skip",
+    "frame": "frame {{index}} of {{total}}",
+    "next": "Next frame"
   },
   "action": {
     "tasks": "Open chores",
@@ -972,7 +1090,7 @@
     "budget_plan": "Make a plan",
     "shop": "Open workshop",
     "savings": "Open jar",
-    "end_period": "End the day",
+    "end_period": "Finish the period",
     "period_summary": "See totals",
     "history": "Open reports",
     "glossary": "Open glossary"
@@ -994,27 +1112,33 @@
         "arcade": "Overseer mini-games"
       },
       "menu": {
-        "plan": "make a plan",
-        "shop": "workshop",
-        "jar": "savings jar",
-        "report": "totals",
-        "trials": "trials",
-        "arcade": "arcade"
+        "plan": "Make a plan",
+        "shop": "Workshop",
+        "jar": "Jar and goals",
+        "report": "Plan and live report",
+        "trials": "Trials",
+        "arcade": "Mini-games"
       },
       "plan": {
-        "youHave": "you have",
+        "youHave": "You have",
         "coinsForPlan": "coins for this plan",
-        "needs": "charge",
-        "needsHint": "needed every period",
-        "wants": "modules",
-        "wantsHint": "can buy later",
-        "savings": "jar",
-        "savingsHint": "for the next tier",
+        "needs": "Charge",
+        "needsHint": "Needed every period",
+        "wants": "Modules",
+        "wantsHint": "Can buy later",
+        "savings": "Jar",
+        "savingsHint": "For the next tier",
         "remainder": "not allocated yet: {{count}} coins",
-        "save": "save plan",
+        "save": "Save the plan",
         "notPlanning": "The plan is already locked. Come back next period.",
         "minus": "Remove 10",
-        "plus": "Add 10"
+        "plus": "Add 10",
+        "remainderLabel": "Not split yet",
+        "checkLabel": "check the plan",
+        "needsZeroTitle": "Nothing set aside for charge",
+        "needsZeroBody": "Bolt will tire fast and trials will pay less. You can save it this way — it is your choice.",
+        "needsZeroKeep": "Back to the plan",
+        "needsZeroConfirm": "Save anyway"
       },
       "shop": {
         "balance": "wallet: {{count}}",
@@ -1023,13 +1147,54 @@
         "confirm": "Buy “{{item}}” for {{price}}?",
         "buy": "buy",
         "bought": "Bought: {{item}}",
-        "failed": "Purchase failed. Try again."
+        "failed": "Purchase failed. Try again.",
+        "tabNeeds": "Charge",
+        "tabWants": "Modules",
+        "planned": "Planned for {{box}}",
+        "spentOf": "{{fact}} of {{plan}} spent",
+        "boxNeeds": "charge",
+        "boxWants": "modules",
+        "short": "short by {{count}}",
+        "owned": "owned",
+        "category": {
+          "charge": "charge",
+          "module": "module",
+          "cosmetic": "decoration",
+          "toy": "toy"
+        },
+        "kind": {
+          "need": "needed",
+          "want": "wanted"
+        },
+        "gives": "What it gives",
+        "wallet": "Wallet",
+        "box": "Box “{{box}}”",
+        "overPlan": "+{{count}} over the plan",
+        "inPlan": "within the plan",
+        "notNow": "Not now",
+        "buyAction": "Buy",
+        "shortTitle": "{{item}} costs {{price}}, you have {{balance}}",
+        "shortOptions": "What you can do:",
+        "optionTrial": "Take a trial",
+        "optionTrialHint": "the Overseer pays for tasks",
+        "optionJar": "Take from the jar",
+        "optionJarHint": "the goal moves a little further",
+        "optionWait": "Wait",
+        "optionWaitHint": "buy it next period",
+        "close": "close",
+        "planFirstTitle": "Plan first",
+        "planFirstBody": "Spending opens after the plan is confirmed."
       },
       "jar": {
         "empty": "No jar goal selected.",
         "progress": "{{saved}} of {{price}} ({{percent}}%)",
         "remaining": "{{count}} left",
-        "open": "open the jar"
+        "open": "open the jar",
+        "mainGoal": "Main goal",
+        "goalBadge": "goal",
+        "left": "{{count}} to go",
+        "deposit": "Put into the jar",
+        "reached": "goal reached"
       },
       "report": {
         "summaryReady": "Period totals are ready. Read them, then move on.",
@@ -1038,21 +1203,69 @@
         "earned": "earned: {{count}}",
         "charge": "charge: {{fact}} / plan {{plan}}",
         "modules": "modules: {{fact}} / plan {{plan}}",
-        "saved": "jar: {{fact}} / plan {{plan}}",
+        "saved": "saved",
         "wallet": "wallet: {{count}}",
         "jarLeft": "{{count}} left to hit the jar plan",
         "supportBody": "The plan is slipping — that is fine. Fix charge or modules, then we go on.",
-        "openPlan": "open plan",
-        "support": "support"
+        "support": "support",
+        "spent": "spent",
+        "of": "of",
+        "overPlan": "The box is empty. You can still buy, but it goes over the plan.",
+        "recent": "Latest",
+        "endPeriod": "Finish the period",
+        "summary": "See the results",
+        "history": "Period history"
       },
       "trials": {
         "planFirst": "Make a plan with the Keeper first — then trials.",
-        "pick": "Pick a trial. Right and wrong both pay."
+        "pick": "Pick a trial. Right and wrong both pay.",
+        "filterAll": "All · {{count}}",
+        "number": "No. {{index}}",
+        "fresh": "new",
+        "active": "picked",
+        "minigames": "Mini-games · coins for points",
+        "minigamesOpen": "Open the arcade"
       },
       "arcade": {
         "paidLeft": "Paid games today: {{left}} of {{total}}",
         "hint": "After the limit, arcade stays open without coins.",
         "trialsTitle": "Overseer trials"
+      },
+      "leaveLabel": "back to the pit",
+      "pages": {
+        "greetingKeeper": {
+          "label": "keeper online",
+          "title": "How can I help?"
+        },
+        "greetingOverseer": {
+          "label": "overseer online",
+          "title": "Trials are waiting"
+        },
+        "plan": {
+          "label": "keeper · plan",
+          "title": "What do we save for?",
+          "intro": "Charge first. Split the rest between modules and the jar."
+        },
+        "shop": {
+          "label": "workshop",
+          "title": "What shall we buy?"
+        },
+        "jar": {
+          "label": "jar",
+          "title": "What are we saving for?"
+        },
+        "report": {
+          "label": "period {{index}} · running",
+          "title": "How the plan is going"
+        },
+        "trials": {
+          "label": "overseer",
+          "title": "Trials"
+        },
+        "arcade": {
+          "label": "arcade",
+          "title": "Mini-games"
+        }
       }
     },
     "overseer": {
@@ -1108,5 +1321,82 @@
     "backup": "Only you can choose a new game. The original record is copied first for recovery. If copying fails, it remains untouched.",
     "newProfile": "Keep a copy and start again",
     "confirm": "Confirm new game"
+  },
+  "app": {
+    "name": "Above Zero",
+    "booting": "terminal booting",
+    "offline": "no internet · no sign-up"
+  },
+  "boxes": {
+    "needs": "Charge",
+    "wants": "Modules",
+    "savings": "Jar"
+  },
+  "returning": {
+    "label": "profile found",
+    "title": "Welcome back!",
+    "progress": "tier {{level}} of {{total}} · period {{period}}",
+    "saved": "Continue where you left off. Everything is saved on this device.",
+    "continue": "Continue",
+    "newGame": "New game"
+  },
+  "diagnosis": {
+    "label": "diagnostics",
+    "because": "Because {{reason}}",
+    "build": "Assembly",
+    "stage": {
+      "basic": "Basic",
+      "upgraded": "Upgraded",
+      "complete": "Complete"
+    },
+    "inProgress": " — building now",
+    "conditions": {
+      "periods": "Finish periods",
+      "goalsReached": "Reach goals",
+      "plansKept": "Keep plans"
+    },
+    "explanation": "Assembly grows through decisions across several periods, not purchases. Earned stages stay with you.",
+    "workshop": "To the workshop",
+    "open": "Mood and assembly",
+    "status": "{{name}} · {{mood}}"
+  },
+  "finale": {
+    "surface": "Tier {{level}} of {{level}} · on the surface",
+    "label": "surface connection",
+    "title": "{{name}} made it out!",
+    "periods": "periods",
+    "saved": "saved up",
+    "plans": "plans kept",
+    "body": "You saved a little at a time and kept going. That is how you climb out of any pit. Keep playing: goals, periods and history stay with you.",
+    "continue": "Keep playing",
+    "history": "Your journey"
+  },
+  "equipment": {
+    "inventory": "Installed modules",
+    "label": "installation · {{slot}}",
+    "title": "What goes here?",
+    "slots": {
+      "head": "Head",
+      "body": "Body",
+      "legs": "Legs"
+    },
+    "base": "Basic unit",
+    "free": "Always available",
+    "owned": "Already owned",
+    "price": "{{amount}} coins · not owned",
+    "buy": "Open workshop",
+    "install": "Install for free",
+    "remove": "Remove for free",
+    "installed": "Module installed. Your balance is unchanged.",
+    "removed": "Module returned to inventory. Your balance is unchanged.",
+    "baseEffect": "Normal trial rewards. All tasks and help remain available.",
+    "effect": {
+      "head": "The antenna connects to the Keeper. Trial rewards are 5% higher while installed.",
+      "body": "The core helps process tasks. Trial rewards are 15% higher while installed.",
+      "legs": "Foot sensors help complete tasks precisely. Trial rewards are 10% higher while installed."
+    },
+    "example": "“{{task}}”: {{before}} → {{after}} coins for full completion.",
+    "explanation": "These purchases are optional. Owned modules stay in your inventory. Installing and removing them is free and does not change your growth stage.",
+    "purchased": "The module is in your inventory. Fit it in Installed modules to activate the bonus. Your growth stage has not changed."
   }
 }

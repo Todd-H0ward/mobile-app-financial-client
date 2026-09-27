@@ -17,8 +17,7 @@ import type {
   WatcherPageId,
 } from '@/entities/watcher';
 
-import { CONTENT_PADDING, SPACING } from '@/shared/constants';
-import { useTranslation } from '@/shared/i18n';
+import { MAX_CONTENT_WIDTH, SPACING } from '@/shared/constants';
 import { useMotionEnabled } from '@/shared/model';
 
 import { useWatcherSession } from '../model';
@@ -30,7 +29,7 @@ import { PlanPage } from './pages/plan-page';
 import { ReportPage } from './pages/report-page';
 import { ShopPage } from './pages/shop-page';
 import { TrialsPage } from './pages/trials-page';
-import { TerminalShell } from './terminal-shell';
+import type { TerminalFrame } from './terminal-shell';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -48,26 +47,19 @@ interface WatcherTerminalProps {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** Greeting dock — face stays visible above. */
-const COLLAPSED_HEIGHT_RATIO = 0.42;
-const COLLAPSED_MAX_HEIGHT = 420;
-/** How long the CRT grows / shrinks. */
-const EXPAND_MS = 340;
-
-// ═══════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════
-
-const subtitleFor = (
-  watcher: WatcherId,
-  page: WatcherPageId,
-  t: (key: string) => string,
-): string => {
-  if (page === 'greeting') {
-    return t(`watcher.terminal.subtitle.${watcher}`);
-  }
-  return t(`watcher.terminal.subtitle.${page}`);
-};
+/**
+ * The greeting is a dialogue: the panel never climbs above this share of the
+ * window, so the watcher's face stays in view above its line.
+ */
+const DIALOGUE_MAX_SHARE = 0.56;
+/**
+ * A page (plan, shop, …) is a form and may rise nearly to the
+ * top — the status board hides during a talk — so nothing is hidden.
+ */
+const PAGE_TOP_CLEARANCE = 48;
+/** How far the panel rises from as it appears. */
+const ENTER_OFFSET = 48;
+const ENTER_MS = 280;
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
@@ -76,9 +68,9 @@ const subtitleFor = (
 /**
  * CRT panel under the focused AI face.
  *
- * Greeting sits in the lower band so the face stays visible. Opening plan /
- * shop / trials grows the panel to fill the screen; back to greeting shrinks
- * it again.
+ * Docked to the bottom edge and sized by its content. The greeting is a
+ * dialogue kept under the face; a page may rise to the status board so the
+ * whole form fits.
  */
 export const WatcherTerminal = ({
   watcher,
@@ -86,49 +78,43 @@ export const WatcherTerminal = ({
   initialPage = 'greeting',
   onLeave,
 }: WatcherTerminalProps) => {
-  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { height: windowHeight } = useWindowDimensions();
+  const {
+    height: windowHeight,
+    width: windowWidth,
+    fontScale,
+  } = useWindowDimensions();
   const isMotionEnabled = useMotionEnabled();
   const session = useWatcherSession(initialPage);
-  const isExpanded = session.page !== 'greeting';
+  const isDialogue = session.page === 'greeting';
 
-  const collapsedHeight = Math.min(
-    windowHeight * COLLAPSED_HEIGHT_RATIO,
-    COLLAPSED_MAX_HEIGHT,
+  const pageMaxHeight =
+    windowHeight - insets.top - PAGE_TOP_CLEARANCE - insets.bottom;
+  const maxHeight = isDialogue
+    ? Math.min(
+        pageMaxHeight,
+        windowHeight * (fontScale > 1.3 ? 0.72 : DIALOGUE_MAX_SHARE),
+      )
+    : pageMaxHeight;
+  const side = Math.max(
+    SPACING.two,
+    (windowWidth - MAX_CONTENT_WIDTH - SPACING.three) / 2,
   );
-  const expandedTop = insets.top + SPACING.one;
-  const expandedHeight = Math.max(
-    collapsedHeight,
-    windowHeight - expandedTop - SPACING.one,
-  );
-  const collapsedTop = windowHeight - collapsedHeight;
 
-  const expand = useSharedValue(initialPage === 'greeting' ? 0 : 1);
-
+  // Rises from the bottom edge once, as the talk starts.
+  const enter = useSharedValue(0);
   useEffect(() => {
-    expand.value = withTiming(isExpanded ? 1 : 0, {
-      duration: isMotionEnabled ? EXPAND_MS : 0,
+    enter.value = withTiming(1, {
+      duration: isMotionEnabled ? ENTER_MS : 0,
       easing: Easing.out(Easing.cubic),
     });
-  }, [expand, isExpanded, isMotionEnabled]);
+  }, [enter, isMotionEnabled]);
 
-  const dockStyle = useAnimatedStyle(() => {
-    const progress = expand.value;
-    const top = collapsedTop + (expandedTop - collapsedTop) * progress;
-    const height =
-      collapsedHeight + (expandedHeight - collapsedHeight) * progress;
-    const side = CONTENT_PADDING + (SPACING.one - CONTENT_PADDING) * progress;
-    return {
-      top,
-      height,
-      left: side,
-      right: side,
-      paddingBottom: SPACING.two + insets.bottom * (1 - progress * 0.4),
-      paddingTop: SPACING.two,
-    };
-  });
+  const enterStyle = useAnimatedStyle(() => ({
+    opacity: enter.value,
+    transform: [{ translateY: (1 - enter.value) * ENTER_OFFSET }],
+  }));
 
   const handleAction = (action: WatcherDialogAction) => {
     if (action.kind === 'page') {
@@ -138,36 +124,44 @@ export const WatcherTerminal = ({
     router.push(action.route as Href);
   };
 
-  const title = t('watcher.terminal.onAir', {
-    name: t(`scene.watchers.${watcher}.name`),
-  });
+  const frame: TerminalFrame = {
+    watcher,
+    onLeave,
+    onBack: session.page === 'greeting' ? undefined : session.backToGreeting,
+  };
 
-  let body = <GreetingPage line={line} onAction={handleAction} />;
+  let body = <GreetingPage frame={frame} line={line} onAction={handleAction} />;
 
   if (session.page === 'plan') {
-    body = <PlanPage onDone={session.backToGreeting} />;
+    body = <PlanPage frame={frame} onDone={session.backToGreeting} />;
   } else if (session.page === 'shop') {
-    body = <ShopPage onBack={session.backToGreeting} />;
+    body = <ShopPage frame={frame} />;
   } else if (session.page === 'jar') {
-    body = <JarPage onBack={session.backToGreeting} />;
+    body = <JarPage frame={frame} />;
   } else if (session.page === 'report') {
-    body = <ReportPage onBack={session.backToGreeting} />;
+    body = <ReportPage frame={frame} />;
   } else if (session.page === 'trials') {
-    body = <TrialsPage onBack={session.backToGreeting} />;
+    body = <TrialsPage frame={frame} onArcade={() => session.open('arcade')} />;
   } else if (session.page === 'arcade') {
-    body = <ArcadePage onBack={session.backToGreeting} />;
+    body = <ArcadePage frame={frame} />;
   }
 
   return (
-    <Animated.View style={[styles.dock, dockStyle]} pointerEvents="box-none">
-      <TerminalShell
-        watcher={watcher}
-        title={title}
-        subtitle={subtitleFor(watcher, session.page, t)}
-        onLeave={onLeave}
-      >
-        {body}
-      </TerminalShell>
+    <Animated.View
+      style={[
+        styles.root,
+        enterStyle,
+        {
+          left: side,
+          maxHeight: maxHeight + insets.bottom + SPACING.two,
+          paddingBottom: insets.bottom + SPACING.two,
+          right: side,
+        },
+      ]}
+      pointerEvents="box-none"
+      accessibilityViewIsModal
+    >
+      {body}
     </Animated.View>
   );
 };
@@ -177,7 +171,10 @@ export const WatcherTerminal = ({
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  dock: {
+  // Anchored to the bottom edge and as tall as its content — a short line
+  // leaves no empty terminal, a long page scrolls inside it.
+  root: {
+    bottom: 0,
     position: 'absolute',
     zIndex: 3,
   },

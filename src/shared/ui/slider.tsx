@@ -8,7 +8,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 
-import { HIT_SLOP_SIZE, RADII, type ThemeColor } from '@/shared/constants';
+import { HIT_SLOP_SIZE, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 
 import { clamp } from '../utils';
@@ -202,14 +202,14 @@ export const Slider = ({
               : { marginHorizontal: THUMB_SIZE / 2 },
           ]}
         >
-          {(
-            track ?? [theme.primarySoft, theme.surfaceDeep, theme.accentSoft]
-          ).map((segment, index) => (
-            <View
-              key={index}
-              style={[styles.segment, { backgroundColor: segment }]}
-            />
-          ))}
+          {(track ?? [theme.border, theme.borderStrong, theme.primary]).map(
+            (segment, index) => (
+              <View
+                key={index}
+                style={[styles.segment, { backgroundColor: segment }]}
+              />
+            ),
+          )}
         </View>
 
         <Animated.View
@@ -246,13 +246,13 @@ const styles = StyleSheet.create({
     width: HIT_SLOP_SIZE,
   },
   trackRow: {
-    borderRadius: RADII.pill,
+    borderRadius: 3,
     flexDirection: 'row',
     height: TRACK_THICKNESS,
     overflow: 'hidden',
   },
   trackColumn: {
-    borderRadius: RADII.pill,
+    borderRadius: 3,
     flex: 1,
     flexDirection: 'column',
     overflow: 'hidden',
@@ -262,8 +262,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   thumb: {
-    borderRadius: RADII.pill,
-    borderWidth: 4,
+    borderRadius: 3,
+    borderWidth: 2,
     height: THUMB_SIZE,
     position: 'absolute',
     width: THUMB_SIZE,

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { WALLET_SOURCES } from '@/entities/economy';
+import { PLATFORM_GOAL_ID, WALLET_SOURCES } from '@/entities/economy';
 import { type GoalContent, getGoalById } from '@/entities/goal';
 import {
   moodFor,
@@ -11,6 +11,7 @@ import { progressFor } from '@/entities/savings';
 import { getTaskById } from '@/entities/task';
 import {
   type RobotSave,
+  rewardForUserTask,
   type UserSave,
   useHomeHudSource,
   useIsMotionEnabled,
@@ -30,6 +31,8 @@ type Translate = ReturnType<typeof useTranslation>['t'];
 type MoodTone = 'calm' | 'attention';
 
 interface HomeHudRobot {
+  /** The saved name, also visible on the mood badge. */
+  name: string;
   /** Build stage — what the scene will dress the dog in. */
   stage: RobotDogStage;
   /** What a screen reader says — name, mood and why (2.5.10). */
@@ -60,6 +63,14 @@ interface HomeHudCredit {
   reasonLabel: string;
 }
 
+/** The trial the child picked this period — the dock card under the pit. */
+interface HomeHudTrial {
+  id: string;
+  title: string;
+  /** "планирование · до +20", already translated. */
+  meta: string;
+}
+
 interface HomeHud {
   /** The robot's mood and stage. Always there — the dog stands in the pit. */
   robot: HomeHudRobot | null;
@@ -68,9 +79,15 @@ interface HomeHud {
   balance: number;
   /** Coins across every goal, not only the active one. */
   savingsTotal: number;
+  /** Coins still needed in the lift jar; never below zero. */
+  liftRemaining: number;
   goal: HomeHudGoal | null;
   /** The coins that landed most recently — 2.5.4's "источник и сумма", shown. */
   lastCredit: HomeHudCredit | null;
+  /** 1-based period number, for the planning card's machine line. */
+  periodIndex: number;
+  /** Picked and not yet finished; `null` hides the card. */
+  activeTrial: HomeHudTrial | null;
   /** Active chore title on the board — catalogue name once issued. */
   taskTitle: string;
   /** Active chore brief, or an all-done / soon line. */
@@ -139,6 +156,7 @@ const buildRobot = (robot: RobotSave, t: Translate): HomeHudRobot => {
   const name = robot.name || t('robot.unnamed');
 
   return {
+    name,
     moodName: mood.name,
     stage: robot.stage,
     accessibilityLabel: `${name}, ${moodLabel}, ${moodReasonLabel}`,
@@ -220,6 +238,27 @@ const buildTaskHint = (tasks: UserSave['tasks'], t: Translate): string => {
   return t('home.task.comingSoon');
 };
 
+/** The picked trial, unless it is already done this period. */
+const buildActiveTrial = (
+  tasks: UserSave['tasks'],
+  modules: UserSave['modules'],
+  t: Translate,
+): HomeHudTrial | null => {
+  const id = tasks.activeTaskId;
+  if (!id || tasks.completedThisPeriod.includes(id)) return null;
+  const task = getTaskById(id);
+  if (!task) return null;
+
+  return {
+    id,
+    title: t(`tasks.items.${task.id}.title`, { defaultValue: task.title }),
+    meta: t('home.hud.trialMeta', {
+      theme: t(`tasks.themes.${task.theme}`),
+      count: rewardForUserTask({ modules }, task),
+    }),
+  };
+};
+
 /** Active chore title for the board row. */
 const buildTaskTitle = (tasks: UserSave['tasks'], t: Translate): string => {
   if (tasks.activeTaskId) {
@@ -257,8 +296,11 @@ export const useHomeHud = (): HomeHud => {
         isAnimationEnabled: isMotionEnabled,
         balance: 0,
         savingsTotal: 0,
+        liftRemaining: getGoalById(PLATFORM_GOAL_ID)?.price ?? 0,
         goal: null,
         lastCredit: null,
+        periodIndex: 1,
+        activeTrial: null,
         taskTitle: t('home.task.title'),
         taskHint: t('home.task.comingSoon'),
         isPlanning: false,
@@ -277,10 +319,21 @@ export const useHomeHud = (): HomeHud => {
         (total: number, entry: { saved: number }) => total + entry.saved,
         0,
       ),
+      liftRemaining: Math.max(
+        0,
+        (getGoalById(PLATFORM_GOAL_ID)?.price ?? 0) -
+          (source.savings.goals.find((goal) => goal.goalId === PLATFORM_GOAL_ID)
+            ?.saved ?? 0),
+      ),
       goal: activeGoal
         ? buildGoal(activeGoal.content, activeGoal.saved, t)
         : null,
       lastCredit: source.lastEarn ? buildLastCredit(source.lastEarn, t) : null,
+      periodIndex: source.periodIndex,
+      activeTrial:
+        source.phase === 'active'
+          ? buildActiveTrial(source.tasks, source.modules, t)
+          : null,
       taskTitle: buildTaskTitle(source.tasks, t),
       taskHint: buildTaskHint(source.tasks, t),
       isPlanning: source.phase === 'planning',
@@ -290,4 +343,11 @@ export const useHomeHud = (): HomeHud => {
   }, [source, t, isMotionEnabled]);
 };
 
-export type { HomeHud, HomeHudCredit, HomeHudGoal, HomeHudRobot, MoodTone };
+export type {
+  HomeHud,
+  HomeHudCredit,
+  HomeHudGoal,
+  HomeHudRobot,
+  HomeHudTrial,
+  MoodTone,
+};

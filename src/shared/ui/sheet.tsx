@@ -22,23 +22,33 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { RADII, SPACING } from '@/shared/constants';
+import { MAX_CONTENT_WIDTH, RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useMotionEnabled } from '@/shared/model';
 
-import { GlassSurface } from './glass-surface';
 import { Text, type TextProps } from './text';
 
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
 
+/** `warning` is the amber edge of a decision with a cost — never red. */
+type SheetVariant = 'default' | 'warning';
+
 interface SheetRootProps {
   children?: ReactNode;
+  variant?: SheetVariant;
   /** Hides the drag handle for sheets that cannot be dismissed by dragging. */
   isGrabberVisible?: boolean;
   style?: StyleProp<ViewStyle>;
+}
+
+interface SheetLabelProps {
+  /** Machine line over the title — "подтверди", "не хватает 20". */
+  children: string;
+  variant?: SheetVariant;
 }
 
 type SheetTitleProps = TextProps;
@@ -52,6 +62,7 @@ interface SheetActionsProps {
 
 interface SheetModalProps {
   children?: ReactNode;
+  variant?: SheetVariant;
   isVisible: boolean;
   onClose: () => void;
   /** Disables the drag handle and the tap-outside dismissal. */
@@ -78,9 +89,20 @@ const DISMISS_VELOCITY = 900;
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-const SheetTitle = ({ children, ...props }: SheetTitleProps) => {
+const SheetLabel = ({ children, variant = 'default' }: SheetLabelProps) => {
   return (
-    <Text variant="subtitle" style={styles.centered} {...props}>
+    <Text
+      variant="machine"
+      themeColor={variant === 'warning' ? 'warning' : 'phosphor'}
+    >
+      {variant === 'warning' ? `! ${children}` : `> ${children}`}
+    </Text>
+  );
+};
+
+const SheetTitle = ({ children, style, ...props }: SheetTitleProps) => {
+  return (
+    <Text variant="title" style={[styles.title, style]} {...props}>
       {children}
     </Text>
   );
@@ -88,7 +110,7 @@ const SheetTitle = ({ children, ...props }: SheetTitleProps) => {
 
 const SheetDescription = ({ children, ...props }: SheetDescriptionProps) => {
   return (
-    <Text themeColor="textSecondary" style={styles.centered} {...props}>
+    <Text variant="body" themeColor="textSecondary" {...props}>
       {children}
     </Text>
   );
@@ -101,21 +123,31 @@ const SheetActions = ({ children, style }: SheetActionsProps) => {
 
 const SheetRoot = ({
   children,
+  variant = 'default',
   isGrabberVisible = true,
   style,
 }: SheetRootProps) => {
   const theme = useTheme();
 
   return (
-    <GlassSurface tone="surface" style={[styles.root, style]}>
+    <View
+      style={[
+        styles.root,
+        {
+          backgroundColor: theme.surface,
+          borderColor: variant === 'warning' ? theme.warning : theme.primary,
+        },
+        style,
+      ]}
+    >
       {isGrabberVisible && (
         <View
-          style={[styles.grabber, { backgroundColor: theme.surfaceDeep }]}
+          style={[styles.grabber, { backgroundColor: theme.borderStrong }]}
         />
       )}
 
       {children}
-    </GlassSurface>
+    </View>
   );
 };
 
@@ -132,11 +164,13 @@ const SheetModal = ({
   onClose,
   isDismissible = true,
   isAnimated = true,
+  variant = 'default',
   style,
 }: SheetModalProps) => {
   const theme = useTheme();
   const isMotionEnabled = useMotionEnabled();
   const { height: windowHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const offset = useSharedValue(windowHeight);
   const sheetHeight = useSharedValue(windowHeight);
   const screenHeight = useSharedValue(windowHeight);
@@ -228,14 +262,22 @@ const SheetModal = ({
           }}
           style={[styles.sheetSlot, sheetStyle]}
         >
-          <SheetRoot isGrabberVisible={false} style={style}>
+          <SheetRoot
+            variant={variant}
+            isGrabberVisible={false}
+            style={[
+              styles.attached,
+              { paddingBottom: Math.max(insets.bottom, SPACING.three) },
+              style,
+            ]}
+          >
             {isDismissible && (
               <GestureDetector gesture={dragGesture}>
                 <View style={styles.grabberArea}>
                   <View
                     style={[
                       styles.grabber,
-                      { backgroundColor: theme.surfaceDeep },
+                      { backgroundColor: theme.borderStrong },
                     ]}
                   />
                 </View>
@@ -255,6 +297,7 @@ const SheetModal = ({
 // ═══════════════════════════════════════════
 
 export const Sheet = Object.assign(SheetRoot, {
+  Label: SheetLabel,
   Title: SheetTitle,
   Description: SheetDescription,
   Actions: SheetActions,
@@ -266,16 +309,30 @@ export const Sheet = Object.assign(SheetRoot, {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
+  actions: {
+    gap: SPACING.two,
+  },
+  // Pinned to the bottom edge: only the top carries the lamp-coloured rule.
+  attached: {
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    borderBottomWidth: 0,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
+  },
   root: {
-    borderRadius: RADII.xxl,
-    gap: SPACING.three,
-    padding: SPACING.four,
+    borderRadius: RADII.xl,
+    borderWidth: 2,
+    gap: SPACING.compact,
+    paddingBottom: SPACING.three,
+    paddingHorizontal: SPACING.three,
+    paddingTop: 10,
   },
   grabber: {
     alignSelf: 'center',
     borderRadius: RADII.pill,
-    height: 5,
-    width: 36,
+    height: 4,
+    width: 40,
   },
   grabberArea: {
     alignItems: 'center',
@@ -294,20 +351,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sheetSlot: {
-    padding: SPACING.two,
+    alignSelf: 'center',
+    maxWidth: MAX_CONTENT_WIDTH,
+    width: '100%',
   },
-  centered: {
-    textAlign: 'center',
-  },
-  actions: {
-    gap: SPACING.two,
-  },
+  title: { fontSize: 20, lineHeight: 25 },
 });
 
 export type {
   SheetActionsProps,
   SheetDescriptionProps,
+  SheetLabelProps,
   SheetModalProps,
   SheetRootProps,
   SheetTitleProps,
+  SheetVariant,
 };

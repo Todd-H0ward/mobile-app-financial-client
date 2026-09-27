@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { Redirect, useRouter } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
@@ -8,6 +9,7 @@ import {
   type BasketPayload,
   type ChangePayload,
   type DialogPayload,
+  listTasks,
   type PriorityPayload,
   type QuizPayload,
   scoreBasket,
@@ -17,9 +19,16 @@ import {
   scoreQuiz,
 } from '@/entities/task';
 
-import { STATIC_ROUTES } from '@/shared/constants';
+import { DYNAMIC_ROUTES, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { Button, Screen, Sheet, Text } from '@/shared/ui';
+import {
+  Button,
+  ChamferCard,
+  PixelIcon,
+  Screen,
+  Sheet,
+  Text,
+} from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
 import { useTaskPlay } from '../model';
@@ -77,10 +86,11 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
   const [choiceId, setChoiceId] = useState<string | null>(null);
 
   if (!play) {
-    return <Redirect href={STATIC_ROUTES.TASKS} />;
+    return <Redirect href={DYNAMIC_ROUTES.watcher('overseer', 'trials')} />;
   }
 
   const { task } = play;
+  const taskIndex = listTasks().findIndex((row) => row.id === task.id) + 1;
   const title = t(`tasks.items.${task.id}.title`, { defaultValue: task.title });
   const brief = t(`tasks.items.${task.id}.brief`, { defaultValue: task.brief });
 
@@ -133,24 +143,51 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
     }
 
     if (didComplete) {
-      router.replace(STATIC_ROUTES.TASKS);
+      // Back to wherever the trial was picked — the Overseer's list or the
+      // pit's dock — so the debrief sheet opens over familiar ground.
+      if (router.canGoBack()) router.back();
+      else router.dismissTo(STATIC_ROUTES.HOME);
     }
   };
 
   return (
-    <Screen gap="three">
+    <Screen presentation="sheet" gap="three" terminalVariant="overseer">
       <Screen.Header>
-        <Screen.Back />
         <Screen.Heading>
-          <Screen.Title>{title}</Screen.Title>
-          <Screen.Subtitle>{brief}</Screen.Subtitle>
+          <Text
+            variant="machine"
+            themeColor="overseerLcd"
+            style={styles.overseerLabel}
+          >
+            {`// ${t('tasks.trialLabel', {
+              index: taskIndex,
+              theme: t(`tasks.filters.${task.theme}`),
+            }).toLocaleUpperCase()}`}
+          </Text>
         </Screen.Heading>
         <HintButton screen="tasks" />
+        <Button
+          variant="icon"
+          accessibilityLabel={t('common.close')}
+          onPress={() => {
+            if (router.canGoBack()) router.back();
+            else router.dismissTo(STATIC_ROUTES.HOME);
+          }}
+        >
+          <PixelIcon name="close" />
+        </Button>
       </Screen.Header>
 
-      <Text themeColor="textSecondary">
-        {t('tasks.rewardHint', { count: formatMoney(play.reward) })}
-      </Text>
+      <ChamferCard
+        variant="topRight"
+        fillTone="overseerSurface"
+        style={styles.brief}
+      >
+        <Text variant="title" style={styles.briefTitle}>
+          {title}
+        </Text>
+        <Text>{brief}</Text>
+      </ChamferCard>
 
       {!play.canPlay && (
         <Text themeColor="textSecondary">
@@ -205,6 +242,18 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
         />
       )}
 
+      <View style={styles.reward}>
+        <Text variant="small" themeColor="textSecondary">
+          {t('tasks.reward')}
+        </Text>
+        <View style={styles.rewardValue}>
+          <Text variant="machine">
+            {t('tasks.rewardUpTo', { count: formatMoney(play.reward) })}
+          </Text>
+          <PixelIcon name="coin" tone="coin" />
+        </View>
+      </View>
+
       <Button
         variant="primary"
         size="l"
@@ -230,7 +279,7 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
             isFullWidth
             onPress={() => {
               play.dismissSheet();
-              router.push(STATIC_ROUTES.BUDGET_PLAN);
+              router.dismissTo(DYNAMIC_ROUTES.watcher('keeper', 'plan'));
             }}
           >
             {t('tasks.goPlan')}
@@ -243,10 +292,26 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
 
 export const TaskRouteScreen = ({ taskId }: { taskId: string }) => {
   if (!taskId) {
-    return <Redirect href={STATIC_ROUTES.TASKS} />;
+    return <Redirect href={DYNAMIC_ROUTES.watcher('overseer', 'trials')} />;
   }
 
   return <TaskScreen taskId={taskId} />;
 };
+
+// ═══════════════════════════════════════════
+// STYLES
+// ═══════════════════════════════════════════
+
+const styles = StyleSheet.create({
+  brief: { gap: SPACING.one, paddingHorizontal: 14, paddingVertical: 14 },
+  briefTitle: { fontSize: 20, lineHeight: 25 },
+  overseerLabel: { letterSpacing: 1 },
+  reward: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  rewardValue: { alignItems: 'center', flexDirection: 'row', gap: 6 },
+});
 
 export type { TaskScreenProps };

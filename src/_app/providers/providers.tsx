@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 
+import { useFonts } from 'expo-font';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -63,6 +64,16 @@ const AccessibilityBridge = ({ children }: { children: ReactNode }) => {
  */
 export const Providers = ({ children }: ProvidersProps) => {
   useAppLanguage();
+  const [areFontsLoaded, fontError] = useFonts({
+    GolosText: require('@/assets/fonts/GolosText-400.ttf'),
+    'GolosText-Semibold': require('@/assets/fonts/GolosText-600.ttf'),
+    'GolosText-Bold': require('@/assets/fonts/GolosText-700.ttf'),
+    MartianMono: require('@/assets/fonts/MartianMono-400.ttf'),
+    'MartianMono-Semibold': require('@/assets/fonts/MartianMono-600.ttf'),
+  });
+
+  // Keep the native splash until local fonts are ready; a load error must not trap startup.
+  if (!areFontsLoaded && !fontError) return null;
 
   return (
     <GestureHandlerRootView style={styles.root}>

@@ -28,7 +28,7 @@ const withPurchasedModule = (
 
   const owned = [...modules.owned, item.ownedId];
   const tier = Math.min(3, owned.length) as ModulesSave['tier'];
-  return { owned, tier };
+  return { ...modules, owned, tier };
 };
 
 // ═══════════════════════════════════════════
@@ -47,7 +47,11 @@ interface PurchaseOk {
 
 interface PurchaseFail {
   ok: false;
-  reason: 'insufficient_funds' | 'wrong_phase' | 'unknown_item';
+  reason:
+    | 'insufficient_funds'
+    | 'wrong_phase'
+    | 'unknown_item'
+    | 'already_owned';
   /** Present when the wallet refused. */
   shortfall?: number;
   price?: number;
@@ -80,6 +84,10 @@ export const applyPurchase = (
   const item = getCatalogueItem(itemId);
   if (!item) {
     return { ok: false, reason: 'unknown_item' };
+  }
+
+  if (item.ownedId && user.ownedItemIds.includes(item.ownedId)) {
+    return { ok: false, reason: 'already_owned', item };
   }
 
   const price = item.price;

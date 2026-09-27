@@ -1,16 +1,13 @@
 export const STATIC_ROUTES = {
   ENTRY: '/',
   HOME: '/home',
-  BUDGET_PLAN: '/budget-plan',
+  MODULES: '/modules',
   END_PERIOD: '/end-period',
   PERIOD_SUMMARY: '/period-summary',
   RECOVERY: '/recovery',
-  /** Deep-link alias — redirects into the Keeper terminal shop page. */
-  SHOP: '/shop',
   GAMES_MARKET: '/games/market',
   GAMES_WEEKLY: '/games/weekly',
   SAVINGS: '/savings',
-  TASKS: '/tasks',
   GAMES: '/games',
   GAMES_CONSOLE: '/games/console',
   GAMES_SPACEWAR: '/games/spacewar',
@@ -26,7 +23,6 @@ export const STATIC_ROUTES = {
 export type RoutePath = (typeof STATIC_ROUTES)[keyof typeof STATIC_ROUTES];
 
 export const DYNAMIC_ROUTES = {
-  shop: (shopId: string) => `${STATIC_ROUTES.SHOP}/${shopId}` as const,
   /** Opens home focused on a watcher terminal page. */
   watcher: (watcher: 'keeper' | 'overseer', page?: string) =>
     ({
@@ -69,3 +65,30 @@ export const DYNAMIC_ROUTES = {
       params: { gameId },
     }) as const,
 };
+
+/**
+ * Routes shown as a terminal sheet over the live pit (`transparentModal`).
+ * Names are expo-router file routes; `isSheetPath` matches their URLs.
+ */
+export const SHEET_ROUTE_NAMES = [
+  'settings',
+  'history',
+  'glossary',
+  'modules',
+  'end-period',
+  'savings/index',
+  'savings/[goalId]',
+  'savings/withdraw',
+  'tasks/[taskId]',
+] as const;
+
+const SHEET_PATH_PATTERNS = SHEET_ROUTE_NAMES.map(
+  (name) =>
+    new RegExp(
+      `^/${name.replace(/\/index$/, '').replace(/\[[^\]]+\]/g, '[^/]+')}$`,
+    ),
+);
+
+/** Whether a pathname is one of the sheets — the arena stays in view. */
+export const isSheetPath = (pathname: string): boolean =>
+  SHEET_PATH_PATTERNS.some((pattern) => pattern.test(pathname));

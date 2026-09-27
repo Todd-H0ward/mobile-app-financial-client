@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { GAME_REWARDS, payoutFor, WRONG_ROUND_SHARE } from './payout';
+import {
+  GAME_REWARDS,
+  isPlaykitGameId,
+  PLAYKIT_GAME_IDS,
+  payoutFor,
+  WRONG_ROUND_SHARE,
+} from './payout';
 
 describe('payoutFor', () => {
   it('pays the full reward on a correct sitting', () => {
@@ -22,5 +28,13 @@ describe('payoutFor', () => {
     );
     expect(coins).toBeGreaterThan(0);
     expect(payoutFor({ gameId: 'snake', isCorrect: false })).toBeGreaterThan(0);
+  });
+});
+
+describe('isPlaykitGameId', () => {
+  it('accepts every playkit game and nothing else', () => {
+    for (const id of PLAYKIT_GAME_IDS) expect(isPlaykitGameId(id)).toBe(true);
+    expect(isPlaykitGameId('puzzle')).toBe(false);
+    expect(isPlaykitGameId('')).toBe(false);
   });
 });

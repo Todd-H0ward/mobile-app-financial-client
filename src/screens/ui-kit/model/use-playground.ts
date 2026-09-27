@@ -6,6 +6,8 @@ import { useState } from 'react';
 
 interface Playground {
   /** Drives every `isLoading` on the screen at once. */
+  isTextureEnabled: boolean;
+  setIsTextureEnabled: (isEnabled: boolean) => void;
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
   /** Drives every `isDisabled` / `disabled` on the screen at once. */
@@ -17,7 +19,7 @@ interface Playground {
   /** Live value of the `Slider` section, 0…100. */
   sliderValue: number;
   setSliderValue: (sliderValue: number) => void;
-  /** Feeds `ProgressBar` and `MeterCard` so one drag moves all three. */
+  /** Feeds `ProgressBar` and the sliders, so one drag moves them all. */
   meterValue: number;
   setMeterValue: (meterValue: number) => void;
   /** Text of the `Input` section, so the counter has something to count. */
@@ -34,8 +36,12 @@ interface Playground {
   /** Whether that sheet can be dragged or tapped away. */
   isSheetDismissible: boolean;
   setIsSheetDismissible: (isSheetDismissible: boolean) => void;
-  isCollapsibleOpen: boolean;
-  setIsCollapsibleOpen: (isCollapsibleOpen: boolean) => void;
+  /** Chosen tab of the `Segmented` section — a real switch, not a picture. */
+  segment: 'need' | 'want' | 'save';
+  setSegment: (segment: 'need' | 'want' | 'save') => void;
+  /** Stepper value of the plan row example, in coins, 0…50. */
+  stepperValue: number;
+  setStepperValue: (stepperValue: number) => void;
   /**
    * Bumped to remount `SplashOverlay`, which plays once and then unmounts
    * itself — the only way to watch its animation a second time.
@@ -54,6 +60,7 @@ interface Playground {
  * stays a playground instead of a gallery.
  */
 export const usePlayground = (): Playground => {
+  const [isTextureEnabled, setIsTextureEnabled] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const [isChecked, setIsChecked] = useState(true);
@@ -61,14 +68,17 @@ export const usePlayground = (): Playground => {
   const [meterValue, setMeterValue] = useState(0.62);
   const [inputValue, setInputValue] = useState('');
   const [selectedChip, setSelectedChip] = useState<number | null>(1);
+  const [segment, setSegment] = useState<'need' | 'want' | 'save'>('need');
+  const [stepperValue, setStepperValue] = useState(20);
   const [isRowDone, setIsRowDone] = useState(false);
   const [isRowSelected, setIsRowSelected] = useState(false);
   const [isSheetVisible, setIsSheetVisible] = useState(false);
   const [isSheetDismissible, setIsSheetDismissible] = useState(true);
-  const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
   const [splashRun, setSplashRun] = useState(0);
 
   return {
+    isTextureEnabled,
+    setIsTextureEnabled,
     isLoading,
     setIsLoading,
     isDisabled,
@@ -91,8 +101,10 @@ export const usePlayground = (): Playground => {
     setIsSheetVisible,
     isSheetDismissible,
     setIsSheetDismissible,
-    isCollapsibleOpen,
-    setIsCollapsibleOpen,
+    segment,
+    setSegment,
+    stepperValue,
+    setStepperValue,
     splashRun,
     replaySplash: () => setSplashRun((run) => run + 1),
   };

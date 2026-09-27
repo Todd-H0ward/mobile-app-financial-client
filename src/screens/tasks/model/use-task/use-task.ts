@@ -2,14 +2,10 @@ import { useState } from 'react';
 
 import { useShowFeedback } from '@/features/feedback';
 
-import {
-  getTaskById,
-  listTasks,
-  rewardForTask,
-  type TaskContent,
-} from '@/entities/task';
+import { getTaskById, listTasks, type TaskContent } from '@/entities/task';
 import {
   applyCompleteTask,
+  rewardForUserTask,
   selectTask,
   type UserSave,
   useCommitUser,
@@ -78,7 +74,7 @@ export const useTasksList = (): TasksListController => {
       ? []
       : listTasks().map((task) => ({
           task,
-          reward: rewardForTask(task),
+          reward: user ? rewardForUserTask(user, task) : 0,
           isDone: user.tasks.completedThisPeriod.includes(task.id),
           isActive: user.tasks.activeTaskId === task.id,
         }));
@@ -113,7 +109,7 @@ export const useTaskPlay = (taskId: string): TaskPlayController | null => {
 
   return {
     task,
-    reward: rewardForTask(task),
+    reward: user ? rewardForUserTask(user, task) : 0,
     canPlay,
     isDone,
     sheet,

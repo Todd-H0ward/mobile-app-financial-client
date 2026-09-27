@@ -63,7 +63,7 @@ interface TextProps extends RNTextProps {
 ```
 
 A `type` alias is used only when the props add nothing
-(`type HintRowTitleProps = TextProps;`) or when the shape is not an object —
+(`type SheetTitleProps = TextProps;`) or when the shape is not an object —
 unions, mapped and utility types (`type TextVariant = 'body' | 'title';`).
 
 **Styles** live in one `StyleSheet.create` at the bottom, keys sorted
@@ -81,20 +81,18 @@ see [layout.md](./layout.md).
 **Compound components** for multi-part UI, so markup stays declarative:
 
 ```tsx
-<HintRow>
-  <HintRow.Title>Try editing</HintRow.Title>
-  <HintRow.Hint>
-    <Text variant="code">src/screens/home/ui/home-screen.tsx</Text>
-  </HintRow.Hint>
-</HintRow>
+<ListGroup>
+  <ListGroup.Item title="Звук" trailing={<Switch … />} />
+  <ListGroup.Item icon="clock" title="История" onPress={openHistory} />
+</ListGroup>
 ```
 
-Built with `Object.assign(HintRowRoot, { Title, Hint })` under the
+Built with `Object.assign(ListGroupRoot, { Item })` under the
 `COMPOUND EXPORT` banner.
 
 **Animations** are declared at module scope, not inside the component body — a
 `Keyframe` recreated on every render is a bug (see
-[`shared/ui/animated-icon.tsx`](../src/shared/ui/animated-icon.tsx)).
+[`shared/ui/button.tsx`](../src/shared/ui/button.tsx)).
 
 **Platform code** uses `Platform.select` / `Platform.OS` inline rather than
 `.web.tsx` / `.native.tsx` twins, so a component stays one file.
@@ -126,10 +124,10 @@ Switchable state (`loading`, `disabled`, meter levels) belongs to
 
 ## Current kit
 
-The kit is the «Лапка» design system — components, tokens and the principles
+The kit is «Выше нуля · Терминал 2b» — components, tokens and the principles
 behind them are documented in [design-system.md](./design-system.md), and the
-live gallery is the second tab of the app
-([`src/screens/ui-kit`](../src/screens/ui-kit/)).
+live gallery is the UI-kit screen
+([`src/screens/ui-kit`](../src/screens/ui-kit/), opened from Settings).
 
 Import from the barrel: `import { Button, Text } from '@/shared/ui';`
 
@@ -140,7 +138,10 @@ Import from the barrel: `import { Button, Text } from '@/shared/ui';`
 слоте `trailing` у `Screen.Header` и больше нигде:
 
 ```tsx
-<Screen.Header title="Лапка" trailing={<HintButton screen="home" />} />
+<Screen.Header>
+  <Screen.Heading>…</Screen.Heading>
+  <HintButton screen="savings" />
+</Screen.Header>
 ```
 
 Текста компонент не содержит: он берёт заголовок и абзацы из

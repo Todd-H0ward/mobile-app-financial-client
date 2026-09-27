@@ -1,6 +1,8 @@
 import { useState } from 'react';
 
-import { Pressable, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+
+import { HintButton } from '@/widgets/hint-button';
 
 import { useShowFeedback } from '@/features/feedback';
 
@@ -12,28 +14,52 @@ import {
   remainder,
 } from '@/entities/budget';
 import { BUDGET_DIRECTIONS, type BudgetDirection } from '@/entities/economy';
-import { startPeriod, useUpdateUser, useUser } from '@/entities/user';
+import {
+  startPeriod,
+  useIsMotionEnabled,
+  useUpdateUser,
+  useUser,
+} from '@/entities/user';
 
-import { FONTS, SPACING } from '@/shared/constants';
+import { FONTS, RADII, SPACING } from '@/shared/constants';
+import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { hapticSuccess } from '@/shared/lib';
-import { Text } from '@/shared/ui';
+import {
+  Button,
+  PixelIcon,
+  type PixelIconName,
+  Sheet,
+  Text,
+} from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
 import {
-  TerminalPrompt,
+  TerminalBubble,
+  TerminalCard,
+  type TerminalFrame,
   TerminalRule,
-  TerminalText,
-  useTerminalTones,
+  TerminalShell,
 } from '../terminal-shell';
+
+import { ReportPage } from './report-page';
 
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
 
 interface PlanPageProps {
+  frame: TerminalFrame;
   /** Called after the plan is saved and the period starts. */
   onDone: () => void;
+}
+
+interface DirectionRowProps {
+  direction: BudgetDirection;
+  value: number;
+  isDecreaseDisabled: boolean;
+  isIncreaseDisabled: boolean;
+  onStep: (delta: number) => void;
 }
 
 // ═══════════════════════════════════════════
@@ -44,20 +70,20 @@ const STEP = 10;
 
 const DIRECTION_META: Record<
   BudgetDirection,
-  { index: string; titleKey: string; hintKey: string }
+  { icon: PixelIconName; titleKey: string; hintKey: string }
 > = {
   needs: {
-    index: '01',
+    icon: 'battery',
     titleKey: 'watcher.terminal.plan.needs',
     hintKey: 'watcher.terminal.plan.needsHint',
   },
   wants: {
-    index: '02',
+    icon: 'gear',
     titleKey: 'watcher.terminal.plan.wants',
     hintKey: 'watcher.terminal.plan.wantsHint',
   },
   savings: {
-    index: '03',
+    icon: 'piggy',
     titleKey: 'watcher.terminal.plan.savings',
     hintKey: 'watcher.terminal.plan.savingsHint',
   },
@@ -67,60 +93,69 @@ const DIRECTION_META: Record<
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-const DirectionBlock = ({
+/** UI kit 07 "строка-степпер": sign, name, amount, − and +. */
+const DirectionRow = ({
   direction,
   value,
+  isDecreaseDisabled,
+  isIncreaseDisabled,
   onStep,
-}: {
-  direction: BudgetDirection;
-  value: number;
-  onStep: (delta: number) => void;
-}) => {
+}: DirectionRowProps) => {
   const { t } = useTranslation();
-  const { lcd, lcdDim } = useTerminalTones();
+  const theme = useTheme();
   const meta = DIRECTION_META[direction];
 
   return (
-    <View style={styles.block}>
-      <Text style={[styles.mono, { color: lcd }]}>
-        {`${meta.index} ${t(meta.titleKey)}`}
-      </Text>
-      <Text style={[styles.monoSmall, { color: lcdDim }]}>
-        {t(meta.hintKey)}
-      </Text>
-      <Text style={[styles.value, { color: lcd, borderBottomColor: lcd }]}>
+    <TerminalCard style={styles.row}>
+      <View style={[styles.iconBox, { backgroundColor: theme.surfaceSoft }]}>
+        <PixelIcon name={meta.icon} />
+      </View>
+      <View style={styles.rowCopy}>
+        <Text variant="bodyBold" style={styles.rowTitle}>
+          {t(meta.titleKey)}
+        </Text>
+        <Text variant="small" themeColor="textMuted">
+          {t(meta.hintKey)}
+        </Text>
+      </View>
+      <Text
+        variant="machine"
+        style={styles.value}
+        accessibilityLiveRegion="polite"
+      >
         {formatMoney(value)}
       </Text>
-      <View style={styles.stepRow}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('watcher.terminal.plan.minus')}
-          onPress={() => onStep(-STEP)}
-          style={({ pressed }) => [styles.step, pressed && styles.pressed]}
-        >
-          <Text style={[styles.mono, { color: lcd }]}>{`[-${STEP}]`}</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('watcher.terminal.plan.plus')}
-          onPress={() => onStep(STEP)}
-          style={({ pressed }) => [styles.step, pressed && styles.pressed]}
-        >
-          <Text style={[styles.mono, { color: lcd }]}>{`[+${STEP}]`}</Text>
-        </Pressable>
-      </View>
-    </View>
+      <Button
+        variant="stepper"
+        accessibilityLabel={`${t(meta.titleKey)}: ${t('watcher.terminal.plan.minus')}`}
+        disabled={isDecreaseDisabled}
+        onPress={() => onStep(-STEP)}
+      >
+        −
+      </Button>
+      <Button
+        variant="stepper"
+        accessibilityLabel={`${t(meta.titleKey)}: ${t('watcher.terminal.plan.plus')}`}
+        disabled={isIncreaseDisabled}
+        onPress={() => onStep(STEP)}
+      >
+        +
+      </Button>
+    </TerminalCard>
   );
 };
 
 /**
- * Period plan in the Keeper terminal — matches the CRT mockup (±10 steps).
+ * Period plan in the Keeper terminal — concept B2 (±10 steps). A plan with
+ * nothing on charge is allowed, but a warning sheet asks first (screen 11).
  */
-export const PlanPage = ({ onDone }: PlanPageProps) => {
+export const PlanPage = ({ frame, onDone }: PlanPageProps) => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const user = useUser();
   const updateUser = useUpdateUser();
   const showFeedback = useShowFeedback();
+  const isMotionEnabled = useIsMotionEnabled();
   const isPlanning = user?.period.phase === 'planning';
   const available = user?.wallet.balance ?? 0;
   const [plan, setPlan] = useState<BudgetPlan>(user?.period.plan ?? EMPTY_PLAN);
@@ -166,88 +201,132 @@ export const PlanPage = ({ onDone }: PlanPageProps) => {
 
   const requestSave = () => {
     if (!canSave) return;
-    if (available === 0) {
-      commit(plan);
-      return;
-    }
-    if (plan.needs === 0) {
+    if (available > 0 && plan.needs === 0) {
       setNeedsWarningVisible(true);
       return;
     }
     commit(plan);
   };
 
-  if (!isPlanning) {
-    return (
-      <View style={styles.stack}>
-        <TerminalText isDim>
-          {t('watcher.terminal.plan.notPlanning')}
-        </TerminalText>
-      </View>
-    );
-  }
+  if (!isPlanning) return <ReportPage frame={frame} />;
 
   return (
-    <View style={styles.stack}>
-      <View style={styles.balanceRow}>
-        <TerminalText>{t('watcher.terminal.plan.youHave')}</TerminalText>
-        <TerminalText>{formatMoney(available)}</TerminalText>
-      </View>
-      <TerminalText isDim>
-        {t('watcher.terminal.plan.coinsForPlan')}
-      </TerminalText>
-      <TerminalRule />
-
-      {BUDGET_DIRECTIONS.map((direction) => (
-        <DirectionBlock
-          key={direction}
-          direction={direction}
-          value={plan[direction]}
-          onStep={(delta) => {
-            setPlan((current) =>
-              allocate(
-                current,
-                direction,
-                current[direction] + delta,
-                available,
-              ),
-            );
-          }}
-        />
-      ))}
-
-      <TerminalRule />
-      <TerminalText>
-        {t('watcher.terminal.plan.remainder', {
-          count: formatMoney(planLeft),
-        })}
-      </TerminalText>
-      <TerminalRule />
-
-      {isNeedsWarningVisible ? (
-        <View style={styles.stack}>
-          <TerminalText>{t('budgetPlan.needsZeroBody')}</TerminalText>
-          <TerminalPrompt
-            onPress={() => {
-              commit(plan);
-            }}
-          >
-            {t('budgetPlan.needsZeroConfirm')}
-          </TerminalPrompt>
-          <TerminalPrompt onPress={() => setNeedsWarningVisible(false)}>
-            {t('budgetPlan.needsZeroKeep')}
-          </TerminalPrompt>
-        </View>
-      ) : (
-        <TerminalPrompt
-          isCursorVisible
-          disabled={!canSave}
-          onPress={requestSave}
-        >
+    <TerminalShell
+      {...frame}
+      label={t('watcher.terminal.pages.plan.label')}
+      title={t('watcher.terminal.pages.plan.title')}
+      trailing={<HintButton screen="budget-plan" />}
+      footer={
+        <Button isFullWidth disabled={!canSave} onPress={requestSave}>
           {t('watcher.terminal.plan.save')}
-        </TerminalPrompt>
-      )}
-    </View>
+        </Button>
+      }
+    >
+      <ScrollView contentContainerStyle={styles.stack}>
+        <TerminalBubble>
+          {t('watcher.terminal.pages.plan.intro')}
+        </TerminalBubble>
+
+        <TerminalCard variant="raised" style={styles.balance}>
+          <Text variant="bodyBold">{t('watcher.terminal.plan.youHave')}</Text>
+          <View style={styles.balanceAmount}>
+            <Text variant="machine" style={styles.balanceNumber}>
+              {formatMoney(available)}
+            </Text>
+            <PixelIcon name="coin" tone="coin" />
+          </View>
+        </TerminalCard>
+
+        <View style={styles.rows}>
+          {BUDGET_DIRECTIONS.map((direction) => (
+            <DirectionRow
+              key={direction}
+              direction={direction}
+              value={plan[direction]}
+              isDecreaseDisabled={plan[direction] === 0}
+              isIncreaseDisabled={planLeft <= 0}
+              onStep={(delta) => {
+                setPlan((current) =>
+                  allocate(
+                    current,
+                    direction,
+                    current[direction] + delta,
+                    available,
+                  ),
+                );
+              }}
+            />
+          ))}
+        </View>
+
+        <TerminalRule isDashed />
+        <View style={styles.remainder}>
+          <Text themeColor="textSecondary">
+            {t('watcher.terminal.plan.remainderLabel')}
+          </Text>
+          <Text variant="code" themeColor="coin" style={styles.remainderValue}>
+            {formatMoney(planLeft)}
+          </Text>
+        </View>
+      </ScrollView>
+
+      <Sheet.Modal
+        variant="warning"
+        isVisible={isNeedsWarningVisible}
+        onClose={() => setNeedsWarningVisible(false)}
+        isAnimated={isMotionEnabled}
+      >
+        <Sheet.Label variant="warning">
+          {t('watcher.terminal.plan.checkLabel')}
+        </Sheet.Label>
+        <Sheet.Title>{t('watcher.terminal.plan.needsZeroTitle')}</Sheet.Title>
+        <View style={[styles.table, { borderColor: theme.border }]}>
+          {BUDGET_DIRECTIONS.map((direction, index) => (
+            <View
+              key={direction}
+              style={[
+                styles.tableRow,
+                index > 0 && [
+                  styles.tableDivider,
+                  { borderColor: theme.border },
+                ],
+              ]}
+            >
+              <PixelIcon
+                name={DIRECTION_META[direction].icon}
+                tone={plan[direction] === 0 ? 'coin' : 'phosphor'}
+              />
+              <Text style={styles.tableLabel}>
+                {t(DIRECTION_META[direction].titleKey)}
+              </Text>
+              <Text
+                variant="code"
+                themeColor={plan[direction] === 0 ? 'coin' : 'text'}
+                style={styles.tableValue}
+              >
+                {formatMoney(plan[direction])}
+              </Text>
+            </View>
+          ))}
+        </View>
+        <Sheet.Description>
+          {t('watcher.terminal.plan.needsZeroBody')}
+        </Sheet.Description>
+        <Sheet.Actions>
+          <Button isFullWidth onPress={() => setNeedsWarningVisible(false)}>
+            {t('watcher.terminal.plan.needsZeroKeep')}
+          </Button>
+          <Button
+            variant="secondary"
+            size="m"
+            isFullWidth
+            onPress={() => commit(plan)}
+          >
+            {t('watcher.terminal.plan.needsZeroConfirm')}
+          </Button>
+        </Sheet.Actions>
+      </Sheet.Modal>
+    </TerminalShell>
   );
 };
 
@@ -256,41 +335,53 @@ export const PlanPage = ({ onDone }: PlanPageProps) => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  balanceRow: {
-    alignItems: 'baseline',
+  balance: {
+    alignItems: 'center',
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  balanceAmount: { alignItems: 'center', flexDirection: 'row', gap: 8 },
+  balanceNumber: { fontSize: 25, lineHeight: 32 },
+  iconBox: {
+    alignItems: 'center',
+    borderRadius: RADII.s,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  remainder: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  block: { gap: SPACING.half },
-  mono: {
-    fontFamily: FONTS.mono,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  monoSmall: {
-    fontFamily: FONTS.mono,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  pressed: { opacity: 0.7 },
-  stack: { gap: SPACING.two },
-  step: {
-    minHeight: 44,
-    justifyContent: 'center',
-    paddingHorizontal: SPACING.one,
-  },
-  stepRow: {
+  remainderValue: { fontFamily: FONTS.monoStrong },
+  row: {
+    alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: 10,
+    paddingLeft: SPACING.compact,
+    paddingRight: 10,
+    paddingVertical: 10,
   },
-  value: {
-    alignSelf: 'flex-start',
-    borderBottomWidth: 2,
-    fontFamily: FONTS.mono,
-    fontSize: 28,
-    fontWeight: '700',
-    lineHeight: 34,
-    marginVertical: SPACING.one,
-    minWidth: 64,
+  rowCopy: { flex: 1, minWidth: 0 },
+  rowTitle: { fontSize: 17, lineHeight: 21 },
+  rows: { gap: SPACING.two },
+  stack: { gap: SPACING.compact, paddingBottom: SPACING.two },
+  table: { borderRadius: RADII.s, borderWidth: 2 },
+  tableDivider: { borderTopWidth: 1 },
+  tableLabel: { flex: 1 },
+  tableRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    paddingHorizontal: SPACING.compact,
+    paddingVertical: 10,
   },
+  tableValue: { fontFamily: FONTS.monoStrong, fontSize: 16 },
+  value: { fontSize: 22, lineHeight: 28, minWidth: 40, textAlign: 'right' },
 });
+
+export type { PlanPageProps };

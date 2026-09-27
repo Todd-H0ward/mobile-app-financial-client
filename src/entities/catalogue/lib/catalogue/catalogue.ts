@@ -17,3 +17,27 @@ export const listCatalogueByShop = (shopId: ShopId): readonly CatalogueItem[] =>
 
 export const getCatalogueItem = (id: string): CatalogueItem | undefined =>
   ITEMS.find((item) => item.id === id);
+
+/**
+ * What a child buys instead when the item is a one-time thing already owned:
+ * the unowned item of the same kind closest in price. Repeatable items (no
+ * `ownedId`) come back as they are; `undefined` when nothing is left to buy.
+ */
+export const pickBuyable = (
+  id: string,
+  ownedIds: readonly string[],
+): CatalogueItem | undefined => {
+  const item = getCatalogueItem(id);
+  if (!item) return undefined;
+  const isOwned = (entry: CatalogueItem) =>
+    entry.ownedId !== undefined && ownedIds.includes(entry.ownedId);
+  if (!isOwned(item)) return item;
+
+  return ITEMS.filter((entry) => entry.kind === item.kind && !isOwned(entry))
+    .sort(
+      (a, b) =>
+        Math.abs(a.price - item.price) - Math.abs(b.price - item.price) ||
+        a.price - b.price,
+    )
+    .at(0);
+};

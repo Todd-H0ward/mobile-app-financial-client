@@ -1,3 +1,4 @@
+import { MODULE_IDS } from '@/entities/catalogue';
 import { PLATFORM_GOAL_ID, PLATFORM_LEVEL_COUNT } from '@/entities/economy';
 import { listLessons } from '@/entities/lesson';
 import {
@@ -47,6 +48,25 @@ const STAGE_FROM_PET: Record<string, RobotDogStage> = {
  * version cannot do that.
  */
 const MIGRATIONS: Record<number, MigrationStep> = {
+  16: (save) => {
+    const modules = isRecord(save.modules) ? save.modules : {};
+    const owned = Array.isArray(modules.owned) ? modules.owned : [];
+    // Previously every purchased module was active. Preserve those bonuses.
+    return {
+      ...save,
+      version: 17,
+      modules: {
+        ...modules,
+        installed: [
+          ...new Set(
+            owned.filter(
+              (id) => typeof id === 'string' && MODULE_IDS.includes(id),
+            ),
+          ),
+        ],
+      },
+    };
+  },
   15: (save) => ({
     ...save,
     version: 16,
@@ -413,6 +433,14 @@ const isModules = (value: unknown): boolean =>
   isRecord(value) &&
   Array.isArray(value.owned) &&
   value.owned.every((id) => typeof id === 'string') &&
+  Array.isArray(value.installed) &&
+  new Set(value.installed).size === value.installed.length &&
+  value.installed.every(
+    (id) =>
+      typeof id === 'string' &&
+      MODULE_IDS.includes(id) &&
+      (value.owned as unknown[]).includes(id),
+  ) &&
   (value.tier === 0 ||
     value.tier === 1 ||
     value.tier === 2 ||

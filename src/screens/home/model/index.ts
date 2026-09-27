@@ -4,6 +4,7 @@ export type {
   HomeHudCredit,
   HomeHudGoal,
   HomeHudRobot,
+  HomeHudTrial,
   MoodTone,
 } from './use-home-hud';
 export { useHomeHud } from './use-home-hud';

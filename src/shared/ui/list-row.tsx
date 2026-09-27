@@ -8,9 +8,10 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { HIT_SLOP_SIZE, RADII, type ThemeColor } from '@/shared/constants';
+import { SPACING, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 
+import { PixelIcon } from './pixel-icon';
 import { Text } from './text';
 
 // ═══════════════════════════════════════════
@@ -33,7 +34,7 @@ interface ListRowRootProps {
   trailing?: ReactNode;
   /** Highlighted with the primary border, e.g. a chosen trait. */
   isSelected?: boolean;
-  /** Completed row: muted surface and a struck-through title. */
+  /** Completed row: muted text and a visible completion check. */
   isDone?: boolean;
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
@@ -43,8 +44,8 @@ interface ListRowRootProps {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-const BORDER = 1;
-const SELECTED_BORDER = 2.5;
+const BORDER = 2;
+const SELECTED_BORDER = 2;
 const PADDING_HORIZONTAL = 14;
 const PADDING_VERTICAL = 13;
 
@@ -55,7 +56,7 @@ const PADDING_VERTICAL = 13;
 const ListRowIcon = ({
   children,
   tone = 'primarySoft',
-  size = 46,
+  size = 36,
 }: ListRowIconProps) => {
   const theme = useTheme();
 
@@ -94,7 +95,11 @@ const ListRowRoot = ({
   const rowStyle: StyleProp<ViewStyle> = [
     styles.root,
     {
-      backgroundColor: isDone ? theme.backgroundAlt : theme.surface,
+      backgroundColor: isSelected
+        ? theme.surfaceSoft
+        : isDone
+          ? theme.backgroundAlt
+          : theme.surface,
       borderColor: isSelected ? theme.primary : theme.border,
       borderWidth: isSelected ? SELECTED_BORDER : BORDER,
       // The thicker border eats into the content box, so the padding gives
@@ -109,14 +114,11 @@ const ListRowRoot = ({
 
   const content = (
     <>
+      {isSelected && <PixelIcon name="check20" size={20} tone="primary" />}
       {icon}
 
       <View style={styles.content}>
-        <Text
-          variant="bodyBold"
-          themeColor={isDone ? 'textMuted' : 'text'}
-          style={isDone && styles.doneTitle}
-        >
+        <Text variant="bodyBold" themeColor={isDone ? 'textMuted' : 'text'}>
           {title}
         </Text>
 
@@ -130,6 +132,9 @@ const ListRowRoot = ({
         )}
       </View>
 
+      {isDone && !isSelected && (
+        <PixelIcon name="check20" size={20} tone="primary" />
+      )}
       {trailing}
     </>
   );
@@ -144,7 +149,10 @@ const ListRowRoot = ({
       accessibilityLabel={subtitle != null ? `${title}. ${subtitle}` : title}
       accessibilityState={{ selected: isSelected, checked: isDone }}
       onPress={onPress}
-      style={({ pressed }) => [rowStyle, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        rowStyle,
+        pressed && { backgroundColor: theme.surfaceSoft },
+      ]}
     >
       {content}
     </Pressable>
@@ -166,27 +174,22 @@ export const ListRow = Object.assign(ListRowRoot, {
 const styles = StyleSheet.create({
   root: {
     alignItems: 'center',
-    borderRadius: RADII.l,
+    borderRadius: 14,
     flexDirection: 'row',
-    gap: 12,
+    gap: SPACING.two,
     // A pressable row is a touch target: the floor is stated, not left to the
     // sum of a font size and two paddings — see docs/accessibility.md.
-    minHeight: HIT_SLOP_SIZE,
-  },
-  pressed: {
-    opacity: 0.85,
+    minHeight: 56,
   },
   content: {
     flex: 1,
-    gap: 2,
+    gap: SPACING.one,
+    minWidth: 0,
   },
   icon: {
     alignItems: 'center',
-    borderRadius: RADII.m,
+    borderRadius: 10,
     justifyContent: 'center',
-  },
-  doneTitle: {
-    textDecorationLine: 'line-through',
   },
 });
 

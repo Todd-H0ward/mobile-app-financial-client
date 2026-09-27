@@ -28,7 +28,7 @@ export const useIsMotionEnabled = (): boolean => {
 export const useIsSoundEnabled = () =>
   useUserStore((state) => state.user?.settings.isSoundEnabled ?? true);
 
-/** Saved liquid-glass switch — settings UI and GlassEnabledProvider. */
+/** Saved terminal-texture switch; legacy key preserves existing profiles. */
 export const useIsGlassEnabled = () =>
   useUserStore((state) => state.user?.settings.isGlassEnabled ?? true);
 

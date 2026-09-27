@@ -128,7 +128,9 @@ export const ConsoleDpad = ({
         depth={theme.arcadeDpad}
         size={KEY}
       >
-        <Text variant="title">↑</Text>
+        <Text variant="title" themeColor="onAccent">
+          ↑
+        </Text>
       </VolumeButton>
       <View style={styles.dpadMid}>
         <VolumeButton
@@ -138,7 +140,9 @@ export const ConsoleDpad = ({
           depth={theme.arcadeDpad}
           size={KEY}
         >
-          <Text variant="title">←</Text>
+          <Text variant="title" themeColor="onAccent">
+            ←
+          </Text>
         </VolumeButton>
         <View style={[styles.dpadHub, { backgroundColor: theme.arcadeDpad }]} />
         <VolumeButton
@@ -148,7 +152,9 @@ export const ConsoleDpad = ({
           depth={theme.arcadeDpad}
           size={KEY}
         >
-          <Text variant="title">→</Text>
+          <Text variant="title" themeColor="onAccent">
+            →
+          </Text>
         </VolumeButton>
       </View>
       <VolumeButton
@@ -158,7 +164,9 @@ export const ConsoleDpad = ({
         depth={theme.arcadeDpad}
         size={KEY}
       >
-        <Text variant="title">↓</Text>
+        <Text variant="title" themeColor="onAccent">
+          ↓
+        </Text>
       </VolumeButton>
     </View>
   );
@@ -248,18 +256,7 @@ const styles = StyleSheet.create({
   },
   volume: {
     alignItems: 'center',
-    borderLeftColor: 'rgba(255,255,255,0.35)',
-    borderLeftWidth: 1,
-    borderRightColor: 'rgba(0,0,0,0.12)',
-    borderRightWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.45)',
-    borderTopWidth: 1.5,
-    elevation: 3,
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 2,
   },
 });
 

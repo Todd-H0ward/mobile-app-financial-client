@@ -26,10 +26,13 @@ export const SavingsScreen = () => {
   const savings = useSavings();
 
   return (
-    <Screen gap="three">
+    <Screen presentation="sheet" gap="three" terminalVariant="keeper">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
+          <Text variant="code" themeColor="primary">
+            &gt; {t('scene.watchers.keeper.name')}
+          </Text>
           <Screen.Title>{t('savings.title')}</Screen.Title>
           <Screen.Subtitle>{t('savings.subtitle')}</Screen.Subtitle>
         </Screen.Heading>

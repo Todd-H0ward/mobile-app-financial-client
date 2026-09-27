@@ -66,11 +66,11 @@ export const ConveyorScene = ({
   return (
     <TrialPanel isWell style={styles.panelFill}>
       <View style={styles.cargo}>
-        <Text style={[styles.cargoGlyph, { color: theme.overseerLcd }]}>◆</Text>
-        <Text style={[styles.monoTitle, { color: theme.overseerLcd }]}>
+        <Text style={[styles.cargoGlyph, { color: theme.primary }]}>◆</Text>
+        <Text style={[styles.monoTitle, { color: theme.primary }]}>
           {round.item}
         </Text>
-        <Text style={[styles.monoDim, { color: theme.overseerLcdDim }]}>
+        <Text style={[styles.monoDim, { color: theme.textSecondary }]}>
           {t('playkit.conveyor.dragHint')}
         </Text>
       </View>
@@ -118,10 +118,10 @@ export const ScalesScene = ({
       ).map(([side, value, target]) => (
         <View key={side} style={styles.pan}>
           <View style={styles.panHead}>
-            <Text style={[styles.monoTitle, { color: theme.overseerLcd }]}>
+            <Text style={[styles.monoTitle, { color: theme.primary }]}>
               {t(`playkit.bins.${side}`)}
             </Text>
-            <Text style={[styles.monoDim, { color: theme.overseerLcdDim }]}>
+            <Text style={[styles.monoDim, { color: theme.textSecondary }]}>
               {`tgt ${target}`}
             </Text>
           </View>
@@ -131,7 +131,7 @@ export const ScalesScene = ({
                 styles.weight,
                 {
                   width: `${Math.min(100, value * 12)}%`,
-                  backgroundColor: theme.overseerLcd,
+                  backgroundColor: theme.primary,
                 },
               ]}
             />
@@ -143,7 +143,7 @@ export const ScalesScene = ({
               disabled={isLocked}
               onPress={() => bump(side, -1)}
             />
-            <Text style={[styles.monoBig, { color: theme.overseerLcd }]}>
+            <Text style={[styles.monoBig, { color: theme.primary }]}>
               {value}
             </Text>
             <TrialChip
@@ -182,7 +182,7 @@ export const CashierScene = ({
           paid: round.paid,
         })}
       </TrialReadout>
-      <Text style={[styles.monoBig, { color: theme.overseerLcd }]}>
+      <Text style={[styles.monoBig, { color: theme.primary }]}>
         {t('playkit.cashier.change', { count: sum })}
       </Text>
       <View style={styles.row}>
@@ -194,14 +194,14 @@ export const CashierScene = ({
             style={({ pressed }) => [
               styles.coin,
               {
-                borderColor: theme.overseerLcd,
+                borderColor: theme.primary,
                 backgroundColor: pressed
-                  ? 'rgba(255, 107, 107, 0.25)'
-                  : theme.overseerScreenGlow,
+                  ? theme.primarySoft
+                  : theme.surfaceDeep,
               },
             ]}
           >
-            <Text style={[styles.monoTitle, { color: theme.overseerLcd }]}>
+            <Text style={[styles.monoTitle, { color: theme.primary }]}>
               {coin}
             </Text>
           </Pressable>
@@ -216,7 +216,7 @@ export const CashierScene = ({
         }}
         style={styles.linkHit}
       >
-        <Text style={[styles.monoDim, { color: theme.overseerLcdDim }]}>
+        <Text style={[styles.monoDim, { color: theme.textSecondary }]}>
           {`> ${t('playkit.cashier.reset')}`}
         </Text>
       </Pressable>
@@ -250,21 +250,19 @@ export const JarScene = ({ onReady, isLocked }: SceneProps<JarRound>) => {
               style={[
                 styles.coin,
                 {
-                  borderColor: isOn ? theme.overseerLcd : theme.overseerLcdDim,
-                  backgroundColor: isOn
-                    ? 'rgba(255, 107, 107, 0.28)'
-                    : theme.overseerScreen,
+                  borderColor: isOn ? theme.primary : theme.textSecondary,
+                  backgroundColor: isOn ? theme.primarySoft : theme.surface,
                 },
               ]}
             >
-              <Text style={[styles.monoTitle, { color: theme.overseerLcd }]}>
+              <Text style={[styles.monoTitle, { color: theme.primary }]}>
                 {isOn ? '●' : '○'}
               </Text>
             </Pressable>
           );
         })}
       </View>
-      <Text style={[styles.monoDim, { color: theme.overseerLcdDim }]}>
+      <Text style={[styles.monoDim, { color: theme.textSecondary }]}>
         {t('playkit.jar.picked', { count: caught.length })}
       </Text>
     </TrialPanel>
@@ -295,7 +293,7 @@ export const PinballScene = ({
   return (
     <TrialPanel isWell style={styles.panelFill}>
       <TrialReadout isDim>{t('playkit.pinball.hint')}</TrialReadout>
-      <Text style={[styles.monoDim, { color: theme.overseerLcdDim }]}>
+      <Text style={[styles.monoDim, { color: theme.textSecondary }]}>
         {t('playkit.pinball.target', { pocket: round.target + 1 })}
       </Text>
       <View
@@ -303,12 +301,12 @@ export const PinballScene = ({
         style={[
           styles.field,
           {
-            borderColor: theme.overseerLcdDim,
-            backgroundColor: theme.overseerScreen,
+            borderColor: theme.textSecondary,
+            backgroundColor: theme.surface,
           },
         ]}
       >
-        <Text style={[styles.monoTitle, { color: theme.overseerLcd }]}>
+        <Text style={[styles.monoTitle, { color: theme.primary }]}>
           {t('playkit.pinball.swipe')}
         </Text>
         <View style={styles.row}>
@@ -319,15 +317,13 @@ export const PinballScene = ({
                 styles.pocket,
                 {
                   borderColor:
-                    aim === pocket ? theme.overseerLcd : theme.overseerLcdDim,
+                    aim === pocket ? theme.primary : theme.textSecondary,
                   backgroundColor:
-                    aim === pocket
-                      ? 'rgba(255, 107, 107, 0.22)'
-                      : 'transparent',
+                    aim === pocket ? theme.primarySoft : 'transparent',
                 },
               ]}
             >
-              <Text style={[styles.monoTitle, { color: theme.overseerLcd }]}>
+              <Text style={[styles.monoTitle, { color: theme.primary }]}>
                 {pocket + 1}
               </Text>
             </View>
@@ -388,17 +384,15 @@ export const MemoryScene = ({
                 styles.memoryCard,
                 {
                   borderColor: isMatch
-                    ? theme.overseerLcd
+                    ? theme.primary
                     : isFace
-                      ? theme.overseerLcdDim
-                      : theme.overseerScreenGlow,
-                  backgroundColor: isFace
-                    ? 'rgba(255, 107, 107, 0.16)'
-                    : theme.overseerScreen,
+                      ? theme.textSecondary
+                      : theme.surfaceDeep,
+                  backgroundColor: isFace ? theme.primarySoft : theme.surface,
                 },
               ]}
             >
-              <Text style={[styles.monoTitle, { color: theme.overseerLcd }]}>
+              <Text style={[styles.monoTitle, { color: theme.primary }]}>
                 {isFace ? label : '??'}
               </Text>
             </Pressable>
@@ -436,18 +430,18 @@ export const PathScene = ({
               styles.cell,
               {
                 borderColor: path.includes(index)
-                  ? theme.overseerLcd
-                  : theme.overseerLcdDim,
+                  ? theme.primary
+                  : theme.textSecondary,
                 backgroundColor: !isSafe
-                  ? theme.overseerScreen
+                  ? theme.surface
                   : path.includes(index)
-                    ? 'rgba(255, 107, 107, 0.28)'
-                    : theme.overseerScreenGlow,
+                    ? theme.primarySoft
+                    : theme.surfaceDeep,
                 opacity: isSafe ? 1 : 0.35,
               },
             ]}
           >
-            <Text style={[styles.monoTitle, { color: theme.overseerLcd }]}>
+            <Text style={[styles.monoTitle, { color: theme.primary }]}>
               {path.includes(index) ? '↑' : isSafe ? '·' : '×'}
             </Text>
           </Pressable>
@@ -460,7 +454,7 @@ export const PathScene = ({
         }}
         style={styles.linkHit}
       >
-        <Text style={[styles.monoDim, { color: theme.overseerLcdDim }]}>
+        <Text style={[styles.monoDim, { color: theme.textSecondary }]}>
           {`> ${t('playkit.path.reset')}`}
         </Text>
       </Pressable>
@@ -505,15 +499,13 @@ export const AssembleScene = ({
               styles.part,
               {
                 borderColor:
-                  held === index ? theme.overseerLcd : theme.overseerLcdDim,
+                  held === index ? theme.primary : theme.textSecondary,
                 backgroundColor:
-                  held === index
-                    ? 'rgba(255, 107, 107, 0.22)'
-                    : theme.overseerScreen,
+                  held === index ? theme.primarySoft : theme.surface,
               },
             ]}
           >
-            <Text style={[styles.monoTitle, { color: theme.overseerLcd }]}>
+            <Text style={[styles.monoTitle, { color: theme.primary }]}>
               {part}
             </Text>
           </Pressable>
@@ -530,12 +522,12 @@ export const AssembleScene = ({
               style={[
                 styles.slot,
                 {
-                  borderColor: theme.overseerLcdDim,
+                  borderColor: theme.textSecondary,
                   borderStyle: 'dashed',
                 },
               ]}
             >
-              <Text style={[styles.mono, { color: theme.overseerLcd }]}>
+              <Text style={[styles.mono, { color: theme.primary }]}>
                 {`${slot}: ${partIndex >= 0 ? round.parts[partIndex] : '—'}`}
               </Text>
             </Pressable>
@@ -575,14 +567,12 @@ export const LaserScene = ({
             style={[
               styles.receiptLine,
               {
-                borderColor: isOn ? theme.overseerLcd : theme.overseerLcdDim,
-                backgroundColor: isOn
-                  ? 'rgba(255, 107, 107, 0.18)'
-                  : theme.overseerScreen,
+                borderColor: isOn ? theme.primary : theme.textSecondary,
+                backgroundColor: isOn ? theme.primarySoft : theme.surface,
               },
             ]}
           >
-            <Text style={[styles.mono, { color: theme.overseerLcd }]}>
+            <Text style={[styles.mono, { color: theme.primary }]}>
               {`${isOn ? '▣' : '□'} ${line}`}
             </Text>
           </Pressable>
@@ -627,12 +617,12 @@ export const OrbitScene = ({
         style={[
           styles.field,
           {
-            borderColor: inWindow ? theme.overseerLcd : theme.overseerLcdDim,
-            backgroundColor: theme.overseerScreen,
+            borderColor: inWindow ? theme.primary : theme.textSecondary,
+            backgroundColor: theme.surface,
           },
         ]}
       >
-        <Text style={[styles.monoTitle, { color: theme.overseerLcd }]}>
+        <Text style={[styles.monoTitle, { color: theme.primary }]}>
           {inWindow ? t('playkit.orbit.ready') : t('playkit.orbit.spin')}
         </Text>
         <View style={styles.orbitRing}>
@@ -640,9 +630,7 @@ export const OrbitScene = ({
             style={[
               styles.orbitDot,
               {
-                backgroundColor: inWindow
-                  ? theme.overseerLcd
-                  : theme.overseerLcdDim,
+                backgroundColor: inWindow ? theme.primary : theme.textSecondary,
                 transform: [
                   { translateX: Math.cos(angle * Math.PI * 2) * 60 },
                   { translateY: Math.sin(angle * Math.PI * 2) * 40 },
@@ -651,7 +639,7 @@ export const OrbitScene = ({
             ]}
           />
         </View>
-        <Text style={[styles.monoDim, { color: theme.overseerLcdDim }]}>
+        <Text style={[styles.monoDim, { color: theme.textSecondary }]}>
           {`${Math.round(angle * 100)}%`}
         </Text>
       </View>
@@ -665,7 +653,6 @@ export const OrbitScene = ({
 
 const styles = StyleSheet.create({
   beam: {
-    backgroundColor: 'rgba(255, 107, 107, 0.12)',
     borderRadius: 2,
     height: 10,
     overflow: 'hidden',
@@ -677,9 +664,8 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.three,
   },
   cargoGlyph: {
-    fontFamily: FONTS.mono,
+    fontFamily: FONTS.monoStrong,
     fontSize: 36,
-    fontWeight: '700',
   },
   cell: {
     alignItems: 'center',
@@ -729,24 +715,22 @@ const styles = StyleSheet.create({
   },
   mono: {
     fontFamily: FONTS.mono,
-    fontSize: 13,
+    fontSize: 14,
     lineHeight: 18,
   },
   monoBig: {
-    fontFamily: FONTS.mono,
+    fontFamily: FONTS.monoStrong,
     fontSize: 28,
-    fontWeight: '700',
     textAlign: 'center',
   },
   monoDim: {
     fontFamily: FONTS.mono,
-    fontSize: 12,
+    fontSize: 14,
     letterSpacing: 0.5,
   },
   monoTitle: {
-    fontFamily: FONTS.mono,
+    fontFamily: FONTS.monoStrong,
     fontSize: 14,
-    fontWeight: '700',
     textAlign: 'center',
   },
   orbitDot: {

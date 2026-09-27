@@ -127,13 +127,14 @@ export const PuzzlePiece = ({
     if (variant === 'slot') return theme.surfaceDeep;
     // Soft primary wash — idle silhouettes, accent reserved for the snap target.
     if (variant === 'slotDark') return withAlpha(theme.primary, 0.14);
-    if (isSlotActive) return withAlpha(theme.accent, 0.28);
+    if (isSlotActive) return withAlpha(theme.phosphor, 0.28);
     return theme.surfaceSoft;
   })();
 
   const stroke = (() => {
-    if (photo) return isFitCell ? withAlpha('#000000', 0.25) : theme.surface;
-    if (isSlotActive) return theme.accent;
+    if (photo)
+      return isFitCell ? withAlpha(theme.surfaceDeep, 0.25) : theme.surface;
+    if (isSlotActive) return theme.phosphor;
     if (variant === 'slotDark') return theme.primaryStrong;
     if (isSlot) return theme.borderStrong;
     return theme.surface;
@@ -166,7 +167,7 @@ export const PuzzlePiece = ({
         isFitCell && styles.fitCell,
         isLoose && styles.looseShadow,
         isSlotActive && styles.activeGlow,
-        { shadowColor: isSlotActive ? theme.accent : theme.inverseSurface },
+        { shadowColor: isSlotActive ? theme.phosphor : theme.inverseSurface },
         style,
       ]}
       accessibilityElementsHidden

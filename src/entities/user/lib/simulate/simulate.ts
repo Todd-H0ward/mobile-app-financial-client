@@ -1,4 +1,4 @@
-import { getCatalogueItem } from '@/entities/catalogue';
+import { pickBuyable } from '@/entities/catalogue';
 import { getGoalById } from '@/entities/goal';
 import { listTasks } from '@/entities/task';
 
@@ -108,7 +108,7 @@ const planFor = (
   let wants = 0;
 
   for (const itemId of profile.buys) {
-    const item = getCatalogueItem(itemId);
+    const item = pickBuyable(itemId, user.ownedItemIds);
     if (!item) continue;
     if (item.kind === 'need') needs += item.price;
     else wants += item.price;
@@ -231,7 +231,11 @@ export const simulate = (
     let spentWants = 0;
     let refusals = 0;
     for (const itemId of profile.buys) {
-      const bought = applyPurchase(user, itemId, time);
+      // A one-time item already owned is swapped for the nearest one still
+      // in the shop — the child keeps the same habit, not the same thing.
+      const item = pickBuyable(itemId, user.ownedItemIds);
+      if (!item) continue;
+      const bought = applyPurchase(user, item.id, time);
       if (!bought.ok) {
         refusals += 1;
         continue;

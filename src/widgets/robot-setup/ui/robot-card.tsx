@@ -7,11 +7,12 @@ import {
   type RobotDogAction,
   type RobotDogSkin,
 } from '@/entities/robot-dog';
+import { ROBOT_SKIN_PREVIEWS } from '@/entities/robot-dog/ui';
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { Button, Card, ListRow, Text } from '@/shared/ui';
+import { Card, Chip, PixelIcon, Text } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -33,22 +34,6 @@ interface SkinTileProps {
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
-
-/**
- * Render previews that ship with the model, one per coat.
- *
- * A literal map because Metro cannot follow a `require` built from a variable,
- * and relative because the `@/*` alias points at `src/`, not `assets/`.
- */
-const SKIN_PREVIEWS: Record<RobotDogSkin, number> = {
-  factory: require('../../../../assets/robot-dog/previews/factory.jpg'),
-  arctic: require('../../../../assets/robot-dog/previews/arctic.jpg'),
-  carbon: require('../../../../assets/robot-dog/previews/carbon.jpg'),
-  desert: require('../../../../assets/robot-dog/previews/desert.jpg'),
-  forest: require('../../../../assets/robot-dog/previews/forest.jpg'),
-  rescue: require('../../../../assets/robot-dog/previews/rescue.jpg'),
-  rust: require('../../../../assets/robot-dog/previews/rust.jpg'),
-};
 
 /** Wide enough to read the coat, small enough that four fit a phone. */
 const TILE_WIDTH = 104;
@@ -79,7 +64,7 @@ const SkinTile = ({ skin, isSelected, onPress }: SkinTileProps) => {
       style={({ pressed }) => [styles.tile, { opacity: pressed ? 0.7 : 1 }]}
     >
       <Image
-        source={SKIN_PREVIEWS[skin]}
+        source={ROBOT_SKIN_PREVIEWS[skin]}
         style={[
           styles.preview,
           {
@@ -90,6 +75,11 @@ const SkinTile = ({ skin, isSelected, onPress }: SkinTileProps) => {
         contentFit="cover"
         transition={120}
       />
+      {isSelected ? (
+        <View style={[styles.selected, { backgroundColor: theme.surface }]}>
+          <PixelIcon name="check20" size={20} />
+        </View>
+      ) : null}
       <Text
         variant={isSelected ? 'bodyBold' : 'body'}
         themeColor={isSelected ? 'primaryStrong' : 'textSecondary'}
@@ -119,13 +109,15 @@ export const RobotCard = ({
   const { t } = useTranslation();
 
   return (
-    <Card tone="surfaceSoft">
+    <Card>
       <Card.Title>{t('settings.robot')}</Card.Title>
       <Card.Content style={styles.content}>
-        <ListRow
-          title={t('settings.robotSkin')}
-          subtitle={t('settings.petSkinSubtitle')}
-        />
+        <View style={styles.heading}>
+          <Text variant="bodyBold">{t('settings.robotSkin')}</Text>
+          <Text variant="small" themeColor="textMuted">
+            {t('settings.petSkinSubtitle')}
+          </Text>
+        </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -143,20 +135,21 @@ export const RobotCard = ({
 
         {onActionChange && (
           <>
-            <ListRow
-              title={t('settings.robotAction')}
-              subtitle={t('settings.petActionSubtitle')}
-            />
+            <View style={styles.heading}>
+              <Text variant="bodyBold">{t('settings.robotAction')}</Text>
+              <Text variant="small" themeColor="textMuted">
+                {t('settings.petActionSubtitle')}
+              </Text>
+            </View>
             <View style={styles.actions}>
               {ROBOT_DOG_ACTIONS.map((value) => (
-                <Button
+                <Chip
                   key={value}
-                  size="s"
-                  variant={value === action ? 'primary' : 'secondary'}
+                  variant={value === action ? 'selected' : 'neutral'}
                   onPress={() => onActionChange(value)}
                 >
                   {t(`settings.action.${value}`)}
-                </Button>
+                </Chip>
               ))}
             </View>
           </>
@@ -180,12 +173,20 @@ const styles = StyleSheet.create({
     gap: SPACING.two,
   },
   content: {
-    gap: SPACING.two,
+    gap: SPACING.compact,
   },
+  heading: { gap: 2 },
   preview: {
     borderRadius: RADII.m,
     height: TILE_HEIGHT,
     width: TILE_WIDTH,
+  },
+  selected: {
+    borderRadius: RADII.xs,
+    padding: SPACING.one,
+    position: 'absolute',
+    right: SPACING.one,
+    top: SPACING.one,
   },
   tile: {
     alignItems: 'center',

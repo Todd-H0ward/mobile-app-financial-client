@@ -193,8 +193,8 @@ Checklist:
 
 ## The arcade
 
-Five games live behind `/games`, reached from the chores screen — not from a tab
-of their own. `entities/minigame` owns the rules, `widgets/minigame` the scenes,
+Five games live behind `/games`, reached from the Overseer's terminal (trials →
+mini-games) — not from a tab of their own. `entities/minigame` owns the rules, `widgets/minigame` the scenes,
 `screens/games` the sitting.
 
 - **Chores pay more than games.** Rewards live in `BALANCE.games.rewards` and
@@ -241,9 +241,9 @@ usual rule still holds: a comment earns its place by explaining *why*.
 component that is not there is unfinished work** — it is the only place where a
 component is checked against all of its states at once.
 
-- Screen: [`src/screens/ui-kit`](src/screens/ui-kit/), pushed from the
-  development card at the bottom of the room screen (`/ui-kit`). It is not a
-  tab: the bar holds the five destinations of the game itself.
+- Screen: [`src/screens/ui-kit`](src/screens/ui-kit/), opened from
+  Settings in development builds (`/ui-kit`). It is not a tab: the bar holds
+  the four actions of the game itself.
 - Add a `<KitSection title="Badge" caption="…">` with the component next to the
   others, and wire any switchable state into
   `screens/ui-kit/model/use-playground.ts` instead of hardcoding it.

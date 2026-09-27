@@ -184,9 +184,8 @@ export const useGoal = (goalId: string): GoalController | null => {
         const climbedOut =
           result.user.platform.level >= PLATFORM_LEVEL_COUNT &&
           !hasSeenStory(result.user, 'finale');
-        router.replace(
-          climbedOut ? DYNAMIC_ROUTES.story('finale') : STATIC_ROUTES.HOME,
-        );
+        if (climbedOut) router.replace(DYNAMIC_ROUTES.story('finale'));
+        else router.dismissTo(STATIC_ROUTES.HOME);
       }
     },
 

@@ -11,10 +11,15 @@ export {
   exitDemoMode,
   runDemoPeriods,
 } from './demo';
-export type { WalletHistoryRow, WalletSourceRef } from './history';
+export type {
+  SourceTranslate,
+  WalletHistoryRow,
+  WalletSourceRef,
+} from './history';
 export {
   describeWalletSource,
   getLastPeriod,
+  labelWalletSource,
   listPeriodHistory,
   listWalletHistory,
 } from './history';
@@ -73,6 +78,7 @@ export type { TaskFail, TaskOk, TaskResult } from './tasks';
 export {
   applyCompleteTask,
   issueNextTask,
+  rewardForUserTask,
   selectTask,
 } from './tasks';
 export type {

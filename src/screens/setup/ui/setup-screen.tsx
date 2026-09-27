@@ -26,9 +26,35 @@ import {
   useUser,
 } from '@/entities/user';
 
-import { DYNAMIC_ROUTES, SPACING, STATIC_ROUTES } from '@/shared/constants';
+import {
+  DYNAMIC_ROUTES,
+  RADII,
+  SPACING,
+  STATIC_ROUTES,
+} from '@/shared/constants';
+import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { Button, Input, Screen, Text } from '@/shared/ui';
+import {
+  Button,
+  Card,
+  Chip,
+  Input,
+  PixelIcon,
+  type PixelIconName,
+  Screen,
+  Text,
+} from '@/shared/ui';
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/** The three boxes, with the signs they wear everywhere else (A2). */
+const BOXES: { icon: PixelIconName; key: 'needs' | 'wants' | 'savings' }[] = [
+  { icon: 'battery', key: 'needs' },
+  { icon: 'gear', key: 'wants' },
+  { icon: 'piggy', key: 'savings' },
+];
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
@@ -43,6 +69,7 @@ import { Button, Input, Screen, Text } from '@/shared/ui';
  */
 export const SetupScreen = () => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const router = useRouter();
   const user = useUser();
   const updateUser = useUpdateUser();
@@ -79,6 +106,9 @@ export const SetupScreen = () => {
     <Screen gap="three">
       <Screen.Header>
         <Screen.Heading>
+          <Screen.Label>
+            {t(isStoryVisible ? 'setup.storyLabel' : 'setup.formLabel')}
+          </Screen.Label>
           <Screen.Title>
             {t(isStoryVisible ? 'setup.welcome' : 'setup.title')}
           </Screen.Title>
@@ -91,19 +121,42 @@ export const SetupScreen = () => {
       >
         {isStoryVisible ? (
           <View style={styles.stack}>
-            <Text>{t('setup.story')}</Text>
-            <Text>{t('setup.needs')}</Text>
-            <Text>{t('setup.wants')}</Text>
-            <Text>{t('setup.savings')}</Text>
-            <Text themeColor="textSecondary">{t('setup.safeError')}</Text>
-            <Button onPress={() => setStoryVisible(false)}>
+            <Text themeColor="textSecondary">{t('setup.story')}</Text>
+            {BOXES.map(({ icon, key }) => (
+              <Card key={key}>
+                <View style={styles.direction}>
+                  <View
+                    style={[
+                      styles.iconBox,
+                      { backgroundColor: theme.surfaceSoft },
+                    ]}
+                  >
+                    <PixelIcon name={icon} />
+                  </View>
+                  <View style={styles.directionText}>
+                    <Text variant="bodyBold">
+                      {t(`setup.boxes.${key}.title`)}
+                    </Text>
+                    <Text variant="small" themeColor="textMuted">
+                      {t(`setup.boxes.${key}.hint`)}
+                    </Text>
+                  </View>
+                </View>
+              </Card>
+            ))}
+            <Text variant="small" themeColor="textSecondary">
+              {t('setup.safeError')}
+            </Text>
+            <Button isFullWidth onPress={() => setStoryVisible(false)}>
               {t('setup.meet')}
             </Button>
           </View>
         ) : (
           <View style={styles.stack}>
             <Text themeColor="textSecondary">{t('setup.privacy')}</Text>
-            <Text variant="bodyBold">{t('setup.playerName')}</Text>
+            <Text variant="small" themeColor="textSecondary">
+              {t('setup.playerName')}
+            </Text>
             <Input
               accessibilityLabel={t('setup.playerName')}
               value={playerName}
@@ -112,7 +165,9 @@ export const SetupScreen = () => {
               isCounterVisible
               autoCorrect={false}
             />
-            <Text variant="bodyBold">{t('setup.robotName')}</Text>
+            <Text variant="small" themeColor="textSecondary">
+              {t('setup.robotName')}
+            </Text>
             <Input
               accessibilityLabel={t('setup.robotName')}
               value={robotName}
@@ -121,31 +176,33 @@ export const SetupScreen = () => {
               isCounterVisible
               autoCorrect={false}
             />
+            <Text variant="small" themeColor="textMuted">
+              {t('setup.nameHint')}
+            </Text>
             <RobotCard skin={skin} onSkinChange={setSkin} />
             {(['head', 'body', 'legs'] as const).map((part) => (
-              <View key={part} style={styles.stack}>
-                <Text variant="bodyBold">
+              <View key={part} style={styles.part}>
+                <Text variant="small" themeColor="textSecondary">
                   {t(`setup.modules.${part}.title`)}
                 </Text>
-                {[0, 1, 2].map((choice) => (
-                  <Button
-                    key={choice}
-                    variant={
-                      assembly[part] === choice ? 'primary' : 'secondary'
-                    }
-                    accessibilityState={{
-                      selected: assembly[part] === choice,
-                    }}
-                    onPress={() =>
-                      setAssembly((current) => ({
-                        ...current,
-                        [part]: choice,
-                      }))
-                    }
-                  >
-                    {t(`setup.modules.${part}.${choice}`)}
-                  </Button>
-                ))}
+                <View style={styles.chips}>
+                  {[0, 1, 2].map((choice) => (
+                    <Chip
+                      key={choice}
+                      variant={
+                        assembly[part] === choice ? 'selected' : 'neutral'
+                      }
+                      onPress={() =>
+                        setAssembly((current) => ({
+                          ...current,
+                          [part]: choice,
+                        }))
+                      }
+                    >
+                      {t(`setup.modules.${part}.${choice}`)}
+                    </Chip>
+                  ))}
+                </View>
               </View>
             ))}
             {!isValid && (
@@ -153,7 +210,7 @@ export const SetupScreen = () => {
                 {t('setup.emptyName')}
               </Text>
             )}
-            <Button disabled={!isValid} onPress={save}>
+            <Button isFullWidth disabled={!isValid} onPress={save}>
               {t('setup.start')}
             </Button>
           </View>
@@ -168,6 +225,21 @@ export const SetupScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.two },
+  direction: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: SPACING.compact,
+  },
+  directionText: { flex: 1 },
   flex: { flex: 1 },
+  iconBox: {
+    alignItems: 'center',
+    borderRadius: RADII.s,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  part: { gap: SPACING.two, marginTop: SPACING.one },
   stack: { gap: SPACING.two },
 });

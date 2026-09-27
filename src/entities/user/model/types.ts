@@ -181,10 +181,10 @@ interface SettingsSave {
   /** Animations. Turned off for a weak device and for 3.6. */
   isAnimationEnabled: boolean;
   /**
-   * Liquid-glass surfaces on cards, sheets and chrome.
+   * Terminal scanline texture. The legacy key keeps existing saves compatible.
    *
-   * Off falls back to solid theme fills. System Reduce Transparency also
-   * forces the solid path so a11y wins over the look.
+   * Off renders a clean screen. Reduce Transparency and disabled animations
+   * also suppress the texture so accessibility wins over decoration.
    */
   isGlassEnabled: boolean;
   /**
@@ -277,10 +277,12 @@ interface ArcadeSave {
   paidCount: number;
 }
 
-/** Robot modules that give gameplay bonuses (reward multiplier, extra hints). */
+/** Optional electronic modules, separate from the free starting appearance. */
 interface ModulesSave {
   /** IDs of purchased modules, ordered by acquisition. */
   owned: string[];
+  /** Owned electronic modules currently fitted; only these affect rewards. */
+  installed: string[];
   /** Current module tier: 0 (none), 1, 2, or 3. Derived from owned count. */
   tier: 0 | 1 | 2 | 3;
 }

@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { ListRow, PiggyIcon, ProgressBar, Text } from '@/shared/ui';
+import { ListRow, PixelIcon, ProgressBar, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
 import type { SavingsGoalRow } from '../model';
@@ -41,7 +41,7 @@ export const GoalRow = ({ goal, onPress }: GoalRowProps) => {
       onPress={onPress}
       icon={
         <ListRow.Icon tone={goal.isActive ? 'primarySoft' : 'surfaceSoft'}>
-          <PiggyIcon size={22} />
+          <PixelIcon name="piggy" size={24} />
         </ListRow.Icon>
       }
       trailing={

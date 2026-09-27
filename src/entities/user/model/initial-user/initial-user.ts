@@ -13,7 +13,7 @@ import type { UserSave } from '../types';
 // ═══════════════════════════════════════════
 
 /** Save schema version. Bumped on every incompatible change. */
-const USER_SAVE_VERSION = 16;
+const USER_SAVE_VERSION = 17;
 
 /** Player name before the introduction asks for one. */
 const DEFAULT_PLAYER_NAME = '';
@@ -108,7 +108,7 @@ export const createInitialUser = ({
   },
   history: [],
   ownedItemIds: [],
-  modules: { owned: [], tier: 0 },
+  modules: { owned: [], installed: [], tier: 0 },
   settings: settings ?? {
     isParentGateEnabled: true,
     isSoundEnabled: true,

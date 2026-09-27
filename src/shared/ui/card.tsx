@@ -1,11 +1,16 @@
 import { memo, type ReactNode } from 'react';
 
-import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
+import {
+  Pressable,
+  type StyleProp,
+  StyleSheet,
+  View,
+  type ViewStyle,
+} from 'react-native';
 
-import { RADII, SPACING, type ThemeColor } from '@/shared/constants';
+import { SPACING, type ThemeColor } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 
-import { GlassSurface } from './glass-surface';
 import { Text, type TextProps } from './text';
 
 // ═══════════════════════════════════════════
@@ -38,12 +43,12 @@ interface CardFooterProps {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-const BORDER = 1;
-const SELECTED_BORDER = 2.5;
-const PADDING = SPACING.three;
+const BORDER = 2;
+const SELECTED_BORDER = 2;
+const PADDING = 14;
 
 // ═══════════════════════════════════════════
-// COMPOUND COMPONENTS
+// COMPONENTS
 // ═══════════════════════════════════════════
 
 const CardTitle = memo(
@@ -111,16 +116,26 @@ const CardRoot = memo(
       style,
     ];
 
+    if (!onPress) {
+      return (
+        <View style={[cardStyle, { backgroundColor: theme[tone] }]}>
+          {children}
+        </View>
+      );
+    }
+
     return (
-      <GlassSurface
-        tone={tone}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ selected: isSelected }}
         onPress={onPress}
-        accessibilityRole={onPress ? 'button' : undefined}
-        accessibilityState={onPress ? { selected: isSelected } : undefined}
-        style={cardStyle}
+        style={({ pressed }) => [
+          cardStyle,
+          { backgroundColor: pressed ? theme.surfaceSoft : theme[tone] },
+        ]}
       >
         {children}
-      </GlassSurface>
+      </Pressable>
     );
   },
 );
@@ -141,7 +156,7 @@ export const Card = Object.assign(CardRoot, {
 
 const styles = StyleSheet.create({
   root: {
-    borderRadius: RADII.l,
+    borderRadius: 14,
     gap: SPACING.two,
   },
   content: {

@@ -4,9 +4,9 @@ import { StyleSheet, View } from 'react-native';
 import { HintButton } from '@/widgets/hint-button';
 import { ComparisonRow } from '@/widgets/plan-fact-bars';
 
-import { SPACING, STATIC_ROUTES } from '@/shared/constants';
+import { FONTS, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { Button, Card, Screen, Text } from '@/shared/ui';
+import { Button, Card, ListGroup, Screen, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
 import { usePeriodSummary } from '../model';
@@ -30,30 +30,33 @@ export const PeriodSummaryScreen = () => {
     return <Redirect href={STATIC_ROUTES.HOME} />;
   }
 
-  const directionName = (id: string) => t(`budgetPlan.directions.${id}.title`);
+  const directionName = (id: string) => t(`boxes.${id}`).toLocaleLowerCase();
 
   const overList = summary.explain.overspent.map(directionName).join(', ');
   const underList = summary.explain.underspent.map(directionName).join(', ');
   const { report, keeperLine, goal } = summary;
 
+  const value = (text: string, tone?: 'phosphor' | 'warning') => (
+    <Text
+      variant={tone === 'phosphor' ? 'machine' : 'code'}
+      themeColor={tone ?? 'text'}
+      style={styles.value}
+    >
+      {text}
+    </Text>
+  );
+
   return (
-    <Screen gap="three">
+    <Screen gap="compact" terminalVariant="keeper">
       <Screen.Header>
         <Screen.Heading>
-          <Screen.Title>
-            {t('periodSummary.title', { period: summary.periodIndex })}
-          </Screen.Title>
-          <Screen.Subtitle>{t('periodSummary.subtitle')}</Screen.Subtitle>
+          <Screen.Label>
+            {t('periodSummary.label', { period: summary.periodIndex })}
+          </Screen.Label>
+          <Screen.Title>{t('periodSummary.heading')}</Screen.Title>
         </Screen.Heading>
         <HintButton screen="period-summary" />
       </Screen.Header>
-
-      <Card tone="surfaceSoft">
-        <Card.Content>
-          <Text variant="bodyBold">{t('scene.watchers.keeper.name')}</Text>
-          <Text themeColor="textSecondary">{t(keeperLine.textKey)}</Text>
-        </Card.Content>
-      </Card>
 
       <View style={styles.rows}>
         {summary.rows.map((row) => (
@@ -65,104 +68,88 @@ export const PeriodSummaryScreen = () => {
         ))}
       </View>
 
-      <Card tone="surfaceSoft">
-        <Card.Content>
-          <Text variant="bodyBold">{t('periodSummary.whatHappened')}</Text>
-          <Text themeColor="textSecondary">
-            {t(`periodSummary.story.${summary.explain.storyKey}`, {
-              over: overList,
-              under: underList,
-            })}
-          </Text>
-        </Card.Content>
+      <Card>
+        <Text>
+          {t(`periodSummary.story.${summary.explain.storyKey}`, {
+            over: overList,
+            under: underList,
+          })}
+        </Text>
+        <Text variant="machine">{`> ${t('periodSummary.keeperLabel')}`}</Text>
+        <Text themeColor="textSecondary">{t(keeperLine.textKey)}</Text>
       </Card>
 
-      <Card tone="surfaceSoft">
-        <Card.Content style={styles.detail}>
-          <Text variant="bodyBold">{t('periodSummary.detailTitle')}</Text>
-          <Text themeColor="textSecondary">
-            {t('periodSummary.earned', { count: formatMoney(report.earned) })}
-          </Text>
-          <Text themeColor="textSecondary">
-            {t('periodSummary.spentCharge', {
-              count: formatMoney(report.spentOnCharge),
-            })}
-          </Text>
-          <Text themeColor="textSecondary">
-            {t('periodSummary.spentModules', {
-              count: formatMoney(report.spentOnModules),
-            })}
-          </Text>
-          <Text themeColor="textSecondary">
-            {t('periodSummary.saved', {
-              count: formatMoney(report.savedAmount),
-            })}
-          </Text>
-          <Text themeColor="textSecondary">
-            {report.adjustment >= 0
-              ? t('periodSummary.bonus', {
-                  count: formatMoney(report.adjustment),
-                })
-              : t('periodSummary.penalty', {
-                  count: formatMoney(Math.abs(report.adjustment)),
-                })}
-          </Text>
-        </Card.Content>
-      </Card>
+      <ListGroup>
+        <ListGroup.Item
+          title={t('periodSummary.table.earned')}
+          trailing={value(`+${formatMoney(report.earned)}`, 'phosphor')}
+        />
+        <ListGroup.Item
+          title={t('periodSummary.table.charge')}
+          trailing={value(formatMoney(report.spentOnCharge))}
+        />
+        <ListGroup.Item
+          title={t('periodSummary.table.modules')}
+          trailing={value(formatMoney(report.spentOnModules))}
+        />
+        <ListGroup.Item
+          title={t('periodSummary.table.saved')}
+          trailing={value(formatMoney(report.savedAmount))}
+        />
+        <ListGroup.Item
+          title={
+            report.adjustment >= 0
+              ? t('periodSummary.table.bonus')
+              : t('periodSummary.table.penalty')
+          }
+          trailing={
+            report.adjustment >= 0
+              ? value(`+${formatMoney(report.adjustment)}`, 'phosphor')
+              : value(`−${formatMoney(Math.abs(report.adjustment))}`, 'warning')
+          }
+        />
+      </ListGroup>
 
-      <Card tone="surfaceSoft">
-        <Card.Content style={styles.detail}>
-          <Text variant="bodyBold">{t('periodSummary.goalTitle')}</Text>
-          {goal ? (
-            <>
-              <Text themeColor="textSecondary">
-                {t(`savings.goals.${goal.goalId}.title`, {
+      <ListGroup>
+        <ListGroup.Item
+          icon="piggy"
+          title={
+            goal
+              ? t(`savings.goals.${goal.goalId}.title`, {
                   defaultValue: goal.title,
-                })}
-              </Text>
-              <Text themeColor="textSecondary">
-                {t('periodSummary.goalProgress', {
-                  saved: formatMoney(goal.saved),
-                  price: formatMoney(goal.price),
-                })}
-              </Text>
-              <Text themeColor="textSecondary">
-                {t(
+                })
+              : t('periodSummary.table.goal')
+          }
+          subtitle={
+            goal
+              ? t(
                   goal.isReached
                     ? 'periodSummary.goalReached'
                     : 'periodSummary.goalOpen',
-                )}
-              </Text>
-            </>
-          ) : (
-            <Text themeColor="textSecondary">
-              {t('periodSummary.goalNone')}
-            </Text>
-          )}
-        </Card.Content>
-      </Card>
-
-      <Card tone="surfaceSoft">
-        <Card.Content style={styles.detail}>
-          <Text variant="bodyBold">{t('periodSummary.robotTitle')}</Text>
-          <Text themeColor="textSecondary">
-            {t('periodSummary.robotCharge', {
-              value: Math.round(report.robotCharge * 100),
-            })}
-          </Text>
-          <Text themeColor="textSecondary">
-            {t('periodSummary.robotSpirit', {
-              value: Math.round(report.robotSpirit * 100),
-            })}
-          </Text>
-          <Text themeColor="textSecondary">
-            {t('periodSummary.robotLevel', { level: report.level })}
-          </Text>
-          <Text themeColor="textSecondary">
-            {t(`periodSummary.mood.${report.robotMood}`)}
-          </Text>
-        </Card.Content>
-      </Card>
+                )
+              : t('periodSummary.goalNone')
+          }
+          trailing={
+            goal
+              ? value(
+                  `${formatMoney(goal.saved)} / ${formatMoney(goal.price)}`,
+                  'phosphor',
+                )
+              : undefined
+          }
+        />
+        <ListGroup.Item
+          icon="battery"
+          title={t('periodSummary.table.charge2')}
+          subtitle={t(`periodSummary.mood.${report.robotMood}`)}
+          trailing={value(`${Math.round(report.robotCharge * 100)}%`)}
+        />
+        <ListGroup.Item
+          icon="up"
+          title={t('periodSummary.table.tier')}
+          trailing={value(String(report.level))}
+        />
+      </ListGroup>
 
       <Button
         variant="primary"
@@ -183,11 +170,9 @@ export const PeriodSummaryScreen = () => {
 
 const styles = StyleSheet.create({
   button: {
-    marginTop: 'auto',
+    marginTop: SPACING.two,
   },
-  detail: {
-    gap: SPACING.one,
-  },
+  value: { fontFamily: FONTS.monoStrong, fontSize: 16, lineHeight: 22 },
   rows: {
     gap: SPACING.two,
   },

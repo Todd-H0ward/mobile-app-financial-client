@@ -312,6 +312,7 @@ export const useHomeHudSource = () =>
 
       return {
         robot: user.robot,
+        modules: user.modules,
         balance: user.wallet.balance,
         /** Newest earn — 2.5.4 on home; spends must not steal the badge. */
         lastEarn:
@@ -319,6 +320,8 @@ export const useHomeHudSource = () =>
         savings: user.savings,
         tasks: user.tasks,
         phase: user.period.phase,
+        /** 1-based — the planning card says "период 3 · начало". */
+        periodIndex: user.period.index,
         isAnimationEnabled: user.settings.isAnimationEnabled,
       };
     }),

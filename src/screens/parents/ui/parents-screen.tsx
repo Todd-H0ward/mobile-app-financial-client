@@ -1,13 +1,14 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { ComparisonRow } from '@/widgets/plan-fact-bars';
 
 import { DemoModeCard } from '@/features/demo-mode';
 import { RestartProfileButton } from '@/features/profile-restart';
 
-import { SPACING } from '@/shared/constants';
+import { RADII, SPACING } from '@/shared/constants';
+import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { Card, Screen, Text } from '@/shared/ui';
+import { Card, PixelIcon, Screen, Segmented, Text } from '@/shared/ui';
 
 import { useParents } from '../model';
 
@@ -30,6 +31,7 @@ import { ThemeTallyRows } from './theme-tally-rows';
  */
 export const ParentsScreen = () => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const parents = useParents();
 
   if (parents.isLocked) {
@@ -45,20 +47,31 @@ export const ParentsScreen = () => {
   const report = parents.report;
 
   return (
-    <Screen gap="three">
+    <Screen gap="compact" terminalVariant="adult">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
+          <Screen.Label voice="adult">{t('parents.service')}</Screen.Label>
           <Screen.Title>{t('parents.title')}</Screen.Title>
-          <Screen.Subtitle>{t('parents.subtitle')}</Screen.Subtitle>
         </Screen.Heading>
       </Screen.Header>
 
-      <ParentsReadout status={parents.status} />
+      <Segmented
+        options={(['overview', 'topics', 'manage'] as const).map((section) => ({
+          value: section,
+          label: t(`parents.sections.${section}`),
+        }))}
+        value={parents.section}
+        onChange={parents.setSection}
+      />
 
-      {report && (
+      {parents.section === 'overview' && (
+        <ParentsReadout status={parents.status} />
+      )}
+
+      {report && parents.section === 'overview' && (
         <>
-          <Card tone="surfaceSoft">
+          <Card>
             <Card.Title>{t('parents.report.earningsTitle')}</Card.Title>
             <Card.Content style={styles.section}>
               <EarningsChart rows={report.earnings} />
@@ -68,7 +81,7 @@ export const ParentsScreen = () => {
             </Card.Content>
           </Card>
 
-          <Card tone="surfaceSoft">
+          <Card>
             <Card.Title>{t('parents.report.planFactTitle')}</Card.Title>
             <Card.Content style={styles.section}>
               {parents.lastRows.length > 0 ? (
@@ -87,10 +100,10 @@ export const ParentsScreen = () => {
                         `periodSummary.story.${parents.lastExplain.storyKey}`,
                         {
                           over: parents.lastExplain.overspent
-                            .map((d) => t(`budgetPlan.directions.${d}.title`))
+                            .map((d) => t(`boxes.${d}`).toLocaleLowerCase())
                             .join(', '),
                           under: parents.lastExplain.underspent
-                            .map((d) => t(`budgetPlan.directions.${d}.title`))
+                            .map((d) => t(`boxes.${d}`).toLocaleLowerCase())
                             .join(', '),
                         },
                       )}
@@ -105,17 +118,7 @@ export const ParentsScreen = () => {
             </Card.Content>
           </Card>
 
-          <Card tone="surfaceSoft">
-            <Card.Title>{t('parents.report.tasksTitle')}</Card.Title>
-            <Card.Content style={styles.section}>
-              <ThemeTallyRows rows={report.tasksByTheme} />
-              <Text variant="small" themeColor="textSecondary">
-                {t('parents.report.tasksNote', { count: report.tasksDone })}
-              </Text>
-            </Card.Content>
-          </Card>
-
-          <Card tone="surfaceSoft">
+          <Card>
             <Card.Title>{t('parents.report.growthTitle')}</Card.Title>
             <Card.Content style={styles.section}>
               <Text variant="bodyBold">
@@ -138,19 +141,45 @@ export const ParentsScreen = () => {
         </>
       )}
 
-      <DemoModeCard />
+      {parents.section === 'topics' && report && (
+        <>
+          <Card>
+            <Card.Title>{t('parents.report.tasksTitle')}</Card.Title>
+            <Card.Content style={styles.section}>
+              <ThemeTallyRows rows={report.tasksByTheme} />
+              <Text variant="small" themeColor="textSecondary">
+                {t('parents.report.tasksNote', { count: report.tasksDone })}
+              </Text>
+            </Card.Content>
+          </Card>
 
-      <Card tone="surfaceSoft">
-        <Card.Title>{t('settings.profile')}</Card.Title>
-        <Card.Content>
-          <Text variant="small" themeColor="textSecondary">
-            {t('settings.profileDescription')}
-          </Text>
-        </Card.Content>
-        <Card.Footer>
-          <RestartProfileButton />
-        </Card.Footer>
-      </Card>
+          <View style={[styles.dashed, { borderColor: theme.borderStrong }]}>
+            <Text themeColor="textSecondary">{t('parents.discuss')}</Text>
+          </View>
+        </>
+      )}
+
+      {parents.section === 'manage' && (
+        <>
+          <DemoModeCard />
+
+          <View style={[styles.dashed, { borderColor: theme.warning }]}>
+            <Text variant="machine" themeColor="warning">
+              {`! ${t('parents.profileLabel').toLocaleUpperCase()}`}
+            </Text>
+            <Text variant="small" themeColor="textSecondary">
+              {t('settings.profileDescription')}
+            </Text>
+            <RestartProfileButton />
+          </View>
+        </>
+      )}
+      <View style={styles.privacy}>
+        <PixelIcon name="lock" size={12} tone="textMuted" />
+        <Text variant="small" themeColor="textMuted" style={styles.privacyText}>
+          {t('parents.privacy')}
+        </Text>
+      </View>
     </Screen>
   );
 };
@@ -160,6 +189,15 @@ export const ParentsScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
+  dashed: {
+    borderRadius: RADII.m,
+    borderStyle: 'dashed',
+    borderWidth: 2,
+    gap: SPACING.two,
+    padding: SPACING.compact,
+  },
+  privacy: { alignItems: 'flex-start', flexDirection: 'row', gap: SPACING.two },
+  privacyText: { flex: 1 },
   section: {
     gap: SPACING.two,
   },

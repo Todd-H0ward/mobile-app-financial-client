@@ -1,7 +1,6 @@
 import { memo } from 'react';
 
 import {
-  Platform,
   Text as RNText,
   type TextProps as RNTextProps,
   StyleSheet,
@@ -25,8 +24,11 @@ type TextVariant =
   | 'label'
   | 'link'
   | 'linkPrimary'
-  | 'code';
-
+  | 'code'
+  | 'machine'
+  | 'number'
+  | 'numberLarge'
+  | 'numberSmall';
 interface TextProps extends RNTextProps {
   variant?: TextVariant;
   themeColor?: ThemeColor;
@@ -36,8 +38,20 @@ interface TextProps extends RNTextProps {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
+/** Only machine output glows — numbers and voice labels, never reading text. */
+const GLOWING_VARIANTS: ReadonlySet<TextVariant> = new Set([
+  'machine',
+  'number',
+  'numberLarge',
+  'numberSmall',
+]);
+
 const VARIANT_COLOR: Partial<Record<TextVariant, ThemeColor>> = {
-  linkPrimary: 'primary',
+  linkPrimary: 'phosphor',
+  machine: 'phosphor',
+  number: 'phosphor',
+  numberLarge: 'phosphor',
+  numberSmall: 'phosphor',
 };
 
 // ═══════════════════════════════════════════
@@ -47,9 +61,19 @@ const VARIANT_COLOR: Partial<Record<TextVariant, ThemeColor>> = {
 export const Text = memo(
   ({ style, variant = 'body', themeColor, ...props }: TextProps) => {
     const theme = useTheme();
-    const color = theme[themeColor ?? VARIANT_COLOR[variant] ?? 'text'];
-
-    return <RNText style={[styles[variant], { color }, style]} {...props} />;
+    const tone = themeColor ?? VARIANT_COLOR[variant] ?? 'text';
+    const isGlowing = GLOWING_VARIANTS.has(variant) && tone === 'phosphor';
+    return (
+      <RNText
+        style={[
+          styles[variant],
+          { color: theme[tone] },
+          isGlowing && [styles.glow, { textShadowColor: theme.glow }],
+          style,
+        ]}
+        {...props}
+      />
+    );
   },
 );
 
@@ -58,76 +82,47 @@ export const Text = memo(
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  /** Screen-level headline: splash, celebration screens. */
-  display: {
-    fontFamily: FONTS.rounded,
-    fontSize: 32,
-    fontWeight: 900,
+  body: { fontFamily: FONTS.sans, fontSize: 16, lineHeight: 23 },
+  bodyBold: { fontFamily: FONTS.sansStrong, fontSize: 16, lineHeight: 23 },
+  code: { fontFamily: FONTS.mono, fontSize: 14, lineHeight: 21 },
+  display: { fontFamily: FONTS.rounded, fontSize: 28, lineHeight: 33 },
+  glow: { textShadowOffset: { height: 0, width: 0 }, textShadowRadius: 10 },
+  label: { fontFamily: FONTS.sansStrong, fontSize: 14, lineHeight: 20 },
+  link: {
+    fontFamily: FONTS.sansStrong,
+    fontSize: 16,
+    lineHeight: 23,
+    textDecorationLine: 'underline',
+  },
+  linkPrimary: {
+    fontFamily: FONTS.sansStrong,
+    fontSize: 16,
+    lineHeight: 23,
+    textDecorationLine: 'underline',
+  },
+  machine: { fontFamily: FONTS.monoStrong, fontSize: 13, lineHeight: 18 },
+  number: {
+    fontFamily: FONTS.monoStrong,
+    fontSize: 28,
+    fontVariant: ['tabular-nums'],
     lineHeight: 36,
   },
-  title: {
-    fontFamily: FONTS.rounded,
-    fontSize: 26,
-    fontWeight: 900,
-    lineHeight: 30,
+  numberLarge: {
+    fontFamily: FONTS.monoStrong,
+    fontSize: 48,
+    fontVariant: ['tabular-nums'],
+    lineHeight: 58,
   },
-  subtitle: {
-    fontFamily: FONTS.rounded,
+  numberSmall: {
+    fontFamily: FONTS.monoStrong,
     fontSize: 20,
-    fontWeight: 800,
-    lineHeight: 24,
+    fontVariant: ['tabular-nums'],
+    lineHeight: 28,
   },
-  /** Body copy — never smaller than this for content. */
-  body: {
-    fontFamily: FONTS.sans,
-    fontSize: 16,
-    fontWeight: 400,
-    lineHeight: 23,
-  },
-  bodyBold: {
-    fontFamily: FONTS.sans,
-    fontSize: 16,
-    fontWeight: 800,
-    lineHeight: 23,
-  },
-  small: {
-    fontFamily: FONTS.sans,
-    fontSize: 13,
-    fontWeight: 400,
-    lineHeight: 18,
-  },
-  smallBold: {
-    fontFamily: FONTS.sans,
-    fontSize: 13,
-    fontWeight: 700,
-    lineHeight: 18,
-  },
-  /** Navigation and icon captions only — the smallest allowed size. */
-  label: {
-    fontFamily: FONTS.sans,
-    fontSize: 10,
-    fontWeight: 700,
-    lineHeight: 12,
-  },
-  link: {
-    fontFamily: FONTS.sans,
-    fontSize: 16,
-    fontWeight: 700,
-    lineHeight: 23,
-  },
-  /** Colour comes from `VARIANT_COLOR`, so it follows the theme. */
-  linkPrimary: {
-    fontFamily: FONTS.sans,
-    fontSize: 16,
-    fontWeight: 700,
-    lineHeight: 23,
-  },
-  /** Monospace for debug / UI-kit only — not content copy. */
-  code: {
-    fontFamily: FONTS.mono,
-    fontSize: 12,
-    fontWeight: Platform.select({ android: 700 }) ?? 500,
-  },
+  small: { fontFamily: FONTS.sans, fontSize: 14, lineHeight: 20 },
+  smallBold: { fontFamily: FONTS.sansStrong, fontSize: 14, lineHeight: 20 },
+  subtitle: { fontFamily: FONTS.rounded, fontSize: 18, lineHeight: 24 },
+  title: { fontFamily: FONTS.rounded, fontSize: 22, lineHeight: 27 },
 });
 
 export type { TextProps, TextVariant };

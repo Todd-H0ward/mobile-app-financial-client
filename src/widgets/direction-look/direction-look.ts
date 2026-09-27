@@ -1,7 +1,7 @@
 import type { BudgetDirection } from '@/entities/economy';
 
 import type { ThemeColor } from '@/shared/constants';
-import type { ShapeVariant } from '@/shared/ui';
+import type { PixelIconName, ShapeVariant } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -9,6 +9,7 @@ import type { ShapeVariant } from '@/shared/ui';
 
 /** How one direction looks wherever the three of them stand together. */
 interface DirectionLook {
+  icon: PixelIconName;
   surface: ThemeColor;
   accent: ThemeColor;
   /** Readable-on-`surface` color for the basket's title. */
@@ -29,25 +30,28 @@ interface DirectionLook {
  * The look of the three budget directions.
  *
  * Shared by the plan screen, the shop and the summary so the same three words
- * keep the same colours and markers everywhere — docs/budget.md.
+ * keep the same icons everywhere — colour is never the only category signal.
  */
 export const DIRECTION_LOOK: Record<BudgetDirection, DirectionLook> = {
   needs: {
-    surface: 'primarySoft',
+    icon: 'battery',
+    surface: 'surface',
     accent: 'primary',
-    label: 'primaryStrong',
+    label: 'text',
     marker: 'circle',
   },
   wants: {
-    surface: 'accentSoft',
-    accent: 'accent',
-    label: 'accentStrong',
+    icon: 'gear',
+    surface: 'surface',
+    accent: 'primary',
+    label: 'text',
     marker: 'diamond',
   },
   savings: {
-    surface: 'successSoft',
-    accent: 'success',
-    label: 'successStrong',
+    icon: 'piggy',
+    surface: 'surface',
+    accent: 'primary',
+    label: 'text',
     marker: 'leaf',
   },
 };
