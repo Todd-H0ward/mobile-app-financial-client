@@ -70,4 +70,18 @@ export const lessonAccess = (
   };
 };
 
+/** Open tiles only — passed cells stay lit and ignore a hold. */
+export const isLessonPlayable = (
+  cellOrdinal: number,
+  completedLessonIds: readonly string[],
+  platformLevel: number,
+): boolean => {
+  const { status } = lessonAccess(
+    cellOrdinal,
+    completedLessonIds,
+    platformLevel,
+  );
+  return status === 'AVAILABLE' || status === 'CURRENT';
+};
+
 export type { LessonStatus };

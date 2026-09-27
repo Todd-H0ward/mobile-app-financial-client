@@ -5,11 +5,11 @@ import {
   activeLessonIndexForCell,
   displayNumberForCell,
   INITIAL_LESSON_SESSION,
+  isLessonPlayable,
   isPassed,
   type Lesson,
   type LessonAction,
   type LessonStage,
-  lessonAccess,
   lessonAt,
   listLessons,
   passMark,
@@ -58,8 +58,11 @@ export const useLesson = (cellId: string): LessonState => {
   const activeIndex = useMemo(() => {
     if (!user || ordinal === null) return null;
     if (
-      lessonAccess(ordinal, user.completedLessonIds, user.platform.level)
-        .status === 'LOCKED'
+      !isLessonPlayable(
+        ordinal,
+        user.completedLessonIds,
+        user.platform.level,
+      )
     ) {
       return null;
     }

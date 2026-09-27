@@ -124,7 +124,7 @@ const displayNumberForCell = (
   _completedLessonIds: readonly string[] = [],
 ): number => cellOrdinal + 1;
 
-/** Cell keys whose lesson is done — what the scene sinks. */
+/** Cell keys whose lesson is done — what the scene paints green. */
 const completedCellKeysFromLessons = (
   completedLessonIds: readonly string[],
 ): string[] => {

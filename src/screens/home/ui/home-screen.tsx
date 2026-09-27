@@ -27,7 +27,7 @@ import { RoomScene, type SceneView } from '@/widgets/room-scene';
 import { WatcherTerminal } from '@/widgets/watcher-terminal';
 
 import { PLATFORM_LEVEL_COUNT } from '@/entities/economy';
-import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
+import { isLessonPlayable, lessonOrdinalForKey } from '@/entities/lesson';
 import { actionForMood, moodFor } from '@/entities/robot-dog';
 import { cellKey, SCENE_PALETTE } from '@/entities/scene';
 import {
@@ -310,8 +310,11 @@ export const HomeScreen = () => {
               const ordinal = lessonOrdinalForKey(key);
               if (ordinal === null) return;
               if (
-                lessonAccess(ordinal, doneLessonIds, homeData.platformLevel)
-                  .status === 'LOCKED'
+                !isLessonPlayable(
+                  ordinal,
+                  doneLessonIds,
+                  homeData.platformLevel,
+                )
               ) {
                 return;
               }

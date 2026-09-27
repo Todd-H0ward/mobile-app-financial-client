@@ -6,7 +6,7 @@ import { useShallow } from 'zustand/react/shallow';
 import {
   activeLessonIndexForCell,
   completedCellKeysFromLessons,
-  lessonAccess,
+  isLessonPlayable,
   lessonAt,
   lessonOrdinalForKey,
 } from '@/entities/lesson';
@@ -84,8 +84,11 @@ export const useUserStore = create<UserStore>()(
         const ordinal = lessonOrdinalForKey(cellKey);
         if (!user || ordinal === null) return;
         if (
-          lessonAccess(ordinal, user.completedLessonIds, user.platform.level)
-            .status === 'LOCKED'
+          !isLessonPlayable(
+            ordinal,
+            user.completedLessonIds,
+            user.platform.level,
+          )
         ) {
           return;
         }

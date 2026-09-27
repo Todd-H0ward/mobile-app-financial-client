@@ -19,7 +19,7 @@ import {
   WebGLRenderer,
 } from 'three';
 
-import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
+import { isLessonPlayable, lessonOrdinalForKey } from '@/entities/lesson';
 import {
   bondReaction,
   DEFAULT_ROBOT_ASSEMBLY,
@@ -723,9 +723,10 @@ export const RoomScene = ({
     if (view === 'top' || view !== cell.segment) return false;
     const ordinal = lessonOrdinalForKey(cellKey(cell));
     if (ordinal === null) return false;
-    return (
-      lessonAccess(ordinal, doneLessonIdsRef.current, levelRef.current)
-        .status !== 'LOCKED'
+    return isLessonPlayable(
+      ordinal,
+      doneLessonIdsRef.current,
+      levelRef.current,
     );
   };
 
