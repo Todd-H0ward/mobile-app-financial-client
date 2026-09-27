@@ -75,10 +75,10 @@ export const SceneBootOverlay = ({ isReady }: SceneBootOverlayProps) => {
     >
       <RingsBackdrop centerY={0.5} />
       <TerminalPanel frameStyle={styles.frame} style={styles.screen}>
-        <Text variant="display" style={styles.title}>
+        <Text variant="display" style={styles.title} numberOfLines={1}>
           {t('app.name')}
         </Text>
-        <Text variant="machine">{`> ${t('app.loadingScene')}`}</Text>
+        <Text variant="machine" numberOfLines={1}>{`> ${t('app.loadingScene')}`}</Text>
         <View style={styles.cells}>
           {BOOT_CELLS.map((isLit, index) => (
             <View

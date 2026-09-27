@@ -65,6 +65,10 @@ export const Text = memo(
     const isGlowing = GLOWING_VARIANTS.has(variant) && tone === 'phosphor';
     return (
       <RNText
+        // Keep whole words on one line — no mid-word hyphenation on either platform.
+        android_hyphenationFrequency="none"
+        lineBreakStrategyIOS="none"
+        textBreakStrategy="simple"
         style={[
           styles[variant],
           { color: theme[tone] },
