@@ -54,7 +54,20 @@ jobs:
             exit 1
           fi
           mkdir -p credentials
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > credentials/release.keystore
+          # Pasting into the GitHub UI often turns base64 `+` into spaces; newlines
+          # from wrapped copies also break GNU base64. Normalize before decode.
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" \
+            | tr -d '\n\r\t' \
+            | tr ' ' '+' \
+            | base64 -d > credentials/release.keystore
+          if ! keytool -list \
+            -keystore credentials/release.keystore \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -alias "$ANDROID_KEY_ALIAS" >/dev/null
+          then
+            echo "::error::Decoded ANDROID_KEYSTORE_BASE64 is not a valid keystore (or password/alias mismatch). Re-set the secret with: base64 -i credentials/release.keystore | gh secret set ANDROID_KEYSTORE_BASE64" >&2
+            exit 1
+          fi
           {
             echo "ANDROID_KEYSTORE_PATH=$PWD/credentials/release.keystore"
             echo "ANDROID_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD"

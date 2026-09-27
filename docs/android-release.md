@@ -88,7 +88,7 @@ Actions:
 
 | Секрет | Значение |
 | --- | --- |
-| `ANDROID_KEYSTORE_BASE64` | `base64 -i credentials/release.keystore \| pbcopy` (macOS) |
+| `ANDROID_KEYSTORE_BASE64` | лучше не через UI: `base64 -i credentials/release.keystore \| gh secret set ANDROID_KEYSTORE_BASE64` (вставка руками часто превращает `+` в пробелы → `base64: invalid input`) |
 | `ANDROID_KEYSTORE_PASSWORD` | из `credentials/android-release.env` |
 | `ANDROID_KEY_ALIAS` | `mobile-hackathon`, если ключ не переименовывали |
 | `ANDROID_KEY_PASSWORD` | тот же пароль, что и у стораджа (скрипт задаёт оба одинаковыми) |
