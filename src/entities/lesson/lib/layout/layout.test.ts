@@ -13,7 +13,7 @@ import {
 } from './layout';
 
 describe('lesson layout on the arena', () => {
-  it('matches the FBX disc count', () => {
+  it('gives each of the ninety lessons a cell', () => {
     expect(ARENA_CELL_COUNT).toBe(90);
   });
 
@@ -51,8 +51,9 @@ describe('lesson layout on the arena', () => {
   });
 
   it('marks a cell sunk only when every stacked lesson is done', () => {
+    // Ordinal 0 is the first cell of the first step, in the first bay.
     const ids = lessonIndicesForCell(0).map((i) => listLessons()[i]?.id ?? '');
-    expect(completedCellKeysFromLessons([])).not.toContain('0-0-0');
-    expect(completedCellKeysFromLessons(ids)).toContain('0-0-0');
+    expect(completedCellKeysFromLessons([])).not.toContain('0-1-0');
+    expect(completedCellKeysFromLessons(ids)).toEqual(['0-1-0']);
   });
 });

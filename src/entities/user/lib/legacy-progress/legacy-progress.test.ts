@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { completedCellKeysFromLessons, listLessons } from '@/entities/lesson';
+
 import { createInitialUser } from '../../model/initial-user';
 
 import { importLegacyProgress, isCompletedCellKey } from './legacy-progress';
@@ -11,7 +13,13 @@ describe('legacy progress import', () => {
       { doneCells: ['0-0-0', '2-4-5', '0-0-0', '3-0-0', '0-5-0', '0-0-6', 1] },
       null,
     );
-    expect(result.completedLessonCells).toEqual(['0-0-0', '0-4-5']);
+    // Old-grid keys are read as the lessons they stood for — `0-4-5` is the
+    // thirtieth — and the cells are those lessons' cells on today's arena.
+    const ids = [listLessons()[0]?.id, listLessons()[29]?.id];
+    expect(result.completedLessonIds).toEqual(ids);
+    expect(result.completedLessonCells).toEqual(
+      completedCellKeysFromLessons(ids.filter((id) => id !== undefined)),
+    );
   });
   it('normalizes legacy records without importing invalid or unbounded data', () => {
     const result = importLegacyProgress(createInitialUser(), null, {

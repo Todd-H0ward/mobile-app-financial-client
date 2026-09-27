@@ -1,6 +1,7 @@
 export type { LessonAction, LessonStage } from './lib';
 export {
   ARENA_CELL_COUNT,
+  ARENA_LAYOUT,
   activeLessonIndexForCell,
   assertLessonContent,
   cellOrdinalForLessonIndex,

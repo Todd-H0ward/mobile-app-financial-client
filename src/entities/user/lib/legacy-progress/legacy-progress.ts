@@ -1,12 +1,23 @@
-import { lessonOrdinalForKey, listLessons } from '@/entities/lesson';
+import { completedCellKeysFromLessons, listLessons } from '@/entities/lesson';
 
 import { isRecord } from '@/shared/utils';
 
 import type { UserSave } from '../../model/types';
 
-/** Valid cells only: arbitrary URLs must never become saved progress. */
+/**
+ * A key of the old arena grid: three bays × five rows × six cells.
+ *
+ * Only for data written before the arena was re-cut — the current layout
+ * decides its own keys (`lessonOrdinalForKey`).
+ */
 export const isCompletedCellKey = (value: unknown): value is string =>
   typeof value === 'string' && /^[0-2]-[0-4]-[0-5]$/.test(value);
+
+/** The lesson an old-grid key stood for: bay-major, six to a row. */
+const legacyLessonId = (key: string): string | undefined => {
+  const [sector, level, index] = key.split('-').map(Number);
+  return listLessons()[sector * 30 + level * 6 + index]?.id;
+};
 
 /** Import the old profile-independent keys once, when upgrading to UserSave v9. */
 export const importLegacyProgress = (
@@ -30,19 +41,16 @@ export const importLegacyProgress = (
           .sort((a, b) => direction * (a - b))
           .slice(0, 5)
       : [];
-  const completedLessonCells = [
-    ...new Set([...user.completedLessonCells, ...cells]),
-  ];
-  const fromCells = completedLessonCells.map((key) => {
-    const ordinal = lessonOrdinalForKey(key);
-    return ordinal === null ? null : listLessons()[ordinal]?.id;
-  });
   const completedLessonIds = [
     ...new Set([
       ...user.completedLessonIds,
-      ...fromCells.filter((id): id is string => typeof id === 'string'),
+      ...cells
+        .map(legacyLessonId)
+        .filter((id): id is string => typeof id === 'string'),
     ]),
   ];
+  // Keys of the current arena, from the lessons — never the old keys as-is.
+  const completedLessonCells = completedCellKeysFromLessons(completedLessonIds);
   return {
     ...user,
     completedLessonCells,

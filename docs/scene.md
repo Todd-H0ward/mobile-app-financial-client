@@ -38,50 +38,85 @@ What went, and why it was not missed:
   built when the wedges were rooms; `highlight` already tints a segment
   through its material, which costs nothing per pixel.
 
-Draw calls are a separate and still-unpaid debt: roughly 260 against the 50 in
-`docs/design-brief-3d.md`, and 68 800 triangles against 50 000. Most of it is
-three glTF models that arrive pre-split — the robot dog alone is 111 meshes
-and 35 648 triangles, the keeper 60 and 19 004, the overseer 54 and 8 746.
-Merging each by material would take those 225 draw calls down to about 15.
-That is worth doing, but it was not what was costing the frames.
+Draw calls are a separate debt: the three glTF models arrive pre-split — the
+robot dog alone is 111 meshes and 35 648 triangles, the keeper 60 and 19 004,
+the overseer 54 and 8 746. Merging each by material would take those 225
+draw calls down to about 15, but the clips animate each mesh on its own.
+The arena itself is now small: 15 row buffers, 15 frame buffers, 15 number
+buffers, three gears and the floor.
 
+## Pixels are the frame budget
 
-## Cells: the ninety pressable tiles
+The other half of a frame is how many pixels get shaded, and two things
+were spending it for nothing:
 
-The FBX holds 90 discs: five terraces of eighteen tiles. Each ring has three
-slots cut in it, one per gear, at 98.5°, 218.5° and 338.5° — measured off the
-vertices, and the gear sits in the slot. Between two slots run six unbroken
-tiles, and **those six are a segment's row**. Five rows, six cells, ninety
-tiles, three bays.
+- **The sky ran fifteen octaves of noise per pixel.** The haze sphere sits
+  behind the whole screen, so its fragment shader ran for every pixel of it
+  every frame — sixty `sin` calls each — to paint soft, slow mist. It is now
+  worked out per vertex (`haze-backdrop.ts`, three octaves on a 64×32
+  sphere) and the fragment shader only writes the interpolated colour.
+- **The arena was drawn at the phone's full density.** At 2.75–3× that is
+  two and a half million Phong pixels with a point light. `room-scene.tsx`
+  caps it at `MAX_RENDER_DENSITY` (1.75): the `GLView` is laid out smaller
+  and scaled up with a transform — on Android it is a `TextureView`, which
+  the compositor scales for free. Taps still map through the outer view,
+  whose aspect the surface keeps.
 
-Do not trust `node.segment` from the converter for this. It buckets each tile
-by its nearest gear, which cuts every bay down the middle and leaves a gear
-standing in the centre of it. `cellsOf` regroups by angle instead. Nor can a
-tile's position be read off `matrix[12..14]`: the tiles are clones and their
-transforms carry rotation and scale with the translation left at zero, so
-every one of them looks like it is standing on the axis. `nodeAngle` averages
-the transformed vertices, the same trap the converter had to work around.
+Also: the bays are opaque until a highlight fade starts (`setFade`). A solid
+arena in the transparent pass is sorted every frame and loses early depth
+rejection, which on a fill-bound GPU is most of what it has.
 
-Each cell is framed and pressable.
+## Cells: built from the content, not from the model
 
-The six cells of a terrace are **merged into one buffer**. Ninety separate
-meshes would be ninety draw calls for a floor, and the arena is already well
-over the draw-call budget in `docs/design-brief-3d.md`. The price of merging
-is that a ray comes back with a triangle index and no idea whose it is, so
-`build-scene` writes the first triangle of each cell onto the mesh
-(`userData.starts`) and `cellOfFace` turns a hit back into a cell. The frames
-are merged the same way: one `LineSegments` per terrace per segment, fifteen
-in all, plus one bright outline that moves to whichever cell is selected.
+The FBX holds 90 discs, five rings of eighteen, with three slots cut in each
+ring — one per gear, at 98.5°, 218.5° and 338.5°. The app **no longer draws
+them**. The converter measures them instead (ring radii and heights, the
+17.14° slot, and `slotted` — whether a gear actually stands in the ring; see
+`tiles` in `scene.json`) and leaves them out, together with the ramps that
+climbed through the inner slots. `lib/cell-geometry` builds the cells at
+runtime from `arenaLayout(count)` in `entities/scene`:
 
-Two things to know before touching them:
+- **Ring 0 is the platform**, level with the floor the robot stands on: one
+  plain ring in the floor's colour, no cells. Lessons start on the first step.
+- **Numbering is per bay**: bay 0 holds 1–30, bay 1 31–60, bay 2 61–90, each
+  running row by row up the steps. A row is numbered against the heading, so
+  from in front of its bay it reads left to right.
+- A bay shares its lessons among its steps **by length** (mid-radius × the
+  bay's arc on that ring), so a cell is about the same size everywhere:
+  30 → 5 / 7 / 8 / 10. A short row stretches its cells over the whole arc.
+- **A ring keeps its slots only where a gear stands in it.** Only the two
+  outer rings do; on the inner ones the bays meet gear line to gear line, so
+  the slot that had nothing in it — a bald patch — is gone.
+- A row opens as a whole: platform at its step, the row below it in the same
+  bay done. `ARENA_LAYOUT` (`entities/lesson`) is the one cut the game uses;
+  never compute keys or ordinals by arithmetic — ask `layoutOrdinal`,
+  `layoutCell`, `rowCells` or `cellFromKey(key, layout)`.
+- A step left bare by short content is drawn whole and dimmed. Past ninety
+  lessons extra ones stack on the same cells (`lessonIndicesForCell`).
 
-- **Cell order is angular, not file order.** `cellsOf` sorts by the angle
-  around the axis so `cell` means a place on the arc. The game will store
-  cell indices; a modelling accident must not move them.
+**Two sets of numbers.** On the map they lie on the tile tops, turned to read
+upright from the map's fixed heading (`TOP_AZIMUTH`) — radially outward they
+were upside down on the near rim. In a bay they stand on the cell fronts, the
+wall that faces the axis: from a camera at eye level a tile top is a sliver.
+`setNumberFace` picks one; both sink with their cell. A passed cell's number
+is the HUD's green, and its front drops out of sight with it.
+
+Each row — the cells of one step in one bay — is **one buffer**, and so
+are its frames and its numbers: 36 draw calls for the whole floor, where the
+numbers alone used to be ninety meshes with a material each. A ray comes
+back with a triangle index, so the row mesh carries the first triangle of
+each cell (`userData.starts`) and `cellOfFace` turns a hit back into a cell.
+Numbers are rebuilt per row when access changes; their colour rides on the
+vertices, so one opaque material serves every status.
+
+Things to know before touching them:
+
+- **Cells sink by moving their slice** of the row buffers (`shiftSlice`),
+  never by a mesh of their own. Numbers are built after the first sink, so
+  a rebuild starts each glyph at the offset its cell already has.
 - **The outlines are lifted one unit.** An edge sitting exactly on the face it
   came from is a coin toss per pixel on a phone GPU, and the frame comes out
   dashed and crawling.
-
 
 ## Откуда берётся геометрия
 
@@ -103,18 +138,20 @@ node scripts/fbx-to-scene.mjs
 
 | Поле | Что это |
 | --- | --- |
-| `geometries` | 33 уникальные геометрии, плоские массивы `position` / `normal` |
-| `nodes` | 95 инстансов: индекс геометрии, номер сектора, матрица 4×4 |
+| `geometries` | 3 геометрии (шестерня, диск пола, пандус), `position` / `normal` |
+| `nodes` | 5 инстансов: три шестерни и пол — индекс геометрии, сектор, матрица 4×4 |
+| `tiles` | Замеры 90 дисков: кольца (радиусы, высоты), дуга диска и прорези |
 | `segmentAngles` | Азимуты трёх секторов: 98.5° / 218.5° / 338.5° |
 | `bounds` | Габариты и `sphereRadius` — по нему кадрируется камера |
 | `camera` | Угол и дистанция камеры, оставленной художником в сцене |
 
-Геометрия шарится: 90 из 95 нод — один и тот же диск из 12 треугольников.
-Поэтому `scene.json` весит ~180 КБ при 5403 треугольниках.
+Диски в файл не попадают — приложение строит ячейки само (см. выше), поэтому
+`scene.json` весит ~140 КБ при 4323 треугольниках.
 
 **Сектор считается по центроиду меша, а не по трансформу клона.** Клонер в C4D
 поворачивает клоны, оставляя трансляцию нулевой, — по трансформу все 90 дисков
-попадали бы в одну комнату.
+попадали бы в одну комнату. По той же причине замеры дисков берутся по их
+вершинам.
 
 Если модель поменялась — перезапустите конвертер и закоммитьте оба файла.
 
@@ -269,6 +306,15 @@ expo-gl не умеет произвольный текст без записи 
 - окрасы — обычные PNG в `assets/robot-dog/skins/<скин>/`, которые
   `expo-asset` кладёт на диск (`downloadAsync`), а `Texture.image` получает
   `{ localUri, width, height }`;
+- **в релизной сборке ни `require`, ни `fetch` напрямую не работают.** На
+  Android модель резолвится в голое имя ресурса (`assets_robotdog_robotdog`),
+  которое `fetch` открыть не может, а картинка помечается «скачанной» с тем же
+  именем вместо пути — `downloadAsync` пропускается, и expo-gl получает имя, а
+  не файл. Так в APK не грузились ни пёс, ни оба ИИ. Всё, что грузит сцена,
+  идёт через `lib/local-asset` (`localFileOf`, `readAssetBytes`,
+  `loadGlTexture`): он копирует ресурс из APK в кэш и отдаёт `file://`.
+  Проверять — только сборкой со встроенным бандлом: в dev файлы приходят с
+  Metro по http, и ошибка не видна;
 - вырезает картинки из GLB скрипт:
 
 ```bash

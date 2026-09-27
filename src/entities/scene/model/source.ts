@@ -12,13 +12,14 @@ interface SceneGeometry {
 }
 
 interface SceneNode {
-  /** Index into `geometries` — 90 of the 95 nodes are cloned discs. */
+  /** Index into `geometries`. */
   geometry: number;
   /** Which room the node stands in, or `-1` when it sits on the axis. */
   segment: number;
   /**
    * Which tier of discs the node belongs to, `0` at the bottom, or `-1` for
-   * anything that is not part of a tier — the spiral itself, above all.
+   * anything that is not part of a tier. The converter keeps only the `-1`
+   * nodes — the gears and the floor — since the discs are built in the app.
    */
   step: number;
   /** World matrix, column-major, 16 numbers — the same layout three uses. */
@@ -53,8 +54,40 @@ interface SceneSource {
     /** Distance between two tiers, in world units. */
     rise: number;
   };
+  /**
+   * The discs, measured off the FBX and left out of `nodes`.
+   *
+   * The app builds the cells itself (`widgets/room-scene/lib/cell-geometry`)
+   * so a bay can carry fewer than six on its top row — see `arenaLayout`.
+   */
+  tiles: {
+    /** One per tier, innermost first. */
+    rings: SceneTileRing[];
+    /** Degrees of arc one disc covers in the model. */
+    cellArc: number;
+    /** Degrees of arc the slot a gear stands in takes out of each ring. */
+    slotArc: number;
+    /** Discs in one full ring of the model, across all three bays. */
+    cellsPerRing: number;
+  };
   geometries: SceneGeometry[];
   nodes: SceneNode[];
+}
+
+interface SceneTileRing {
+  /** Radius of the ring's inner edge — the riser the child faces. */
+  inner: number;
+  /** Radius of the outer edge, where the next ring starts. */
+  outer: number;
+  /** Height of the underside, in world units. */
+  bottom: number;
+  /** Height of the top face — where the numbers are drawn. */
+  top: number;
+  /**
+   * Whether a gear stands in this ring. Only then does it keep the slot the
+   * model cut at every gear; the inner rings run all the way round.
+   */
+  slotted: boolean;
 }
 
 // ═══════════════════════════════════════════
@@ -117,7 +150,13 @@ const SCENE_STEP_RISE = SCENE_SOURCE.steps.rise;
 /** Nodes that belong to no tier carry this instead of an index. */
 const SCENE_FLAT_STEP = -1;
 
-export type { SceneGeometry, SceneNode, SceneSource };
+/** The rings the cells are cut from, innermost first. */
+const SCENE_TILE_RINGS = SCENE_SOURCE.tiles.rings;
+
+/** Degrees of arc a gear's slot takes out of a ring it stands in. */
+const SCENE_SLOT_ARC = SCENE_SOURCE.tiles.slotArc;
+
+export type { SceneGeometry, SceneNode, SceneSource, SceneTileRing };
 export {
   SCENE_FLAT_STEP,
   SCENE_GEAR_ANGLES,
@@ -125,8 +164,10 @@ export {
   SCENE_RADIUS,
   SCENE_SEGMENT_COUNT,
   SCENE_SHARED_SEGMENT,
+  SCENE_SLOT_ARC,
   SCENE_SOURCE,
   SCENE_STEP_COUNT,
   SCENE_STEP_RISE,
+  SCENE_TILE_RINGS,
   SCENE_VIEW_ANGLES,
 };

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { SCENE_CELLS_PER_STEP } from '../../model';
+import { arenaLayout, FULL_ARENA_LAYOUT } from '../layout';
 
 import {
   cellFraction,
@@ -57,8 +58,9 @@ describe('cellOrdinal', () => {
 
     for (let segment = 0; segment < 3; segment += 1) {
       for (let step = 0; step < 5; step += 1) {
-        for (let cell = 0; cell < SCENE_CELLS_PER_STEP; cell += 1) {
-          seen.add(cellOrdinal({ segment, step, cell }));
+        for (let cell = 0; cell < 20; cell += 1) {
+          const ordinal = cellOrdinal({ segment, step, cell });
+          if (ordinal !== null) seen.add(ordinal);
         }
       }
     }
@@ -68,15 +70,19 @@ describe('cellOrdinal', () => {
     expect(Math.max(...seen)).toBe(89);
   });
 
-  it('counts along a terrace first — the order a child works through', () => {
-    expect(cellOrdinal({ segment: 0, step: 0, cell: 1 })).toBe(1);
-    expect(cellOrdinal({ segment: 0, step: 1, cell: 0 })).toBe(6);
+  it('counts up the steps of a bay — the order a child works through', () => {
+    expect(cellOrdinal({ segment: 0, step: 1, cell: 1 })).toBe(1);
+    expect(cellOrdinal({ segment: 0, step: 2, cell: 0 })).toBe(
+      FULL_ARENA_LAYOUT.rows[0]?.[1],
+    );
+    expect(cellOrdinal({ segment: 1, step: 1, cell: 0 })).toBe(30);
   });
 });
 
 describe('cellFromKey', () => {
   it('undoes cellKey', () => {
     const cell = { segment: 2, step: 3, cell: 4 };
+    expect(cellOrdinal(cell)).not.toBeNull();
 
     expect(cellFromKey(cellKey(cell))).toEqual(cell);
   });
@@ -90,6 +96,19 @@ describe('cellFromKey', () => {
 
   it('refuses a cell the arena does not have', () => {
     expect(cellFromKey('0-9-0')).toBeNull();
-    expect(cellFromKey(`0-0-${SCENE_CELLS_PER_STEP}`)).toBeNull();
+    // The platform ring carries no cells.
+    expect(cellFromKey('0-0-0')).toBeNull();
+    expect(cellFromKey('0-1-99')).toBeNull();
+  });
+
+  it('follows the layout it is given', () => {
+    // Twelve lessons: four to a bay, one on each step.
+    const layout = arenaLayout(12);
+    expect(cellFromKey('0-1-0', layout)).toEqual({
+      segment: 0,
+      step: 1,
+      cell: 0,
+    });
+    expect(cellOrdinal({ segment: 0, step: 1, cell: 0 }, layout)).toBe(0);
   });
 });

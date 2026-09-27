@@ -266,7 +266,7 @@ There are **no rooms**. `entities/room` is gone, and with it the street, the
 living room and the kitchen: the arena has three wedges, the model numbers
 them `0 … 2`, and a view is `'top' | number` (`SceneView`). The names went
 because the wedges outlived them — what a wedge holds is now decided by its
-thirty cells, not by a label over the door.
+cells, not by a label over the door.
 
 The three segments are the three sectors of **one 3D model** (`assets/scene`),
 rendered on `/home` by `widgets/room-scene`. Walking to another segment turns
@@ -283,22 +283,43 @@ down is a tap on a cell, which walks into that cell's segment — so the map is
 a place you read and point at, not one you fiddle with. The same freeze
 applies in front of a watcher.
 
-**Cells are the second way to walk.** Each wedge carries five terraces of six
-cells, ninety in all, and every one is framed and pressable. A tap on a cell
+**Cells are the second way to walk.** The steps above the platform carry
+one cell per lesson, ninety at most, and every one is framed and pressable. A tap on a cell
 of another segment turns the world to that segment instead of selecting the
 cell; a tap on a cell of the segment you are standing in selects it. That tap
 is what keeps 3.6 satisfied now the labelled buttons are gone: a gesture is
 invisible to a child who has never been taught it, and must never be the only
 way through. **Do not leave the swipe as the only way across.**
 
-**A segment is the bay between two gears**, and that is not how the FBX
-groups its discs. Each terrace is a ring of eighteen tiles with three slots
-cut in it, one per gear, at 98.5°, 218.5° and 338.5° — the gear stands in the
-slot. Between two slots run six tiles with nothing between them, and those
-six by five terraces are a segment. The converter's `node.segment` instead
-buckets tiles by their nearest gear, which cuts a bay in half and puts a gear
-in the middle of it; `cellsOf` in `build-scene` regroups by angle and is the
-only grouping the game should use.
+**A segment is the bay between two gears**, at 98.5°, 218.5° and 338.5°.
+
+**The cells are built in the app, not shipped in the model.** The FBX still
+has its ninety discs, but `scripts/fbx-to-scene.mjs` only measures them (ring
+radii and heights, which rings a gear actually stands in) and leaves them —
+and the ramps that climbed through their slots — out of `scene.json`, which
+carries just the gears and the floor. `widgets/room-scene/lib/cell-geometry`
+builds the cells from `ARENA_LAYOUT` (`entities/lesson`, from `arenaLayout`
+in `entities/scene`):
+
+- **Ring 0 is the platform** the robot stands on — no cells. The lessons
+  start on the first step.
+- **Numbering is per bay**, bottom step up: bay 0 holds 1–30, bay 1 31–60,
+  bay 2 61–90. Seen from in front of a bay a row reads left to right.
+- A bay shares its lessons among its steps **in proportion to their length**,
+  so a cell is about the same size on every step (30 → 5 / 7 / 8 / 10).
+- A ring keeps its gear slots **only where a gear stands in it** (the two
+  outer rings); on the inner rings the bays meet with no bald patch.
+- A row opens as a whole: the platform at its step and the row below it in
+  the same bay done (`lessonAccess`). `unlockCondition` in `lessons.json`
+  names cells of the old cut and is not read.
+- Numbers lie on the tile tops for the map and stand on the cell fronts for
+  a bay (`setNumberFace`) — each is the face that camera actually sees.
+
+Keys stay `segment-step-cell` and ordinals stay gap-free, but never compute
+them with arithmetic — ask the layout (`layoutOrdinal`, `layoutCell`,
+`rowCells`, `cellFromKey(key, ARENA_LAYOUT)`). Saves store lesson ids, and
+the sunk cells are always worked out from them (`useDoneCells`), never read
+off the saved keys.
 
 The camera stands **opposite** the middle of the bay, at eye level. Three
 things make that shot work and none of them are optional:

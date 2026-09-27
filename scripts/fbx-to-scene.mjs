@@ -8,7 +8,9 @@
 //   node scripts/fbx-to-scene.mjs
 //
 // Output: assets/scene/scene.json — unique geometries plus one world matrix
-// per instance, so the 119 cloned discs stay 33 buffers.
+// per instance for what the app draws as-is (the gears and the floor), and the
+// measurements of the ninety discs, which the app builds itself
+// (widgets/room-scene/lib/cell-geometry) so the count can follow the content.
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
@@ -465,6 +467,93 @@ const STEP_COUNT = Math.max(...nodes.map((node) => node.step)) + 1;
 const STEP_RISE =
   stepHeights.length > 1 ? stepHeights[1] - stepHeights[0] : 0;
 
+/**
+ * What the discs are made of, measured rather than shipped.
+ *
+ * The app rebuilds the cells from these numbers so a bay can hold fewer than
+ * six on its top row and stretch them over the whole arc — which a baked
+ * mesh of eighteen fixed tiles per ring cannot do.
+ */
+const tierNodes = nodes.filter((node) => node.step >= 0);
+const worldPointsOf = (node) => {
+  const position = geometries[node.geometry].position;
+  const points = [];
+  for (let i = 0; i < position.length; i += 3) {
+    points.push(applyMatrix(node.matrix, position.slice(i, i + 3)));
+  }
+  return points;
+};
+
+// Every gear vertex in the world, to tell which rings a gear actually cuts.
+const gearPoints = nodes
+  .filter((node) => node.step < 0 && node.segment >= 0)
+  .flatMap((node) => worldPointsOf(node));
+
+const rings = [];
+for (let step = 0; step < STEP_COUNT; step += 1) {
+  const ring = { inner: Infinity, outer: -Infinity, bottom: Infinity, top: -Infinity };
+  for (const node of tierNodes.filter((entry) => entry.step === step)) {
+    for (const [x, y, z] of worldPointsOf(node)) {
+      const radius = Math.hypot(x, z);
+      ring.inner = Math.min(ring.inner, radius);
+      ring.outer = Math.max(ring.outer, radius);
+      ring.bottom = Math.min(ring.bottom, y);
+      ring.top = Math.max(ring.top, y);
+    }
+  }
+  // The FBX cuts a slot in every ring, but a gear only stands in the outer
+  // ones; below that the slot is a bald patch the app fills with cells.
+  const slotted = gearPoints.some(([x, y, z]) => {
+    const radius = Math.hypot(x, z);
+    return (
+      radius > ring.inner && radius < ring.outer && y > ring.bottom && y < ring.top
+    );
+  });
+  rings.push({
+    inner: round(ring.inner, 2),
+    outer: round(ring.outer, 2),
+    bottom: round(ring.bottom, 2),
+    top: round(ring.top, 2),
+    slotted,
+  });
+}
+
+// A disc's arc, read off its own corners relative to where it stands so the
+// ±180° seam cannot turn a 17° tile into a 343° one.
+const arcs = tierNodes.map((node) => {
+  const points = worldPointsOf(node);
+  const middle = points.reduce(
+    (sum, [x, , z]) => [sum[0] + x, sum[1] + z],
+    [0, 0],
+  );
+  const heading = Math.atan2(middle[0], middle[1]);
+  const offsets = points.map(([x, , z]) => {
+    const delta = Math.atan2(x, z) - heading;
+    return Math.atan2(Math.sin(delta), Math.cos(delta));
+  });
+  return ((Math.max(...offsets) - Math.min(...offsets)) * 180) / Math.PI;
+});
+const cellArc = arcs.reduce((sum, arc) => sum + arc, 0) / arcs.length;
+const cellsPerRing = tierNodes.filter((node) => node.step === 0).length;
+const slotArc = (360 - cellsPerRing * cellArc) / segmentAngles.length;
+
+// Only what the app draws as-is stays in the file: the gears and the floor.
+// The ramps that climbed through the inner rings' slots go too — those slots
+// are filled with cells now, and a ramp would stick up through them. The
+// floor is the one shared piece that is flat.
+const isRamp = (node) =>
+  node.segment < 0 && worldPointsOf(node).some(([, y]) => Math.abs(y) > 1);
+const kept = nodes.filter((node) => node.step < 0 && !isRamp(node));
+const keptGeometries = [...new Set(kept.map((node) => node.geometry))].sort(
+  (a, b) => a - b,
+);
+const remap = new Map(keptGeometries.map((index, at) => [index, at]));
+const shippedNodes = kept.map((node) => ({
+  ...node,
+  geometry: remap.get(node.geometry),
+}));
+const shippedGeometries = keptGeometries.map((index) => geometries[index]);
+
 const center = bounds.min.map((min, axis) => (min + bounds.max[axis]) / 2);
 const radius =
   Math.max(...bounds.max.map((max, axis) => max - bounds.min[axis])) / 2;
@@ -496,19 +585,33 @@ const scene = {
     /** Distance between two tiers, in world units. */
     rise: STEP_RISE,
   },
-  geometries: geometries.map((geometry) => ({
+  /** The discs, as measurements — the app builds them (see above). */
+  tiles: {
+    /**
+     * One ring per tier, innermost first: radii and heights in world units,
+     * and whether a gear stands in it (`slotted`).
+     */
+    rings,
+    /** Degrees of arc one disc covers. */
+    cellArc: round(cellArc, 4),
+    /** Degrees of arc the slot a gear stands in takes out of every ring. */
+    slotArc: round(slotArc, 4),
+    /** Discs in one full ring, across all three bays. */
+    cellsPerRing,
+  },
+  geometries: shippedGeometries.map((geometry) => ({
     position: geometry.position.map((value) => round(value, 2)),
     normal: geometry.normal.map((value) => round(value, 4)),
   })),
-  nodes,
+  nodes: shippedNodes,
 };
 
 writeFileSync(TARGET, `${JSON.stringify(scene)}\n`);
 
-const triangles = nodes.reduce(
-  (sum, node) => sum + geometries[node.geometry].position.length / 9,
+const triangles = shippedNodes.reduce(
+  (sum, node) => sum + shippedGeometries[node.geometry].position.length / 9,
   0,
 );
 console.log(
-  `scene.json: ${geometries.length} geometries, ${nodes.length} nodes, ${triangles} triangles, segments at ${segmentAngles.join('° / ')}°, ${STEP_COUNT} steps every ${STEP_RISE} units`,
+  `scene.json: ${shippedGeometries.length} geometries, ${shippedNodes.length} nodes, ${triangles} triangles, segments at ${segmentAngles.join('° / ')}°, ${STEP_COUNT} steps every ${STEP_RISE} units, ${tierNodes.length} discs measured (${round(cellArc, 2)}° each, ${round(slotArc, 2)}° slots)`,
 );

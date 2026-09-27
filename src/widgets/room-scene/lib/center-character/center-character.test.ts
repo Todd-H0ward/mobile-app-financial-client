@@ -5,18 +5,27 @@ const mocks = vi.hoisted(() => ({
   download: vi.fn<(id: number) => Promise<void>>(),
   parse: vi.fn(),
 }));
+// Like a release build: nothing is on disk until `downloadAsync` puts it there.
 vi.mock('expo-asset', () => ({
   Asset: {
-    fromModule: (id: number) => ({
-      localUri: `file://${id}`,
-      width: 16,
-      height: 16,
-      downloadAsync: () => mocks.download(id),
-    }),
+    fromModule: (id: number) => {
+      const asset = {
+        name: String(id),
+        type: 'png',
+        uri: `asset_${id}`,
+        localUri: null as string | null,
+        downloaded: false,
+        width: 16,
+        height: 16,
+        downloadAsync: async () => {
+          await mocks.download(id);
+          asset.localUri = `file://${id}`;
+          return asset;
+        },
+      };
+      return asset;
+    },
   },
-}));
-vi.mock('react-native', () => ({
-  Image: { resolveAssetSource: () => ({ uri: 'file://robot' }) },
 }));
 vi.mock('three/examples/jsm/loaders/GLTFLoader.js', () => ({
   GLTFLoader: class {

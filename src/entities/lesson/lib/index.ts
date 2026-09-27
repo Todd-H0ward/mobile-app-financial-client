@@ -1,6 +1,7 @@
 export { getLessonById, lessonAt, listLessons } from './catalogue';
 export {
   ARENA_CELL_COUNT,
+  ARENA_LAYOUT,
   activeLessonIndexForCell,
   cellOrdinalForLessonIndex,
   completedCellKeysFromLessons,

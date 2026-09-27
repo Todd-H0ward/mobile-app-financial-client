@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { completedCellKeysFromLessons, listLessons } from '@/entities/lesson';
 import { ROBOT_DOG_STAGES } from '@/entities/robot-dog';
 
 import { createInitialUser, USER_SAVE_VERSION } from '../initial-user';
@@ -36,7 +37,12 @@ describe('migrateUser', () => {
       completedLessonCells: ['0-0-0', '1-0-0', '2-4-5'],
     };
     const migrated = migrateUser(save, 9);
-    expect(migrated?.completedLessonCells).toEqual(['0-0-0', '0-4-5']);
+    const ids = [listLessons()[0]?.id, listLessons()[29]?.id];
+    expect(migrated?.completedLessonIds).toEqual(ids);
+    // v18 re-cuts the keys for the arena with the platform ring left bare.
+    expect(migrated?.completedLessonCells).toEqual(
+      completedCellKeysFromLessons(ids.filter((id) => id !== undefined)),
+    );
     expect(migrated?.wallet).toEqual(save.wallet);
     expect(migrated?.platform).toEqual(save.platform);
   });

@@ -96,6 +96,41 @@ const textGeometryOnPlane = (
 };
 
 /**
+ * World-space filled geometry for a string standing upright on a wall.
+ *
+ * `origin` is the centre of the glyph box, `right` the reading direction
+ * along the wall; the tops point at the sky. What the cell fronts carry:
+ * a number lying on a tile top is a sliver from a camera at eye level.
+ */
+const textGeometryUpright = (
+  text: string,
+  origin: Vector3,
+  right: Vector3,
+  height: number,
+): BufferGeometry => {
+  const geometry = geometryFromShapes(layoutTextShapes(text, height));
+  const position = geometry.getAttribute('position');
+  if (!position) return geometry;
+
+  centerGeometry(geometry);
+
+  for (let i = 0; i < position.count; i += 1) {
+    const lx = position.getX(i);
+    const ly = position.getY(i);
+    position.setXYZ(
+      i,
+      origin.x + right.x * lx,
+      origin.y + ly,
+      origin.z + right.z * lx,
+    );
+  }
+
+  position.needsUpdate = true;
+  geometry.computeBoundingSphere();
+  return geometry;
+};
+
+/**
  * Filled geometry for a string in a local XY plane at a fixed Z.
  *
  * Used by the map HUD boards: ink floats just in front of the slab face.
@@ -127,37 +162,9 @@ const textGeometryLocal = (
   return geometry;
 };
 
-/**
- * Gear mark used as the currency glyph on the coins board.
- *
- * Tooth outline + hub disc — filled so it matches the digit weight.
- */
-const gearGeometryLocal = (
-  cx: number,
-  cy: number,
-  outer: number,
-  z: number,
-): BufferGeometry => {
-  const teeth = 8;
-  const valley = outer * 0.72;
-  const hub = outer * 0.28;
-  const outline = new Shape();
-
-  for (let i = 0; i < teeth * 2; i += 1) {
-    const angle = (i / (teeth * 2)) * Math.PI * 2 - Math.PI / 2;
-    const radius = i % 2 === 0 ? outer : valley;
-    const x = cx + Math.cos(angle) * radius;
-    const y = cy + Math.sin(angle) * radius;
-    if (i === 0) outline.moveTo(x, y);
-    else outline.lineTo(x, y);
-  }
-  outline.closePath();
-
-  const hole = new Path();
-  hole.absarc(cx, cy, hub, 0, Math.PI * 2, true);
-  outline.holes.push(hole);
-
-  const geometry = new ShapeGeometry(outline, CURVE_SEGMENTS);
+/** A shape laid flat at `z`, as filled geometry. */
+const shapeGeometryAt = (shape: Shape, z: number): BufferGeometry => {
+  const geometry = new ShapeGeometry(shape, CURVE_SEGMENTS);
   const position = geometry.getAttribute('position');
   for (let i = 0; i < position.count; i += 1) {
     position.setZ(i, z);
@@ -165,6 +172,54 @@ const gearGeometryLocal = (
   position.needsUpdate = true;
   geometry.computeBoundingSphere();
   return geometry;
+};
+
+/**
+ * The coin, as the HUD over the scene draws it: a disc with a slot down the
+ * middle. The wallet board wears it so the two wallets read as one.
+ */
+const coinGeometryLocal = (
+  cx: number,
+  cy: number,
+  radius: number,
+  z: number,
+): BufferGeometry => {
+  const disc = new Shape();
+  disc.absarc(cx, cy, radius, 0, Math.PI * 2, false);
+
+  const slotHalfWidth = radius * 0.18;
+  const slotHalfHeight = radius * 0.5;
+  const slot = new Path();
+  slot.moveTo(cx - slotHalfWidth, cy - slotHalfHeight);
+  slot.lineTo(cx - slotHalfWidth, cy + slotHalfHeight);
+  slot.lineTo(cx + slotHalfWidth, cy + slotHalfHeight);
+  slot.lineTo(cx + slotHalfWidth, cy - slotHalfHeight);
+  slot.closePath();
+  disc.holes.push(slot);
+
+  return shapeGeometryAt(disc, z);
+};
+
+/**
+ * An upward chevron — the tier board's mark, the "подъём" the HUD words.
+ */
+const upGeometryLocal = (
+  cx: number,
+  cy: number,
+  size: number,
+  z: number,
+): BufferGeometry => {
+  const half = size / 2;
+  const stroke = size * 0.3;
+  const chevron = new Shape();
+  chevron.moveTo(cx - half, cy - half * 0.35);
+  chevron.lineTo(cx, cy + half * 0.65);
+  chevron.lineTo(cx + half, cy - half * 0.35);
+  chevron.lineTo(cx + half - stroke, cy - half * 0.35 - stroke * 0.6);
+  chevron.lineTo(cx, cy + half * 0.65 - stroke * 1.2);
+  chevron.lineTo(cx - half + stroke, cy - half * 0.35 - stroke * 0.6);
+  chevron.closePath();
+  return shapeGeometryAt(chevron, z);
 };
 
 /** Merge several geometries into one indexed mesh (disposes the parts). */
@@ -212,9 +267,11 @@ const mergeGeometries = (parts: BufferGeometry[]): BufferGeometry => {
 };
 
 export {
-  gearGeometryLocal,
+  coinGeometryLocal,
   layoutTextShapes,
   mergeGeometries,
   textGeometryLocal,
   textGeometryOnPlane,
+  textGeometryUpright,
+  upGeometryLocal,
 };

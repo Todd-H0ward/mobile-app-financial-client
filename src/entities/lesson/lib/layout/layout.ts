@@ -1,8 +1,4 @@
-import {
-  SCENE_CELLS_PER_STEP,
-  SCENE_SEGMENT_COUNT,
-  SCENE_TERRACE_COUNT,
-} from '@/entities/scene';
+import { arenaLayout, cellKey, layoutCell } from '@/entities/scene';
 
 import type { Lesson } from '../../model';
 import { listLessons } from '../catalogue';
@@ -12,31 +8,35 @@ import { listLessons } from '../catalogue';
 // ═══════════════════════════════════════════
 
 /**
- * Discs in the FBX — three bays × five terraces × six cells.
+ * How the arena is cut for the lessons that ship.
  *
- * Geometry is fixed; content is not. Extra rows in `lessons.json` stack as
- * further layers on the same discs (requirement 2.5.14 / 3.2: add lessons
- * in one file, no scene rebuild).
+ * The cells follow the content, not the other way round: ninety lessons fill
+ * three bays × five terraces × six cells, and fewer leave each bay on a short
+ * top row that the scene stretches over the whole arc (requirement 2.5.14 /
+ * 3.2: add lessons in one file, no scene rebuild). Past ninety the arena is
+ * full and further rows stack as layers on the same cells.
  */
-const ARENA_CELL_COUNT =
-  SCENE_SEGMENT_COUNT * SCENE_TERRACE_COUNT * SCENE_CELLS_PER_STEP;
+const ARENA_LAYOUT = arenaLayout(listLessons().length);
+
+/** Cells on the arena — one per lesson, up to ninety. */
+const ARENA_CELL_COUNT = ARENA_LAYOUT.count;
 
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
 
-/** Which arena disc hosts lesson index `i` (wraps onto the 90 tiles). */
+/** Which arena cell hosts lesson index `i` (wraps onto the cells there are). */
 const cellOrdinalForLessonIndex = (index: number): number => {
   if (!Number.isInteger(index) || index < 0) {
     throw new RangeError('Lesson index must be a non-negative integer');
   }
-  return index % ARENA_CELL_COUNT;
+  return ARENA_CELL_COUNT > 0 ? index % ARENA_CELL_COUNT : 0;
 };
 
 /**
  * Lesson indices on one cell, in play order — layer 0, then 1, …
  *
- * Cell `c` owns `c`, `c + 90`, `c + 180`, … while content lasts.
+ * Cell `c` owns `c`, `c + count`, `c + 2 × count`, … while content lasts.
  */
 const lessonIndicesForCell = (cellOrdinal: number): number[] => {
   if (
@@ -94,19 +94,19 @@ const completedCellKeysFromLessons = (
   completedLessonIds: readonly string[],
 ): string[] => {
   const keys: string[] = [];
-  for (let cell = 0; cell < ARENA_CELL_COUNT; cell += 1) {
-    if (activeLessonIndexForCell(cell, completedLessonIds) === null) {
-      const sector = Math.floor(cell / 30);
-      const level = Math.floor((cell % 30) / 6);
-      const index = cell % 6;
-      keys.push(`${sector}-${level}-${index}`);
+  for (let ordinal = 0; ordinal < ARENA_CELL_COUNT; ordinal += 1) {
+    if (activeLessonIndexForCell(ordinal, completedLessonIds) !== null) {
+      continue;
     }
+    const cell = layoutCell(ARENA_LAYOUT, ordinal);
+    if (cell) keys.push(cellKey(cell));
   }
   return keys;
 };
 
 export {
   ARENA_CELL_COUNT,
+  ARENA_LAYOUT,
   activeLessonIndexForCell,
   cellOrdinalForLessonIndex,
   completedCellKeysFromLessons,

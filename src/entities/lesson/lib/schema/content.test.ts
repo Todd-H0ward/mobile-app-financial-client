@@ -54,10 +54,14 @@ describe('assertLessonContent', () => {
     expect(() => assertLessonContent({ lessons: ninety() })).not.toThrow();
   });
 
-  it('refuses too few lessons — a segment would repeat one', () => {
+  it('accepts fewer than ninety — the arena cuts itself to the content', () => {
     expect(() =>
       assertLessonContent({ lessons: ninety().slice(0, 89) }),
-    ).toThrow(/at least 90/);
+    ).not.toThrow();
+  });
+
+  it('refuses an empty file — there would be no arena at all', () => {
+    expect(() => assertLessonContent({ lessons: [] })).toThrow(/at least 1/);
   });
 
   it('refuses a duplicate id, which would split progress', () => {

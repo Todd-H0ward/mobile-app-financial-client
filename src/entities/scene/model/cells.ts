@@ -3,13 +3,12 @@
 // ═══════════════════════════════════════════
 
 /**
- * Cells in one terrace of one room.
+ * Cells in a full terrace of one bay.
  *
- * Not a number this code chose: the FBX holds 90 discs, and they divide
- * exactly into three rooms × five terraces × six cells. The arcade, the
- * chores and the shop all get laid out on these, so the count is read off
- * the model rather than decided here — `source.test.ts` asserts the model
- * still says six.
+ * Not a number this code chose: the FBX ring holds eighteen discs between
+ * three gear slots, six to a bay. The app now builds the cells itself, and a
+ * bay may end on a shorter row (`arenaLayout`), but six is still how many a
+ * full row carries and how wide each of them is drawn.
  */
 const SCENE_CELLS_PER_STEP = 6;
 
@@ -22,7 +21,10 @@ interface SceneCell {
   segment: number;
   /** Which terrace, `0` innermost and lowest. */
   step: number;
-  /** Where it sits along the arc, `0 … SCENE_CELLS_PER_STEP - 1`, left to right. */
+  /**
+   * Where it sits along the arc, left to right: `0 … SCENE_CELLS_PER_STEP - 1`
+   * on a full row, fewer on a bay's short top row.
+   */
   cell: number;
 }
 

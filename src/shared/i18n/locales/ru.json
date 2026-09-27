@@ -989,7 +989,7 @@
     "practiceAvailable": "Игры открыты для тренировки. Сейчас прохождения без новых монет."
   },
   "lesson": {
-    "header": "урок {{number}} / 30",
+    "header": "урок {{number}} / {{total}}",
     "theoryOf": "ТЕОРИЯ {{index}} / {{total}}",
     "questionOf": "ВОПРОС {{index}} / {{total}}",
     "next": "Дальше",

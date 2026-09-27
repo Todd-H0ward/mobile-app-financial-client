@@ -25,9 +25,9 @@ import {
 import { clamp } from '@/shared/utils';
 
 import {
-  gearGeometryLocal,
-  mergeGeometries,
+  coinGeometryLocal,
   textGeometryLocal,
+  upGeometryLocal,
 } from '../scene-glyphs';
 
 // ═══════════════════════════════════════════
@@ -41,7 +41,7 @@ interface MapHudStats {
   tier: number;
   /** Upper bound of the climb. */
   tierTotal: number;
-  /** Robot charge, `0…1`. */
+  /** Robot charge, `0…1` — lit as the same five cells the HUD shows. */
   charge: number;
 }
 
@@ -110,8 +110,16 @@ const DIGIT_HEIGHT = 28;
 /** Ink floats just in front of the slab face. */
 const INK_Z = PANEL_DEPTH / 2 + 0.4;
 
-/** Charge below this reads on the warm battery colour. */
-const CHARGE_LOW = 0.35;
+/**
+ * Cells in the charge readout — the HUD's five, so a child comparing the
+ * board with the bar over the scene counts the same thing on both.
+ */
+const CHARGE_CELLS = 5;
+
+/** One charge cell on the board, in world units. */
+const CHARGE_CELL_WIDTH = 16;
+const CHARGE_CELL_HEIGHT = 30;
+const CHARGE_CELL_GAP = 6;
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -242,7 +250,9 @@ const batteryOutlineLines = (
 
 /**
  * Three boards hugging the top terrace rim between the two gears of the bay
- * the top shot looks into — coins, tier, battery.
+ * the top shot looks into — coins, tier, battery — each read the way the
+ * HUD over the scene reads it: the same coin, the same tier count, the same
+ * five charge cells.
  *
  * Parent is the outermost terrace group, so they sink with that ring. Each
  * board sits on its own azimuth and faces outward, following the disc's
@@ -272,8 +282,18 @@ const createMapHud = (): MapHud => {
     depthTest: true,
     depthWrite: true,
   });
-  const batteryFillMaterial = new MeshBasicMaterial({
+  const coinMaterial = new MeshBasicMaterial({
+    color: new Color(SCENE_PALETTE.hudCoin),
+    side: DoubleSide,
+    depthTest: true,
+  });
+  const cellOnMaterial = new MeshBasicMaterial({
     color: new Color(SCENE_PALETTE.hudBattery),
+    side: DoubleSide,
+    depthTest: true,
+  });
+  const cellOffMaterial = new MeshBasicMaterial({
+    color: new Color(SCENE_PALETTE.hudBatteryOff),
     side: DoubleSide,
     depthTest: true,
   });
@@ -284,7 +304,9 @@ const createMapHud = (): MapHud => {
     sideMaterial,
     edgeMaterial,
     inkMaterial,
-    batteryFillMaterial,
+    coinMaterial,
+    cellOnMaterial,
+    cellOffMaterial,
   ];
 
   const makePanel = (azimuthDeg: number) => {
@@ -331,44 +353,62 @@ const createMapHud = (): MapHud => {
   const tierPanel = makePanel(HUD_AZIMUTH);
   const chargePanel = makePanel(HUD_AZIMUTH + PANEL_STEP_DEG);
 
+  // Wallet: the coin, then the amount — the HUD's first reading.
+  const coinMark = new Mesh(coinGeometryLocal(-44, 0, 15, INK_Z), coinMaterial);
+  coinMark.renderOrder = 1;
+  geometries.push(coinMark.geometry);
+  coinsPanel.add(coinMark);
+
   const coinsInk = new Mesh(new BufferGeometry(), inkMaterial);
   coinsInk.renderOrder = 1;
   coinsPanel.add(coinsInk);
 
+  // Tier: the climb mark over "0/5", the same tier the HUD words.
+  const tierMark = new Mesh(upGeometryLocal(0, 22, 24, INK_Z), inkMaterial);
+  tierMark.renderOrder = 1;
+  geometries.push(tierMark.geometry);
+  tierPanel.add(tierMark);
+
   const tierInk = new Mesh(new BufferGeometry(), inkMaterial);
   tierInk.renderOrder = 1;
+  tierInk.position.y = -12;
   tierPanel.add(tierInk);
 
+  // Charge: five cells in a battery body, lit the way the HUD lights them.
+  const cellsWidth =
+    CHARGE_CELLS * CHARGE_CELL_WIDTH + (CHARGE_CELLS - 1) * CHARGE_CELL_GAP;
+  const batteryPad = 5;
+  const batteryNub = 8;
   const batteryOutline = new LineSegments(new BufferGeometry(), edgeMaterial);
   batteryOutline.renderOrder = 1;
-  chargePanel.add(batteryOutline);
-
-  const batteryBodyWidth = 78;
-  const batteryBodyHeight = 34;
-  const batteryNub = 10;
-  const batteryPad = 4;
-  /** Battery sits a touch above centre so the percent can sit under it. */
-  const batteryY = 8;
   setLineGeometry(
     batteryOutline,
-    batteryOutlineLines(batteryBodyWidth, batteryBodyHeight, batteryNub),
+    batteryOutlineLines(
+      cellsWidth + batteryPad * 2,
+      CHARGE_CELL_HEIGHT + batteryPad * 2,
+      batteryNub,
+    ),
   );
-  batteryOutline.position.y = batteryY;
+  // Nudged left by half the nub, so body and nub together sit centred.
+  batteryOutline.position.x = -batteryNub / 2;
   geometries.push(batteryOutline.geometry);
+  chargePanel.add(batteryOutline);
 
-  const fillMaxWidth = batteryBodyWidth - batteryPad * 2;
-  const fillHeight = batteryBodyHeight - batteryPad * 2;
-  const fillGeometry = new PlaneGeometry(1, fillHeight);
-  geometries.push(fillGeometry);
-  const batteryFill = new Mesh(fillGeometry, batteryFillMaterial);
-  batteryFill.position.z = PANEL_DEPTH / 2 + 0.2;
-  batteryFill.position.y = batteryY;
-  chargePanel.add(batteryFill);
-
-  const chargeLabel = new Mesh(new BufferGeometry(), inkMaterial);
-  chargeLabel.renderOrder = 1;
-  chargeLabel.position.set(0, -28, 0);
-  chargePanel.add(chargeLabel);
+  const cellGeometry = new PlaneGeometry(CHARGE_CELL_WIDTH, CHARGE_CELL_HEIGHT);
+  geometries.push(cellGeometry);
+  const chargeCells = Array.from({ length: CHARGE_CELLS }, (_, index) => {
+    const cell = new Mesh(cellGeometry, cellOffMaterial);
+    cell.position.set(
+      -batteryNub / 2 -
+        cellsWidth / 2 +
+        CHARGE_CELL_WIDTH / 2 +
+        index * (CHARGE_CELL_WIDTH + CHARGE_CELL_GAP),
+      0,
+      INK_Z,
+    );
+    chargePanel.add(cell);
+    return cell;
+  });
 
   let lastKey = '';
 
@@ -376,46 +416,27 @@ const createMapHud = (): MapHud => {
     const balance = Math.max(0, Math.round(stats.balance));
     const tier = Math.max(0, Math.round(stats.tier));
     const tierTotal = Math.max(1, Math.round(stats.tierTotal));
-    const charge = clamp(stats.charge, 0, 1);
-    const key = `${balance}:${tier}:${tierTotal}:${charge.toFixed(2)}`;
+    // Same rounding as the HUD's bar: a cell lights only once it is full.
+    const lit = Math.floor(
+      clamp(stats.charge, 0, 1) * CHARGE_CELLS + Number.EPSILON,
+    );
+    const key = `${balance}:${tier}:${tierTotal}:${lit}`;
     if (key === lastKey) return;
     lastKey = key;
 
-    const gear = gearGeometryLocal(-48, 0, 15, INK_Z);
-    const amount = textGeometryLocal(
-      String(balance),
-      20,
-      0,
-      DIGIT_HEIGHT,
-      INK_Z,
+    setMeshGeometry(
+      coinsInk,
+      textGeometryLocal(String(balance), 22, 0, DIGIT_HEIGHT, INK_Z),
     );
-    setMeshGeometry(coinsInk, mergeGeometries([gear, amount]));
 
     setMeshGeometry(
       tierInk,
       textGeometryLocal(`${tier}/${tierTotal}`, 0, 0, DIGIT_HEIGHT, INK_Z),
     );
 
-    const fillWidth = Math.max(0.01, fillMaxWidth * charge);
-    batteryFill.scale.x = fillWidth;
-    // PlaneGeometry is centred — grow from the left inside of the body.
-    batteryFill.position.x = -batteryBodyWidth / 2 + batteryPad + fillWidth / 2;
-    batteryFillMaterial.color.set(
-      charge < CHARGE_LOW
-        ? SCENE_PALETTE.hudBatteryLow
-        : SCENE_PALETTE.hudBattery,
-    );
-
-    setMeshGeometry(
-      chargeLabel,
-      textGeometryLocal(
-        `${Math.round(charge * 100)}`,
-        0,
-        0,
-        DIGIT_HEIGHT * 0.55,
-        INK_Z,
-      ),
-    );
+    chargeCells.forEach((cell, index) => {
+      cell.material = index < lit ? cellOnMaterial : cellOffMaterial;
+    });
   };
 
   // Seed so the first show is never empty geometry.
@@ -428,8 +449,6 @@ const createMapHud = (): MapHud => {
   const dispose = () => {
     coinsInk.geometry.dispose();
     tierInk.geometry.dispose();
-    batteryOutline.geometry.dispose();
-    chargeLabel.geometry.dispose();
     for (const geometry of geometries) geometry.dispose();
     for (const material of materials) material.dispose();
   };

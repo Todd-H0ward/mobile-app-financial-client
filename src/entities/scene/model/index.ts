@@ -24,7 +24,12 @@ export {
   SCENE_TERRACE_RADII,
   SCENE_TERRACE_RISE,
 } from './pit';
-export type { SceneGeometry, SceneNode, SceneSource } from './source';
+export type {
+  SceneGeometry,
+  SceneNode,
+  SceneSource,
+  SceneTileRing,
+} from './source';
 export {
   SCENE_FLAT_STEP,
   SCENE_GEAR_ANGLES,
@@ -32,8 +37,10 @@ export {
   SCENE_RADIUS,
   SCENE_SEGMENT_COUNT,
   SCENE_SHARED_SEGMENT,
+  SCENE_SLOT_ARC,
   SCENE_SOURCE,
   SCENE_STEP_COUNT,
   SCENE_STEP_RISE,
+  SCENE_TILE_RINGS,
   SCENE_VIEW_ANGLES,
 } from './source';

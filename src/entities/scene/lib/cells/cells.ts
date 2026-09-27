@@ -1,8 +1,10 @@
+import { SCENE_CELLS_PER_STEP, type SceneCell } from '../../model';
 import {
-  SCENE_CELLS_PER_STEP,
-  SCENE_TERRACE_COUNT,
-  type SceneCell,
-} from '../../model';
+  type ArenaLayout,
+  FULL_ARENA_LAYOUT,
+  hasCell,
+  layoutOrdinal,
+} from '../layout';
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -57,34 +59,36 @@ const isSameCell = (a: SceneCell | null, b: SceneCell | null): boolean =>
   a !== null && b !== null && cellKey(a) === cellKey(b);
 
 /**
- * A cell's place in the whole arena, `0 … 89`.
+ * A cell's place in the whole arena, `0 … layout.count - 1`.
  *
  * One number for what is otherwise three, so that anything ordered by cell —
  * which lesson sits on it, which order they unlock in — can be a single
- * lookup rather than a table of ninety rows. Counts along a terrace first,
- * then up the terraces, then round to the next segment, which is the order a
- * child works through them.
+ * lookup. Counts along a terrace first, then up the terraces, then round to
+ * the next segment, which is the order a child works through them. `null`
+ * for a cell the layout does not have.
  */
-const cellOrdinal = (cell: SceneCell): number =>
-  (cell.segment * SCENE_TERRACE_COUNT + cell.step) * SCENE_CELLS_PER_STEP +
-  cell.cell;
+const cellOrdinal = (
+  cell: SceneCell,
+  layout: ArenaLayout = FULL_ARENA_LAYOUT,
+): number | null => layoutOrdinal(layout, cell);
 
 /**
- * The cell a key names, or `null` if the string is not one.
+ * The cell a key names, or `null` if the string is not one of the layout's.
  *
  * The inverse of `cellKey`: a lesson is opened by a route parameter, and a
  * route parameter is whatever the URL happened to contain.
  */
-const cellFromKey = (key: string): SceneCell | null => {
+const cellFromKey = (
+  key: string,
+  layout: ArenaLayout = FULL_ARENA_LAYOUT,
+): SceneCell | null => {
   const parts = key.split('-');
   if (parts.length !== 3) return null;
+  if (!parts.every((part) => /^\d+$/.test(part))) return null;
 
   const [segment, step, cell] = parts.map(Number);
-  if (![segment, step, cell].every(Number.isInteger)) return null;
-  if (segment < 0 || step < 0 || cell < 0) return null;
-  if (step >= SCENE_TERRACE_COUNT || cell >= SCENE_CELLS_PER_STEP) return null;
-
-  return { segment, step, cell };
+  const found = { segment, step, cell };
+  return hasCell(layout, found) ? found : null;
 };
 
 export {

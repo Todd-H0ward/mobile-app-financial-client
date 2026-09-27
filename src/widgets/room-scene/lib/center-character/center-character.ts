@@ -1,5 +1,3 @@
-import { Asset } from 'expo-asset';
-import { Image } from 'react-native';
 import {
   type AnimationAction,
   type AnimationClip,
@@ -11,8 +9,7 @@ import {
   type Mesh,
   MeshStandardMaterial,
   type Object3D,
-  SRGBColorSpace,
-  Texture,
+  type Texture,
   Vector3,
 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -27,6 +24,7 @@ import {
   type RobotDogStage,
 } from '@/entities/robot-dog';
 
+import { loadGlTexture, readAssetBytes } from '../local-asset';
 import {
   ROBOT_DOG_MATERIAL_SLOTS,
   ROBOT_DOG_MODEL,
@@ -105,42 +103,16 @@ const fitOnPlatform = (root: Object3D) => {
   root.position.y -= box.min.y;
 };
 
-/**
- * A texture expo-gl can actually upload.
- *
- * The native side reads pixels off a `file://` path — it never sees a decoded
- * bitmap — so the asset has to be on disk first. `downloadAsync` is what puts
- * it there: in development the file arrives from Metro, in a release build it
- * is unpacked out of the bundle.
- */
-const loadTexture = async (module: number): Promise<Texture> => {
-  const asset = Asset.fromModule(module);
-  await asset.downloadAsync();
-
-  const localUri = asset.localUri ?? asset.uri;
-  const texture = new Texture();
-  // three reads width and height off the image; the native loader fills in
-  // the pixels. Both have to be there or the upload silently draws nothing.
-  texture.image = {
-    localUri,
-    width: asset.width ?? 0,
-    height: asset.height ?? 0,
-  };
-  // glTF lays its UVs out top-down, and albedo is colour, not data.
-  texture.flipY = false;
-  texture.colorSpace = SRGBColorSpace;
-  texture.needsUpdate = true;
-
-  return texture;
-};
-
 const loadSkinTextures = async (
   skin: RobotDogSkin,
 ): Promise<Map<RobotDogTextureSlot, Texture>> => {
   const slots: RobotDogTextureSlot[] = ['body', 'dark', 'mid'];
   const results = await Promise.allSettled(
     slots.map(async (slot) => {
-      const texture = await loadTexture(ROBOT_DOG_TEXTURES[skin][slot]);
+      // glTF lays its UVs out top-down.
+      const texture = await loadGlTexture(ROBOT_DOG_TEXTURES[skin][slot], {
+        isFlipped: false,
+      });
       return [slot, texture] as const;
     }),
   );
@@ -220,19 +192,6 @@ const disposeTree = (root: Object3D) => {
   for (const material of materials) material.dispose();
 };
 
-const loadGlbBuffer = async (): Promise<ArrayBuffer> => {
-  const resolved = Image.resolveAssetSource(ROBOT_DOG_MODEL);
-  if (!resolved?.uri) {
-    throw new Error('robot dog model has no uri');
-  }
-
-  const response = await fetch(resolved.uri);
-  if (!response.ok) {
-    throw new Error(`Failed to load the robot dog (${response.status})`);
-  }
-  return response.arrayBuffer();
-};
-
 // ═══════════════════════════════════════════
 // FACTORY
 // ═══════════════════════════════════════════
@@ -249,7 +208,9 @@ export const attachCenterCharacter = async (
   action: RobotDogAction,
 ): Promise<CenterCharacter> => {
   const results = await Promise.allSettled([
-    loadGlbBuffer().then((buffer) => new GLTFLoader().parseAsync(buffer, '')),
+    readAssetBytes(ROBOT_DOG_MODEL).then((buffer) =>
+      new GLTFLoader().parseAsync(buffer, ''),
+    ),
     loadSkinTextures(skin),
   ]);
   const [modelResult, textureResult] = results;

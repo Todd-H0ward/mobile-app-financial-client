@@ -1,5 +1,6 @@
 export {
   ARENA_CELL_COUNT,
+  ARENA_LAYOUT,
   activeLessonIndexForCell,
   cellOrdinalForLessonIndex,
   completedCellKeysFromLessons,

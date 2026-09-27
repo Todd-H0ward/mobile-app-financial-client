@@ -29,7 +29,7 @@ import { WatcherTerminal } from '@/widgets/watcher-terminal';
 import { PLATFORM_LEVEL_COUNT } from '@/entities/economy';
 import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
 import { actionForMood, moodFor } from '@/entities/robot-dog';
-import { cellKey, SCENE_PALETTE, SCENE_TERRACE_COUNT } from '@/entities/scene';
+import { cellKey, SCENE_PALETTE } from '@/entities/scene';
 import {
   useDoneCells,
   useDoneLessonIds,
@@ -290,7 +290,8 @@ export const HomeScreen = () => {
             mapHud={{
               balance: homeData.balance,
               tier: homeData.platformLevel,
-              tierTotal: SCENE_TERRACE_COUNT,
+              // The HUD's total, so the board and the bar count the same climb.
+              tierTotal: PLATFORM_LEVEL_COUNT,
               charge: homeData.robotCharge,
             }}
             onCellPress={(cell) => {

@@ -1,6 +1,6 @@
 import { MODULE_IDS } from '@/entities/catalogue';
 import { PLATFORM_GOAL_ID, PLATFORM_LEVEL_COUNT } from '@/entities/economy';
-import { listLessons } from '@/entities/lesson';
+import { completedCellKeysFromLessons, listLessons } from '@/entities/lesson';
 import {
   DEFAULT_ROBOT_ASSEMBLY,
   DEFAULT_ROBOT_DOG_ACTION,
@@ -48,6 +48,22 @@ const STAGE_FROM_PET: Record<string, RobotDogStage> = {
  * version cannot do that.
  */
 const MIGRATIONS: Record<number, MigrationStep> = {
+  // The arena was re-cut: the platform ring holds no cells and the steps
+  // carry more than six each, so a key like `0-0-0` names another cell now —
+  // or none. Lesson ids are the record (since v13); the keys are worked out
+  // again from them.
+  17: (save) => {
+    const completedLessonIds = Array.isArray(save.completedLessonIds)
+      ? save.completedLessonIds.filter(
+          (id): id is string => typeof id === 'string',
+        )
+      : [];
+    return {
+      ...save,
+      version: 18,
+      completedLessonCells: completedCellKeysFromLessons(completedLessonIds),
+    };
+  },
   16: (save) => {
     const modules = isRecord(save.modules) ? save.modules : {};
     const owned = Array.isArray(modules.owned) ? modules.owned : [];
@@ -461,8 +477,10 @@ export const isUserSave = (value: unknown): value is UserSave =>
   isArcade(value.arcade) &&
   Array.isArray(value.completedLessonCells) &&
   value.completedLessonCells.length <= 90 &&
+  // Shape only: which cells exist is the layout's business, and a save must
+  // not be thrown away because the content grew a row.
   value.completedLessonCells.every(
-    (key) => typeof key === 'string' && /^[0-2]-[0-4]-[0-5]$/.test(key),
+    (key) => typeof key === 'string' && /^\d{1,2}-\d{1,2}-\d{1,2}$/.test(key),
   ) &&
   new Set(value.completedLessonCells).size ===
     value.completedLessonCells.length &&

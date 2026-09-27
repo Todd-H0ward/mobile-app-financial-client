@@ -37,16 +37,27 @@ const SKY_RADIUS = SCENE_RADIUS * 2.4;
  */
 const HAZE_STRENGTH = 0.34;
 
+/**
+ * Longitude and latitude cuts of the sky sphere.
+ *
+ * The mist is worked out per vertex, so the mesh is its resolution: fine
+ * enough that the drifting banks stay soft blobs, still only ~2k vertices —
+ * nothing next to the two and a half million pixels it used to be run for.
+ */
+const SKY_WIDTH_SEGMENTS = 64;
+const SKY_HEIGHT_SEGMENTS = 32;
+
+/*
+ * The whole sky is computed in the vertex shader.
+ *
+ * It used to run in the fragment shader: fifteen octaves of value noise —
+ * sixty `sin` calls — for every pixel of a sphere that sits behind the whole
+ * screen, every frame. On a phone that was a large share of the frame spent
+ * on a backdrop of soft, slow haze whose detail nobody could see. The
+ * gradient and the mist are both low-frequency, so interpolating them across
+ * a triangle looks the same and costs nothing per pixel.
+ */
 const SKY_VERTEX = /* glsl */ `
-varying vec3 vLocalPos;
-
-void main() {
-  vLocalPos = position;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-}
-`;
-
-const SKY_FRAGMENT = /* glsl */ `
 uniform float uTime;
 uniform vec3 uSkyTop;
 uniform vec3 uSkyMid;
@@ -55,7 +66,7 @@ uniform vec3 uSkyBottom;
 uniform vec3 uHaze;
 uniform float uHazeStrength;
 
-varying vec3 vLocalPos;
+varying vec3 vSky;
 
 float hash(vec2 p) {
   return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -72,10 +83,11 @@ float noise(vec2 p) {
   return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
 
+// Three octaves: past that the detail is finer than the mesh can carry.
 float fbm(vec2 p) {
   float v = 0.0;
   float a = 0.5;
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 3; i++) {
     v += a * noise(p);
     p *= 2.05;
     a *= 0.5;
@@ -84,7 +96,7 @@ float fbm(vec2 p) {
 }
 
 void main() {
-  vec3 dir = normalize(vLocalPos);
+  vec3 dir = normalize(position);
   float h = dir.y * 0.5 + 0.5;
 
   // Night void → polluted horizon → black under the rim.
@@ -110,9 +122,17 @@ void main() {
 
   // Soft glow band just above the horizon — distant city light bleed.
   float glowBand = smoothstep(0.38, 0.48, h) * (1.0 - smoothstep(0.48, 0.58, h));
-  sky += uHaze * glowBand * 0.22;
+  vSky = sky + uHaze * glowBand * 0.22;
 
-  gl_FragColor = vec4(sky, 1.0);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const SKY_FRAGMENT = /* glsl */ `
+varying vec3 vSky;
+
+void main() {
+  gl_FragColor = vec4(vSky, 1.0);
 }
 `;
 
@@ -147,7 +167,11 @@ const createHazeBackdrop = (): HazeBackdrop => {
     fog: false,
   });
 
-  const geometry = new SphereGeometry(SKY_RADIUS, 32, 20);
+  const geometry = new SphereGeometry(
+    SKY_RADIUS,
+    SKY_WIDTH_SEGMENTS,
+    SKY_HEIGHT_SEGMENTS,
+  );
   const mesh = new Mesh(geometry, material);
   mesh.position.y = SCENE_PLATFORM_Y;
   mesh.renderOrder = -1;

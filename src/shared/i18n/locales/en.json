@@ -989,7 +989,7 @@
     "practiceAvailable": "Games are open for practice. No extra coins are paid right now."
   },
   "lesson": {
-    "header": "lesson {{number}} / 30",
+    "header": "lesson {{number}} / {{total}}",
     "theoryOf": "THEORY {{index}} / {{total}}",
     "questionOf": "QUESTION {{index}} / {{total}}",
     "next": "Next",

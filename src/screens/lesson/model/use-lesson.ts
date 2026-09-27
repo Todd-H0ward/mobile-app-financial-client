@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 
 import {
+  ARENA_LAYOUT,
   activeLessonIndexForCell,
   INITIAL_LESSON_SESSION,
   isPassed,
@@ -9,6 +10,7 @@ import {
   type LessonStage,
   lessonAccess,
   lessonAt,
+  listLessons,
   passMark,
   transitionLesson,
 } from '@/entities/lesson';
@@ -24,6 +26,8 @@ interface LessonState {
   lesson: Lesson | null;
   /** Its place in the catalogue, `1`-based — the number written on the tile. */
   number: number;
+  /** Lessons in the catalogue — what `number` counts up to. */
+  lessonCount: number;
   /** Where the child is. */
   stage: LessonStage;
   /** Which paragraph or question is on screen, `0`-based. */
@@ -71,10 +75,11 @@ export const useLesson = (cellId: string): LessonState => {
   const completeCell = useCompleteLesson();
   const user = useUser();
 
-  const cell = useMemo(() => cellFromKey(cellId), [cellId]);
+  const cell = useMemo(() => cellFromKey(cellId, ARENA_LAYOUT), [cellId]);
   const activeIndex = useMemo(() => {
     if (!cell || !user) return null;
-    const ordinal = cellOrdinal(cell);
+    const ordinal = cellOrdinal(cell, ARENA_LAYOUT);
+    if (ordinal === null) return null;
     if (
       lessonAccess(ordinal, user.completedLessonIds, user.platform.level)
         .status === 'LOCKED'
@@ -128,6 +133,7 @@ export const useLesson = (cellId: string): LessonState => {
   return {
     lesson,
     number: activeIndex !== null ? activeIndex + 1 : 0,
+    lessonCount: listLessons().length,
     stage,
     index,
     total,

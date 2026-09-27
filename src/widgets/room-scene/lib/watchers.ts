@@ -1,5 +1,3 @@
-import { Asset } from 'expo-asset';
-import { Image } from 'react-native';
 import {
   type AnimationAction,
   AnimationMixer,
@@ -9,8 +7,7 @@ import {
   MeshStandardMaterial,
   type Object3D,
   Quaternion,
-  SRGBColorSpace,
-  Texture,
+  type Texture,
   Vector3,
 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -32,6 +29,8 @@ import {
   type WatcherAction,
   type WatcherId,
 } from '@/entities/watcher';
+
+import { loadGlTexture, readAssetBytes } from './local-asset';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -129,42 +128,15 @@ const SCREEN_GLOW = 1.1;
 // ═══════════════════════════════════════════
 
 /**
- * A texture expo-gl can actually upload.
+ * A face for the screen.
  *
- * The native side reads pixels off a `file://` path — it never sees a decoded
- * bitmap — so the asset has to be on disk first (see docs/scene.md).
+ * Faces are the one texture where a flip is not a subtlety: upside down, the
+ * keeper's smile arches over its eyes as a frown. expo-gl hands the pixels
+ * to GL the way stb read them — top row first — so the screen has to be
+ * turned back over, unlike the dog's coats where nobody could tell.
  */
-const loadTexture = async (module: number): Promise<Texture> => {
-  const asset = Asset.fromModule(module);
-  await asset.downloadAsync();
-
-  const texture = new Texture();
-  texture.image = {
-    localUri: asset.localUri ?? asset.uri,
-    width: asset.width ?? 0,
-    height: asset.height ?? 0,
-  };
-  // Faces are the one texture where a flip is not a subtlety: upside down,
-  // the keeper's smile arches over its eyes as a frown. expo-gl hands the
-  // pixels to GL the way stb read them — top row first — so the screen has to
-  // be turned back over, unlike the dog's coats where nobody could tell.
-  texture.flipY = true;
-  texture.colorSpace = SRGBColorSpace;
-  texture.needsUpdate = true;
-
-  return texture;
-};
-
-const loadGlbBuffer = async (watcher: WatcherId): Promise<ArrayBuffer> => {
-  const resolved = Image.resolveAssetSource(WATCHER_MODELS[watcher]);
-  if (!resolved?.uri) throw new Error(`watcher "${watcher}" has no uri`);
-
-  const response = await fetch(resolved.uri);
-  if (!response.ok) {
-    throw new Error(`Failed to load watcher "${watcher}" (${response.status})`);
-  }
-  return response.arrayBuffer();
-};
+const loadFace = (module: number): Promise<Texture> =>
+  loadGlTexture(module, { isFlipped: true });
 
 /**
  * Brings the artist's PBR down to what this scene can light, and lights the
@@ -277,10 +249,10 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
   await Promise.all(
     WATCHER_IDS.map(async (watcher) => {
       const [buffer, faceList] = await Promise.all([
-        loadGlbBuffer(watcher),
+        readAssetBytes(WATCHER_MODELS[watcher]),
         Promise.all(
           WATCHER_ACTIONS.map(async (action) =>
-            loadTexture(WATCHER_SCREENS[watcher][action]),
+            loadFace(WATCHER_SCREENS[watcher][action]),
           ),
         ),
       ]);

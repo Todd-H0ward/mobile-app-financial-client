@@ -3,7 +3,15 @@ import type { ReactNode } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 
 import { SPACING, type ThemeColor } from '@/shared/constants';
-import { Button, Card, ListRow, Text, type TextProps } from '@/shared/ui';
+import { useTheme } from '@/shared/hooks';
+import {
+  Button,
+  Card,
+  ListRow,
+  PixelIcon,
+  Text,
+  type TextProps,
+} from '@/shared/ui';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -21,10 +29,22 @@ interface TerminalRowProps {
   style?: ViewStyle;
 }
 
+/**
+ * What an option says once the question is answered.
+ *
+ * `right` is the answer, whoever picked it; `wrong` is the child's pick when
+ * it was not. Every other option is left plain — a mark on an option nobody
+ * chose reads as "this one was correct too".
+ */
+type ChoiceMark = 'right' | 'wrong';
+
 interface TerminalChoiceProps {
   children?: string;
   index: number;
-  isSpent?: boolean;
+  /** Set once answered; the row stops taking presses from then on. */
+  mark?: ChoiceMark | null;
+  /** Answered already — no option can be pressed again. */
+  isAnswered?: boolean;
   onPress: () => void;
 }
 
@@ -68,20 +88,40 @@ const TerminalRule = () => <View style={styles.rule} />;
 const TerminalChoice = ({
   children = '',
   index,
-  isSpent = false,
+  mark = null,
+  isAnswered = false,
   onPress,
-}: TerminalChoiceProps) => (
-  <ListRow
-    title={children}
-    icon={
-      <Text variant="code" themeColor="primary">
-        {String(index + 1).padStart(2, '0')}
-      </Text>
-    }
-    onPress={onPress}
-    isDone={isSpent}
-  />
-);
+}: TerminalChoiceProps) => {
+  const theme = useTheme();
+
+  return (
+    <ListRow
+      title={children}
+      icon={
+        <Text variant="code" themeColor="primary">
+          {String(index + 1).padStart(2, '0')}
+        </Text>
+      }
+      trailing={
+        mark === 'right' ? (
+          <PixelIcon name="check20" size={20} tone="primary" />
+        ) : mark === 'wrong' ? (
+          <PixelIcon name="close" size={16} tone="warning" />
+        ) : null
+      }
+      // Not `isSelected`: that draws its own check on the left, and the
+      // two marks belong on the same side so they read as one column.
+      style={
+        mark === 'right'
+          ? { backgroundColor: theme.surfaceSoft, borderColor: theme.primary }
+          : mark === 'wrong'
+            ? { borderColor: theme.warning }
+            : undefined
+      }
+      onPress={isAnswered ? undefined : onPress}
+    />
+  );
+};
 
 const TerminalKey = ({
   children,
@@ -123,6 +163,7 @@ const styles = StyleSheet.create({
 });
 
 export type {
+  ChoiceMark,
   TerminalChoiceProps,
   TerminalKeyProps,
   TerminalLineProps,

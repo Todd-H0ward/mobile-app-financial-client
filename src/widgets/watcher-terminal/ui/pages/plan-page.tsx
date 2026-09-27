@@ -107,40 +107,57 @@ const DirectionRow = ({
 
   return (
     <TerminalCard style={styles.row}>
-      <View style={[styles.iconBox, { backgroundColor: theme.surfaceSoft }]}>
-        <PixelIcon name={meta.icon} />
+      <View style={styles.rowLabel}>
+        <View style={[styles.iconBox, { backgroundColor: theme.surfaceSoft }]}>
+          <PixelIcon name={meta.icon} />
+        </View>
+        <View style={styles.rowCopy}>
+          <Text variant="bodyBold" style={styles.rowTitle}>
+            {t(meta.titleKey)}
+          </Text>
+          <Text variant="small" themeColor="textMuted">
+            {t(meta.hintKey)}
+          </Text>
+        </View>
       </View>
-      <View style={styles.rowCopy}>
-        <Text variant="bodyBold" style={styles.rowTitle}>
-          {t(meta.titleKey)}
+      {/* − amount + as one control: the number sits between the keys that
+          change it, and the three drop under the label together when the
+          row is too narrow rather than squeezing the title into "Модул-и". */}
+      <View style={styles.stepper}>
+        <Button
+          variant="stepper"
+          style={styles.stepperKey}
+          accessibilityLabel={`${t(meta.titleKey)}: ${t('watcher.terminal.plan.minus')}`}
+          disabled={isDecreaseDisabled}
+          onPress={() => onStep(-STEP)}
+        >
+          <PixelIcon
+            name="minus"
+            size={16}
+            tone={isDecreaseDisabled ? 'borderStrong' : 'phosphor'}
+          />
+        </Button>
+        <Text
+          variant="machine"
+          style={styles.value}
+          accessibilityLiveRegion="polite"
+        >
+          {formatMoney(value)}
         </Text>
-        <Text variant="small" themeColor="textMuted">
-          {t(meta.hintKey)}
-        </Text>
+        <Button
+          variant="stepper"
+          style={styles.stepperKey}
+          accessibilityLabel={`${t(meta.titleKey)}: ${t('watcher.terminal.plan.plus')}`}
+          disabled={isIncreaseDisabled}
+          onPress={() => onStep(STEP)}
+        >
+          <PixelIcon
+            name="plus"
+            size={16}
+            tone={isIncreaseDisabled ? 'borderStrong' : 'phosphor'}
+          />
+        </Button>
       </View>
-      <Text
-        variant="machine"
-        style={styles.value}
-        accessibilityLiveRegion="polite"
-      >
-        {formatMoney(value)}
-      </Text>
-      <Button
-        variant="stepper"
-        accessibilityLabel={`${t(meta.titleKey)}: ${t('watcher.terminal.plan.minus')}`}
-        disabled={isDecreaseDisabled}
-        onPress={() => onStep(-STEP)}
-      >
-        −
-      </Button>
-      <Button
-        variant="stepper"
-        accessibilityLabel={`${t(meta.titleKey)}: ${t('watcher.terminal.plan.plus')}`}
-        disabled={isIncreaseDisabled}
-        onPress={() => onStep(STEP)}
-      >
-        +
-      </Button>
     </TerminalCard>
   );
 };
@@ -360,16 +377,35 @@ const styles = StyleSheet.create({
   remainderValue: { fontFamily: FONTS.monoStrong },
   row: {
     alignItems: 'center',
+    columnGap: 10,
     flexDirection: 'row',
-    gap: 10,
+    flexWrap: 'wrap',
     paddingLeft: SPACING.compact,
     paddingRight: 10,
     paddingVertical: 10,
+    rowGap: SPACING.two,
   },
   rowCopy: { flex: 1, minWidth: 0 },
+  // Icon plus "Копилка" on one line; below that the stepper wraps under it.
+  rowLabel: {
+    alignItems: 'center',
+    flexBasis: 128,
+    flexDirection: 'row',
+    flexGrow: 1,
+    gap: 10,
+  },
   rowTitle: { fontSize: 17, lineHeight: 21 },
   rows: { gap: SPACING.two },
   stack: { gap: SPACING.compact, paddingBottom: SPACING.two },
+  stepper: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: SPACING.one,
+    marginLeft: 'auto',
+  },
+  // Button's root sits at flex-start for column layouts; in a row that
+  // lifts the keys above the amount between them.
+  stepperKey: { alignSelf: 'center' },
   table: { borderRadius: RADII.s, borderWidth: 2 },
   tableDivider: { borderTopWidth: 1 },
   tableLabel: { flex: 1 },
@@ -381,7 +417,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   tableValue: { fontFamily: FONTS.monoStrong, fontSize: 16 },
-  value: { fontSize: 22, lineHeight: 28, minWidth: 40, textAlign: 'right' },
+  value: { fontSize: 22, lineHeight: 28, minWidth: 48, textAlign: 'center' },
 });
 
 export type { PlanPageProps };

@@ -90,7 +90,16 @@ const Test = ({
           <Terminal.Choice
             key={option}
             index={option_index}
-            isSpent={verdict !== null && option_index !== answerIndex}
+            isAnswered={verdict !== null}
+            mark={
+              verdict === null
+                ? null
+                : option_index === answerIndex
+                  ? 'right'
+                  : option_index === verdict.chosen
+                    ? 'wrong'
+                    : null
+            }
             onPress={() => onAnswer(option_index)}
           >
             {option}
@@ -214,7 +223,10 @@ export const LessonScreen = () => {
             }
           >
             {stage === 'test' || stage === 'scenario' ? '// ' : '> '}
-            {t('lesson.header', { number: lessonState.number })}
+            {t('lesson.header', {
+              number: lessonState.number,
+              total: lessonState.lessonCount,
+            })}
           </Text>
           <Screen.Title>{lesson.title}</Screen.Title>
         </Screen.Heading>

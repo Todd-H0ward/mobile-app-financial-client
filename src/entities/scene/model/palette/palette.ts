@@ -28,6 +28,11 @@ const SCENE_PALETTE = {
   cellFrameMuted: '#5A6674',
   /** Selected cell — sodium-amber neon, not pastel gold. */
   cellFrameActive: '#FFC45A',
+  /**
+   * The number on a passed cell — the HUD's phosphor green. It used to be a
+   * bay colour, which vanished into the tile it was painted on.
+   */
+  cellDone: '#9EF0A8',
   /** Map-HUD panel face — dark slab under the overhead shot. */
   hudPanel: '#1A2030',
   /** Map-HUD panel thickness. */
@@ -36,10 +41,15 @@ const SCENE_PALETTE = {
   hudPanelEdge: '#4A5668',
   /** Map-HUD ink for digits and icons. */
   hudInk: '#E4EAF2',
-  /** Battery fill when the charge is healthy. */
-  hudBattery: '#4ADADA',
-  /** Battery fill when the charge is low — amber, never alarm red. */
-  hudBatteryLow: '#F0B04A',
+  /**
+   * The coin on the wallet board — the same gold as the coin in the HUD
+   * over the scene, so the two read as one number.
+   */
+  hudCoin: '#F2C879',
+  /** A lit charge cell — the HUD's phosphor, for the same reason. */
+  hudBattery: '#9EF0A8',
+  /** An unlit charge cell. */
+  hudBatteryOff: '#2A3444',
   /** Grit thrown off the rim when the platform climbs. */
   dust: '#7A6A54',
   /** Gear-train sparks — brief, additive, hot. */

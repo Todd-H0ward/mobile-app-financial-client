@@ -13,7 +13,7 @@ import type { UserSave } from '../types';
 // ═══════════════════════════════════════════
 
 /** Save schema version. Bumped on every incompatible change. */
-const USER_SAVE_VERSION = 17;
+const USER_SAVE_VERSION = 18;
 
 /** Player name before the introduction asks for one. */
 const DEFAULT_PLAYER_NAME = '';

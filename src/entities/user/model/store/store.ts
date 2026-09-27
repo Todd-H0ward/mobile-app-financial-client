@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -18,10 +20,7 @@ import {
 } from '@/shared/model';
 
 import { enterDemoMode, exitDemoMode } from '../../lib/demo';
-import {
-  importLegacyProgress,
-  isCompletedCellKey,
-} from '../../lib/legacy-progress';
+import { importLegacyProgress } from '../../lib/legacy-progress';
 import { resetUser } from '../../lib/reset';
 import {
   type CreateUserInput,
@@ -100,7 +99,7 @@ export const useUserStore = create<UserStore>()(
       completeLesson: (cellKey) => {
         const { user } = get();
         const ordinal = lessonOrdinalForKey(cellKey);
-        if (!user || ordinal === null || !isCompletedCellKey(cellKey)) return;
+        if (!user || ordinal === null) return;
         if (
           lessonAccess(ordinal, user.completedLessonIds, user.platform.level)
             .status === 'LOCKED'
@@ -284,11 +283,25 @@ export const useHomeScreenData = () =>
 const EMPTY_COMPLETED_CELLS: string[] = [];
 const EMPTY_COMPLETED_LESSONS: string[] = [];
 
-/** Arena progress belongs to the current profile, including its demo backup. */
-export const useDoneCells = () =>
-  useUserStore(
-    (state) => state.user?.completedLessonCells ?? EMPTY_COMPLETED_CELLS,
+/**
+ * The cells whose every lesson is done, worked out from the lesson ids.
+ *
+ * Not read off `completedLessonCells`: the ids are the record, and a cell key
+ * only means something for the arena it was written for. Deriving it here
+ * keeps the sunk tiles right whenever the layout is re-cut, save or no save.
+ */
+export const useDoneCells = () => {
+  const lessonIds = useUserStore(
+    (state) => state.user?.completedLessonIds ?? EMPTY_COMPLETED_LESSONS,
   );
+  return useMemo(
+    () =>
+      lessonIds.length === 0
+        ? EMPTY_COMPLETED_CELLS
+        : completedCellKeysFromLessons(lessonIds),
+    [lessonIds],
+  );
+};
 /** Lesson ids finished — cells may host more than one when content grows. */
 export const useDoneLessonIds = () =>
   useUserStore(

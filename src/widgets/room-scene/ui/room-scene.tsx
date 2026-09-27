@@ -2,7 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { type ExpoWebGLRenderingContext, GLView } from 'expo-gl';
 import { useFocusEffect } from 'expo-router';
-import { type LayoutChangeEvent, StyleSheet, View } from 'react-native';
+import {
+  type LayoutChangeEvent,
+  PixelRatio,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -214,11 +219,31 @@ const BOND_STROKE_MIN = 28;
 /** How often the dev readout samples the camera and the frame counter, in ms. */
 const READOUT_MS = 500;
 
+/**
+ * Pixels per point the arena is drawn at, at most.
+ *
+ * The scene is fill-bound: every pixel runs Phong with a point light, and a
+ * phone at 2.75–3× hands expo-gl two and a half million of them. Past this
+ * density nobody can tell the difference on a 3D arena of flat slabs, so the
+ * surface is made smaller and scaled up to the screen instead — about 2.5×
+ * fewer pixels shaded on a typical Android flagship. The HUD over it is
+ * native and stays sharp.
+ */
+const MAX_RENDER_DENSITY = 1.75;
+
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
 
-/** A `[segment][step]` table, filled by `value`. */
+/**
+ * How much the GL surface is scaled up to fill the view, `≥ 1`.
+ *
+ * `GLView` sizes its drawing buffer from its own layout size, so a smaller
+ * view is the only way to ask it for fewer pixels. On Android it is a
+ * `TextureView`, which a transform scales on the compositor for free.
+ */
+const renderScaleFor = (pixelRatio: number): number =>
+  Math.max(1, pixelRatio / MAX_RENDER_DENSITY);
 
 /**
  * A canvas that is not a canvas.
@@ -529,6 +554,8 @@ export const RoomScene = ({
   useEffect(() => {
     if (isAnimated) camera.applyView(view);
     else camera.jumpToView(view);
+    // The map reads the numbers on the tile tops; a bay, on the cell fronts.
+    model.current?.setNumberFace(view === 'top' ? 'top' : 'front');
     // Bond freezes the orbit the same way a watcher does — no pan while close.
     model.current?.setWatchersVisible(
       view === 'top' || focusedWatcher !== null,
@@ -635,7 +662,7 @@ export const RoomScene = ({
       // a render later. Without this the tiles a child sank yesterday come
       // back up every time the app is opened.
       built.setCellsDone(doneCellsRef.current, true);
-      built.setCellAccess(doneLessonIdsRef.current, level);
+      built.setCellAccess(doneLessonIdsRef.current, levelRef.current);
       hasSunkOnce.current = true;
       const lens = new PerspectiveCamera(
         tuneRef.current.fov,
@@ -672,6 +699,7 @@ export const RoomScene = ({
       camera.setAspect(lens.aspect);
       // Re-seat the orbit against the (possibly hot-reloaded) elevations.
       camera.jumpToView(viewRef.current);
+      built.setNumberFace(viewRef.current === 'top' ? 'top' : 'front');
 
       // Reused every frame: a fresh Color sixty times a second is litter.
       const clear = new Color(clearColor.current);
@@ -818,7 +846,7 @@ export const RoomScene = ({
 
       loop();
     },
-    [camera, level],
+    [camera],
   );
 
   const onLayout = (event: LayoutChangeEvent) => {
@@ -1067,14 +1095,25 @@ export const RoomScene = ({
       if (holdRef.current && !holdRef.current.isDone) clearCellHold();
     });
 
+  // Taps are measured against the outer view, which never scales: only the
+  // aspect of the surface has to match it, and scaling keeps that.
+  const renderScale = renderScaleFor(PixelRatio.get());
+  const surfaceStyle = surface && {
+    height: surface.height / renderScale,
+    left: (surface.width - surface.width / renderScale) / 2,
+    top: (surface.height - surface.height / renderScale) / 2,
+    transform: [{ scale: renderScale }],
+    width: surface.width / renderScale,
+  };
+
   return (
     <View style={styles.root} onLayout={onLayout}>
       <GestureDetector gesture={Gesture.Exclusive(pan, cellHold, tap)}>
         <View style={styles.canvas}>
           {surface && (
             <GLView
-              key={`${surface.width}x${surface.height}`}
-              style={styles.canvas}
+              key={`${surface.width}x${surface.height}@${renderScale}`}
+              style={[styles.surface, surfaceStyle]}
               onContextCreate={onContextCreate}
             />
           )}
@@ -1100,6 +1139,7 @@ export const RoomScene = ({
 const styles = StyleSheet.create({
   canvas: {
     flex: 1,
+    overflow: 'hidden',
   },
   rig: {
     left: 0,
@@ -1111,6 +1151,9 @@ const styles = StyleSheet.create({
   },
   root: {
     flex: 1,
+  },
+  surface: {
+    position: 'absolute',
   },
 });
 

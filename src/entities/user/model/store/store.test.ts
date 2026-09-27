@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { lessonCellKey } from '@/entities/lesson';
+
 import { STORAGE_KEYS } from '@/shared/constants';
 
 import { createInitialUser, USER_SAVE_VERSION } from '../initial-user';
@@ -271,7 +273,9 @@ describe('useUserStore', () => {
   it('isolates completed lessons and records between the child and demo', () => {
     const actions = useUserStore.getState();
     actions.createUser({ playerName: 'Player' });
-    actions.completeLesson('0-0-0');
+    // The first cell of the first step; the platform ring has none.
+    actions.completeLesson('0-1-0');
+    actions.completeLesson('0-1-0');
     actions.completeLesson('0-0-0');
     actions.completeLesson('bad-key');
     actions.updateUser((user) => ({
@@ -281,10 +285,10 @@ describe('useUserStore', () => {
     actions.setDemoMode(true);
     expect(useUserStore.getState().user?.completedLessonCells).toEqual([]);
     expect(useUserStore.getState().user?.arcade.scores.snake).toEqual([]);
-    actions.completeLesson('1-1-1');
+    actions.completeLesson('0-1-1');
     actions.setDemoMode(false);
     expect(useUserStore.getState().user?.completedLessonCells).toEqual([
-      '0-0-0',
+      '0-1-0',
     ]);
     expect(useUserStore.getState().user?.arcade.scores.snake).toEqual([9]);
     actions.resetUser();
@@ -312,8 +316,9 @@ describe('useUserStore', () => {
       }),
     );
     useUserStore.persist.rehydrate();
+    // Old-grid `0-1-2` was the ninth lesson; it lands on its cell today.
     expect(useUserStore.getState().user?.completedLessonCells).toEqual([
-      '0-1-2',
+      lessonCellKey(8),
     ]);
     expect(useUserStore.getState().user?.arcade.scores.snake).toEqual([12]);
     useUserStore.getState().resetUser();
