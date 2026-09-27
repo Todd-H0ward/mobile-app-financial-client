@@ -5,6 +5,8 @@ import { INITIAL_LESSON_SESSION, transitionLesson } from './session';
 const lesson = {
   id: 'test',
   title: 'Test',
+  sector: 0,
+  level: 1,
   theory: ['One', 'Two'],
   questions: [
     { question: 'One?', options: ['a', 'b', 'c'], answerIndex: 0 },

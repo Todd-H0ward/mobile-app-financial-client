@@ -6,7 +6,13 @@ import {
   SCENE_TERRACE_RISE,
 } from '../../model/pit';
 
-import { gearAngle, levelProgress, terraceSinkY, terracesInView } from './pit';
+import {
+  flushSteps,
+  gearAngle,
+  levelProgress,
+  terraceSinkY,
+  terracesInView,
+} from './pit';
 
 // ═══════════════════════════════════════════
 // 1. Levels map onto terraces
@@ -66,6 +72,17 @@ describe('terraceSinkY', () => {
     }
   });
 
+  it('lays one step flush with the platform per lift', () => {
+    for (let level = 0; level < SCENE_TERRACE_COUNT; level += 1) {
+      const progress = levelProgress(level);
+      expect(flushSteps(progress)).toBe(level);
+      // The step just flattened is level with the floor…
+      if (level > 0) expect(topOf(level, progress)).toBeCloseTo(0, 6);
+      // …and the next one stands exactly one rise above it: the new wall.
+      expect(topOf(level + 1, progress)).toBeCloseTo(SCENE_TERRACE_RISE, 6);
+    }
+  });
+
   it('never drops a ring below the floor the robot stands on', () => {
     for (let i = 0; i <= 20; i += 1) {
       for (let terrace = 0; terrace < SCENE_TERRACE_COUNT; terrace += 1) {
@@ -88,16 +105,15 @@ describe('terracesInView', () => {
     expect(terracesInView(1)).toBe(1);
   });
 
-  it('keeps a visible height change through all five required stages', () => {
+  it('takes one step away with each of the four lifts, then holds flat for the way out', () => {
     expect(SCENE_LEVEL_COUNT).toBe(5);
-    let previous = topOf(SCENE_TERRACE_COUNT - 1, 0);
-    for (let level = 1; level <= 5; level += 1) {
-      const now = topOf(SCENE_TERRACE_COUNT - 1, levelProgress(level));
-      expect(now).toBeLessThan(previous);
-      if (level < 5) expect(now).toBeGreaterThan(0);
-      else expect(now).toBe(0);
-      previous = now;
+    for (let level = 0; level <= 4; level += 1) {
+      expect(terracesInView(levelProgress(level))).toBe(
+        SCENE_TERRACE_COUNT - level,
+      );
     }
+    // The fifth lift leaves the pit: nothing left to lower, the finale plays.
+    expect(terracesInView(levelProgress(5))).toBe(1);
   });
 });
 

@@ -303,15 +303,22 @@ in `entities/scene`):
 
 - **Ring 0 is the platform** the robot stands on — no cells. The lessons
   start on the first step.
-- **Numbering is per bay**, bottom step up: bay 0 holds 1–30, bay 1 31–60,
-  bay 2 61–90. Seen from in front of a bay a row reads left to right.
-- A bay shares its lessons among its steps **in proportion to their length**,
-  so a cell is about the same size on every step (30 → 5 / 7 / 8 / 10).
+- **The content places the lessons.** Each lesson in `lessons.json` names its
+  theme (`sector`, the bay) and its step (`level`, 1–4); a row is every
+  lesson with that pair, in file order, spread over the bay's arc
+  (`placeLessons` in `entities/lesson`). Adding a lesson is one JSON entry.
+  A row past `rowCapacity` fails the schema test. Full rules:
+  [docs/content.md](docs/content.md).
+- **Numbering is per theme**, up its steps, left to right as seen from the
+  bay; the lesson screen shows the same number.
 - A ring keeps its gear slots **only where a gear stands in it** (the two
   outer rings); on the inner rings the bays meet with no bald patch.
 - A row opens as a whole: the platform at its step and the row below it in
-  the same bay done (`lessonAccess`). `unlockCondition` in `lessons.json`
-  names cells of the old cut and is not read.
+  the same theme done (`lessonAccess`).
+- **A passed cell stays in place and lights up green.** Only the lift takes
+  steps away: lift `N` lays step `N` flush with the platform and the next
+  step becomes the wall; four lifts flatten the pit, the fifth plays the
+  finale. See "Подъём из ямы" in [docs/scene.md](docs/scene.md).
 - Numbers lie on the tile tops for the map and stand on the cell fronts for
   a bay (`setNumberFace`) — each is the face that camera actually sees.
 

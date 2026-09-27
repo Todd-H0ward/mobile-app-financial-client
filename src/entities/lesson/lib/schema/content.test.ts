@@ -18,12 +18,22 @@ const lesson = (over: Record<string, unknown> = {}) => ({
     { question: 'Почему?', options: ['a', 'b', 'c'], answerIndex: 0 },
     { question: 'Когда?', options: ['a', 'b', 'c'], answerIndex: 1 },
   ],
+  sector: 0,
+  level: 1,
   ...over,
 });
 
-/** The full arena, which is the floor the schema enforces. */
+/** Ninety lessons placed 5 / 7 / 8 / 10 up the steps of each theme. */
 const ninety = () =>
-  Array.from({ length: 90 }, (_, index) => lesson({ id: `lesson-${index}` }));
+  Array.from({ length: 90 }, (_, index) => {
+    const position = index % 30;
+    const level = position < 5 ? 1 : position < 12 ? 2 : position < 20 ? 3 : 4;
+    return lesson({
+      id: `lesson-${index}`,
+      sector: Math.floor(index / 30),
+      level,
+    });
+  });
 
 // ═══════════════════════════════════════════
 // TESTS
@@ -44,8 +54,11 @@ describe('content/lessons.json', () => {
     }
   });
 
-  it('fills all three sectors — five terraces of six cells each', () => {
-    expect(assertLessonContent(LESSON_CONTENT).lessons).toHaveLength(90);
+  it('places every lesson on a theme and a step', () => {
+    for (const entry of assertLessonContent(LESSON_CONTENT).lessons) {
+      expect([0, 1, 2]).toContain(entry.sector);
+      expect([1, 2, 3, 4]).toContain(entry.level);
+    }
   });
 });
 
@@ -58,6 +71,28 @@ describe('assertLessonContent', () => {
     expect(() =>
       assertLessonContent({ lessons: ninety().slice(0, 89) }),
     ).not.toThrow();
+  });
+
+  it('refuses a lesson with no theme or no step', () => {
+    for (const over of [
+      { sector: undefined },
+      { sector: 3 },
+      { sector: 1.5 },
+      { level: undefined },
+      { level: 0 },
+      { level: 5 },
+    ]) {
+      expect(() => assertLessonContent({ lessons: [lesson(over)] })).toThrow();
+    }
+  });
+
+  it('refuses a step fuller than its cells can be read', () => {
+    const crowded = Array.from({ length: 8 }, (_, index) =>
+      lesson({ id: `crowded-${index}`, sector: 0, level: 1 }),
+    );
+    expect(() => assertLessonContent({ lessons: crowded })).toThrow(
+      /theme 0, step 1 holds 8 lessons/,
+    );
   });
 
   it('refuses an empty file — there would be no arena at all', () => {

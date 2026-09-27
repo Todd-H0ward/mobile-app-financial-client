@@ -127,9 +127,8 @@ interface RoomSceneProps {
   /**
    * Cells whose lesson has been passed, as `cellKey` strings.
    *
-   * They sit one terrace lower than the rest. Passed while the scene was
-   * away, they are simply there; passed just now, the tile drops in front of
-   * the child — `firstDone` is what tells the two apart.
+   * They stay where they are and light up green; the lift is what takes
+   * a step away.
    */
   doneCells?: readonly string[];
   /**
@@ -388,10 +387,8 @@ export const RoomScene = ({
   }, [robotAssembly, robotStage]);
   const robotSkinRef = useRef(robotSkin);
   const robotActionRef = useRef(robotAction);
-  /** False until the sunk cells have been placed once, without animating. */
-  const hasSunkOnce = useRef(false);
   /**
-   * The sunk cells as of this render.
+   * The passed cells as of this render.
    *
    * `onContextCreate` closes over what it saw, and it runs a render after the
    * props first arrive — this is how the scene it builds learns about them.
@@ -576,14 +573,7 @@ export const RoomScene = ({
     };
   }, [focusedWatcher, isBonding, bondMood]);
 
-  /**
-   * Sinks what the child has already learnt.
-   *
-   * The first run puts the tiles down without the drop — those lessons were
-   * passed on another day and the scene should open on their result, not
-   * replay it. Every run after that animates, because by then a change means
-   * a tile the child has just earned.
-   */
+  /** Lights up what the child has already learnt, and what is open. */
   useEffect(() => {
     if (!doneCells) return;
     doneCellsRef.current = doneCells;
@@ -591,9 +581,8 @@ export const RoomScene = ({
     levelRef.current = level;
 
     if (!model.current) return;
-    model.current.setCellsDone(doneCells, !hasSunkOnce.current);
+    model.current.setCellsDone(doneCells);
     model.current.setCellAccess(doneLessonIds, level);
-    hasSunkOnce.current = true;
   }, [doneCells, doneLessonIds, level]);
 
   useEffect(() => {
@@ -659,11 +648,10 @@ export const RoomScene = ({
       built.setPlatformY(tuneRef.current.platformY);
       // The effect below has already run by now and found no scene to talk
       // to: `onContextCreate` waits for the surface to be measured, which is
-      // a render later. Without this the tiles a child sank yesterday come
-      // back up every time the app is opened.
-      built.setCellsDone(doneCellsRef.current, true);
+      // a render later. Without this the cells a child passed yesterday go
+      // dark every time the app is opened.
+      built.setCellsDone(doneCellsRef.current);
       built.setCellAccess(doneLessonIdsRef.current, levelRef.current);
-      hasSunkOnce.current = true;
       const lens = new PerspectiveCamera(
         tuneRef.current.fov,
         gl.drawingBufferWidth / gl.drawingBufferHeight,

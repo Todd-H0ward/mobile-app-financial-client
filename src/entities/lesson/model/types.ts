@@ -14,10 +14,17 @@ interface LessonQuestion {
 }
 
 interface Lesson {
-  /** Arena coordinates and learning metadata; old fixtures may omit these. */
-  sector?: number;
-  level?: number;
-  index?: number;
+  /**
+   * The theme, and with it the bay the lesson sits in: `0` money basics,
+   * `1` saving plans, `2` buying decisions.
+   */
+  sector: number;
+  /**
+   * The step it sits on, `1` just above the platform … `4` the rim. The
+   * higher the step, the later it opens: a step opens once the platform has
+   * climbed to it and the row below it in the same theme is done.
+   */
+  level: number;
   shortDescription?: string;
   learningObjective?: string;
   scenario?: {
@@ -25,7 +32,6 @@ interface Lesson {
     actions: { title: string; consequence: string; isRecommended: boolean }[];
   };
   reward?: { coins: number; description: string };
-  unlockCondition?: { platformLevel: number; completedCells: string[] };
 
   /** Stable id, used by the save — renaming one loses a child's progress. */
   id: string;

@@ -25,15 +25,30 @@ describe('buildScene', () => {
     model.dispose();
   });
 
-  it('sinks cells before their numbers exist, then numbers them where they sank', () => {
+  it('lights passed cells before their numbers exist, then numbers them', () => {
     const model = buildScene('factory', 'idle');
     const done = ['0-1-0', '0-1-1'];
 
-    // The order the component uses on a fresh context: sinks first.
-    expect(() => model.setCellsDone(done, true)).not.toThrow();
+    // The order the component uses on a fresh context: done cells first.
+    expect(() => model.setCellsDone(done)).not.toThrow();
     expect(() => model.setCellAccess([], 0)).not.toThrow();
     expect(() => model.tick(1, 0.016)).not.toThrow();
 
+    model.dispose();
+  });
+
+  it('keeps every cell where it was built when its lesson is passed', () => {
+    const model = buildScene('factory', 'idle');
+    const [row] = model.cellTargets() as Mesh[];
+    if (!row) throw new Error('no pressable row');
+    const position = row.geometry.getAttribute('position');
+    const before = Array.from(position.array as Float32Array);
+
+    model.setCellsDone(['0-1-0']);
+    model.setCellAccess([], 0);
+    model.tick(1, 1);
+
+    expect(Array.from(position.array as Float32Array)).toEqual(before);
     model.dispose();
   });
 

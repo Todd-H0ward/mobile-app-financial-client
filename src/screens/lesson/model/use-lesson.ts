@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import {
   ARENA_LAYOUT,
   activeLessonIndexForCell,
+  displayNumberForCell,
   INITIAL_LESSON_SESSION,
   isPassed,
   type Lesson,
@@ -76,10 +77,12 @@ export const useLesson = (cellId: string): LessonState => {
   const user = useUser();
 
   const cell = useMemo(() => cellFromKey(cellId, ARENA_LAYOUT), [cellId]);
+  const ordinal = useMemo(
+    () => (cell ? cellOrdinal(cell, ARENA_LAYOUT) : null),
+    [cell],
+  );
   const activeIndex = useMemo(() => {
-    if (!cell || !user) return null;
-    const ordinal = cellOrdinal(cell, ARENA_LAYOUT);
-    if (ordinal === null) return null;
+    if (!user || ordinal === null) return null;
     if (
       lessonAccess(ordinal, user.completedLessonIds, user.platform.level)
         .status === 'LOCKED'
@@ -87,7 +90,7 @@ export const useLesson = (cellId: string): LessonState => {
       return null;
     }
     return activeLessonIndexForCell(ordinal, user.completedLessonIds);
-  }, [cell, user]);
+  }, [ordinal, user]);
 
   const lesson = useMemo(
     () => (activeIndex === null ? null : lessonAt(activeIndex)),
@@ -132,7 +135,12 @@ export const useLesson = (cellId: string): LessonState => {
 
   return {
     lesson,
-    number: activeIndex !== null ? activeIndex + 1 : 0,
+    // The number on the tile, not the lesson's line in the file: lessons are
+    // placed by theme and step, so the two differ.
+    number:
+      activeIndex !== null && ordinal !== null
+        ? displayNumberForCell(ordinal)
+        : 0,
     lessonCount: listLessons().length,
     stage,
     index,

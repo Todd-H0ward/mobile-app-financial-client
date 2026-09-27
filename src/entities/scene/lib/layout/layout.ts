@@ -60,6 +60,18 @@ const SCENE_FIRST_CELL_STEP = 1;
  */
 const SCENE_MAX_CELLS = 90;
 
+/** The last ring that carries cells — the rim. */
+const SCENE_LAST_CELL_STEP = SCENE_TERRACE_COUNT - 1;
+
+/**
+ * The shortest a cell may be along its arc, in world units.
+ *
+ * Below this a two-digit number no longer fits on the cell's front. It is
+ * what `rowCapacity` divides a row by, so content that asks for more is
+ * turned away by the schema test instead of drawing unreadable slivers.
+ */
+const SCENE_MIN_CELL_LENGTH = 44;
+
 /** Degrees between two gears — the width of a bay. */
 const BAY_ARC = 360 / SCENE_SEGMENT_COUNT;
 
@@ -78,6 +90,29 @@ const bayArcOf = (segment: number, ring: SceneTileRing): CellArc => {
   const gear = SCENE_GEAR_ANGLES[segment] ?? 0;
   const margin = ring.slotted ? SCENE_SLOT_ARC / 2 : 0;
   return { from: gear + margin, to: gear + BAY_ARC - margin };
+};
+
+/** A row's length along the middle of its ring, in world units. */
+const rowLength = (ring: SceneTileRing): number => {
+  const { from, to } = bayArcOf(0, ring);
+  return (((ring.inner + ring.outer) / 2) * (to - from) * Math.PI) / 180;
+};
+
+/**
+ * How many cells one row can take before its numbers stop fitting.
+ *
+ * The same for every bay: the bays are equal thirds of the ring. `0` for the
+ * platform and anything off the arena.
+ */
+const rowCapacity = (
+  step: number,
+  rings: readonly SceneTileRing[] = SCENE_TILE_RINGS,
+): number => {
+  const ring = rings[step];
+  if (!ring || step < SCENE_FIRST_CELL_STEP || step > SCENE_LAST_CELL_STEP) {
+    return 0;
+  }
+  return Math.max(1, Math.floor(rowLength(ring) / SCENE_MIN_CELL_LENGTH));
 };
 
 /**
@@ -151,39 +186,28 @@ const rowArcs = (
 };
 
 /**
- * The arena cut for `cellCount` cells.
+ * The arena cut into the rows it is given: `counts[segment][step]` cells.
  *
- * The count comes from the content, not from the model. The three bays share
- * it as evenly as it divides (the first bays take the remainder), and each
- * bay fills the steps above the platform from the bottom up, numbering its
- * lessons row by row. Past `SCENE_MAX_CELLS` the arena is full and extra
- * content stacks on the cells that are there.
+ * This is how the game builds it — the counts come from `lessons.json`,
+ * where every lesson names its theme (bay) and its step. The platform ring
+ * and anything past the rim are ignored. Ordinals run along a row, up the
+ * steps of a bay, then on to the next bay.
  */
-const arenaLayout = (
-  cellCount: number,
+const arenaLayoutOf = (
+  counts: readonly (readonly number[])[],
   rings: readonly SceneTileRing[] = SCENE_TILE_RINGS,
 ): ArenaLayout => {
-  const count = Math.max(
-    0,
-    Math.min(
-      SCENE_MAX_CELLS,
-      Math.floor(Number.isFinite(cellCount) ? cellCount : 0),
-    ),
-  );
-  const steps = rings.slice(SCENE_FIRST_CELL_STEP, SCENE_TERRACE_COUNT);
-  const share = Math.floor(count / SCENE_SEGMENT_COUNT);
-  const extra = count % SCENE_SEGMENT_COUNT;
-
   const rows: number[][] = [];
   const starts: number[][] = [];
   const arcs: CellArc[][][] = [];
   let ordinal = 0;
 
   for (let segment = 0; segment < SCENE_SEGMENT_COUNT; segment += 1) {
-    const bay = [
-      ...Array.from({ length: SCENE_FIRST_CELL_STEP }, () => 0),
-      ...stepShares(share + (segment < extra ? 1 : 0), steps),
-    ];
+    const bay = Array.from({ length: SCENE_TERRACE_COUNT }, (_, step) => {
+      if (step < SCENE_FIRST_CELL_STEP) return 0;
+      const cells = counts[segment]?.[step] ?? 0;
+      return Number.isInteger(cells) && cells > 0 ? cells : 0;
+    });
     rows.push(bay);
     starts.push(
       bay.map((cells) => {
@@ -200,7 +224,37 @@ const arenaLayout = (
     );
   }
 
-  return { rows, starts, arcs, count };
+  return { rows, starts, arcs, count: ordinal };
+};
+
+/**
+ * The arena for `cellCount` cells when nothing says where they go.
+ *
+ * The bays share the count as evenly as it divides (the first bays take the
+ * remainder), and each bay fills its steps from the bottom by length. Kept
+ * for fixtures and for content that has not placed its lessons yet; the game
+ * itself places them from `lessons.json` through `arenaLayoutOf`.
+ */
+const arenaLayout = (
+  cellCount: number,
+  rings: readonly SceneTileRing[] = SCENE_TILE_RINGS,
+): ArenaLayout => {
+  const count = Math.max(
+    0,
+    Math.min(
+      SCENE_MAX_CELLS,
+      Math.floor(Number.isFinite(cellCount) ? cellCount : 0),
+    ),
+  );
+  const steps = rings.slice(SCENE_FIRST_CELL_STEP, SCENE_TERRACE_COUNT);
+  const share = Math.floor(count / SCENE_SEGMENT_COUNT);
+  const extra = count % SCENE_SEGMENT_COUNT;
+
+  const counts = Array.from({ length: SCENE_SEGMENT_COUNT }, (_, segment) => [
+    ...Array.from({ length: SCENE_FIRST_CELL_STEP }, () => 0),
+    ...stepShares(share + (segment < extra ? 1 : 0), steps),
+  ]);
+  return arenaLayoutOf(counts, rings);
 };
 
 /** Cells on one step of one bay; `0` for anything off the arena. */
@@ -270,13 +324,17 @@ const FULL_ARENA_LAYOUT = arenaLayout(SCENE_MAX_CELLS);
 export type { ArenaLayout, CellArc };
 export {
   arenaLayout,
+  arenaLayoutOf,
   cellArcOf,
   FULL_ARENA_LAYOUT,
   hasCell,
   layoutCell,
   layoutOrdinal,
+  rowCapacity,
   rowCells,
   rowSize,
   SCENE_FIRST_CELL_STEP,
+  SCENE_LAST_CELL_STEP,
   SCENE_MAX_CELLS,
+  SCENE_MIN_CELL_LENGTH,
 };

@@ -1,3 +1,10 @@
+import {
+  rowCapacity,
+  SCENE_FIRST_CELL_STEP,
+  SCENE_LAST_CELL_STEP,
+  SCENE_SEGMENT_COUNT,
+} from '@/entities/scene';
+
 import { isNonEmptyString, isRecord } from '@/shared/utils';
 
 import type { Lesson, LessonFile, LessonQuestion } from '../../model';
@@ -6,13 +13,7 @@ import type { Lesson, LessonFile, LessonQuestion } from '../../model';
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * One lesson is an arena; ninety fill it.
- *
- * The cells follow the content (`ARENA_LAYOUT`): fewer than ninety leave each
- * bay on a short, stretched top row, and more stack as further layers on the
- * same cells (`lessonIndicesForCell`). Only the JSON has to change.
- */
+/** An arena needs at least one lesson to stand on. */
 const MIN_LESSONS = 1;
 
 /** Two would be a coin toss; three is a choice. */
@@ -92,6 +93,28 @@ const assertLesson = (lesson: unknown, path: string): Lesson => {
     assertQuestion(question, `${path}.questions[${index}]`);
   });
 
+  const { sector, level } = lesson;
+  if (
+    typeof sector !== 'number' ||
+    !Number.isInteger(sector) ||
+    sector < 0 ||
+    sector >= SCENE_SEGMENT_COUNT
+  ) {
+    throw new Error(
+      `${path}.sector: a theme 0…${SCENE_SEGMENT_COUNT - 1} is required`,
+    );
+  }
+  if (
+    typeof level !== 'number' ||
+    !Number.isInteger(level) ||
+    level < SCENE_FIRST_CELL_STEP ||
+    level > SCENE_LAST_CELL_STEP
+  ) {
+    throw new Error(
+      `${path}.level: a step ${SCENE_FIRST_CELL_STEP}…${SCENE_LAST_CELL_STEP} is required`,
+    );
+  }
+
   return lesson as unknown as Lesson;
 };
 
@@ -125,6 +148,23 @@ export const assertLessonContent = (data: unknown): LessonFile => {
     ids.add(parsed.id);
     return parsed;
   });
+
+  // A row is one step of one theme; past its capacity the numbers stop
+  // fitting on the cells. Say so here, where adding the lesson happened.
+  const rows = new Map<string, number>();
+  for (const { sector, level } of lessons) {
+    const key = `${sector}:${level}`;
+    rows.set(key, (rows.get(key) ?? 0) + 1);
+  }
+  for (const [key, count] of rows) {
+    const [sector, level] = key.split(':').map(Number);
+    const capacity = rowCapacity(level ?? 0);
+    if (count > capacity) {
+      throw new Error(
+        `lessons: theme ${sector}, step ${level} holds ${count} lessons — the step fits ${capacity}. Move some to another step.`,
+      );
+    }
+  }
 
   return { lessons };
 };

@@ -42,6 +42,7 @@ import {
   cellKey,
   cellOfFace,
   damp,
+  flushSteps,
   gearAngle,
   isSameCell,
   layoutOrdinal,
@@ -50,6 +51,7 @@ import {
   SCENE_CHARACTER_FACING,
   SCENE_FIRST_CELL_STEP,
   SCENE_FLAT_STEP,
+  SCENE_GEAR_ANGLES,
   SCENE_PALETTE,
   SCENE_PLATFORM_Y,
   SCENE_RADIUS,
@@ -59,7 +61,6 @@ import {
   SCENE_SOURCE,
   SCENE_TERRACE_COUNT,
   SCENE_TERRACE_RADII,
-  SCENE_TERRACE_RISE,
   SCENE_TILE_RINGS,
   type SceneCell,
   type SceneNode,
@@ -173,13 +174,10 @@ interface SceneModel {
    */
   setNumberFace: (face: NumberFace) => void;
   /**
-   * Sinks the cells whose lesson has been passed, and raises the rest.
-   *
-   * `isImmediate` puts them where they belong without the drop — which is
-   * what a scene being built for a child who learnt this yesterday needs,
-   * against a tile sinking in front of them, which is the reward.
+   * Lights up the cells whose lesson has been passed; the rest go back to
+   * their locked or open look. Nothing moves — the lift takes the steps away.
    */
-  setCellsDone: (doneKeys: readonly string[], isImmediate?: boolean) => void;
+  setCellsDone: (doneKeys: readonly string[]) => void;
   /** Same, for one of the two screens overhead. */
   watcherRoot: (watcher: WatcherId) => Object3D | null;
   /** Where the camera stands to talk to a screen, and what it looks at. */
@@ -211,20 +209,8 @@ interface Slice {
   to: number;
 }
 
-interface CellSink {
-  /**
-   * The buffers this cell owns a slice of: tile, frame, number — in that
-   * order, because `setCellAccess` swaps the number's out when it rebuilds.
-   */
-  parts: Slice[];
-  /** How far the slice is currently pushed down, in world units. */
-  offset: number;
-  /** How far it is heading. `tick` walks `offset` to meet it. */
-  target: number;
-}
-
 interface CellRecord {
-  /** Stable cell key — what the game stores and the sink map is keyed by. */
+  /** Stable cell key — what the game stores and the done list is keyed by. */
   key: string;
   /** Where it is on the arena. */
   cell: SceneCell;
@@ -236,18 +222,29 @@ interface CellRecord {
   status: LessonStatus;
   /** The outline the selection borrows while the cell is picked. */
   outline: BufferGeometry;
-  /** Its slices of the row buffers, and how far it has sunk. */
-  sink: CellSink;
+  /** Its slice of the row's tile buffer — what the tint is painted on. */
+  tile: Slice;
+  /** Its slice of the row's frame buffer. */
+  frame: Slice;
+  /** Whether its lesson is passed — it lights up green, and stays put. */
+  isDone: boolean;
 }
 
 interface RowRecord {
   /** Bay index — the numbers fade with their bay. */
   segment: number;
+  /** Step index — once the step is flush with the floor, its front is gone. */
+  step: number;
   /**
-   * The row's numbers lying on the tile tops, as one buffer — what the map
-   * reads from above.
+   * The row's numbers lying on the tile tops, turned to the map camera, as
+   * one buffer — what the overhead shot reads.
    */
   numbers: Mesh;
+  /**
+   * The same numbers on the tops, turned to the camera of the row's own bay:
+   * what that bay reads once the step has gone flush and has no front.
+   */
+  flats: Mesh;
   /**
    * The same numbers standing on the cell fronts — what a bay camera reads
    * from across the pit, where a tile top is a sliver.
@@ -265,22 +262,6 @@ type NumberFace = 'top' | 'front';
 // ═══════════════════════════════════════════
 
 /**
- * How far a cell drops once its lesson is passed, in world units.
- *
- * One terrace rise, so a passed cell comes down level with the ring below
- * it. A passed row leaves the terrace flat, which is the same shape the
- * level mechanic makes — the pit fills in as the child learns, one tile at a
- * time rather than one ring at a time.
- */
-const CELL_SINK_DROP = SCENE_TERRACE_RISE;
-
-/** Share of a cell's drop still left after a second. Slow: it is a reward. */
-const CELL_SINK_SMOOTHING = 0.004;
-
-/** Below this the drop is over and the cell stops being written to. */
-const CELL_SINK_EPSILON = 0.05;
-
-/**
  * How dark a locked tile reads against its bay.
  *
  * Multiplies the vertex colour; diffuse takes the hit, emissive stays soft
@@ -288,6 +269,15 @@ const CELL_SINK_EPSILON = 0.05;
  * content ran out below it — wears the same tint: nothing there to press.
  */
 const LOCKED_CELL_TINT = 0.28;
+
+/**
+ * How much a passed tile brightens against its bay.
+ *
+ * A passed cell used to drop a step, which read as a hole in the floor. It
+ * stays where it is now and lights up instead: the tile a touch brighter,
+ * the frame and the number the HUD's green.
+ */
+const DONE_CELL_TINT = 1.18;
 
 /**
  * Bond-mode close-up: ~0.38 of the segment shot, so the dog fills the frame
@@ -416,36 +406,24 @@ const nodesOf = (segment: number, step: number): SceneNode[] =>
   );
 
 /**
- * Pushes one cell's slice down by `delta`, in place.
+ * Paints one slice's vertices: a grey factor, or one factor per channel.
  *
- * Every third float from the start of the slice is a Y, and nothing else in
- * the buffer is touched — the cells beside it keep their vertices and the
- * row keeps its single draw call.
+ * Vertex colours multiply the material's, so a frame can be turned any
+ * colour by the ratio of that colour to the frame's own.
  */
-const shiftSlice = (part: Slice, delta: number) => {
-  // The numbers are not built until the first `setCellAccess`, and a sink
-  // placed before that has nothing to move yet — the rebuild starts the
-  // glyphs at the offset the cell already has.
-  if (part.to <= part.from) return;
-  const attribute = part.geometry.getAttribute('position');
-  if (!attribute) return;
-  const array = attribute.array as Float32Array;
-
-  for (let i = part.from + 1; i < part.to; i += 3) {
-    array[i] += delta;
-  }
-
-  attribute.needsUpdate = true;
-};
-
-/** Paints one slice's vertices a uniform grey factor. */
-const tintSlice = (part: Slice, tint: number) => {
+const tintSlice = (
+  part: Slice,
+  tint: number | readonly [number, number, number],
+) => {
   if (part.to <= part.from) return;
   const colors = part.geometry.getAttribute('color');
   if (!colors) return;
   const values = colors.array as Float32Array;
-  for (let i = part.from; i < part.to; i += 1) {
-    values[i] = tint;
+  const [r, g, b] = typeof tint === 'number' ? [tint, tint, tint] : tint;
+  for (let i = part.from; i < part.to; i += 3) {
+    values[i] = r;
+    values[i + 1] = g;
+    values[i + 2] = b;
   }
   colors.needsUpdate = true;
 };
@@ -690,6 +668,9 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     terraces[step].add(new Mesh(plain.geometry, sharedMaterial));
   };
 
+  /** What a cell's slices point at until its row has been merged. */
+  const unmerged = new BufferGeometry();
+
   /** Tile, frame and number buffers of one row, merged and hung on its terrace. */
   const buildRow = (segment: number, step: number) => {
     const ring = SCENE_TILE_RINGS[step];
@@ -714,7 +695,10 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         arc,
         status: 'LOCKED',
         outline: arcEdges(arc, CELL_FRAME_LIFT),
-        sink: { parts: [], offset: 0, target: 0 },
+        // Pointed at the row buffers once they are merged, just below.
+        tile: { geometry: unmerged, from: 0, to: 0 },
+        frame: { geometry: unmerged, from: 0, to: 0 },
+        isDone: false,
       });
     }
 
@@ -730,24 +714,21 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     tileMesh.userData = { segment, step, starts: tiles.starts, count };
     const frameLines = new LineSegments(frame.geometry, frameMaterial);
     const numbers = new Mesh(new BufferGeometry(), numberMaterials[segment]);
+    const flats = new Mesh(new BufferGeometry(), numberMaterials[segment]);
     const fronts = new Mesh(new BufferGeometry(), numberMaterials[segment]);
 
     records.forEach((record, index) => {
-      record.sink.parts = [
-        { geometry: tiles.geometry, ...tiles.ranges[index] },
-        { geometry: frame.geometry, ...frame.ranges[index] },
-        { geometry: numbers.geometry, from: 0, to: 0 },
-        { geometry: fronts.geometry, from: 0, to: 0 },
-      ];
+      record.tile = { geometry: tiles.geometry, ...tiles.ranges[index] };
+      record.frame = { geometry: frame.geometry, ...frame.ranges[index] };
       cells.set(record.key, record);
     });
 
-    // The numbers are not in `segmentParts`: which of the two sets shows
-    // depends on the view as well as the bay (`applyNumbers`).
-    terraces[step].add(tileMesh, frameLines, numbers, fronts);
+    // The numbers are not in `segmentParts`: which set shows depends on the
+    // view and on the lift as well as on the bay (`applyNumbers`).
+    terraces[step].add(tileMesh, frameLines, numbers, flats, fronts);
     segmentParts[segment].push(tileMesh, frameLines);
     cellMeshes.push(tileMesh);
-    rows.push({ segment, numbers, fronts, cells: records });
+    rows.push({ segment, step, numbers, flats, fronts, cells: records });
   };
 
   for (let segment = 0; segment < SCENE_SEGMENT_COUNT; segment += 1) {
@@ -799,75 +780,77 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   }
 
   /**
-   * Which way the tops of the digits on the tiles point: away from the map
-   * camera, which is the only one that reads them. The map is a fixed shot
-   * (`TOP_AZIMUTH`), so the direction never changes — and a number facing
-   * outward from the axis, as they used to, is upside down on the near rim.
+   * Which way the tops of the digits on the tiles point on the map: away from
+   * its camera. The map is a fixed shot (`TOP_AZIMUTH`), so the direction
+   * never changes — and a number facing outward from the axis, as they used
+   * to, is upside down on the near rim.
    */
-  const numberUp = new Vector3(
+  const mapUp = new Vector3(
     -Math.sin((TOP_AZIMUTH * Math.PI) / 180),
     0,
     -Math.cos((TOP_AZIMUTH * Math.PI) / 180),
   );
-  /** Which set of numbers is showing — see `setNumberFace`. */
-  let numberFace: NumberFace = 'top';
 
   /**
-   * Rebuilds a row's numbers into one buffer, keeping where each has sunk.
-   *
-   * The digits change when a stacked lesson is cleared and the colours when
-   * a row unlocks, and both are rare enough that rebuilding six glyphs beats
-   * keeping ninety meshes (and ninety draw calls) around.
+   * The same for a bay's own camera, which stands across the pit from the
+   * bay's middle: away from it is straight out through that middle.
    */
-  const rebuildNumbers = (
-    row: RowRecord,
-    completedLessonIds: readonly string[],
-  ) => {
+  const bayUp = (segment: number): Vector3 => {
+    const middle =
+      (((SCENE_GEAR_ANGLES[segment] ?? 0) + 180 / SCENE_SEGMENT_COUNT) *
+        Math.PI) /
+      180;
+    return new Vector3(Math.sin(middle), 0, Math.cos(middle));
+  };
+
+  /** Which set of numbers is showing — see `setNumberFace`. */
+  let numberFace: NumberFace = 'top';
+  /** Steps already flush with the floor — their fronts are under it. */
+  let flushCount = 0;
+
+  /**
+   * Rebuilds a row's three sets of numbers, one buffer each.
+   *
+   * The colours change when a row unlocks or a lesson is passed, which is
+   * rare enough that rebuilding a row of glyphs beats keeping a mesh (and a
+   * draw call) per number.
+   */
+  const rebuildNumbers = (row: RowRecord) => {
     const labels = row.cells.map(
-      (record) => displayNumberForCell(record.ordinal, completedLessonIds) - 1,
+      (record) => displayNumberForCell(record.ordinal) - 1,
     );
     const colors = row.cells.map((record) =>
       rgbOf(colorForLabelStatus(record.status)),
     );
-
-    const tops = row.cells.map((record, index) => {
-      const anchor = arcAnchor(record.arc, CELL_NUMBER_LIFT);
-      anchor.y -= record.sink.offset;
-      return cellNumberGeometry(
-        labels[index] ?? 0,
-        anchor,
-        undefined,
-        numberUp,
+    const onTops = (up: Vector3) =>
+      row.cells.map((record, index) =>
+        cellNumberGeometry(
+          labels[index] ?? 0,
+          arcAnchor(record.arc, CELL_NUMBER_LIFT),
+          undefined,
+          up,
+        ),
       );
-    });
-    const faces = row.cells.map((record, index) => {
-      const { arc, sink } = record;
-      return cellFrontNumberGeometry(
+    const onFronts = row.cells.map(({ arc }, index) =>
+      cellFrontNumberGeometry(
         labels[index] ?? 0,
         (arc.from + arc.to) / 2,
         arc.ring.inner,
-        (arc.ring.bottom + arc.ring.top) / 2 - sink.offset,
-      );
-    });
+        (arc.ring.bottom + arc.ring.top) / 2,
+      ),
+    );
 
-    const top = mergeParts(tops, colors);
-    const front = mergeParts(faces, colors);
-    for (const part of [...tops, ...faces]) part.dispose();
-
-    const previousTop = row.numbers.geometry;
-    const previousFront = row.fronts.geometry;
-    row.numbers.geometry = top.geometry;
-    row.fronts.geometry = front.geometry;
-    previousTop.dispose();
-    previousFront.dispose();
-
-    row.cells.forEach((record, index) => {
-      record.sink.parts[2] = { geometry: top.geometry, ...top.ranges[index] };
-      record.sink.parts[3] = {
-        geometry: front.geometry,
-        ...front.ranges[index],
-      };
-    });
+    for (const [mesh, parts] of [
+      [row.numbers, onTops(mapUp)],
+      [row.flats, onTops(bayUp(row.segment))],
+      [row.fronts, onFronts],
+    ] as const) {
+      const merged = mergeParts(parts, colors);
+      for (const part of parts) part.dispose();
+      const previous = mesh.geometry;
+      mesh.geometry = merged.geometry;
+      previous.dispose();
+    }
   };
 
   /**
@@ -1062,41 +1045,44 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       return mesh.visible && material.opacity > 0.5;
     });
 
-  const setCellsDone = (doneKeys: readonly string[], isImmediate = false) => {
-    const done = new Set(doneKeys);
+  /**
+   * The frame colour of a passed cell, as the factor that turns the frame
+   * material's own colour into the HUD's green.
+   */
+  const doneFrame = (() => {
+    const frameColor = new Color(SCENE_PALETTE.cellFrame);
+    const doneColor = new Color(SCENE_PALETTE.cellDone);
+    return [
+      doneColor.r / Math.max(frameColor.r, 1e-3),
+      doneColor.g / Math.max(frameColor.g, 1e-3),
+      doneColor.b / Math.max(frameColor.b, 1e-3),
+    ] as const;
+  })();
 
-    for (const [cellId, record] of cells) {
-      const sink = record.sink;
-      sink.target = done.has(cellId) ? CELL_SINK_DROP : 0;
-      if (!isImmediate) continue;
-
-      const delta = sink.target - sink.offset;
-      if (delta === 0) continue;
-
-      for (const part of sink.parts) shiftSlice(part, -delta);
-      sink.offset = sink.target;
+  /** Paints a cell's tile and frame for what it is: locked, open or passed. */
+  const paintCell = (record: CellRecord) => {
+    if (record.isDone) {
+      tintSlice(record.tile, DONE_CELL_TINT);
+      tintSlice(record.frame, doneFrame);
+      return;
     }
+    const tint = record.status === 'LOCKED' ? LOCKED_CELL_TINT : 1;
+    tintSlice(record.tile, tint);
+    tintSlice(record.frame, tint);
   };
 
-  /** Walks every cell that is still on its way down, or back up. */
-  const tickCellSinks = (deltaSec: number) => {
-    for (const { sink } of cells.values()) {
-      const gap = sink.target - sink.offset;
-      if (gap === 0) continue;
-      if (Math.abs(gap) < CELL_SINK_EPSILON) {
-        for (const part of sink.parts) shiftSlice(part, -gap);
-        sink.offset = sink.target;
-        continue;
-      }
-
-      const next = damp(
-        sink.offset,
-        sink.target,
-        CELL_SINK_SMOOTHING,
-        deltaSec,
-      );
-      for (const part of sink.parts) shiftSlice(part, -(next - sink.offset));
-      sink.offset = next;
+  /**
+   * Lights up the cells whose lesson is passed. They stay where they are —
+   * a passed cell used to drop a step, and a hole in the floor read as a bug,
+   * not a reward. What takes the steps away is the lift (`setLevelProgress`).
+   */
+  const setCellsDone = (doneKeys: readonly string[]) => {
+    const done = new Set(doneKeys);
+    for (const [cellId, record] of cells) {
+      const isDone = done.has(cellId);
+      if (record.isDone === isDone) continue;
+      record.isDone = isDone;
+      paintCell(record);
     }
   };
 
@@ -1118,8 +1104,6 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     }
 
     selection.geometry = record.outline;
-    // The outline is the cell as built; a sunk cell has moved down since.
-    selection.position.y = -record.sink.offset;
     selection.visible = true;
     terraces[next.step]?.add(selection);
   };
@@ -1142,7 +1126,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     holdMesh.geometry = holdSolid(record.arc);
     previous.dispose();
 
-    holdBaseY = record.arc.ring.bottom - record.sink.offset;
+    holdBaseY = record.arc.ring.bottom;
     holdFullHeight = record.arc.ring.top - record.arc.ring.bottom;
     holdMaterial.opacity = 0;
     holdMesh.visible = true;
@@ -1161,8 +1145,12 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   const applyNumbers = () => {
     for (const row of rows) {
       const isShown = segmentPresence[row.segment] > HIGHLIGHT_EPSILON;
+      // A step the lift has laid flush has no front above the floor, so a
+      // bay reads that row's numbers off the tops, turned to its camera.
+      const isFlush = row.step <= flushCount;
       row.numbers.visible = isShown && numberFace === 'top';
-      row.fronts.visible = isShown && numberFace === 'front';
+      row.flats.visible = isShown && numberFace === 'front' && isFlush;
+      row.fronts.visible = isShown && numberFace === 'front' && !isFlush;
     }
   };
 
@@ -1182,13 +1170,10 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
           completedLessonIds,
           level,
         ).status;
-        const tint = record.status === 'LOCKED' ? LOCKED_CELL_TINT : 1;
         // Tile and outline take the tint; numbers carry their own colour.
-        const [tile, outline] = record.sink.parts;
-        if (tile) tintSlice(tile, tint);
-        if (outline) tintSlice(outline, tint);
+        paintCell(record);
       }
-      rebuildNumbers(row, completedLessonIds);
+      rebuildNumbers(row);
     }
 
     // A locked cell must not keep the selection ring — it is not a target.
@@ -1216,10 +1201,16 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     appliedProgress = progress;
 
     // The pit sinks around the robot rather than lifting them out of it: each
-    // paid stage lowers the rim; the fifth stage finally flattens the bowl.
+    // paid lift lays one more step flush with the platform.
     terraces.forEach((terrace, index) => {
       terrace.position.y = terraceSinkY(index, progress);
     });
+
+    const flush = flushSteps(progress);
+    if (flush !== flushCount) {
+      flushCount = flush;
+      applyNumbers();
+    }
 
     gears.forEach((gear, index) => {
       gear.quaternion.setFromAxisAngle(
@@ -1230,9 +1221,10 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   };
 
   const burstLift = (level: number) => {
-    // The ring that just landed is the one the level number names, and its
-    // radius is where the dust has to come from.
-    const landed = clamp(level - 1, 0, SCENE_TERRACE_RADII.length - 1);
+    // Lift `N` lays step `N` flush with the platform: its rim is where the
+    // dust has to come from. The fifth lift has nothing left to lower and
+    // throws it off the outer edge on the way out.
+    const landed = clamp(level, 1, SCENE_TERRACE_RADII.length - 1);
 
     effects.burst(SCENE_TERRACE_RADII[landed]);
   };
@@ -1247,7 +1239,6 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     watchers?.tick(deltaSec);
     effects.tick(deltaSec);
     bondBursts.tick(deltaSec);
-    tickCellSinks(deltaSec);
     tickHighlight(deltaSec);
   };
 
@@ -1330,8 +1321,10 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     for (const geometry of geometries) geometry.dispose();
     for (const row of rows) {
       row.numbers.geometry.dispose();
+      row.flats.geometry.dispose();
       row.fronts.geometry.dispose();
     }
+    unmerged.dispose();
     for (const record of cells.values()) record.outline.dispose();
     cells.clear();
     for (const material of rooms) material.dispose();

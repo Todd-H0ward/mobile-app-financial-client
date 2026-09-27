@@ -78,12 +78,14 @@ runtime from `arenaLayout(count)` in `entities/scene`:
 
 - **Ring 0 is the platform**, level with the floor the robot stands on: one
   plain ring in the floor's colour, no cells. Lessons start on the first step.
-- **Numbering is per bay**: bay 0 holds 1–30, bay 1 31–60, bay 2 61–90, each
-  running row by row up the steps. A row is numbered against the heading, so
-  from in front of its bay it reads left to right.
-- A bay shares its lessons among its steps **by length** (mid-radius × the
-  bay's arc on that ring), so a cell is about the same size everywhere:
-  30 → 5 / 7 / 8 / 10. A short row stretches its cells over the whole arc.
+- **The content cuts the rows.** Each lesson names its theme (`sector`,
+  the bay) and its step (`level`); `placeLessons` counts them into
+  `counts[segment][step]` and `arenaLayoutOf` turns that into arcs. A row is
+  spread over the whole of its bay's arc, however many cells it has, up to
+  `rowCapacity` (7 / 11 / 12 / 14 — a cell no shorter than
+  `SCENE_MIN_CELL_LENGTH`). The shipped content is 5 / 7 / 8 / 10 per theme.
+- **Numbering is per theme**, row by row up the steps, each row against the
+  heading so that from in front of its bay it reads left to right.
 - **A ring keeps its slots only where a gear stands in it.** Only the two
   outer rings do; on the inner ones the bays meet gear line to gear line, so
   the slot that had nothing in it — a bald patch — is gone.
@@ -98,8 +100,9 @@ runtime from `arenaLayout(count)` in `entities/scene`:
 upright from the map's fixed heading (`TOP_AZIMUTH`) — radially outward they
 were upside down on the near rim. In a bay they stand on the cell fronts, the
 wall that faces the axis: from a camera at eye level a tile top is a sliver.
-`setNumberFace` picks one; both sink with their cell. A passed cell's number
-is the HUD's green, and its front drops out of sight with it.
+`setNumberFace` picks one. A third set lies on the tops turned to the bay's
+own camera: a step the lift has laid flush has no front left, so a bay reads
+that row off its tops instead.
 
 Each row — the cells of one step in one bay — is **one buffer**, and so
 are its frames and its numbers: 36 draw calls for the whole floor, where the
@@ -111,9 +114,10 @@ vertices, so one opaque material serves every status.
 
 Things to know before touching them:
 
-- **Cells sink by moving their slice** of the row buffers (`shiftSlice`),
-  never by a mesh of their own. Numbers are built after the first sink, so
-  a rebuild starts each glyph at the offset its cell already has.
+- **A passed cell stays where it is** and lights up: the number and the frame
+  turn the HUD's green, the tile brightens (`setCellsDone`). It used to drop
+  a step, and a hole in the floor read as a bug rather than a reward. What
+  takes steps away is the lift, below.
 - **The outlines are lifted one unit.** An edge sitting exactly on the face it
   came from is a coin toss per pixel on a phone GPU, and the frame comes out
   dashed and crawling.
@@ -138,8 +142,8 @@ node scripts/fbx-to-scene.mjs
 
 | Поле | Что это |
 | --- | --- |
-| `geometries` | 3 геометрии (шестерня, диск пола, пандус), `position` / `normal` |
-| `nodes` | 5 инстансов: три шестерни и пол — индекс геометрии, сектор, матрица 4×4 |
+| `geometries` | 2 геометрии (шестерня, диск пола), `position` / `normal` |
+| `nodes` | 4 инстанса: три шестерни и пол — индекс геометрии, сектор, матрица 4×4 |
 | `tiles` | Замеры 90 дисков: кольца (радиусы, высоты), дуга диска и прорези |
 | `segmentAngles` | Азимуты трёх секторов: 98.5° / 218.5° / 338.5° |
 | `bounds` | Габариты и `sphereRadius` — по нему кадрируется камера |
@@ -185,22 +189,32 @@ node scripts/fbx-to-scene.mjs
 
 ## Подъём из ямы
 
-Главная механика сцены — **подъём уровня**. Чаша модели это ступенчатый конус:
-**пять террас**, каждая на 40 единиц выше и шире предыдущей (радиусы
-133 → 400). Робопёс стоит в центре на платформе.
+Главная механика сцены — **подъём уровня**, оплаченный из копилки. Чаша —
+ступенчатый конус: площадка под псом (кольцо 0) и **четыре ступени с уроками**,
+каждая на 40 единиц выше и шире предыдущей. Робопёс не поднимается — яма
+опускается вокруг него, **по одной ступени за подъём**:
 
-- **Уровень 0** — платформа внизу, ребёнок видит все пять террас.
-- **Каждый подъём** поднимает платформу ровно на одну террасу, и вместе с ней
-  поднимаются **все пройденные террасы** — они встают вровень с полом.
-- Две террасы на одной высоте читаются как одна ступень, поэтому уровней
-  видно всё меньше: 5 → 4 → 3 → 2 → 1.
-- **Уровень 5** — вся чаша сошлась в одну плоскость.
+| Подъём | Что происходит | Что открывается |
+| --- | --- | --- |
+| 0 | Видны все четыре ступени | Ступень 1 во всех трёх темах |
+| 1 | Ступень 1 встаёт вровень с площадкой, крутятся шестерни, летит пыль | Ступень 2 — она теперь стена перед псом |
+| 2 | Ступень 2 вровень с площадкой | Ступень 3 |
+| 3 | Ступень 3 вровень с площадкой | Ступень 4 |
+| 4 | Ступень 4 (край) вровень — яма плоская | — |
+| 5 | Выход из ямы: шестерни докручиваются, играет финал (`story/finale`) | — |
 
-Террасы обязаны подниматься вместе с платформой: иначе платформа уезжает
-вверх одна и робопёс висит в воздухе.
+- Каждый подъём опускает **все** кольца на одну высоту ступени, и каждое
+  останавливается, когда встаёт вровень с полом. Поэтому после подъёма `N`
+  ступень `N` лежит на полу, а ступень `N + 1` стоит ровно на одну ступень
+  выше — новая стена, ряд которой только что открылся (`lessonAccess`).
+- Пройденные уроки ступени не опускают: их ячейки светятся зелёным. Ступени
+  убирает только подъём — так картинка, уровень платформы и открытый ряд
+  всегда совпадают.
+- У ступени, ушедшей на пол, нет передней грани, поэтому в виде сектора её
+  номера переезжают на верх плиток (`flushSteps`, `applyNumbers`).
 
 Вся математика — в `entities/scene/lib/pit`, чистая и покрытая тестами:
-`platformLiftY`, `terraceLiftY`, `terracesInView`, `gearAngle`.
+`sinkBudget`, `terraceSinkY`, `flushSteps`, `terracesInView`, `gearAngle`.
 
 ## Три шестерни
 

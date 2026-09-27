@@ -8,6 +8,7 @@ export {
   displayNumberForCell,
   lessonIndicesForCell,
   lessonsForCell,
+  placeLessons,
 } from './layout';
 export { assertLessonContent } from './schema';
 export { isPassed, LESSON_PASS_SHARE, passMark } from './score';

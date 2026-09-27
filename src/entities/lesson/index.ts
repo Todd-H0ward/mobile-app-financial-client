@@ -16,6 +16,7 @@ export {
   lessonsForCell,
   listLessons,
   passMark,
+  placeLessons,
   transitionLesson,
 } from './lib';
 export type { LessonStatus } from './lib/access';
