@@ -28,7 +28,7 @@ describe('explainShortage', () => {
       shortfall: 12,
       price: 40,
       balance: 28,
-      savings: savingsWith('scooter', 0),
+      savings: savingsWith('radar', 0),
     });
 
     expect(explain.shortfall).toBe(12);
@@ -47,7 +47,7 @@ describe('explainShortage', () => {
       shortfall,
       price: 40,
       balance: 28,
-      savings: savingsWith('scooter', 0),
+      savings: savingsWith('radar', 0),
     });
 
     expect(explain.task).not.toBeNull();
@@ -65,7 +65,7 @@ describe('explainShortage', () => {
       shortfall: richest.reward + 50,
       price: richest.reward + 50,
       balance: 0,
-      savings: savingsWith('scooter', 0),
+      savings: savingsWith('radar', 0),
     });
 
     expect(explain.task?.taskId).toBe(richest.task.id);
@@ -73,9 +73,9 @@ describe('explainShortage', () => {
   });
 
   it('shows jar consequence when the active goal holds enough', () => {
-    const scooter = getGoalById('scooter');
-    expect(scooter).toBeDefined();
-    if (!scooter) return;
+    const radar = getGoalById('radar');
+    expect(radar).toBeDefined();
+    if (!radar) return;
 
     const saved = 55;
     const shortfall = 12;
@@ -83,15 +83,13 @@ describe('explainShortage', () => {
       shortfall,
       price: 40,
       balance: 28,
-      savings: savingsWith('scooter', saved),
+      savings: savingsWith('radar', saved),
     });
 
     expect(explain.jar.isAvailable).toBe(true);
-    expect(explain.jar.goalTitle).toBe(scooter.title);
-    expect(explain.jar.remainingBefore).toBe(scooter.price - saved);
-    expect(explain.jar.remainingAfter).toBe(
-      scooter.price - (saved - shortfall),
-    );
+    expect(explain.jar.goalTitle).toBe(radar.title);
+    expect(explain.jar.remainingBefore).toBe(radar.price - saved);
+    expect(explain.jar.remainingAfter).toBe(radar.price - (saved - shortfall));
   });
 
   it('marks the jar unavailable when savings are short', () => {
@@ -99,7 +97,7 @@ describe('explainShortage', () => {
       shortfall: 12,
       price: 40,
       balance: 28,
-      savings: savingsWith('scooter', 5),
+      savings: savingsWith('radar', 5),
     });
 
     expect(explain.jar.isAvailable).toBe(false);
@@ -111,7 +109,7 @@ describe('explainShortage', () => {
       shortfall: 1,
       price: 10,
       balance: 9,
-      savings: savingsWith('paints', 0),
+      savings: savingsWith('coat', 0),
     });
 
     expect(explain.wait.kind).toBe('wait');

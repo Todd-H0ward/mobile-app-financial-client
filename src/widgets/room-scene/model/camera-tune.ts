@@ -5,9 +5,6 @@
 /**
  * Live knobs for framing the arena. Start as the committed constants in
  * `entities/scene/model/camera.ts` — dial here, then paste the readout back.
- *
- * Defaults are literals (not imported) so this module cannot be left
- * half-initialised by a Metro barrel cycle with `use-scene-camera`.
  */
 interface CameraTune {
   /** Degrees above the floor for a room view. */

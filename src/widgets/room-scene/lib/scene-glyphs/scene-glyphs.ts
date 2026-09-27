@@ -14,11 +14,6 @@ import fontData from './helvetiker-bold.typeface.json';
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * Curve segments for bezier glyph outlines.
- *
- * Helvetiker strokes are smooth; too few and the counters of 8/0 go polygonal.
- */
 const CURVE_SEGMENTS = 8;
 
 /** Parsed once — every arena number and HUD board shares the same face. */
@@ -28,12 +23,7 @@ const SCENE_FONT = new FontLoader().parse(fontData);
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * Real type outlines for `text`, sized so capitals sit at `height`.
- *
- * This is a filled font (outer rings + counters), not thickened stick strokes —
- * that is what makes arena numbers read as digits instead of bars.
- */
+/** Real type outlines for `text`, sized so capitals sit at `height`. */
 const layoutTextShapes = (text: string, height: number): Shape[] =>
   SCENE_FONT.generateShapes(text, height);
 
@@ -59,13 +49,7 @@ const centerGeometry = (geometry: BufferGeometry) => {
   position.needsUpdate = true;
 };
 
-/**
- * World-space filled geometry for a string on a horizontal plane.
- *
- * `origin` is the centre of the glyph box; `tangent` is local +X (reading
- * direction); `up` is local +Y (glyph top). Every vertex keeps `origin.y`
- * so the label sits flat on a cell top.
- */
+/** World-space filled geometry for a string on a horizontal plane. */
 const textGeometryOnPlane = (
   text: string,
   origin: Vector3,
@@ -95,13 +79,7 @@ const textGeometryOnPlane = (
   return geometry;
 };
 
-/**
- * World-space filled geometry for a string standing upright on a wall.
- *
- * `origin` is the centre of the glyph box, `right` the reading direction
- * along the wall; the tops point at the sky. What the cell fronts carry:
- * a number lying on a tile top is a sliver from a camera at eye level.
- */
+/** World-space filled geometry for a string standing upright on a wall. */
 const textGeometryUpright = (
   text: string,
   origin: Vector3,
@@ -130,11 +108,7 @@ const textGeometryUpright = (
   return geometry;
 };
 
-/**
- * Filled geometry for a string in a local XY plane at a fixed Z.
- *
- * Used by the map HUD boards: ink floats just in front of the slab face.
- */
+/** Filled geometry for a string in a local XY plane at a fixed Z. */
 const textGeometryLocal = (
   text: string,
   originX: number,
@@ -174,10 +148,7 @@ const shapeGeometryAt = (shape: Shape, z: number): BufferGeometry => {
   return geometry;
 };
 
-/**
- * The coin, as the HUD over the scene draws it: a disc with a slot down the
- * middle. The wallet board wears it so the two wallets read as one.
- */
+/** The coin, as the HUD over the scene draws it: a disc with a slot down the middle. */
 const coinGeometryLocal = (
   cx: number,
   cy: number,
@@ -200,9 +171,7 @@ const coinGeometryLocal = (
   return shapeGeometryAt(disc, z);
 };
 
-/**
- * An upward chevron — the tier board's mark, the "подъём" the HUD words.
- */
+/** An upward chevron — the tier board's mark, the "подъём" the HUD words. */
 const upGeometryLocal = (
   cx: number,
   cy: number,

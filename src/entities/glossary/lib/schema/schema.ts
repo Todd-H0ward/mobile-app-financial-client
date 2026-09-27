@@ -34,12 +34,7 @@ const assertTerm = (term: unknown, path: string): GlossaryTerm => {
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/**
- * Validates `content/glossary.json`.
- *
- * Terms are the grown-up's and child's shared vocabulary (2.5.11) — a broken
- * row must fail in tests, not open an empty sheet on the device.
- */
+/** Validates `content/glossary.json`. */
 export const assertGlossaryContent = (data: unknown): GlossaryFile => {
   if (!isRecord(data)) {
     throw new Error('glossary content: must be an object');

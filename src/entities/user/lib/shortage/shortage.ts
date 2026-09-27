@@ -33,12 +33,11 @@ interface ShortageTaskOption {
 }
 
 /**
- * Taking the shortfall from the jar — only offered when the active goal
- * actually holds that many coins.
+ * Taking the shortfall from the jar — only offered when the active goal actually holds
+ * that many coins.
  */
 interface ShortageJarOption {
   kind: 'jar';
-  /** Whether the jar can cover the shortfall right now. */
   isAvailable: boolean;
   /** Active goal id, or null when none is picked. */
   goalId: string | null;
@@ -58,8 +57,8 @@ interface ShortageWaitOption {
 }
 
 /**
- * Child-readable refusal for 2.5.6 / docs/economy.md — shortfall named, three
- * options with consequences, never a bare "insufficient funds".
+ * Child-readable refusal for 2.5.6 / docs/economy.md — shortfall named, three options with
+ * consequences, never a bare "insufficient funds".
  */
 interface ShortageExplain {
   shortfall: number;
@@ -76,8 +75,8 @@ interface ShortageExplain {
 // ═══════════════════════════════════════════
 
 /**
- * Prefer the cheapest chore that covers the gap; otherwise the richest one —
- * so the screen never says "earn" without naming how many coins that is.
+ * Prefer the cheapest chore that covers the gap; otherwise the richest one — so the screen
+ * never says "earn" without naming how many coins that is.
  */
 const pickTask = (shortfall: number): ShortageTaskOption | null => {
   const ranked = listTasks()
@@ -143,10 +142,6 @@ const explainJar = (
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/**
- * Builds the shortage explanation: how many coins are missing, and three
- * named recovery options with consequences (earn / jar / wait).
- */
 export const explainShortage = (
   input: ShortageExplainInput,
 ): ShortageExplain => {

@@ -5,12 +5,7 @@ import type { PuzzleLevel } from './types';
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * Levels unlocked by toys bought for the room.
- *
- * Ownership reuses `ownedItemIds`: the catalogue SKU's `ownedId`
- * matches the puzzle level `id` (e.g. `rooms-living`), so no second inventory.
- */
+/** Levels unlocked by toys bought for the room. */
 export const ownedPuzzles = (ownedItemIds: readonly string[]): PuzzleLevel[] =>
   PUZZLE_CATALOGUE.filter((level) => ownedItemIds.includes(level.id));
 

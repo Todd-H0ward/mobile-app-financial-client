@@ -49,11 +49,7 @@ type ConsoleVolumeButtonProps = VolumeButtonProps;
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * Plastic face with a thicker bottom lip — reads as a raised button.
- * Press animates with translateY inside a fixed slot so the D-pad layout
- * never shifts (margin/border changes would shove neighbours).
- */
+/** Plastic face with a thicker bottom lip — reads as a raised button. */
 export const ConsoleVolumeButton = ({
   children,
   accessibilityLabel,
@@ -88,7 +84,7 @@ export const ConsoleVolumeButton = ({
             height: size,
             minWidth: slotWidth,
             opacity: disabled ? 0.55 : 1,
-            paddingHorizontal: minWidth != null ? SPACING.two : 0,
+            paddingHorizontal: minWidth != null ? SPACING.TWO : 0,
             transform: [
               {
                 translateY: pressed && !disabled ? LIP - PRESSED_LIFT : 0,
@@ -232,8 +228,8 @@ const PRESSED_LIFT = 3;
 const styles = StyleSheet.create({
   dpad: {
     alignItems: 'center',
-    gap: SPACING.one,
-    width: KEY * 3 + SPACING.one * 2,
+    gap: SPACING.ONE,
+    width: KEY * 3 + SPACING.ONE * 2,
   },
   dpadHub: {
     borderRadius: RADII.xs,
@@ -243,7 +239,7 @@ const styles = StyleSheet.create({
   dpadMid: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.one,
+    gap: SPACING.ONE,
   },
   faceSpacer: {
     height: 64 + LIP,
@@ -251,7 +247,7 @@ const styles = StyleSheet.create({
   },
   faces: {
     alignItems: 'flex-end',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     justifyContent: 'center',
   },
   volume: {

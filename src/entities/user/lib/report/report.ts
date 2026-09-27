@@ -37,11 +37,8 @@ interface GrowthReport {
 }
 
 /**
- * The four questions docs/parents.md says a grown-up actually has, answered
- * from what the child already sees.
- *
- * Nothing extra is collected and nothing is sent anywhere: this is the same
- * wallet history and the same period totals, counted a second way.
+ * The four questions docs/parents.md says a grown-up actually has, answered from what the
+ * child already sees.
  */
 interface ParentsReport {
   /** Oldest period first, so a chart reads left to right like a calendar. */
@@ -59,14 +56,7 @@ interface ParentsReport {
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * Coins per period, over the stretch the wallet still holds.
- *
- * The window is deliberately the wallet's own: history is trimmed to
- * `WALLET_HISTORY_LIMIT` because it is a report and not an archive
- * (docs/economy.md), so the chart covers what is actually known rather than
- * drawing an honest-looking zero for a period whose lines have aged out.
- */
+/** Coins per period, over the stretch the wallet still holds. */
 const earningsByPeriod = (user: UserSave): PeriodEarnings[] => {
   const tally = new Map<number, PeriodEarnings>();
 
@@ -84,20 +74,14 @@ const earningsByPeriod = (user: UserSave): PeriodEarnings[] => {
     else row.spent += entry.amount;
   }
 
-  // The running period always gets a column, even before it earns anything:
-  // an absent "now" reads as a broken chart rather than as an empty week.
+  // The running period always gets a column, even before it earns anything: an absent "now"
+  // reads as a broken chart rather than as an empty week.
   touch(user.period.index);
 
   return [...tally.values()].sort((a, b) => a.periodIndex - b.periodIndex);
 };
 
-/**
- * Chores by theme, counted off the wallet.
- *
- * `TasksSave.completedThisPeriod` is wiped every settlement, so the only place
- * a finished chore survives is the coin it paid — which is exactly the record
- * 2.5.4 made sure carries its source.
- */
+/** Chores by theme, counted off the wallet. */
 const tasksByTheme = (user: UserSave): ThemeTally[] => {
   const tally = new Map<TaskTheme, number>(
     TASK_THEMES.map((theme) => [theme, 0]),

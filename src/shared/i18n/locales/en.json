@@ -515,10 +515,6 @@
       "puzzle-arena": {
         "title": "Arena puzzle",
         "note": "Buy it — the puzzle unlocks in the mini-games."
-      },
-      "game-console": {
-        "title": "Game console",
-        "note": "Buy it — Spacewar and snake unlock in the mini-games."
       }
     }
   },
@@ -555,17 +551,17 @@
     "goPlan": "Make a plan",
     "cancel": "Not now",
     "goals": {
-      "paints": {
-        "title": "Paint set"
-      },
-      "scooter": {
-        "title": "Scooter"
-      },
-      "telescope": {
-        "title": "Telescope"
-      },
       "lift": {
         "title": "Next tier"
+      },
+      "coat": {
+        "title": "Arctic coat"
+      },
+      "radar": {
+        "title": "Radar module"
+      },
+      "beacon": {
+        "title": "Signal beacon"
       }
     },
     "jar": {
@@ -642,8 +638,8 @@
         "brief": "Put needs above wants.",
         "explanation": "Food and warmth come first; a poster can wait."
       },
-      "save-for-scooter": {
-        "title": "Save for a scooter",
+      "save-for-radar": {
+        "title": "Save for a radar",
         "brief": "How many periods if you put a little aside each time?",
         "explanation": "Save for one thing and watch how much is left."
       },
@@ -1325,6 +1321,7 @@
   "app": {
     "name": "Above Zero",
     "booting": "terminal booting",
+    "loadingScene": "raising the arena",
     "offline": "no internet · no sign-up"
   },
   "boxes": {

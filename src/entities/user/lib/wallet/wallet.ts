@@ -36,8 +36,8 @@ interface DebitOk {
 }
 
 /**
- * Debit refused — 2.5.6. Returned, never thrown: the shop must explain the
- * shortfall rather than crash.
+ * Debit refused — 2.5.6. Returned, never thrown: the shop must explain the shortfall
+ * rather than crash.
  */
 interface DebitFail {
   ok: false;
@@ -56,20 +56,7 @@ type DebitResult = DebitOk | DebitFail;
 // WALLET
 // ═══════════════════════════════════════════
 
-/**
- * Credits coins to the wallet, with the entry that names them.
- *
- * The only door into `balance`: docs/economy.md — "ни один экран не пишет
- * баланс напрямую" — every coin the child ever has arrives through here, so
- * "no nameless income" is a property of one function rather than a rule every
- * call site has to remember.
- *
- * `WalletEntry.id` is built from `entryCount`, not from `history.length`:
- * the array is capped at `WALLET_HISTORY_LIMIT` and its length stops growing
- * once trimming starts, while `entryCount` never resets and never shrinks.
- *
- * @throws {Error} If `amount` is not a finite number above zero.
- */
+/** Credits coins to the wallet, with the entry that names them. */
 export const creditWallet = (
   wallet: WalletSave,
   input: CreditInput,
@@ -98,12 +85,8 @@ export const creditWallet = (
 };
 
 /**
- * Debits coins from the wallet — the only door out of `balance`.
- *
- * Never goes below zero: a shortfall is a returned result, not a throw and
- * not a silent clamp — docs/economy.md / 2.5.6.
- *
- * @throws {Error} If `amount` is not a finite number above zero.
+ * Debits coins — the only door out of `balance`. Never goes below zero: a
+ * shortfall is a returned result, not a throw or a silent clamp (2.5.6).
  */
 export const debitWallet = (
   wallet: WalletSave,
@@ -150,9 +133,9 @@ export const canAfford = (wallet: WalletSave, price: number): boolean =>
   Number.isFinite(price) && price > 0 && wallet.balance >= price;
 
 /**
- * The wallet a fresh profile starts with: the starting balance, credited as a
- * named entry rather than materialized as a bare number — 2.5.4 makes no
- * exception for the very first coin.
+ * The wallet a fresh profile starts with: the starting balance, credited as a named entry
+ * rather than materialized as a bare number — 2.5.4 makes no exception for the very first
+ * coin.
  */
 export const startingWallet = (createdAt: number): WalletSave =>
   creditWallet(

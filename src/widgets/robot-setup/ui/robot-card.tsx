@@ -43,13 +43,6 @@ const TILE_HEIGHT = 72;
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/**
- * One coat, shown rather than named.
- *
- * The name of a coat means nothing before you have seen it — «Карбон» is a
- * word, the picture is the choice. The label stays underneath for the screen
- * reader and for telling two dark coats apart.
- */
 const SkinTile = ({ skin, isSelected, onPress }: SkinTileProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -94,12 +87,7 @@ const SkinTile = ({ skin, isSelected, onPress }: SkinTileProps) => {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * The grown-up's controls for the dog: how it looks and what it does.
- *
- * Both are looks-only — nothing here touches the economy — which is why they
- * sit next to the interface switches and not behind the arithmetic gate.
- */
+/** The grown-up's controls for the dog: how it looks and what it does. */
 export const RobotCard = ({
   skin,
   action,
@@ -170,10 +158,10 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   content: {
-    gap: SPACING.compact,
+    gap: SPACING.COMPACT,
   },
   heading: { gap: 2 },
   preview: {
@@ -183,18 +171,18 @@ const styles = StyleSheet.create({
   },
   selected: {
     borderRadius: RADII.xs,
-    padding: SPACING.one,
+    padding: SPACING.ONE,
     position: 'absolute',
-    right: SPACING.one,
-    top: SPACING.one,
+    right: SPACING.ONE,
+    top: SPACING.ONE,
   },
   tile: {
     alignItems: 'center',
-    gap: SPACING.one,
+    gap: SPACING.ONE,
   },
   tiles: {
-    gap: SPACING.two,
-    paddingVertical: SPACING.one,
+    gap: SPACING.TWO,
+    paddingVertical: SPACING.ONE,
   },
 });
 

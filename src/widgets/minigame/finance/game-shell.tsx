@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 
+import { SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Screen, Sheet, Text } from '@/shared/ui';
 
@@ -35,7 +36,7 @@ export const GameShell = ({
 }: GameShellProps) => {
   const { t } = useTranslation();
   return (
-    <Screen gap="three">
+    <Screen gap={SPACING.THREE}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Title>{title}</Screen.Title>
@@ -65,6 +66,7 @@ export const DebriefSheet = ({
   onClose,
 }: DebriefSheetProps) => {
   const { t } = useTranslation();
+
   return (
     <Sheet.Modal isVisible={isVisible} isDismissible={false} onClose={onClose}>
       <Sheet.Title>{t('financeGame.debrief')}</Sheet.Title>

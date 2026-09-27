@@ -14,10 +14,7 @@ import { useDemoMode } from '../model';
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/**
- * Temporary home for demo controls until `screens/parents` lands (wave 1 §18).
- * The card is self-contained and will move behind the arithmetic gate as-is.
- */
+/** Temporary until `screens/parents` (wave 1 §18) — moves behind the gate as-is. */
 export const DemoModeCard = () => {
   const { t } = useTranslation();
   const {
@@ -34,8 +31,6 @@ export const DemoModeCard = () => {
 
   const onSwitchChange = (isChecked: boolean) => {
     if (isChecked) {
-      // Nothing is lost any more, but swapping the profile under a child is
-      // still a thing a grown-up should confirm rather than discover.
       setIsConfirmVisible(true);
       return;
     }
@@ -130,12 +125,12 @@ export const DemoModeCard = () => {
 
 const styles = StyleSheet.create({
   actions: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     width: '100%',
   },
   content: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
-  head: { alignItems: 'center', flexDirection: 'row', gap: SPACING.compact },
+  head: { alignItems: 'center', flexDirection: 'row', gap: SPACING.COMPACT },
   headCopy: { flex: 1, gap: 2 },
 });

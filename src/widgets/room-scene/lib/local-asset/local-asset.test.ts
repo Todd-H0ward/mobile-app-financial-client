@@ -117,6 +117,29 @@ describe('localFileOf', () => {
 });
 
 describe('readAssetBytes', () => {
+  it('reads a Metro/dev model from the http source uri, not the cached file://', async () => {
+    const bytes = new ArrayBuffer(4);
+    const fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      arrayBuffer: async () => bytes,
+    });
+    vi.stubGlobal('fetch', fetch);
+    mocks.bundled = {
+      name: 'robot-dog',
+      type: 'glb',
+      uri: 'http://127.0.0.1:8081/assets/robot-dog.glb',
+      localUri: 'file:///cache/ExperienceData/ExponentAsset-abc.glb',
+      downloaded: true,
+      downloadAsync: vi.fn(),
+    };
+
+    expect(await readAssetBytes(4)).toBe(bytes);
+    expect(fetch).toHaveBeenCalledWith(
+      'http://127.0.0.1:8081/assets/robot-dog.glb',
+    );
+  });
+
   it('reads a release model from its local copy, not from the resource name', async () => {
     const bytes = new ArrayBuffer(4);
     const fetch = vi.fn().mockResolvedValue({
@@ -138,7 +161,7 @@ describe('readAssetBytes', () => {
     };
     mocks.bundled = bundled;
 
-    expect(await readAssetBytes(4)).toBe(bytes);
+    expect(await readAssetBytes(5)).toBe(bytes);
     expect(fetch).toHaveBeenCalledWith('file:///cache/robot-dog.glb');
   });
 });

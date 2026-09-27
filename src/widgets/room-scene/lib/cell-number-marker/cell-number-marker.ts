@@ -9,31 +9,15 @@ import { textGeometryOnPlane, textGeometryUpright } from '../scene-glyphs';
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * Digit height in world units on the cell top.
- *
- * Tall enough that a filled stem stays readable from the opposite-bay
- * camera; a touch taller than the old stick glyphs so the mass of the
- * capsules does not crowd the rim.
- */
+/** Digit height in world units on the cell top. */
 const DIGIT_HEIGHT = 24;
 
-/**
- * Digit height on a cell's front, in world units.
- *
- * The front is forty units tall; this leaves a margin above and below so the
- * number reads as painted on the wall, not spilling over its edges.
- */
+/** Digit height on a cell's front, in world units. */
 const FRONT_DIGIT_HEIGHT = 22;
 
 /** How far in front of the wall the digits float, so they never z-fight it. */
 const FRONT_LIFT = 1.5;
 
-/**
- * How far inward from the rim the number sits, toward the pit centre.
- *
- * Parks the glyphs on the inner top of the tile the child reads across the pit.
- */
 const LABEL_INWARD = 8;
 
 const STATUS_COLOR: Record<LessonStatus, string> = {
@@ -50,15 +34,7 @@ const STATUS_COLOR: Record<LessonStatus, string> = {
 const colorForLabelStatus = (status: LessonStatus): string =>
   STATUS_COLOR[status];
 
-/**
- * World-space filled geometry for the 1-based lesson number on a cell top.
- *
- * Laid flat on the tile. `up` is the way the top of the digits points, on
- * the ground plane: away from the camera, so the number reads upright on
- * screen whichever side of the pit it is on. Without one it points outward
- * from the axis — upright from across the pit, upside down from the near
- * side, which is what the map used to show on its front rim.
- */
+/** World-space filled geometry for the 1-based lesson number on a cell top. */
 const cellNumberGeometry = (
   ordinal: number,
   anchor: Vector3,
@@ -87,12 +63,8 @@ const cellNumberGeometry = (
 };
 
 /**
- * The lesson number standing on a cell's front — the wall that faces the
- * axis, which is what a camera across the pit actually sees.
- *
- * `heading` is the middle of the cell, in degrees; `radius` the wall's;
- * `y` the middle of its height. The digits read left to right for someone
- * looking out from the axis, which is the way every bay camera looks at it.
+ * The lesson number standing on a cell's front — the wall that faces the axis, which is
+ * what a camera across the pit actually sees.
  */
 const cellFrontNumberGeometry = (
   ordinal: number,

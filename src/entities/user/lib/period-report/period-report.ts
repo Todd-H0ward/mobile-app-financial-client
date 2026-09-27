@@ -7,21 +7,10 @@ import type { UserSave, WalletEntry } from '../../model';
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * Fraction of liquid balance lost when the budget is not met.
- *
- * 10 % — felt enough to teach cause and effect, small enough not to trap a
- * child who already has nothing. The penalty never drops the wallet below
- * zero, and it never touches non-liquid savings or the platform level.
- */
+/** Fraction of liquid balance lost when the budget is not met. */
 export const BUDGET_FAIL_PENALTY_RATE = 0.1;
 
-/**
- * Bonus coins awarded when the budget is met for the period.
- *
- * Small enough that it does not distort the economy, big enough to be
- * noticeable on the summary screen.
- */
+/** Bonus coins awarded when the budget is met for the period. */
 export const BUDGET_SUCCESS_BONUS = 5;
 
 // ═══════════════════════════════════════════
@@ -62,11 +51,6 @@ interface PeriodReport {
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * Sums up earnings during a specific period from wallet history.
- *
- * Skips the starting-wallet credit — that is not "earned this period".
- */
 const sumEarnings = (history: WalletEntry[], periodIndex: number): number =>
   history
     .filter(
@@ -77,14 +61,7 @@ const sumEarnings = (history: WalletEntry[], periodIndex: number): number =>
     )
     .reduce((total, entry) => total + entry.amount, 0);
 
-/**
- * Computes the penalty or bonus based on whether the budget was met.
- *
- * - Met: flat bonus of `BUDGET_SUCCESS_BONUS`.
- * - Not met: penalty of `BUDGET_FAIL_PENALTY_RATE` × balance, floored.
- *
- * The penalty never exceeds the current balance.
- */
+/** Computes the penalty or bonus based on whether the budget was met. */
 export const computeAdjustment = (
   isBudgetMet: boolean,
   balance: number,
@@ -98,12 +75,6 @@ export const computeAdjustment = (
 // BUILDER
 // ═══════════════════════════════════════════
 
-/**
- * Builds a full period report from the user save at `summary` phase.
- *
- * Called before `endPeriod` settles the state — the report reads the
- * pre-settlement snapshot so plan, fact and balance are still frozen.
- */
 export const buildPeriodReport = (user: UserSave): PeriodReport => {
   const { period, wallet, robot, platform } = user;
 

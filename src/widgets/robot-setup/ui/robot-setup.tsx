@@ -42,12 +42,7 @@ interface RobotSetupProps {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Edit names and coat from settings.
- *
- * First-run introduction lives on `/setup` — this sheet is only the short
- * revisit, so it stays a modal.
- */
+/** Edit names and coat from settings. */
 export const RobotSetup = ({ onClose }: RobotSetupProps) => {
   const { t } = useTranslation();
   const user = useUser();
@@ -145,8 +140,8 @@ export const RobotSetup = ({ onClose }: RobotSetupProps) => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  actions: { gap: SPACING.two },
-  content: { gap: SPACING.two, paddingBottom: SPACING.two },
+  actions: { gap: SPACING.TWO },
+  content: { gap: SPACING.TWO, paddingBottom: SPACING.TWO },
   root: { flexGrow: 0 },
 });
 

@@ -21,7 +21,7 @@ export const GamesScreen = () => {
   const levels = ownedPuzzles(user?.ownedItemIds ?? []);
 
   return (
-    <Screen gap="three" terminalVariant="overseer">
+    <Screen gap={SPACING.THREE} terminalVariant="overseer">
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -126,6 +126,6 @@ export const GamesScreen = () => {
 
 const styles = StyleSheet.create({
   list: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
 });

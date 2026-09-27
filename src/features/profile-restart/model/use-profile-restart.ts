@@ -10,13 +10,7 @@ import { toast } from '@/shared/ui';
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * Deleting the profile and starting over from the bottom of the pit — 2.5.12.
- *
- * It is the delete, not the reset: a reset keeps the names and the settings.
- * Erasing the key is the only honest way back to a first launch, which is
- * also why it asks first wherever it is used.
- */
+/** Delete (not reset) — only way back to a first launch; 2.5.12. */
 export const useProfileRestart = () => {
   const { t } = useTranslation();
   const router = useRouter();
@@ -25,16 +19,14 @@ export const useProfileRestart = () => {
 
   return {
     hasProfile: user !== null,
-    /** Name shown in the confirmation, so it is clear whose profile goes. */
+    /** Shown in the confirmation — whose profile goes. */
     playerName: user?.playerName ?? '',
-    /** Periods already lived through — the consequence, named before the tap. */
+    /** Periods lived — named before the wipe. */
     finishedPeriods: user?.history.length ?? 0,
 
     restart: () => {
       deleteUser();
-      // The entry screen makes the fresh guest profile, exactly as on a
-      // first launch — replacing right here keeps a profile-less home screen
-      // from flashing in between.
+      // Entry rebuilds the guest; replace avoids a profile-less home flash.
       router.replace(STATIC_ROUTES.ENTRY);
       toast(t('profileRestart.toastDeleted'));
     },

@@ -36,15 +36,15 @@
       }
     },
     {
-      "id": "save-for-scooter",
+      "id": "save-for-radar",
       "theme": "savings",
       "mechanic": "quiz",
-      "title": "Накопить на самокат",
+      "title": "Накопить на радар",
       "difficulty": "medium",
       "brief": "Сколько периодов копиться, если откладывать понемногу?",
       "explanation": "Копим на что-то одно и видим, сколько осталось.",
       "payload": {
-        "question": "Самокат стоит 140. Если откладывать по 40 за период, сколько периодов нужно?",
+        "question": "Радарный модуль стоит 140. Если откладывать по 40 за период, сколько периодов нужно?",
         "options": [
           { "id": "two", "label": "2", "isCorrect": false },
           { "id": "three", "label": "3", "isCorrect": false },

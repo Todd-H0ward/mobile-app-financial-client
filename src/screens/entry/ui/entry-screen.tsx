@@ -22,7 +22,6 @@ import { formatMoney } from '@/shared/utils';
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** First launches go straight to setup; returning players see their saved progress. */
 export const EntryScreen = () => {
   const user = useUser();
   const createUser = useCreateUser();
@@ -94,22 +93,22 @@ export const EntryScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  actions: { gap: SPACING.two, marginTop: 'auto', paddingTop: SPACING.four },
+  actions: { gap: SPACING.TWO, marginTop: 'auto', paddingTop: SPACING.FOUR },
   balance: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.one,
+    gap: SPACING.ONE,
     marginLeft: 'auto',
   },
   heading: { flex: 0 },
-  identity: { flexBasis: 100, flexGrow: 1, gap: SPACING.one },
+  identity: { flexBasis: 100, flexGrow: 1, gap: SPACING.ONE },
   profile: {
     alignItems: 'center',
     borderRadius: 14,
     borderWidth: 2,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.compact,
-    padding: SPACING.compact,
+    gap: SPACING.COMPACT,
+    padding: SPACING.COMPACT,
   },
 });

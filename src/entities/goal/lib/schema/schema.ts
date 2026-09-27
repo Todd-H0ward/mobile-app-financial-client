@@ -41,12 +41,7 @@ const assertGoal = (goal: unknown, path: string): GoalContent => {
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/**
- * Validates `content/goals.json` (or a fixture shaped like it).
- *
- * Every goal ends up in the starting save, so a broken row here is a broken
- * profile on the device. It must fail in tests instead — 2.5.14 / 3.2.
- */
+/** Validates `content/goals.json` (or a fixture shaped like it). */
 export const assertGoalsContent = (data: unknown): GoalsFile => {
   if (!isRecord(data)) {
     throw new Error('goals content: must be an object');

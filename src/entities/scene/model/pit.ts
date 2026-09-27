@@ -2,24 +2,13 @@
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * Terraces in the bowl — the levels the child climbs.
- *
- * The model is a stepped cone: five rings, each one step taller and wider
- * than the one inside it. The robot starts on the innermost, lowest ring with
- * all five in view.
- */
+/** Terraces in the bowl — the levels the child climbs. */
 const SCENE_TERRACE_COUNT = 5;
 
 /** Height of one terrace, in world units. Read off the model. */
 const SCENE_TERRACE_RISE = 40;
 
-/**
- * Outer radius of each terrace, innermost first.
- *
- * The platform has to grow to cover what it has risen above, and these are
- * the widths it has to reach.
- */
+/** Outer radius of each terrace, innermost first. */
 const SCENE_TERRACE_RADII = [133, 200, 267, 333, 400];
 
 /** Radius of the platform as the artist built it. */
@@ -28,22 +17,10 @@ const SCENE_PLATFORM_RADIUS = 267;
 /** Five progression stages; geometry must represent the full game progression. */
 const SCENE_LEVEL_COUNT = 5;
 
-/**
- * How far each gear turns per level, in radians.
- *
- * Three wheels stand upright around the bowl; they are the machine that
- * raises the floor, so they turn while it rises and stop when it stops.
- * Nearly a full turn per level — enough to read as work being done.
- */
+/** How far each gear turns per level, in radians. */
 const SCENE_GEAR_TURN = Math.PI * 1.6;
 
-/**
- * Which way the robot's own model faces, in radians, before it is turned.
- *
- * Added to the camera's heading so `setCharacterFacing` can be given a plain
- * azimuth. A quarter turn: the robot dog is built looking down its own +X,
- * so without this it stands side on to whoever is watching it.
- */
+/** Which way the robot's own model faces, in radians, before it is turned. */
 const SCENE_CHARACTER_FACING = Math.PI / 2;
 
 /** Seconds a single level-up takes, gears, dust and all. */

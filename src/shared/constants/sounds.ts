@@ -1,9 +1,4 @@
-/**
- * Cue ids matching files in `assets/audio/*.wav`.
- *
- * Keep values in lockstep with `scripts/generate-game-audio.py` and the
- * players registered in `GameAudioImpl`.
- */
+/** Cue ids ↔ `assets/audio/*.wav` (keep in sync with `generate-game-audio.py`). */
 export const SOUNDS = {
   UI_TAP: 'ui_tap',
   UI_CONFIRM: 'ui_confirm',

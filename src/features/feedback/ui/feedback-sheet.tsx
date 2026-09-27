@@ -24,10 +24,7 @@ interface FeedbackSheetProps {
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * Params may carry raw coin amounts — format money-looking keys so the
- * child never sees a bare "48" where a coin total belongs.
- */
+/** Format money-looking param keys so the child never sees a bare "48". */
 const formatParams = (
   params: Record<string, string | number>,
 ): Record<string, string | number> => {
@@ -56,11 +53,7 @@ const formatParams = (
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * «Что изменилось и почему» after an action — 2.5.9 / roadmap 1.18.
- *
- * Numbers side by side, then the rule named. Never shame, never a wipe.
- */
+/** Post-action «что изменилось» — numbers then the rule; 2.5.9. */
 export const FeedbackSheet = ({
   report,
   isVisible,
@@ -133,7 +126,7 @@ const styles = StyleSheet.create({
   },
   divider: { borderTopWidth: 1 },
   why: {
-    gap: SPACING.one,
+    gap: SPACING.ONE,
     width: '100%',
   },
 });

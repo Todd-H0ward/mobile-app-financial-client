@@ -17,11 +17,7 @@ import { SCENE_PALETTE } from '@/entities/scene';
 // ═══════════════════════════════════════════
 
 interface LiftEffects {
-  /**
-   * Fires one level's worth of VFX.
-   *
-   * @param ringRadius where the ring that just landed meets the floor
-   */
+  /** Fires one level's worth of VFX. @param ringRadius where the ring that just landed meets the floor */
   burst: (ringRadius: number) => void;
   /** Advances every burst — call once per frame with the frame delta. */
   tick: (deltaSec: number) => void;
@@ -50,12 +46,6 @@ interface BurstOptions {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * Grit kicked up where the ring lands.
- *
- * Slow, wide and plentiful: it sells the weight of a stone ring dropping a
- * step, which is the whole point of the animation.
- */
 const RING_DUST: BurstOptions = {
   count: 240,
   life: 1.6,
@@ -68,12 +58,7 @@ const RING_DUST: BurstOptions = {
   isAdditive: false,
 };
 
-/**
- * Sparks off the same impact — fast, tight and brief.
- *
- * Fewer than the dust on purpose: sparks read as stone striking stone, and a
- * shower of them would read as fireworks.
- */
+/** Sparks off the same impact — fast, tight and brief. */
 const RING_SPARKS: BurstOptions = {
   count: 90,
   life: 0.8,
@@ -86,13 +71,6 @@ const RING_SPARKS: BurstOptions = {
   isAdditive: true,
 };
 
-/**
- * Sparks off the gear teeth.
- *
- * Spread over most of their life rather than thrown at once: the wheels turn
- * for the whole two seconds of a level, so they should sputter throughout
- * instead of flashing once at the start.
- */
 const GEAR_SPARKS: BurstOptions = {
   count: 150,
   life: 1.9,
@@ -108,33 +86,13 @@ const GEAR_SPARKS: BurstOptions = {
 /** How far from a wheel's hub its teeth are, in world units. */
 const GEAR_TOOTH_RADIUS = 150;
 
-/**
- * Turns a world size into pixels at a given depth.
- *
- * `viewportHeight / (2 · tan(fov/2))`, with the 2400-pixel phone and the 45°
- * lens this scene uses. Written down rather than plumbed through as a uniform
- * because it only has to be right to within a grain of dust — but it does
- * have to be roughly right: the camera sits two and a half thousand units
- * back, and the arbitrary constant this replaced drew three-pixel specks.
- */
+/** Turns a world size into pixels at a given depth. */
 const POINT_SCALE = 2900;
 
 /** Born a little clear of the floor, or the first frames are inside it. */
 const BIRTH_LIFT = 12;
 
-/**
- * Every grain is born once and simulated on the GPU.
- *
- * Nothing about a burst changes between frames except one number, so a grain
- * is a position, a velocity and a clock: the JS thread advances `uTime` and
- * does no per-grain work at all. The render loop here is already on the JS
- * thread (docs/scene.md), and five hundred grains of per-frame maths there
- * would cost the frame the camera needs.
- *
- * `aOrigin` is a direction on the unit circle for the ring bursts, scaled by
- * `uRadius` so one buffer serves every ring, and an absolute position for the
- * gear sparks, which stand where their wheels do.
- */
+/** Every grain is born once and simulated on the GPU. */
 const VERTEX_SHADER = /* glsl */ `
   uniform float uTime;
   uniform float uLife;
@@ -165,8 +123,8 @@ const VERTEX_SHADER = /* glsl */ `
     // Grains shrink as they die, and near ones read bigger than far ones.
     gl_PointSize = uSize * vFade * (uPointScale / -view.z);
 
-    // A grain not yet born, or already spent, is pushed off screen rather
-    // than drawn: there is no branch cheaper than this one.
+    // A grain not yet born, or already spent, is pushed off screen rather than drawn: there is
+    // no branch cheaper than this one.
     if (age < 0.0 || vFade <= 0.0) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
   }
 `;
@@ -191,13 +149,6 @@ const FRAGMENT_SHADER = /* glsl */ `
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * One burst system.
- *
- * `hubs` empty means a ring burst: grains are born on a unit circle the
- * shader scales to whatever ring just landed. Otherwise the grains are split
- * between the hubs — the three wheels — and stay where those stand.
- */
 const createBurst = (options: BurstOptions, hubs: Vector3[] = []): Points => {
   const origins = new Float32Array(options.count * 3);
   const velocities = new Float32Array(options.count * 3);
@@ -230,8 +181,8 @@ const createBurst = (options: BurstOptions, hubs: Vector3[] = []): Points => {
   }
 
   const geometry = new BufferGeometry();
-  // `position` is never read by the shader, but three needs the attribute to
-  // size the draw and to build a bounding sphere.
+  // `position` is never read by the shader, but three needs the attribute to size the draw
+  // and to build a bounding sphere.
   geometry.setAttribute('position', new BufferAttribute(origins, 3));
   geometry.setAttribute('aOrigin', new BufferAttribute(origins, 3));
   geometry.setAttribute('aVelocity', new BufferAttribute(velocities, 3));
@@ -257,8 +208,8 @@ const createBurst = (options: BurstOptions, hubs: Vector3[] = []): Points => {
 
   const points = new Points(geometry, material);
   points.visible = false;
-  // The cloud is far wider than the ring it is born on, and a frustum test on
-  // the birth ring alone pops the whole burst out of view at the screen edge.
+  // The cloud is far wider than the ring it is born on, and a frustum test on the birth ring
+  // alone pops the whole burst out of view at the screen edge.
   points.frustumCulled = false;
 
   return points;
@@ -271,12 +222,7 @@ const uniformsOf = (points: Points) =>
 // FACTORY
 // ═══════════════════════════════════════════
 
-/**
- * Dust and sparks for one level of the climb.
- *
- * Two impacts happen at once and both are worth showing: the ring lands on
- * the floor, and the wheels that drove it down grind while it does.
- */
+/** Dust and sparks for one level of the climb. */
 const createLiftEffects = (mount: Group, gearHubs: Vector3[]): LiftEffects => {
   const ringDust = createBurst(RING_DUST);
   const ringSparks = createBurst(RING_SPARKS);

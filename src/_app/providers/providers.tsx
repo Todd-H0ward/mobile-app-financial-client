@@ -60,10 +60,7 @@ const AccessibilityBridge = ({ children }: { children: ReactNode }) => {
   );
 };
 
-/**
- * App shell. TimeSource is only for wallet / content stamps — the period
- * engine never reads it (0.3-R). Offline by design: no QueryClient / axios.
- */
+/** TimeSource for wallet/content stamps only (0.3-R); offline — no QueryClient. */
 export const Providers = ({ children }: ProvidersProps) => {
   useAppLanguage();
   const [areFontsLoaded, fontError] = useFonts({

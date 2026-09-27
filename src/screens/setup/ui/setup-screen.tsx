@@ -49,7 +49,6 @@ import {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** The three boxes, with the signs they wear everywhere else (A2). */
 const BOXES: { icon: PixelIconName; key: 'needs' | 'wants' | 'savings' }[] = [
   { icon: 'battery', key: 'needs' },
   { icon: 'gear', key: 'wants' },
@@ -60,13 +59,6 @@ const BOXES: { icon: PixelIconName; key: 'needs' | 'wants' | 'savings' }[] = [
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * First-run introduction: story, then names, coat and modules.
- *
- * Lived in a sheet on `/home`, but the form needs a full screen — the modal
- * clipped the module choices and the story into a 70% height scroll.
- * After save the walk/fall cutscene plays before the arena.
- */
 export const SetupScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -103,7 +95,7 @@ export const SetupScreen = () => {
   };
 
   return (
-    <Screen gap="three">
+    <Screen gap={SPACING.THREE}>
       <Screen.Header>
         <Screen.Heading>
           <Screen.Label>
@@ -225,11 +217,11 @@ export const SetupScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.two },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.TWO },
   direction: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.compact,
+    gap: SPACING.COMPACT,
   },
   directionText: { flex: 1 },
   flex: { flex: 1 },
@@ -240,6 +232,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 36,
   },
-  part: { gap: SPACING.two, marginTop: SPACING.one },
-  stack: { gap: SPACING.two },
+  part: { gap: SPACING.TWO, marginTop: SPACING.ONE },
+  stack: { gap: SPACING.TWO },
 });

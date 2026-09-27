@@ -79,21 +79,7 @@ const CardFooter = memo(
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * A surface with a border. Pass `onPress` and it becomes a button; without it
- * the card stays a plain view, so it never shows up in the a11y tree as one.
- *
- * @example
- * <Card onPress={choose} isSelected={isChosen}>
- *   <Card.Title>Робопёс</Card.Title>
- *   <Card.Content>
- *     <Text>Заряд на исходе, но доволен.</Text>
- *   </Card.Content>
- *   <Card.Footer>
- *     <Button size="s">Покормить</Button>
- *   </Card.Footer>
- * </Card>
- */
+/** Pressable only when `onPress` is set — otherwise plain view (no a11y button). */
 const CardRoot = memo(
   ({
     children,
@@ -109,8 +95,6 @@ const CardRoot = memo(
       {
         borderColor: isSelected ? theme.primary : theme.border,
         borderWidth: isSelected ? SELECTED_BORDER : BORDER,
-        // The thicker border eats into the content box, so the padding gives
-        // back exactly what it took: selecting a row must not nudge its text.
         padding: PADDING - (isSelected ? SELECTED_BORDER : BORDER),
       },
       style,
@@ -157,15 +141,15 @@ export const Card = Object.assign(CardRoot, {
 const styles = StyleSheet.create({
   root: {
     borderRadius: 14,
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   content: {
-    gap: SPACING.one,
+    gap: SPACING.ONE,
   },
   footer: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     justifyContent: 'flex-end',
   },
   footerSpread: {

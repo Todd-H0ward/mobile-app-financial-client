@@ -21,18 +21,9 @@ interface CellArc {
 }
 
 interface ArenaLayout {
-  /**
-   * Cells on each step of each bay, `rows[segment][step]`. The platform
-   * ring (`step 0`) holds none.
-   */
+  /** Cells on each step of each bay, `rows[segment][step]`. Platform ring (`step 0`) holds none. */
   rows: readonly (readonly number[])[];
-  /**
-   * Ordinal of the first cell of each row, `starts[segment][step]`.
-   *
-   * Ordinals run along a row, up the steps of a bay, then on to the next
-   * bay — each bay is its own run of lessons, "from this one to that one" —
-   * with no holes, so ordinal `n` is the `n`-th lesson.
-   */
+  /** Ordinal of the first cell of each row, `starts[segment][step]`. */
   starts: readonly (readonly number[])[];
   /** Where every cell lies, `arcs[segment][step][cell]`. */
   arcs: readonly (readonly (readonly CellArc[])[])[];
@@ -44,32 +35,16 @@ interface ArenaLayout {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * The first ring that carries cells.
- *
- * Ring `0` is level with the floor the robot stands on: it is the platform,
- * not a step, and the lessons begin on the step above it.
- */
+/** The first ring that carries cells. */
 const SCENE_FIRST_CELL_STEP = 1;
 
-/**
- * Cells the arena holds before further lessons start stacking on them.
- *
- * Ninety is what the content was written for; past it the cells would grow
- * too narrow to hold a two-digit number, so extra lessons layer instead.
- */
+/** Cells the arena holds before further lessons start stacking on them. */
 const SCENE_MAX_CELLS = 90;
 
 /** The last ring that carries cells — the rim. */
 const SCENE_LAST_CELL_STEP = SCENE_TERRACE_COUNT - 1;
 
-/**
- * The shortest a cell may be along its arc, in world units.
- *
- * Below this a two-digit number no longer fits on the cell's front. It is
- * what `rowCapacity` divides a row by, so content that asks for more is
- * turned away by the schema test instead of drawing unreadable slivers.
- */
+/** The shortest a cell may be along its arc, in world units. */
 const SCENE_MIN_CELL_LENGTH = 44;
 
 /** Degrees between two gears — the width of a bay. */
@@ -79,13 +54,7 @@ const BAY_ARC = 360 / SCENE_SEGMENT_COUNT;
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * The stretch of a ring that belongs to one bay, in degrees.
- *
- * Gear to gear, less half a slot at each end where a gear actually stands
- * in the ring. The inner rings have no gear in them, so their bays meet and
- * the ring runs all the way round without a bald patch.
- */
+/** The stretch of a ring that belongs to one bay, in degrees. */
 const bayArcOf = (segment: number, ring: SceneTileRing): CellArc => {
   const gear = SCENE_GEAR_ANGLES[segment] ?? 0;
   const margin = ring.slotted ? SCENE_SLOT_ARC / 2 : 0;
@@ -98,12 +67,7 @@ const rowLength = (ring: SceneTileRing): number => {
   return (((ring.inner + ring.outer) / 2) * (to - from) * Math.PI) / 180;
 };
 
-/**
- * How many cells one row can take before its numbers stop fitting.
- *
- * The same for every bay: the bays are equal thirds of the ring. `0` for the
- * platform and anything off the arena.
- */
+/** How many cells one row can take before its numbers stop fitting. */
 const rowCapacity = (
   step: number,
   rings: readonly SceneTileRing[] = SCENE_TILE_RINGS,
@@ -115,15 +79,7 @@ const rowCapacity = (
   return Math.max(1, Math.floor(rowLength(ring) / SCENE_MIN_CELL_LENGTH));
 };
 
-/**
- * How one bay's lessons fill its steps, bottom first.
- *
- * In proportion to the length of arc each step has in the bay, so a cell is
- * about the same size on every step instead of the inner ones crowding their
- * numbers — thirty lessons come out 5 / 7 / 8 / 10. Largest remainder keeps
- * the total exact, and no step is left bare while one above it holds more
- * than one: the lessons start at the bottom.
- */
+/** How one bay's lessons fill its steps, bottom first. */
 const stepShares = (
   count: number,
   rings: readonly SceneTileRing[],
@@ -163,14 +119,7 @@ const stepShares = (
   return shares;
 };
 
-/**
- * The arcs of one row, in the order they are numbered.
- *
- * The row is spread evenly over the bay's stretch of the ring, a short row
- * stretching its cells rather than leaving a gap. The walk goes **against**
- * the heading: seen from the camera in front of a bay, falling headings run
- * left to right, so the numbers read 1, 2, 3 the way a child reads.
- */
+/** The arcs of one row, in the order they are numbered. */
 const rowArcs = (
   cells: number,
   segment: number,
@@ -185,14 +134,7 @@ const rowArcs = (
   }));
 };
 
-/**
- * The arena cut into the rows it is given: `counts[segment][step]` cells.
- *
- * This is how the game builds it — the counts come from `lessons.json`,
- * where every lesson names its theme (bay) and its step. The platform ring
- * and anything past the rim are ignored. Ordinals run along a row, up the
- * steps of a bay, then on to the next bay.
- */
+/** The arena cut into the rows it is given: `counts[segment][step]` cells. */
 const arenaLayoutOf = (
   counts: readonly (readonly number[])[],
   rings: readonly SceneTileRing[] = SCENE_TILE_RINGS,
@@ -227,14 +169,7 @@ const arenaLayoutOf = (
   return { rows, starts, arcs, count: ordinal };
 };
 
-/**
- * The arena for `cellCount` cells when nothing says where they go.
- *
- * The bays share the count as evenly as it divides (the first bays take the
- * remainder), and each bay fills its steps from the bottom by length. Kept
- * for fixtures and for content that has not placed its lessons yet; the game
- * itself places them from `lessons.json` through `arenaLayoutOf`.
- */
+/** The arena for `cellCount` cells when nothing says where they go. */
 const arenaLayout = (
   cellCount: number,
   rings: readonly SceneTileRing[] = SCENE_TILE_RINGS,
@@ -261,7 +196,6 @@ const arenaLayout = (
 const rowSize = (layout: ArenaLayout, segment: number, step: number): number =>
   layout.rows[segment]?.[step] ?? 0;
 
-/** Whether the cell is one this layout actually has. */
 const hasCell = (layout: ArenaLayout, cell: SceneCell): boolean =>
   Number.isInteger(cell.segment) &&
   Number.isInteger(cell.step) &&
@@ -301,12 +235,7 @@ const cellArcOf = (layout: ArenaLayout, cell: SceneCell): CellArc | null =>
     ? (layout.arcs[cell.segment]?.[cell.step]?.[cell.cell] ?? null)
     : null;
 
-/**
- * Every cell of one row, in ordinal order.
- *
- * A row is what unlocks together: the next row of the same bay opens once
- * all of these are done and the platform has climbed to it.
- */
+/** Every cell of one row, in ordinal order. */
 const rowCells = (
   layout: ArenaLayout,
   segment: number,

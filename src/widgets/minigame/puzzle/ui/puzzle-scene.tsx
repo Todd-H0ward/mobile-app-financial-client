@@ -28,9 +28,7 @@ interface PuzzleSceneProps {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Board + tray + ghost for one sitting. Completion is reported once upward.
- */
+/** Board + tray + ghost for one sitting. */
 export const PuzzleScene = ({ puzzle, onComplete }: PuzzleSceneProps) => {
   const theme = useTheme();
   const image = puzzleImageUri(puzzle.imageKey);
@@ -148,9 +146,9 @@ export const PuzzleScene = ({ puzzle, onComplete }: PuzzleSceneProps) => {
 
 const styles = StyleSheet.create({
   meta: {
-    gap: SPACING.one,
-    paddingBottom: SPACING.two,
-    paddingHorizontal: SPACING.three,
+    gap: SPACING.ONE,
+    paddingBottom: SPACING.TWO,
+    paddingHorizontal: SPACING.THREE,
   },
   root: {
     flex: 1,

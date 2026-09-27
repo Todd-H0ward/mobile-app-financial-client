@@ -101,18 +101,13 @@ const LONG_TITLE =
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/**
- * Every component of `@/shared/ui` against all of its states at once. This is
- * the project's Storybook: it ships inside the app, so it costs no dependency
- * and runs on the real device.
- */
 export const UiKitScreen = () => {
   const theme = useTheme();
   const playground = usePlayground();
 
   return (
     <>
-      <Screen gap="three">
+      <Screen gap={SPACING.THREE}>
         <Screen.Header>
           <Screen.Back />
           <Screen.Heading>
@@ -164,7 +159,7 @@ export const UiKitScreen = () => {
               key={variant}
               variant={variant}
               isTextureEnabled={playground.isTextureEnabled}
-              style={{ padding: SPACING.three, gap: SPACING.two }}
+              style={{ padding: SPACING.THREE, gap: SPACING.TWO }}
             >
               <Text
                 variant="machine"
@@ -328,13 +323,13 @@ export const UiKitScreen = () => {
             style={{
               flexDirection: 'row',
               flexWrap: 'wrap',
-              gap: SPACING.three,
+              gap: SPACING.THREE,
             }}
           >
             {PIXEL_ICON_NAMES.map((name) => (
               <View
                 key={name}
-                style={{ alignItems: 'center', gap: SPACING.two, minWidth: 72 }}
+                style={{ alignItems: 'center', gap: SPACING.TWO, minWidth: 72 }}
               >
                 <PixelIcon
                   name={name}
@@ -677,7 +672,7 @@ export const UiKitScreen = () => {
 
         <KitSection
           title="Screen"
-          caption="Этот экран и есть пример: фон, safe area, скролл и колонка по MAX_CONTENT_WIDTH"
+          caption="Этот экран и есть пример: фон, safe area, скролл и колонка по MAX_CONTENT_WIDTH. Screen.Footer — кнопки у низа, без сдвига при росте контента"
         >
           <KitSection.Row label="Screen.Header со всеми слотами">
             <Screen.Header>
@@ -688,6 +683,16 @@ export const UiKitScreen = () => {
               </Screen.Heading>
               <CoinBadge amount={7} variant="plain" coinSize={16} />
             </Screen.Header>
+          </KitSection.Row>
+          <KitSection.Row label="Screen.Footer">
+            <Screen.Footer style={styles.screenFooterDemo}>
+              <Button size="l" isFullWidth>
+                Начать период 2
+              </Button>
+              <Button variant="ghost" size="s" isFullWidth>
+                без выбора
+              </Button>
+            </Screen.Footer>
           </KitSection.Row>
         </KitSection>
 
@@ -988,17 +993,20 @@ const styles = StyleSheet.create({
   fullWidth: {
     width: '100%',
   },
-  pad: { gap: SPACING.one, padding: SPACING.compact },
+  pad: { gap: SPACING.ONE, padding: SPACING.COMPACT },
   rings: {
     alignSelf: 'stretch',
     borderRadius: 14,
     height: 160,
     overflow: 'hidden',
   },
-  stack: { gap: SPACING.two, width: '100%' },
+  screenFooterDemo: {
+    paddingHorizontal: 0,
+  },
+  stack: { gap: SPACING.TWO, width: '100%' },
   swatch: {
     alignItems: 'center',
-    borderRadius: SPACING.two,
+    borderRadius: SPACING.TWO,
     height: 56,
     justifyContent: 'center',
     width: 96,

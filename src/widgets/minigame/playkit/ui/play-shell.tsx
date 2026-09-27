@@ -44,7 +44,7 @@ export const PlayShell = ({
 }: PlayShellProps) => {
   const { t } = useTranslation();
   return (
-    <Screen terminalVariant="overseer" gap="three">
+    <Screen terminalVariant="overseer" gap={SPACING.THREE}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     justifyContent: 'space-between',
   },
   stage: { flex: 1, minHeight: 240 },

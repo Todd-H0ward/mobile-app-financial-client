@@ -36,11 +36,7 @@ const DEFAULT_MAX_SHARE = 0.54;
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * A terminal docked to the bottom of the game, as tall as its content and
- * never above `maxShare` — whatever the camera looks at above stays in view.
- * Longer content scrolls inside the screen.
- */
+/** Bottom terminal capped at `maxShare` so the camera view stays visible. */
 export const TerminalDock = ({
   children,
   variant = 'keeper',
@@ -53,7 +49,7 @@ export const TerminalDock = ({
   return (
     <View
       pointerEvents="box-none"
-      style={[styles.root, { paddingBottom: insets.bottom + SPACING.two }]}
+      style={[styles.root, { paddingBottom: insets.bottom + SPACING.TWO }]}
     >
       <TerminalPanel
         variant={variant}
@@ -77,10 +73,10 @@ export const TerminalDock = ({
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  content: { padding: SPACING.three },
+  content: { padding: SPACING.THREE },
   frame: {
     flexShrink: 1,
-    maxWidth: MAX_CONTENT_WIDTH + SPACING.three,
+    maxWidth: MAX_CONTENT_WIDTH + SPACING.THREE,
     width: '100%',
   },
   panel: { flexShrink: 1 },
@@ -88,7 +84,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     bottom: 0,
     left: 0,
-    paddingHorizontal: SPACING.two,
+    paddingHorizontal: SPACING.TWO,
     position: 'absolute',
     right: 0,
     zIndex: 3,

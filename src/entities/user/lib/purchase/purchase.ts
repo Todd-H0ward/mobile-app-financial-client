@@ -15,10 +15,6 @@ import { debitWallet } from '../wallet';
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * Adds a bought module to the save and bumps the tier to the owned count
- * (capped at 3). Cosmetics and charge packs leave modules untouched.
- */
 const withPurchasedModule = (
   modules: ModulesSave,
   item: CatalogueItem,
@@ -65,13 +61,7 @@ type PurchaseResult = PurchaseOk | PurchaseFail;
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/**
- * Buys one catalogue item: debit the wallet, bump period fact, apply influence.
- *
- * Only legal in the `active` phase — docs/game-period.md. Shortfalls come back
- * as a result so the shop can name the gap and the three recovery options
- * (2.5.6 / docs/economy.md).
- */
+/** Buys one catalogue item: debit the wallet, bump period fact, apply influence. */
 export const applyPurchase = (
   user: UserSave,
   itemId: string,

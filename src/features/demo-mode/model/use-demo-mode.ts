@@ -14,11 +14,7 @@ import { toast } from '@/shared/ui';
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * Demo-mode controls for the grown-up (2.5.13 / 0.3-R).
- *
- * Demo is a test profile + reset + FSM run — no accelerated clock.
- */
+/** Demo controls (2.5.13 / 0.3-R): test profile + reset + FSM — no fast clock. */
 export const useDemoMode = () => {
   const { t } = useTranslation();
   const user = useUser();

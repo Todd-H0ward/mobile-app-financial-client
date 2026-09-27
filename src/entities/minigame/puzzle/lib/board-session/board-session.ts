@@ -79,10 +79,7 @@ export const isBoardComplete = (
   totalCount: number,
 ): boolean => placedCount === totalCount && totalCount > 0;
 
-/**
- * Visible board rect: viewport clips the board under zoom. Without a viewport
- * the full board counts.
- */
+/** Visible board rect: viewport clips the board under zoom. Without a viewport the full board counts. */
 export const visibleBoardRect = (
   board: ScreenRect,
   viewport?: ScreenRect | null,
@@ -97,12 +94,7 @@ export const visibleBoardRect = (
   };
 };
 
-/**
- * Target cell for piece `id`, derived from the board rect — not from measuring
- * each slot view. Per-slot `measureInWindow` was unreliable (collapsed % height
- * / shared parent box), so a drop near the board centre snapped *any* piece
- * and it teleported into its real cell — looked like a random lock.
- */
+/** Target cell for piece `id`, derived from the board rect — not from measuring each slot view. */
 export const slotRectOf = (
   board: ScreenRect,
   cols: number,
@@ -126,8 +118,8 @@ const inside = (rect: ScreenRect, x: number, y: number): boolean =>
   x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
 
 /**
- * Shared aim / drop outcome. Highlight and release must agree — otherwise the
- * glow would promise a snap the drop does not honour.
+ * Shared aim / drop outcome. Highlight and release must agree — otherwise the glow would
+ * promise a snap the drop does not honour.
  */
 export const dropTargetOf = ({
   board,
@@ -162,8 +154,8 @@ export const dropTargetOf = ({
 };
 
 /**
- * Loose placement as board-relative fractions, clamped to the table (viewport
- * union board) so a miss still lands on the canvas, not off-screen.
+ * Loose placement as board-relative fractions, clamped to the table (viewport union board)
+ * so a miss still lands on the canvas, not off-screen.
  */
 export const loosePlacementOf = ({
   ghost,
@@ -263,10 +255,7 @@ const isPlacedId = (
   id: number,
 ): boolean => placements[id]?.kind === 'placed';
 
-/**
- * Hint: place the first unplaced piece in tray order.
- * Returns null when nothing is left to reveal.
- */
+/** Hint: place the first unplaced piece in tray order. Returns null when nothing is left to reveal. */
 export const revealPiece = (
   placements: Record<number, Placement>,
   trayOrder: readonly number[],

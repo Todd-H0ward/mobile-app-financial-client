@@ -21,12 +21,7 @@ interface BondReaction {
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * What the dog does when stroked or kicked in bond mode.
- *
- * Pure show — does not touch charge or spirit. Mood only picks the clip and
- * the burst so a proud dog reads warm and a tired one reads soft.
- */
+/** What the dog does when stroked or kicked in bond mode. */
 const bondReaction = (
   mood: RobotDogMoodName | null,
   kind: BondKind,

@@ -1,12 +1,4 @@
-/**
- * Geometry of jigsaw pieces. Each side is flat (0), a tab out (1), or a
- * blank in (−1); a neighbour's tab and this piece's blank on the shared
- * edge always flip sign so the pieces lock.
- *
- * Board layout and tray order are pure functions of indices and a seed: the
- * same seed always yields the same result, independent of call order — a
- * deterministic hash over coordinates, not a sequential PRNG stream.
- */
+/** Geometry of jigsaw pieces. */
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -34,10 +26,8 @@ interface PieceSides {
 // ═══════════════════════════════════════════
 
 /**
- * How much larger the SVG box is than the piece body: tabs need 32% on each
- * side (viewBox `-32 -32 164 164` and `fitCell` on the piece use the same
- * numbers). Callers that size a piece in pixels — drag, for example — need
- * this ratio.
+ * How much larger the SVG box is than the piece body: tabs need 32% on each side (viewBox
+ * `-32 -32 164 164` and `fitCell` on the piece use the same numbers).
  */
 export const PIECE_BOX_RATIO = 1.64;
 
@@ -115,16 +105,7 @@ export const piecePath = (tabs: PieceTabs, size = 100): string => {
   );
 };
 
-/**
- * Open path of only the chosen sides. The board needs this: neighbours share
- * an edge, and if each piece stroked its whole outline the shared seam would
- * get two dashed strokes out of phase. So each seam is drawn by exactly one
- * piece (its right/bottom), and the outer frame is closed by the first row
- * and first column.
- *
- * Each side is its own subpath (`M …`) so the dash starts at the corner and
- * every side looks the same.
- */
+/** Open path of only the chosen sides. */
 export const pieceSeamPath = (
   tabs: PieceTabs,
   sides: PieceSides,
@@ -152,9 +133,8 @@ const sign = (seed: number, a: number, b: number): TTab => {
 };
 
 /**
- * Deterministic layout of `count` cells in a `cols`-wide grid: neighbouring
- * cells get opposite tabs on the shared edge so they lock visually. `seed`
- * changes the joint pattern between puzzles of the same size.
+ * Deterministic layout of `count` cells in a `cols`-wide grid: neighbouring cells get
+ * opposite tabs on the shared edge so they lock visually.
  */
 export const generateBoard = (
   count: number,
@@ -190,16 +170,7 @@ export const generateLoosePieces = (count: number, seed = 0): PieceTabs[] => {
   }));
 };
 
-/**
- * Pseudo-random stream from one seed (mulberry32).
- *
- * A stream, not a hash of the step index: neighbouring values are uncorrelated,
- * whereas hashing `(seed, i)` dragged `i` along and the shuffle below came out
- * almost sorted.
- *
- * Divide by 2^32, not 2^32−1: otherwise exactly 1 is reachable and `Math.floor`
- * in the shuffle would index past the end of the array.
- */
+/** Pseudo-random stream from one seed (mulberry32). */
 const randomStream = (seed: number): (() => number) => {
   let state = seed >>> 0;
 
@@ -213,15 +184,7 @@ const randomStream = (seed: number): (() => number) => {
   };
 };
 
-/**
- * Deterministic shuffled order of indices `[0, count)` — for the piece tray.
- * The seed decides everything: the same level with the same shuffle count
- * lays out the same way, and a saved assembly comes back as left.
- *
- * Fisher–Yates over a stream: earlier each step hashed `(seed, i)`, and `j`
- * too often landed on `i` — pieces stayed put and the tray nearly followed
- * board order.
- */
+/** Deterministic shuffled order of indices `[0, count)` — for the piece tray. */
 export const shuffleIndices = (count: number, seed: number): number[] => {
   const indices = Array.from({ length: count }, (_, i) => i);
   const next = randomStream(seed);

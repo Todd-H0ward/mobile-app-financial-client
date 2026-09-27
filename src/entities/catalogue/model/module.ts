@@ -14,16 +14,11 @@ const MODULE_BONUSES: Record<string, ModuleBonus> = {
 
 const MODULE_IDS = Object.keys(MODULE_BONUSES);
 
-/**
- * Returns the bonus for a given module ID, or null if not found.
- */
 function getModuleBonus(moduleId: string): ModuleBonus | null {
   return MODULE_BONUSES[moduleId] ?? null;
 }
 
-/**
- * Combines only the installed modules. Ownership alone never activates a bonus.
- */
+/** Combines only the installed modules. Ownership alone never activates a bonus. */
 function computeEffectiveBonus(installedModuleIds: string[]): ModuleBonus {
   return installedModuleIds.reduce(
     (acc, id) => {
@@ -37,9 +32,6 @@ function computeEffectiveBonus(installedModuleIds: string[]): ModuleBonus {
   );
 }
 
-/**
- * Checks if a catalogue item is a module.
- */
 function isModuleItem(item: CatalogueItem): boolean {
   return item.category === 'module' || item.moduleTier !== undefined;
 }

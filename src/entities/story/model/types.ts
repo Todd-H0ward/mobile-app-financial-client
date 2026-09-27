@@ -19,10 +19,7 @@ interface StoryCutscene {
   id: StoryCutsceneId;
   /** Short label for the screen header. */
   title: string;
-  /**
-   * Filename under `assets/story/` once the mp4 ships.
-   * The screen ignores it until `assetModule` is wired.
-   */
+  /** Filename under `assets/story/` once the mp4 ships. */
   asset: string;
   /** Ordered caption beats for the placeholder (and later as subtitles). */
   beats: StoryBeat[];

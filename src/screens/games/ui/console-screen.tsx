@@ -1,11 +1,9 @@
-import { Redirect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ConsoleDevice, ConsoleVolumeButton } from '@/widgets/minigame/console';
 
 import { GAME_REWARDS } from '@/entities/minigame';
-import { isConsoleOwned } from '@/entities/minigame/console';
-import { useUser } from '@/entities/user';
 
 import { RADII, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
@@ -17,19 +15,14 @@ import { formatMoney } from '@/shared/utils';
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
+/** Hub for snake + spacewar — always open from the Overseer's arcade. */
 export const ConsoleScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
   const router = useRouter();
-  const user = useUser();
-  const ownedItemIds = user?.ownedItemIds ?? [];
-
-  if (!isConsoleOwned(ownedItemIds)) {
-    return <Redirect href={STATIC_ROUTES.HOME} />;
-  }
 
   return (
-    <Screen gap="two" isScrollable={false}>
+    <Screen gap={SPACING.TWO} isScrollable={false}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -80,7 +73,7 @@ export const ConsoleScreen = () => {
         <View style={styles.screenBody}>
           <Text
             variant="smallBold"
-            style={{ color: theme.arcadeLcd, marginBottom: SPACING.two }}
+            style={{ color: theme.arcadeLcd, marginBottom: SPACING.TWO }}
           >
             {t('games.console.menu')}
           </Text>
@@ -144,8 +137,8 @@ const styles = StyleSheet.create({
   cart: {
     borderRadius: RADII.m,
     borderWidth: 1,
-    gap: SPACING.one,
-    padding: SPACING.three,
+    gap: SPACING.ONE,
+    padding: SPACING.THREE,
   },
   device: {
     flex: 1,
@@ -154,10 +147,10 @@ const styles = StyleSheet.create({
   fakeFaces: {
     alignItems: 'flex-end',
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   list: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   screenBody: {
     flex: 1,
@@ -168,6 +161,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.two,
+    paddingHorizontal: SPACING.TWO,
   },
 });

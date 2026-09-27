@@ -92,7 +92,7 @@ export const SettingsScreen = () => {
     }));
 
   return (
-    <Screen presentation="sheet" gap="compact">
+    <Screen presentation="sheet" gap={SPACING.COMPACT}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -198,8 +198,7 @@ export const SettingsScreen = () => {
         </ListGroup>
       ) : null}
 
-      {/* Last and quiet — docs/parents.md: the panel a child sees every day
-          must not advertise the room they are not allowed into. */}
+      {/* Last and quiet — docs/parents.md: the panel a child sees every day must not advertise the room they are not allowed into */}
       <Button
         size="m"
         variant="secondary"
@@ -219,5 +218,5 @@ export const SettingsScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  section: { gap: SPACING.two },
+  section: { gap: SPACING.TWO },
 });

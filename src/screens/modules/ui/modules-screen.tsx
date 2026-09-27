@@ -75,7 +75,7 @@ export const ModulesScreen = () => {
   };
 
   return (
-    <Screen presentation="sheet" gap="compact">
+    <Screen presentation="sheet" gap={SPACING.COMPACT}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
@@ -201,20 +201,20 @@ export const ModulesScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  actions: { paddingTop: SPACING.two },
+  actions: { paddingTop: SPACING.TWO },
   effect: {
     borderRadius: 12,
     borderWidth: 1,
-    gap: SPACING.two,
-    padding: SPACING.compact,
+    gap: SPACING.TWO,
+    padding: SPACING.COMPACT,
   },
   option: {
     alignItems: 'center',
     borderRadius: 14,
     borderWidth: 2,
     flex: 1,
-    gap: SPACING.two,
-    padding: SPACING.compact,
+    gap: SPACING.TWO,
+    padding: SPACING.COMPACT,
   },
-  options: { flexDirection: 'row', gap: SPACING.two },
+  options: { flexDirection: 'row', gap: SPACING.TWO },
 });

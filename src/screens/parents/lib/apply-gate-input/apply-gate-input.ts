@@ -5,13 +5,9 @@ import { type GateChallenge, isGateAnswerCorrect } from '@/entities/settings';
 // ═══════════════════════════════════════════
 
 interface GateInputResult {
-  /** Digits currently shown in the field. */
   typed: string;
-  /** Whether the calm miss line should show. */
   isMissed: boolean;
-  /** Open the section — the product matched. */
   didPass: boolean;
-  /** Ask for a fresh question — a full wrong try. */
   didMiss: boolean;
 }
 
@@ -22,13 +18,7 @@ interface GateInputResult {
 /** Digits only — the number pad can still paste letters on some keyboards. */
 const digitsOnly = (value: string) => value.replace(/\D/g, '');
 
-/**
- * One keystroke (or paste) against the barrier.
- *
- * Keeps the field usable for a two-digit product: a miss only fires once the
- * typed width reaches the answer's width. Wrong try → clear + calm miss flag.
- * Typing again after a miss hides the line until the next full try.
- */
+/** Miss only fires once typed width reaches the answer's width. */
 export const applyGateInput = (
   challenge: GateChallenge,
   next: string,

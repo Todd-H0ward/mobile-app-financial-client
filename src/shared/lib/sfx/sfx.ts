@@ -1,9 +1,8 @@
 import type { SoundId } from '@/shared/constants/sounds';
 
-/** Cue ids matching files in `assets/audio/*.wav` — see `SOUNDS`. */
 type SfxId = SoundId;
 
-/** Minimal player surface used by GameAudioImpl — keeps shared free of expo-audio. */
+/** Player handle — shared stays free of expo-audio. */
 interface SfxPlayer {
   pause: () => void;
   play: () => void;
@@ -19,7 +18,6 @@ type SfxPlayerMap = Partial<Record<SfxId, SfxPlayer>>;
 /** Bound from Providers — shared must not import the user store. */
 let isSoundAllowed = (): boolean => true;
 
-/** True while the app is foregrounded; GameAudioImpl flips this on AppState. */
 let isAppActive = (): boolean => true;
 
 let players: SfxPlayerMap = {};
@@ -27,7 +25,6 @@ let generation = 0;
 let lastPlayedAt = 0;
 let lastPlayedId: SfxId | null = null;
 
-/** Ignore a second fire of the same cue within this window (ms). */
 const DEBOUNCE_MS = 40;
 
 // ═══════════════════════════════════════════
@@ -42,14 +39,12 @@ export const bindSfxAppActive = (gate: () => boolean): void => {
   isAppActive = gate;
 };
 
-/** Called once from GameAudioImpl after all players are created. */
 export const registerSfxPlayers = (next: SfxPlayerMap): void => {
   players = next;
   lastPlayedId = null;
   lastPlayedAt = 0;
 };
 
-/** Stop every registered player and invalidate in-flight seeks. */
 export const stopSfx = (): void => {
   generation += 1;
   for (const player of Object.values(players)) {
@@ -57,10 +52,7 @@ export const stopSfx = (): void => {
   }
 };
 
-/**
- * Play a short cue. No-op when sound is off, the app is backgrounded, or the
- * player for `id` was never registered (Expo Go without the native module).
- */
+/** No-op when sound is off, backgrounded, or the player is missing. */
 export const playSfx = (id: SfxId): void => {
   if (!isSoundAllowed() || !isAppActive()) return;
   const player = players[id];

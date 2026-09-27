@@ -11,7 +11,7 @@ import {
 
 import { useTimeSource } from '@/shared/lib';
 
-/** The screen keeps only a handle; the profile owns identity, consumption and pay. */
+/** Screen holds a handle; profile owns identity, consumption and pay. */
 export const useArcadeSession = (gameId: GameId) => {
   const time = useTimeSource();
   const user = useUser();

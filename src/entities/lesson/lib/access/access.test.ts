@@ -5,7 +5,12 @@ import { cellKey, rowCells } from '@/entities/scene';
 import { listLessons } from '../catalogue';
 import { ARENA_LAYOUT, lessonIndicesForCell } from '../layout';
 
-import { lessonAccess, lessonCellKey, lessonOrdinalForKey } from './access';
+import {
+  isLessonPlayable,
+  lessonAccess,
+  lessonCellKey,
+  lessonOrdinalForKey,
+} from './access';
 
 /** Base-layer lesson ids for the given cell keys — one layer of progress. */
 const idsForKeys = (keys: readonly string[]): string[] =>
@@ -66,7 +71,9 @@ describe('arena lesson access', () => {
     expect(lessonAccess(0, allIdsForKeys([firstKey]), 0).status).toBe(
       'COMPLETED',
     );
+    expect(isLessonPlayable(0, allIdsForKeys([firstKey]), 0)).toBe(false);
     expect(lessonAccess(1, idsForKeys([firstKey]), 0).status).toBe('CURRENT');
+    expect(isLessonPlayable(1, idsForKeys([firstKey]), 0)).toBe(true);
   });
   it('maps every cell and rejects keys the arena does not have', () => {
     for (let n = 0; n < ARENA_LAYOUT.count; n++)

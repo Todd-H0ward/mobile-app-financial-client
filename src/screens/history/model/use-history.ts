@@ -20,17 +20,11 @@ import {
 // ═══════════════════════════════════════════
 
 interface HistoryController {
-  /** Finished periods, newest first. */
   periods: readonly PeriodRecord[];
-  /** Most recent settlement — null before the first one. */
   lastPeriod: PeriodRecord | null;
-  /** Plan vs fact rows for the last period, when it exists. */
   lastRows: BudgetComparison[];
-  /** Story keys for the last period. */
   lastExplain: SummaryExplain | null;
-  /** Shared bar scale for the last-period comparison. */
   lastBarMax: number;
-  /** Wallet lines with resolved source labels, newest first. */
   walletRows: readonly WalletHistoryRow[];
 }
 
@@ -38,12 +32,7 @@ interface HistoryController {
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * History queries for the report screen — periods + named wallet lines (2.5.11).
- *
- * Subscribes to the two history arrays only; memoizes derived rows so opening
- * the screen does not rebuild labels on an unrelated settings tick.
- */
+/** Memoized rows — unrelated settings ticks must not rebuild labels. */
 export const useHistory = (): HistoryController => {
   const periodHistory = useUserStore((state) => state.user?.history);
   const walletHistory = useUserStore((state) => state.user?.wallet.history);
@@ -60,8 +49,7 @@ export const useHistory = (): HistoryController => {
       };
     }
 
-    // Reconstruct the minimal shape the list helpers expect — they only read
-    // these two arrays.
+    // Reconstruct the minimal shape the list helpers expect — they only read these two arrays
     const user = {
       history: periodHistory,
       wallet: { history: walletHistory },

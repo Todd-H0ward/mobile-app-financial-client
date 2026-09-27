@@ -18,14 +18,7 @@ import { type CameraTune, DEFAULT_CAMERA_TUNE } from './camera-tune';
 // TYPES
 // ═══════════════════════════════════════════
 
-/**
- * Straight over the model, or standing over one of its segments.
- *
- * A segment is an index into `SCENE_VIEW_ANGLES`, which is the model's own
- * numbering — the arena has three wedges and no names for them. There used to
- * be a `RoomId` here, back when the three were a street, a living room and a
- * kitchen; the wedges outlived the rooms.
- */
+/** Straight over the model, or standing over one of its segments. */
 type SceneView = 'top' | number;
 
 interface OrbitState {
@@ -38,7 +31,6 @@ interface OrbitState {
 }
 
 interface SceneFit {
-  /** Distance that frames one room on this screen. */
   room: number;
   /** Distance that frames the whole model on this screen. */
   top: number;
@@ -67,13 +59,7 @@ interface SceneCamera {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * Degrees of turn per point dragged.
- *
- * A room is 120° away, so walking to the next one costs about a third of a
- * phone screen — short enough to feel like a flick, long enough that a tap
- * that slips does not move the world.
- */
+/** Degrees of turn per point dragged. */
 const DEGREES_PER_POINT = 0.42;
 
 /** Vertical drag is slower: the whole arc from floor to top fits one screen. */
@@ -83,17 +69,9 @@ const TILT_PER_POINT = 0.22;
 const DEFAULT_ASPECT = 9 / 16;
 
 /**
- * Where a segment's camera stands, measured from that segment's gear.
- *
- * Two turns in one number, and both are needed. A segment is the bay
- * *between* two gears, so its middle is 60° past gear `s`; the camera then
- * has to stand opposite that middle rather than in it, which is another 180.
- * Standing in the bay wraps its six cells around the lens and leaves the
- * child looking at the empty far side with a ramp up the middle of the
- * frame — which is what this used to do.
- *
- * Measured from `SCENE_GEAR_ANGLES`, never from `SCENE_VIEW_ANGLES`: those
- * already carry a half turn of their own.
+ * Camera stands opposite the bay middle: 60° past the gear + 180° across.
+ * Measured from `SCENE_GEAR_ANGLES`, never `SCENE_VIEW_ANGLES` (those already
+ * include a half turn).
  */
 const SEGMENT_CAMERA_OFFSET = 240;
 
@@ -102,10 +80,7 @@ const SEGMENT_CAMERA_OFFSET = 240;
 // ═══════════════════════════════════════════
 
 const fitFor = (aspect: number, tune: CameraTune): SceneFit => ({
-  // Capped, not fitted: a segment shot is a place the child stands, and a
-  // wider screen should not walk them back into the stands. The cap has to
-  // live here rather than at the one call site — `distanceAt` interpolates
-  // off `fit.room` on every drag and resize, and would undo it.
+  // Cap here — `distanceAt` interpolates off `fit.room` on every drag/resize.
   room: Math.min(
     fitDistance(SCENE_RADIUS, tune.fov, aspect, tune.roomFit),
     SCENE_SEGMENT_DISTANCE,
@@ -114,8 +89,8 @@ const fitFor = (aspect: number, tune: CameraTune): SceneFit => ({
 });
 
 /**
- * Where the camera stands to look at a segment: opposite the middle of its
- * bay, with the bay's six cells facing it across the pit.
+ * Where the camera stands to look at a segment: opposite the middle of its bay, with the
+ * bay's six cells facing it across the pit.
  */
 const viewAngleOf = (segment: number): number =>
   (SCENE_GEAR_ANGLES[segment] ?? 0) + SEGMENT_CAMERA_OFFSET;
@@ -130,12 +105,6 @@ const climbOf = (elevation: number, tune: CameraTune): number =>
 const topThreshold = (tune: CameraTune): number =>
   (tune.roomElevation + tune.topElevation) / 2;
 
-/**
- * The view for a settled camera.
- *
- * Elevation decides first — a camera pulled overhead is looking at the whole
- * model, whichever wedge happens to be under it.
- */
 const viewAt = (
   state: OrbitState,
   tune: CameraTune = DEFAULT_CAMERA_TUNE,
@@ -156,8 +125,8 @@ const stateFor = (
   tune: CameraTune,
 ): OrbitState => {
   if (view === 'top') {
-    // A fixed heading: the map view is a composed shot, and coming to it from
-    // three different rooms would otherwise give three different pictures.
+    // A fixed heading: the map view is a composed shot, and coming to it from three different
+    // rooms would otherwise give three different pictures.
     return {
       azimuth: alignAngle(azimuth, tune.topAzimuth),
       elevation: tune.topElevation,
@@ -176,17 +145,7 @@ const stateFor = (
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * The camera's whole state, in refs.
- *
- * A drag moves the camera sixty times a second; through `useState` that is
- * sixty React renders and a rebuilt scene graph behind them. The GL loop reads
- * these refs directly and React only hears about a change when the camera
- * settles on a new room.
- *
- * `tuneRef` lets the framing desk rewrite elevations / fit without remounting
- * the GL context — call `reframe()` after changing it.
- */
+/** Camera in refs — drag at 60fps must not re-render React / rebuild the graph. */
 const useSceneCamera = (
   initialView: SceneView,
   tuneRef?: MutableRefObject<CameraTune>,
@@ -299,8 +258,7 @@ const useSceneCamera = (
     return view;
   }, [applyView, tuneRef]);
 
-  // Stable: the render loop closes over this object once, and an effect that
-  // re-applied the view on every parent render would snap a drag in progress.
+  // Stable: the loop closes over this once; re-applying on every render would snap a drag.
   return useMemo(
     () => ({
       current,

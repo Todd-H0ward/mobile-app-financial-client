@@ -75,11 +75,7 @@ const pointsFor = (
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/**
- * A card with its corners cut off — the Overseer's signature. The child's own
- * interface never uses it, so a cut corner always means "the Overseer speaks".
- * React Native has no clip-path, so the frame is drawn behind the content.
- */
+/** Overseer frame — cut corners mean Overseer; drawn behind (no clip-path). */
 export const ChamferCard = ({
   children,
   variant = 'both',
@@ -134,9 +130,9 @@ export const ChamferCard = ({
 
 const styles = StyleSheet.create({
   root: {
-    gap: SPACING.one,
+    gap: SPACING.ONE,
     paddingHorizontal: 14,
-    paddingVertical: SPACING.compact,
+    paddingVertical: SPACING.COMPACT,
   },
 });
 

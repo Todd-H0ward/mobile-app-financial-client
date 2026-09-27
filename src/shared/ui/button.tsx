@@ -35,11 +35,7 @@ import { Text, type TextProps } from './text';
 // TYPES
 // ═══════════════════════════════════════════
 
-/**
- * One filled action (`primary`) per screen, `secondary` outline, `ghost` the
- * "[ system link ]", `warning` the amber irreversible choice. `stepper` is the ±48 square of the plan rows; `icon` the bordered 48 square.
- * `warning` is the amber frame of an irreversible choice — never red.
- */
+/** `primary` one filled/screen; `warning` amber irreversible — never red. */
 type ButtonVariant =
   | 'primary'
   | 'secondary'
@@ -77,10 +73,10 @@ const PRESS_OUT_DURATION = 130;
 const LOADING_DOTS = [1, 0.6, 0.3];
 
 const SIZE_STYLE: Record<ButtonSize, ViewStyle> = {
-  xl: { minHeight: 64, paddingHorizontal: SPACING.three },
-  l: { minHeight: 56, paddingHorizontal: SPACING.three },
-  m: { minHeight: 52, paddingHorizontal: SPACING.three },
-  s: { minHeight: 48, paddingHorizontal: SPACING.two },
+  xl: { minHeight: 64, paddingHorizontal: SPACING.THREE },
+  l: { minHeight: 56, paddingHorizontal: SPACING.THREE },
+  m: { minHeight: 52, paddingHorizontal: SPACING.THREE },
+  s: { minHeight: 48, paddingHorizontal: SPACING.TWO },
 };
 
 const ButtonContext = createContext<ButtonContextValue | null>(null);
@@ -304,7 +300,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     flexShrink: 1,
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     justifyContent: 'center',
   },
   dashed: { borderStyle: 'dashed' },
@@ -314,7 +310,7 @@ const styles = StyleSheet.create({
     borderRadius: RADII.m,
     borderWidth: 2,
     justifyContent: 'center',
-    paddingVertical: SPACING.two,
+    paddingVertical: SPACING.TWO,
   },
   fullWidth: { alignSelf: 'stretch', width: '100%' },
   label: { flexShrink: 1, textAlign: 'center' },

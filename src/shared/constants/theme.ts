@@ -86,14 +86,14 @@ export const FONTS = {
 // ═══════════════════════════════════════════
 
 export const SPACING_BASE = {
-  half: 2,
-  one: 4,
-  two: 8,
-  compact: 12,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
+  HALF: 2,
+  ONE: 4,
+  TWO: 8,
+  COMPACT: 12,
+  THREE: 16,
+  FOUR: 24,
+  FIVE: 32,
+  SIX: 64,
 } as const;
 export const SPACING = SPACING_BASE;
 export const RADII = {
@@ -110,6 +110,7 @@ export const CONTENT_PADDING = 14;
 export const MAX_CONTENT_WIDTH = 560;
 
 type ThemeColor = keyof typeof TERMINAL_COLORS;
-type Spacing = keyof typeof SPACING;
+/** Pixel values from `SPACING` — use as `gap={SPACING.TWO}`. */
+type Spacing = (typeof SPACING)[keyof typeof SPACING];
 
 export type { Spacing, ThemeColor };

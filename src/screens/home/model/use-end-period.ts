@@ -13,15 +13,7 @@ import { STATIC_ROUTES } from '@/shared/constants';
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * Opens the End day confirm screen from home.
- *
- * Freeze (`finishPeriod`) runs on that screen — home only navigates, so the
- * child always sees the soft warning before the phase changes (0.3-R).
- *
- * The selector returns a string status, so wallet ticks that leave the phase
- * and plan untouched do not re-render the banner.
- */
+/** Home only navigates — soft warning must show before phase changes (0.3-R). */
 export const useEndPeriod = () => {
   const router = useRouter();
   const status: EndPeriodStatus = useUserStore((state) => {

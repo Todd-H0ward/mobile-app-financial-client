@@ -19,7 +19,6 @@ interface DialogMechanicProps {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/** Pick a reply — every choice is valid; the consequence teaches. */
 export const DialogMechanic = ({
   payload,
   selectedId,
@@ -53,10 +52,10 @@ export const DialogMechanic = ({
 
 const styles = StyleSheet.create({
   list: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   root: {
-    gap: SPACING.three,
+    gap: SPACING.THREE,
   },
 });
 

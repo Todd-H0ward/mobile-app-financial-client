@@ -72,9 +72,6 @@ const moveId = (
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * One chore with its mechanic — quiz, change, basket, priority or dialog.
- */
 export const TaskScreen = ({ taskId }: TaskScreenProps) => {
   const { t } = useTranslation();
   const router = useRouter();
@@ -143,15 +140,13 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
     }
 
     if (didComplete) {
-      // Back to wherever the trial was picked — the Overseer's list or the
-      // pit's dock — so the debrief sheet opens over familiar ground.
       if (router.canGoBack()) router.back();
       else router.dismissTo(STATIC_ROUTES.HOME);
     }
   };
 
   return (
-    <Screen presentation="sheet" gap="three" terminalVariant="overseer">
+    <Screen presentation="sheet" gap={SPACING.THREE} terminalVariant="overseer">
       <Screen.Header>
         <Screen.Heading>
           <Text
@@ -242,27 +237,28 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
         />
       )}
 
-      <View style={styles.reward}>
-        <Text variant="small" themeColor="textSecondary">
-          {t('tasks.reward')}
-        </Text>
-        <View style={styles.rewardValue}>
-          <Text variant="machine">
-            {t('tasks.rewardUpTo', { count: formatMoney(play.reward) })}
+      <Screen.Footer style={styles.footer}>
+        <View style={styles.reward}>
+          <Text variant="small" themeColor="textSecondary">
+            {t('tasks.reward')}
           </Text>
-          <PixelIcon name="coin" tone="coin" />
+          <View style={styles.rewardValue}>
+            <Text variant="machine">
+              {t('tasks.rewardUpTo', { count: formatMoney(play.reward) })}
+            </Text>
+            <PixelIcon name="coin" tone="coin" />
+          </View>
         </View>
-      </View>
-
-      <Button
-        variant="primary"
-        size="l"
-        isFullWidth
-        disabled={!canSubmit}
-        onPress={submit}
-      >
-        {t('tasks.submit')}
-      </Button>
+        <Button
+          variant="primary"
+          size="l"
+          isFullWidth
+          disabled={!canSubmit}
+          onPress={submit}
+        >
+          {t('tasks.submit')}
+        </Button>
+      </Screen.Footer>
 
       <Sheet.Modal
         isVisible={play.sheet === 'planning'}
@@ -303,8 +299,9 @@ export const TaskRouteScreen = ({ taskId }: { taskId: string }) => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  brief: { gap: SPACING.one, paddingHorizontal: 14, paddingVertical: 14 },
+  brief: { gap: SPACING.ONE, paddingHorizontal: 14, paddingVertical: 14 },
   briefTitle: { fontSize: 20, lineHeight: 25 },
+  footer: { gap: SPACING.COMPACT },
   overseerLabel: { letterSpacing: 1 },
   reward: {
     alignItems: 'center',

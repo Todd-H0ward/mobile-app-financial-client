@@ -36,10 +36,7 @@ interface FeedbackStore {
 // STORE
 // ═══════════════════════════════════════════
 
-/**
- * Ephemeral «что изменилось» sheet — not persisted. One report at a time;
- * a newer action replaces the previous one (2.5.9).
- */
+/** Ephemeral sheet — one report; newer replaces older (2.5.9). */
 export const useFeedbackStore = create<FeedbackStore>((set) => ({
   report: null,
 

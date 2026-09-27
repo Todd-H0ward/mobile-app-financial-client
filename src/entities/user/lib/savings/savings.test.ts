@@ -31,23 +31,23 @@ describe('applyDeposit', () => {
   it('moves coins into the jar and bumps fact.savings', () => {
     const time = makeDemoTimeSource();
     const user = activeUser(time);
-    const result = applyDeposit(user, 'paints', 20, time);
+    const result = applyDeposit(user, 'coat', 20, time);
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
     expect(result.user.wallet.balance).toBe(STARTING_BALANCE - 20);
     expect(
-      result.user.savings.goals.find((g) => g.goalId === 'paints')?.saved,
+      result.user.savings.goals.find((g) => g.goalId === 'coat')?.saved,
     ).toBe(20);
     expect(result.user.savings.depositsThisPeriod).toBe(1);
     expect(result.user.period.fact.savings).toBe(20);
   });
 
   it('marks the goal reached when the jar fills', () => {
-    const paints = getGoalById('paints');
-    expect(paints).toBeDefined();
-    if (!paints) return;
+    const coat = getGoalById('coat');
+    expect(coat).toBeDefined();
+    if (!coat) return;
 
     const time = makeDemoTimeSource();
     let user = activeUser(time);
@@ -62,12 +62,12 @@ describe('applyDeposit', () => {
       }),
     };
 
-    const result = applyDeposit(user, 'paints', paints.price, time);
+    const result = applyDeposit(user, 'coat', coat.price, time);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
-    const row = result.user.savings.goals.find((g) => g.goalId === 'paints');
-    expect(row?.saved).toBe(paints.price);
+    const row = result.user.savings.goals.find((g) => g.goalId === 'coat');
+    expect(row?.saved).toBe(coat.price);
     expect(row?.reachedInPeriod).toBe(1);
   });
 
@@ -77,13 +77,13 @@ describe('applyDeposit', () => {
       playerName: 'Саша',
       createdAt: time.now(),
     });
-    expect(applyDeposit(user, 'paints', 10, time).ok).toBe(false);
+    expect(applyDeposit(user, 'coat', 10, time).ok).toBe(false);
   });
 
   it('refuses more than the wallet holds', () => {
     const time = makeDemoTimeSource();
     const user = activeUser(time);
-    const result = applyDeposit(user, 'scooter', STARTING_BALANCE + 1, time);
+    const result = applyDeposit(user, 'radar', STARTING_BALANCE + 1, time);
 
     expect(result.ok).toBe(false);
     if (result.ok) return;
@@ -96,18 +96,18 @@ describe('applyWithdraw', () => {
   it('returns coins to the wallet and lowers fact.savings', () => {
     const time = makeDemoTimeSource();
     let user = activeUser(time);
-    const deposited = applyDeposit(user, 'paints', 30, time);
+    const deposited = applyDeposit(user, 'coat', 30, time);
     expect(deposited.ok).toBe(true);
     if (!deposited.ok) return;
     user = deposited.user;
 
-    const result = applyWithdraw(user, 'paints', 12, time);
+    const result = applyWithdraw(user, 'coat', 12, time);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
     expect(result.user.wallet.balance).toBe(STARTING_BALANCE - 30 + 12);
     expect(
-      result.user.savings.goals.find((g) => g.goalId === 'paints')?.saved,
+      result.user.savings.goals.find((g) => g.goalId === 'coat')?.saved,
     ).toBe(18);
     expect(result.user.period.fact.savings).toBe(18);
   });
@@ -115,7 +115,7 @@ describe('applyWithdraw', () => {
   it('refuses a take larger than the jar', () => {
     const time = makeDemoTimeSource();
     const user = activeUser(time);
-    const result = applyWithdraw(user, 'paints', 5, time);
+    const result = applyWithdraw(user, 'coat', 5, time);
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.reason).toBe('insufficient_saved');
@@ -125,9 +125,9 @@ describe('applyWithdraw', () => {
 describe('setActiveGoal', () => {
   it('switches the home focus goal', () => {
     const user = activeUser();
-    const result = setActiveGoal(user, 'scooter');
+    const result = setActiveGoal(user, 'radar');
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.user.savings.activeGoalId).toBe('scooter');
+    expect(result.user.savings.activeGoalId).toBe('radar');
   });
 });

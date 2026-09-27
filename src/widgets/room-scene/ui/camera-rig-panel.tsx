@@ -82,10 +82,14 @@ const TuneRow = ({
 // ═══════════════════════════════════════════
 
 /**
- * Dev framing desk: dial the camera constants, read the live orbit, paste
- * the dump into `entities/scene/model/camera.ts` when it looks right.
+ * Dev framing desk: dial the camera constants, read the live orbit, paste the dump into
+ * `entities/scene/model/camera.ts` when it looks right.
  */
-const CameraRigPanel = ({ tune, onTuneChange, live }: CameraRigPanelProps) => {
+export const CameraRigPanel = ({
+  tune,
+  onTuneChange,
+  live,
+}: CameraRigPanelProps) => {
   const theme = useTheme();
   const [isOpen, setIsOpen] = useState(true);
 
@@ -178,18 +182,18 @@ const CameraRigPanel = ({ tune, onTuneChange, live }: CameraRigPanelProps) => {
 
 const styles = StyleSheet.create({
   body: {
-    gap: SPACING.one,
-    paddingBottom: SPACING.two,
-    paddingHorizontal: SPACING.two,
+    gap: SPACING.ONE,
+    paddingBottom: SPACING.TWO,
+    paddingHorizontal: SPACING.TWO,
   },
   dump: {
     fontFamily: 'monospace',
-    marginTop: SPACING.one,
+    marginTop: SPACING.ONE,
   },
   header: {
     gap: 2,
-    paddingHorizontal: SPACING.two,
-    paddingVertical: SPACING.two,
+    paddingHorizontal: SPACING.TWO,
+    paddingVertical: SPACING.TWO,
   },
   root: {
     alignSelf: 'stretch',
@@ -212,4 +216,3 @@ const styles = StyleSheet.create({
 });
 
 export type { CameraRigPanelProps };
-export { CameraRigPanel };

@@ -54,11 +54,7 @@ const isSamePeriod = (
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/**
- * The Overseer's trials (screen 20). An open trial wears his cut-corner frame,
- * a finished one is a calm card with "✓". The brief's three themes are the
- * filters; mini-games sit apart, as extra income.
- */
+/** The Overseer's trials (screen 20). */
 export const TrialsPage = ({ frame, onArcade }: TrialsPageProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -210,11 +206,11 @@ export const TrialsPage = ({ frame, onArcade }: TrialsPageProps) => {
 
 const styles = StyleSheet.create({
   copy: { flex: 1, gap: 2, minWidth: 0 },
-  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.two },
+  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.TWO },
   meta: { fontSize: 12, letterSpacing: 1, lineHeight: 16 },
-  row: { alignItems: 'center', flexDirection: 'row', gap: SPACING.two },
-  section: { marginTop: SPACING.one },
-  stack: { gap: SPACING.two, paddingBottom: SPACING.two },
+  row: { alignItems: 'center', flexDirection: 'row', gap: SPACING.TWO },
+  section: { marginTop: SPACING.ONE },
+  stack: { gap: SPACING.TWO, paddingBottom: SPACING.TWO },
 });
 
 export type { TrialsPageProps };

@@ -46,7 +46,7 @@ const SIZE_STYLES: Record<
   { frame: ViewStyle; screen: ViewStyle; lamp: ViewStyle }
 > = {
   l: {
-    frame: { borderRadius: RADII.xxl, padding: SPACING.two },
+    frame: { borderRadius: RADII.xxl, padding: SPACING.TWO },
     screen: { borderRadius: RADII.xl },
     lamp: { height: 3, top: 2, width: 48 },
   },
@@ -56,7 +56,7 @@ const SIZE_STYLES: Record<
     lamp: { height: 3, top: 1, width: 40 },
   },
   s: {
-    frame: { borderRadius: RADII.m, padding: SPACING.one },
+    frame: { borderRadius: RADII.m, padding: SPACING.ONE },
     screen: { borderRadius: RADII.s },
     lamp: { height: 2, top: 1, width: 32 },
   },

@@ -5,11 +5,11 @@ import {
   activeLessonIndexForCell,
   displayNumberForCell,
   INITIAL_LESSON_SESSION,
+  isLessonPlayable,
   isPassed,
   type Lesson,
   type LessonAction,
   type LessonStage,
-  lessonAccess,
   lessonAt,
   listLessons,
   passMark,
@@ -26,36 +26,18 @@ import { playSfx } from '@/shared/lib';
 // ═══════════════════════════════════════════
 
 interface LessonState {
-  /** The lesson behind this cell, or `null` if the route named no real cell. */
   lesson: Lesson | null;
-  /** Its place in the catalogue, `1`-based — the number written on the tile. */
   number: number;
-  /** Lessons in the catalogue — what `number` counts up to. */
   lessonCount: number;
-  /** Where the child is. */
   stage: LessonStage;
-  /** Which paragraph or question is on screen, `0`-based. */
   index: number;
-  /** How many there are of whichever is on screen. */
   total: number;
-  /**
-   * What was answered last, and whether it was right.
-   *
-   * Held for a beat so the machine can say so before moving on — a test that
-   * silently advances teaches nothing.
-   */
   verdict: { chosen: number; isRight: boolean } | null;
-  /** Right answers so far. */
   correct: number;
-  /** How many of them it takes to sink the cell. */
   needed: number;
-  /** Whether the finished test cleared the bar. */
   isPassed: boolean;
-  /** Turns the page, or moves from the theory into the test. */
   next: () => void;
-  /** Answers the question on screen. Each is answered once. */
   answer: (option: number) => void;
-  /** Wipes the score and reads the theory again. */
   retry: () => void;
 }
 
@@ -63,18 +45,7 @@ interface LessonState {
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * One lesson, from its cell's key.
- *
- * The cell is the argument rather than the lesson, because what the child
- * pressed is a tile and what has to sink afterwards is that same tile — the
- * lesson on it is a lookup. When `lessons.json` outgrows the ninety discs,
- * the tile hosts a stack and this opens the next unfinished layer.
- *
- * The test is answered once per question and scored at the end, rather than
- * retried until right: a score nobody can miss is not a result worth showing.
- * Missing it is still not a dead end — `retry` reads the lesson again.
- */
+/** Keyed by cell so the pressed tile is what sinks after the lesson. */
 export const useLesson = (cellId: string): LessonState => {
   const completeCell = useCompleteLesson();
   const user = useUser();
@@ -87,8 +58,7 @@ export const useLesson = (cellId: string): LessonState => {
   const activeIndex = useMemo(() => {
     if (!user || ordinal === null) return null;
     if (
-      lessonAccess(ordinal, user.completedLessonIds, user.platform.level)
-        .status === 'LOCKED'
+      !isLessonPlayable(ordinal, user.completedLessonIds, user.platform.level)
     ) {
       return null;
     }
@@ -132,10 +102,7 @@ export const useLesson = (cellId: string): LessonState => {
 
   const passed = isPassed(correct, questionCount);
 
-  // Recorded in an effect, not on the way through render: writing to a store
-  // while rendering updates another component mid-render, which React is
-  // right to complain about. The tile is down by the time the child has read
-  // the result either way.
+  // Effect, not render — writing a store mid-render updates another component.
   useEffect(() => {
     if (stage !== 'result' || !passed || !cell) return;
 
@@ -144,8 +111,7 @@ export const useLesson = (cellId: string): LessonState => {
 
   return {
     lesson,
-    // The number on the tile, not the lesson's line in the file: lessons are
-    // placed by theme and step, so the two differ.
+    // Tile number, not file order — lessons are placed by theme and step.
     number:
       activeIndex !== null && ordinal !== null
         ? displayNumberForCell(ordinal)

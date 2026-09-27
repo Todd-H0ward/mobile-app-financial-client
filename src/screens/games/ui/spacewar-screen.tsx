@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 
-import { Redirect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import {
@@ -12,7 +12,6 @@ import { SpacewarScene } from '@/widgets/minigame/spacewar';
 
 import { useArcadeSession } from '@/features/arcade-session';
 
-import { isConsoleOwned } from '@/entities/minigame/console';
 import { useUser } from '@/entities/user';
 
 import { SPACING, STATIC_ROUTES } from '@/shared/constants';
@@ -25,6 +24,7 @@ import { formatMoney } from '@/shared/utils';
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
+/** Console games are free arcade sittings — no shop SKU gate (concept: drop console purchase). */
 export const SpacewarScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -34,8 +34,6 @@ export const SpacewarScreen = () => {
   const [rewardReason, setRewardReason] = useState('paid');
   const spacewarMs = user?.arcade.scores.spacewarMs ?? [];
 
-  const ownedItemIds = user?.ownedItemIds ?? [];
-  const isOwned = isConsoleOwned(ownedItemIds);
   const [isPlaying, setIsPlaying] = useState(false);
   const [reward, setReward] = useState<number | null>(null);
   const [runId, setRunId] = useState(0);
@@ -56,10 +54,6 @@ export const SpacewarScreen = () => {
     },
     [session.complete, user],
   );
-
-  if (!isOwned) {
-    return <Redirect href={STATIC_ROUTES.HOME} />;
-  }
 
   return (
     <Screen isScrollable={false}>
@@ -108,7 +102,7 @@ export const SpacewarScreen = () => {
             <View style={styles.menuBody}>
               <Text
                 variant="subtitle"
-                style={{ color: theme.arcadeLcd, marginBottom: SPACING.two }}
+                style={{ color: theme.arcadeLcd, marginBottom: SPACING.TWO }}
               >
                 {t('games.spacewar.title')}
               </Text>
@@ -116,7 +110,7 @@ export const SpacewarScreen = () => {
                 variant="small"
                 style={{
                   color: theme.arcadeLcdDim,
-                  marginBottom: SPACING.three,
+                  marginBottom: SPACING.THREE,
                 }}
               >
                 {t('games.spacewar.blurb')}
@@ -180,7 +174,7 @@ const styles = StyleSheet.create({
   menu: {
     flex: 1,
     minHeight: 0,
-    paddingHorizontal: SPACING.two,
+    paddingHorizontal: SPACING.TWO,
   },
   menuBody: {
     flex: 1,

@@ -40,11 +40,7 @@ const MAX_CELLS = 15;
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/**
- * The jar (concept E1): the chosen goal framed in green and labelled "✓ ЦЕЛЬ",
- * the others as plain rows. Depositing and withdrawing live on the goal's
- * own screen, where the cost of a withdrawal is spelled out.
- */
+/** The jar (concept E1): the chosen goal framed in green and labelled "✓ ЦЕЛЬ", the others as plain rows. */
 export const JarPage = ({ frame }: JarPageProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -176,7 +172,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     flexDirection: 'row',
     gap: 6,
-    paddingHorizontal: SPACING.two,
+    paddingHorizontal: SPACING.TWO,
     paddingVertical: 3,
   },
   badgeText: { fontSize: 12, lineHeight: 16 },
@@ -195,7 +191,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  stack: { gap: SPACING.two, paddingBottom: SPACING.two },
+  stack: { gap: SPACING.TWO, paddingBottom: SPACING.TWO },
 });
 
 export type { JarPageProps };

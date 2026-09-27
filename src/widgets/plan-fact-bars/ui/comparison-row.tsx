@@ -32,14 +32,13 @@ const barWidth = (value: number, max: number) =>
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * One direction: plan bar, fact bar, and a signed delta in words — never red.
- */
+/** One direction: plan bar, fact bar, and a signed delta in words — never red. */
 export const ComparisonRow = ({ row, barMax }: ComparisonRowProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const look = DIRECTION_LOOK[row.direction];
+
   const onPlan = isOnPlan(row);
+  const look = DIRECTION_LOOK[row.direction];
 
   const title = t(`boxes.${row.direction}`);
   const deltaLabel = onPlan
@@ -127,28 +126,28 @@ const styles = StyleSheet.create({
   barRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   bars: {
-    gap: SPACING.one,
+    gap: SPACING.ONE,
   },
   fill: {
     borderRadius: RADII.xs,
     height: '100%',
   },
-  delta: { alignItems: 'center', flexDirection: 'row', gap: SPACING.one },
+  delta: { alignItems: 'center', flexDirection: 'row', gap: SPACING.ONE },
   deltaText: { fontFamily: FONTS.monoStrong, fontSize: 13, lineHeight: 18 },
   header: {
     alignItems: 'center',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   root: {
     borderRadius: RADII.m,
     borderWidth: 2,
-    gap: SPACING.two,
-    padding: SPACING.compact,
+    gap: SPACING.TWO,
+    padding: SPACING.COMPACT,
   },
   title: {
     flex: 1,

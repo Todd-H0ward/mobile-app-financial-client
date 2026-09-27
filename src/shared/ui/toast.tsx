@@ -90,10 +90,10 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 2,
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     minHeight: HIT_SLOP_SIZE,
-    paddingHorizontal: SPACING.three,
-    paddingVertical: SPACING.two,
+    paddingHorizontal: SPACING.THREE,
+    paddingVertical: SPACING.TWO,
   },
 });
 

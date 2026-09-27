@@ -58,12 +58,7 @@ const STEAM_COLOR = new Color(SCENE_PALETTE.bondSteam);
 // FACTORY
 // ═══════════════════════════════════════════
 
-/**
- * Short-lived points above the dog's head during bond mode.
- *
- * No textures — expo-gl would need `file://` paths, and coloured points are
- * enough for hearts / sparks / steam at this scale.
- */
+/** Short-lived points above the dog's head during bond mode. */
 const createBondBursts = (parent: Group): BondBursts => {
   const root = new Group();
   parent.add(root);
@@ -71,6 +66,7 @@ const createBondBursts = (parent: Group): BondBursts => {
   const positions = new Float32Array(MAX_PARTICLES * 3);
   const colors = new Float32Array(MAX_PARTICLES * 3);
   const geometry = new BufferGeometry();
+
   geometry.setAttribute('position', new BufferAttribute(positions, 3));
   geometry.setAttribute('color', new BufferAttribute(colors, 3));
   geometry.setDrawRange(0, 0);

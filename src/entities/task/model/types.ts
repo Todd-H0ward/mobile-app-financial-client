@@ -6,8 +6,8 @@
 export const TASK_THEMES = ['planning', 'savings', 'payments'] as const;
 
 /**
- * Mechanic kinds the engine knows how to render. A new task of an existing
- * kind is a JSON row; a new kind needs a component — 2.5.14.
+ * Mechanic kinds the engine knows how to render. A new task of an existing kind is a JSON
+ * row; a new kind needs a component — 2.5.14.
  */
 export const MECHANIC_TYPES = [
   'quiz',

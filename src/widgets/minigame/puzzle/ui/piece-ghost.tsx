@@ -26,8 +26,8 @@ interface PieceGhostProps {
 // ═══════════════════════════════════════════
 
 /**
- * Floating copy of the piece under the finger — screen coordinates, above
- * board and tray so the drag crosses the split cleanly.
+ * Floating copy of the piece under the finger — screen coordinates, above board and tray
+ * so the drag crosses the split cleanly.
  */
 export const PieceGhost = ({
   piece,

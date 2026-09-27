@@ -176,14 +176,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 14,
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
     // A pressable row is a touch target: the floor is stated, not left to the
     // sum of a font size and two paddings — see docs/accessibility.md.
     minHeight: 56,
   },
   content: {
     flex: 1,
-    gap: SPACING.one,
+    gap: SPACING.ONE,
     minWidth: 0,
   },
   icon: {

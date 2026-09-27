@@ -18,10 +18,7 @@ interface SnakeSession {
   /** Queued turn applied on the next tick (never a reverse). */
   pendingDirection: Direction;
   apple: Cell;
-  /**
-   * Apples eaten this sitting. Endless — never auto-ends.
-   * Cash-out unlocks at {@link CLAIM_APPLES}.
-   */
+  /** Apples eaten this sitting. Endless — never auto-ends. */
   applesEaten: number;
 }
 
@@ -31,10 +28,7 @@ interface SnakeSession {
 
 export const GRID_SIZE = 12;
 
-/**
- * Minimum apples before the child may cash out. Play stays endless;
- * the sitting pays when they choose to claim.
- */
+/** Minimum apples before the child may cash out. */
 export const CLAIM_APPLES = 3;
 
 /** Milliseconds between ticks — fixed, no countdown UI. */
@@ -108,9 +102,7 @@ export const createSnakeSession = (
   };
 };
 
-/**
- * Queue a turn. Reverse is ignored so a fast swipe cannot fold the snake.
- */
+/** Queue a turn. Reverse is ignored so a fast swipe cannot fold the snake. */
 export const queueDirection = (
   session: SnakeSession,
   next: Direction,
@@ -120,8 +112,8 @@ export const queueDirection = (
 };
 
 /**
- * Advance one tick. Wall / self hit restarts the body but keeps the score —
- * endless play, never a failed sitting.
+ * Advance one tick. Wall / self hit restarts the body but keeps the score — endless play,
+ * never a failed sitting.
  */
 export const tickSnake = (
   session: SnakeSession,

@@ -10,8 +10,8 @@ import type {
 // ═══════════════════════════════════════════
 
 /**
- * Share of the full reward when the answer is wrong — arcade rule: nothing
- * can be failed, a miss still pays (AGENTS.md / docs).
+ * Share of the full reward when the answer is wrong — arcade rule: nothing can be failed,
+ * a miss still pays (AGENTS.md / docs).
  */
 export const TASK_WRONG_SHARE = 0.5;
 
@@ -53,9 +53,7 @@ export const scoreChange = (
   };
 };
 
-/**
- * Basket is right when something is bought and the total stays within budget.
- */
+/** Basket is right when something is bought and the total stays within budget. */
 export const scoreBasket = (
   payload: BasketPayload,
   selectedIds: readonly string[],
@@ -71,9 +69,7 @@ export const scoreBasket = (
   };
 };
 
-/**
- * Priority is right when every need sits above every want in the order.
- */
+/** Priority is right when every need sits above every want in the order. */
 export const scorePriority = (
   payload: PriorityPayload,
   orderedIds: readonly string[],

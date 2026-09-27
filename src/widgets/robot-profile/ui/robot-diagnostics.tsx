@@ -28,9 +28,8 @@ const CONDITIONS = ['periods', 'goalsReached', 'plansKept'] as const;
 // ═══════════════════════════════════════════
 
 /**
- * The dog's diagnostics (screen 10): mood with its cause, then the three
- * build stages with the checklist of the next one. Stages grow from
- * decisions over several periods, never from purchases, and never go down.
+ * The dog's diagnostics (screen 10): mood with its cause, then the three build stages with
+ * the checklist of the next one.
  */
 export const RobotDiagnostics = ({
   onClose,
@@ -38,8 +37,8 @@ export const RobotDiagnostics = ({
 }: RobotDiagnosticsProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
-  // Read here, not on the home screen: the arena must not re-render on every
-  // save change just because the panel could open.
+  // Read here, not on the home screen: the arena must not re-render on every save change
+  // just because the panel could open.
   const user = useUser();
   if (!user) return null;
   const mood = moodFor(user.robot.charge, user.robot.spirit);
@@ -183,8 +182,8 @@ export const RobotDiagnostics = ({
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  condition: { alignItems: 'center', flexDirection: 'row', gap: SPACING.two },
-  copy: { flex: 1, gap: SPACING.one },
+  condition: { alignItems: 'center', flexDirection: 'row', gap: SPACING.TWO },
+  copy: { flex: 1, gap: SPACING.ONE },
   dot: { borderRadius: 5, height: 10, width: 10 },
   header: { alignItems: 'center', flexDirection: 'row', gap: 10 },
   heading: { flex: 1, gap: 2, minWidth: 0 },
@@ -203,13 +202,13 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 2,
     flexDirection: 'row',
-    gap: SPACING.compact,
-    padding: SPACING.compact,
+    gap: SPACING.COMPACT,
+    padding: SPACING.COMPACT,
   },
   rail: { alignItems: 'center' },
-  root: { gap: SPACING.compact },
-  stage: { flexDirection: 'row', gap: SPACING.compact },
-  stageContent: { flex: 1, gap: SPACING.one, paddingBottom: SPACING.three },
+  root: { gap: SPACING.COMPACT },
+  stage: { flexDirection: 'row', gap: SPACING.COMPACT },
+  stageContent: { flex: 1, gap: SPACING.ONE, paddingBottom: SPACING.THREE },
 });
 
 export type { RobotDiagnosticsProps };

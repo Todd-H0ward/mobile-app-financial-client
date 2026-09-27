@@ -6,11 +6,7 @@ import type { WatcherPageId } from '@/entities/watcher';
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * Page stack inside one watcher session.
- *
- * Opening a watcher always starts on greeting; leave clears via the parent.
- */
+/** Page stack inside one watcher session. */
 export const useWatcherSession = (initialPage: WatcherPageId = 'greeting') => {
   const [page, setPage] = useState<WatcherPageId>(initialPage);
 

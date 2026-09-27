@@ -20,7 +20,6 @@ interface EndPeriodConfirmController {
   isNeedsShort: boolean;
   /** How many need-coins are still missing from the plan (0 when covered). */
   needsGap: number;
-  /** Freeze the period and open plan-vs-fact. */
   confirm: () => void;
 }
 
@@ -28,12 +27,7 @@ interface EndPeriodConfirmController {
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * Confirm screen before `finishPeriod` — soft warning only (0.3-R / 2.5.5).
- *
- * Settlement (`endPeriod`) still runs later from recovery after the child
- * reads the summary.
- */
+/** Confirm screen before `finishPeriod` — soft warning only (0.3-R / 2.5.5) */
 export const useEndPeriodConfirm = (): EndPeriodConfirmController | null => {
   const router = useRouter();
   const user = useUser();

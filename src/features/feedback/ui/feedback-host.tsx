@@ -6,9 +6,7 @@ import { FeedbackSheet } from './feedback-sheet';
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Global host for post-action feedback. Mount once next to `<Toaster />`.
- */
+/** Mount once next to `<Toaster />`. */
 export const FeedbackHost = () => {
   const report = useFeedbackReport();
   const dismiss = useDismissFeedback();

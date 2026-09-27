@@ -33,10 +33,7 @@ type PuzzlePieceVariant =
   | 'loose';
 
 interface PuzzlePhotoProps {
-  /**
-   * Full puzzle photo URI — when set, the piece shows its fragment instead of
-   * the decorative fill pattern.
-   */
+  /** Full puzzle photo URI — when set, the piece shows its fragment instead of the decorative fill pattern. */
   image: string;
   row: number;
   col: number;
@@ -49,14 +46,11 @@ interface PuzzlePieceProps {
   variant?: PuzzlePieceVariant;
   photo?: PuzzlePhotoProps;
   /**
-   * Board-grid cell: the SVG is drawn at 164% / −32% so the body (0…100 in
-   * viewBox) tiles flush with neighbours and the tabs overlap the cell edge.
+   * Board-grid cell: the SVG is drawn at 164% / −32% so the body (0…100 in viewBox) tiles
+   * flush with neighbours and the tabs overlap the cell edge.
    */
   isFitCell?: boolean;
-  /**
-   * Which sides to stroke. Default is the full outline; the board passes only
-   * "its" sides so a shared seam is not drawn twice — see {@link pieceSeamPath}.
-   */
+  /** Which sides to stroke. */
   seams?: PieceSides;
   style?: StyleProp<ViewStyle>;
 }
@@ -94,14 +88,7 @@ const withAlpha = (hex: string, alpha: number): string => {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * One jigsaw piece. Shape comes from `tabs` via {@link piecePath}.
- *
- * Without `photo` — decorative `variant` fill (striped pattern lives in this
- * SVG's own `<Defs>`; RN cannot share `url(#id)` across separate Svg trees the
- * way the web `JigsawDefs` did). With `photo` — the piece clips its fragment of
- * the full image via `ClipPath` + `<Image>`, shifted by `-col/-row` cells.
- */
+/** One jigsaw piece. Shape comes from `tabs` via {@link piecePath}. */
 export const PuzzlePiece = ({
   tabs,
   variant = 'filled',
@@ -152,9 +139,7 @@ export const PuzzlePiece = ({
           ? 3.25
           : 3;
 
-  // Empty slots show the full jigsaw silhouette (tabs included). Shared-seam
-  // culling is only for filled neighbours — a dashed outline of half a piece
-  // does not read as "put it here".
+  // Empty slots show the full jigsaw silhouette (tabs included).
   const strokeDasharray = isSlot && !isSlotActive ? '6 5' : undefined;
   const showFullOutline = !seams || isSlot || isSlotActive || Boolean(photo);
   const showSeams = Boolean(seams) && !isSlot && !isSlotActive && !photo;
@@ -239,11 +224,7 @@ export const PuzzlePiece = ({
   );
 };
 
-/**
- * Web mounted a shared `<pattern id="jigfill">` once. On RN each piece carries
- * its own pattern in `<Defs>` — `url(#id)` does not cross Svg roots — so this
- * stays as a no-op for call-site parity.
- */
+/** Web mounted a shared `<pattern id="jigfill">` once. */
 export const JigsawDefs = () => null;
 
 // ═══════════════════════════════════════════

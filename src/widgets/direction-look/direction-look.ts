@@ -14,11 +14,7 @@ interface DirectionLook {
   accent: ThemeColor;
   /** Readable-on-`surface` color for the basket's title. */
   label: ThemeColor;
-  /**
-   * Marker shape. Colour is never the only carrier of a difference (3.6), so
-   * each direction keeps a silhouette of its own — the same pairing `Chip`
-   * already uses: needs is a circle, wants a diamond.
-   */
+  /** Silhouette per direction — colour is never the only signal (3.6). */
   marker: ShapeVariant;
 }
 
@@ -26,12 +22,7 @@ interface DirectionLook {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * The look of the three budget directions.
- *
- * Shared by the plan screen, the shop and the summary so the same three words
- * keep the same icons everywhere — colour is never the only category signal.
- */
+/** Shared icons/colours for the three budget directions (colour ≠ only cue). */
 export const DIRECTION_LOOK: Record<BudgetDirection, DirectionLook> = {
   needs: {
     icon: 'battery',

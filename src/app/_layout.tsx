@@ -9,10 +9,7 @@ import { SplashOverlay } from '@/shared/ui';
 // The overlay hides it once the first screen has laid out.
 SplashScreen.preventAutoHideAsync();
 
-/**
- * A transparent modal keeps the home screen attached underneath, so its GL
- * surface survives and coming back does not flash an empty frame.
- */
+/** transparentModal keeps home's GL surface alive underneath. */
 const SHEET_OPTIONS = {
   animation: 'fade',
   contentStyle: { backgroundColor: 'transparent' },

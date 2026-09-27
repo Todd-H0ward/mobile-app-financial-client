@@ -28,10 +28,6 @@ const CELLS = 10;
 // COMPONENTS
 // ═══════════════════════════════════════════
 
-/**
- * Screen 21, "корзина": a decision with a visible consequence. Going over the
- * budget turns the scale amber and says so — "Проверить" stays available.
- */
 export const BasketMechanic = ({
   payload,
   selectedIds,
@@ -39,6 +35,7 @@ export const BasketMechanic = ({
 }: BasketMechanicProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
+
   const selected = new Set(selectedIds);
   const total = payload.items
     .filter((item) => selected.has(item.id))
@@ -111,24 +108,24 @@ export const BasketMechanic = ({
 const styles = StyleSheet.create({
   check: { position: 'absolute', right: 10, top: 10 },
   filler: { flexBasis: '46%', flexGrow: 1 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.two },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.TWO },
   item: {
     borderRadius: RADII.m,
     borderWidth: 2,
     flexBasis: '46%',
     flexGrow: 1,
-    gap: SPACING.one,
+    gap: SPACING.ONE,
     minHeight: 76,
-    padding: SPACING.compact,
+    padding: SPACING.COMPACT,
   },
-  itemTitle: { paddingRight: SPACING.three },
+  itemTitle: { paddingRight: SPACING.THREE },
   price: { fontFamily: FONTS.monoStrong, fontSize: 16, lineHeight: 22 },
-  root: { gap: SPACING.two },
+  root: { gap: SPACING.TWO },
   total: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: SPACING.one,
+    marginTop: SPACING.ONE,
   },
 });
 

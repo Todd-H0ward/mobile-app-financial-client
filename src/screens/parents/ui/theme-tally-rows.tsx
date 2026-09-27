@@ -18,12 +18,6 @@ interface ThemeTallyRowsProps {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Chores done, by theme — the third of the four questions in docs/parents.md.
- *
- * The bars share one ceiling so the three themes are comparable at a glance:
- * the point is which subject the child keeps choosing, not the absolute count.
- */
 export const ThemeTallyRows = ({ rows }: ThemeTallyRowsProps) => {
   const { t } = useTranslation();
   const ceiling = Math.max(1, ...rows.map((row) => row.done));
@@ -58,7 +52,7 @@ export const ThemeTallyRows = ({ rows }: ThemeTallyRowsProps) => {
 
 const styles = StyleSheet.create({
   root: {
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
   bar: {
     flex: 1,
@@ -73,7 +67,7 @@ const styles = StyleSheet.create({
   row: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.two,
+    gap: SPACING.TWO,
   },
 });
 

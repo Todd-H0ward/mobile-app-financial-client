@@ -114,11 +114,7 @@ const DraggablePiece = ({
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Grid of slots, placed photos, and loose pieces on the table.
- * Snap targets are derived from the board rect in the session hook — slots
- * here are visual only.
- */
+/** Grid of slots, placed photos, and loose pieces on the table. */
 export const PuzzleBoard = ({
   pieces,
   rows,
@@ -259,7 +255,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     overflow: 'hidden',
-    padding: SPACING.two,
+    padding: SPACING.TWO,
     width: '100%',
   },
 });

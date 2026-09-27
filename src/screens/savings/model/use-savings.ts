@@ -10,14 +10,12 @@ import { formatMoney } from '@/shared/utils';
 
 interface SavingsGoalRow {
   id: string;
-  /** Catalogue title (i18n overlays in the UI). */
   title: string;
   price: number;
   saved: number;
   remaining: number;
   /** 0…1 for the progress bar. */
   progress: number;
-  /** "32 из 120". */
   progressLabel: string;
   isActive: boolean;
   isReached: boolean;
@@ -25,7 +23,6 @@ interface SavingsGoalRow {
 
 interface SavingsController {
   balance: number;
-  /** Sum across every goal jar. */
   totalSaved: number;
   goals: SavingsGoalRow[];
   setActive: (goalId: string) => void;
@@ -35,7 +32,6 @@ interface SavingsController {
 // HOOK
 // ═══════════════════════════════════════════
 
-/** Showcase of every savings goal with progress — 2.5.7. */
 export const useSavings = (): SavingsController => {
   const user = useUser();
   const commitUser = useCommitUser();

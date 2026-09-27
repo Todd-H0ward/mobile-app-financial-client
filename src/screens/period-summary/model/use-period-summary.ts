@@ -31,17 +31,11 @@ interface GoalStatus {
 
 interface PeriodSummaryController {
   periodIndex: number;
-  /** Three comparison rows, always. */
   rows: BudgetComparison[];
-  /** Story for the copy layer — tips live on the recovery screen. */
   explain: SummaryExplain;
-  /** Largest of plan/fact across rows — shared scale for the bars. */
   barMax: number;
-  /** Full financial breakdown for the period. */
   report: PeriodReport;
-  /** Keeper's contextual line for the summary phase. */
   keeperLine: WatcherLine;
-  /** Active savings goal progress, if any. */
   goal: GoalStatus | null;
   continueNext: () => void;
 }
@@ -50,10 +44,6 @@ interface PeriodSummaryController {
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * Reads the frozen plan/fact of the `summary` phase. Settlement happens on
- * the recovery screen after the child picks a next step (or skips).
- */
 export const usePeriodSummary = (): PeriodSummaryController | null => {
   const router = useRouter();
   const user = useUser();

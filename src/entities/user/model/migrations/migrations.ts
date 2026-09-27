@@ -1,5 +1,6 @@
 import { MODULE_IDS } from '@/entities/catalogue';
 import { PLATFORM_GOAL_ID, PLATFORM_LEVEL_COUNT } from '@/entities/economy';
+import { listGoals } from '@/entities/goal';
 import { completedCellKeysFromLessons, listLessons } from '@/entities/lesson';
 import {
   DEFAULT_ROBOT_ASSEMBLY,
@@ -39,19 +40,97 @@ const STAGE_FROM_PET: Record<string, RobotDogStage> = {
 // MIGRATIONS
 // ═══════════════════════════════════════════
 
-/**
- * One step at a time: the key is the version coming in, the value is how to get
- * to the next one.
- *
- * The chain is what carries a player who skipped three releases all the way to
- * the current schema: `v0 → v1 → v2 → …`. A single jump straight to the latest
- * version cannot do that.
- */
+/** One step at a time: the key is the version coming in, the value is how to get to the next one. */
 const MIGRATIONS: Record<number, MigrationStep> = {
-  // The arena was re-cut: the platform ring holds no cells and the steps
-  // carry more than six each, so a key like `0-0-0` names another cell now —
-  // or none. Lesson ids are the record (since v13); the keys are worked out
-  // again from them.
+  // Pit goals replace the old coat / radar / beacon catalogue.
+  18: (save) => {
+    const GOAL_REMAP: Record<string, string> = {
+      coat: 'coat',
+      radar: 'radar',
+      beacon: 'beacon',
+    };
+    const TASK_REMAP: Record<string, string> = {
+      'save-for-radar': 'save-for-radar',
+    };
+    const remapId = (id: string, table: Record<string, string>) =>
+      table[id] ?? id;
+
+    const savings = isRecord(save.savings) ? save.savings : {};
+    const rawGoals = Array.isArray(savings.goals) ? savings.goals : [];
+    const byId = new Map<
+      string,
+      { goalId: string; saved: number; reachedInPeriod: number | null }
+    >();
+
+    for (const row of rawGoals) {
+      if (!isRecord(row) || typeof row.goalId !== 'string') continue;
+      const goalId = remapId(row.goalId, GOAL_REMAP);
+      const saved = isFiniteNumber(row.saved) ? Math.max(0, row.saved) : 0;
+      const reachedInPeriod =
+        row.reachedInPeriod === null || isFiniteNumber(row.reachedInPeriod)
+          ? (row.reachedInPeriod as number | null)
+          : null;
+      const previous = byId.get(goalId);
+      byId.set(goalId, {
+        goalId,
+        saved: Math.max(previous?.saved ?? 0, saved),
+        reachedInPeriod: previous?.reachedInPeriod ?? reachedInPeriod,
+      });
+    }
+
+    for (const goal of listGoals()) {
+      if (!byId.has(goal.id)) {
+        byId.set(goal.id, {
+          goalId: goal.id,
+          saved: 0,
+          reachedInPeriod: null,
+        });
+      }
+    }
+
+    const catalogueIds = new Set(listGoals().map((goal) => goal.id));
+    const goals = [...byId.values()].filter((row) =>
+      catalogueIds.has(row.goalId),
+    );
+
+    const activeRaw =
+      typeof savings.activeGoalId === 'string' ? savings.activeGoalId : null;
+    const activeMapped = activeRaw ? remapId(activeRaw, GOAL_REMAP) : null;
+    const activeGoalId =
+      activeMapped && catalogueIds.has(activeMapped)
+        ? activeMapped
+        : catalogueIds.has(PLATFORM_GOAL_ID)
+          ? PLATFORM_GOAL_ID
+          : (goals[0]?.goalId ?? null);
+
+    const tasks = isRecord(save.tasks) ? save.tasks : {};
+    const completed = Array.isArray(tasks.completedThisPeriod)
+      ? tasks.completedThisPeriod
+      : [];
+    const activeTaskId =
+      typeof tasks.activeTaskId === 'string'
+        ? remapId(tasks.activeTaskId, TASK_REMAP)
+        : tasks.activeTaskId;
+
+    return {
+      ...save,
+      version: 19,
+      savings: {
+        ...savings,
+        goals,
+        activeGoalId,
+      },
+      tasks: {
+        ...tasks,
+        activeTaskId,
+        completedThisPeriod: completed.map((id) =>
+          typeof id === 'string' ? remapId(id, TASK_REMAP) : id,
+        ),
+      },
+    };
+  },
+  // The arena was re-cut: the platform ring holds no cells and the steps carry more than six
+  // each, so a key like `0-0-0` names another cell now — or none.
   17: (save) => {
     const completedLessonIds = Array.isArray(save.completedLessonIds)
       ? save.completedLessonIds.filter(
@@ -147,10 +226,8 @@ const MIGRATIONS: Record<number, MigrationStep> = {
       assembly: { ...DEFAULT_ROBOT_ASSEMBLY },
     },
   }),
-  // The old arena repeated the first 30 lessons in every sector. Preserve
-  // that learned content without marking new practice exercises completed.
-  // Also backfills modules / arcade scores for saves that reached v9 via the
-  // workshop-only step on this branch.
+  // The old arena repeated the first 30 lessons in every sector. Preserve that learned
+  // content without marking new practice exercises completed.
   9: (save) => {
     const arcade = isRecord(save.arcade) ? save.arcade : {};
     return {
@@ -214,12 +291,9 @@ const MIGRATIONS: Record<number, MigrationStep> = {
     };
   },
   // v0 — a save from a build before versioning: fewer fields, no `version`.
-  // Missing fields come from the starting profile; what the player earned stays.
   0: (save) => ({ ...createInitialUser(), ...save, version: 1 }),
 
-  // v1 — the pet grew a `celebratedStage`. An existing pet is taken as already
-  // celebrated: a child who has been playing for a week must not be handed a
-  // ceremony for a stage they reached three periods ago.
+  // v1 — the pet grew a `celebratedStage`.
   1: (save) => {
     const pet = isRecord(save.pet) ? save.pet : {};
 
@@ -230,10 +304,7 @@ const MIGRATIONS: Record<number, MigrationStep> = {
     };
   },
 
-  // v2 — the wallet grew `entryCount`, the counter `WalletEntry.id` is built
-  // from. A save from before this step never credited a named entry, so its
-  // history is empty and the honest backfill is the length of that history —
-  // zero, for every real save this migration will ever see.
+  // v2 — the wallet grew `entryCount`, the counter `WalletEntry.id` is built from.
   2: (save) => {
     const wallet = isRecord(save.wallet) ? save.wallet : {};
     const history = Array.isArray(wallet.history) ? wallet.history : [];
@@ -251,9 +322,7 @@ const MIGRATIONS: Record<number, MigrationStep> = {
     };
   },
 
-  // v3 — chores engine: active task + per-period completions (2.5.8). Fresh
-  // profiles get the first catalogue task; a mid-game save starts the same
-  // way so the HUD never shows an empty slot for no reason.
+  // v3 — chores engine: active task + per-period completions (2.5.8).
   3: (save) => {
     const fresh = createInitialUser();
 
@@ -264,9 +333,7 @@ const MIGRATIONS: Record<number, MigrationStep> = {
     };
   },
 
-  // v4 — the pet became a 3D robot dog with seven coats and four clips. An
-  // existing profile has no opinion about either, so it gets the defaults: a
-  // save from before this step never showed a dog at all.
+  // v4 — the pet became a 3D robot dog with seven coats and four clips.
   4: (save) => {
     const settings = isRecord(save.settings) ? save.settings : {};
 
@@ -285,11 +352,8 @@ const MIGRATIONS: Record<number, MigrationStep> = {
     };
   },
 
-  // v5 — the game left the pet's house for the pit. The 2D pet's species,
-  // coat, pattern and traits go; its name, stage and mood carry over to the
-  // robot. The house goes too: no thermostat, no insulation, no bill. What
-  // was bought and stays — the console, the puzzles — keeps unlocking the
-  // arcade from `ownedItemIds`.
+  // v5 — the game left the pet's house for the pit. The 2D pet's species, coat, pattern and
+  // traits go; its name, stage and mood carry over to the robot.
   5: (save) => {
     const pet = isRecord(save.pet) ? save.pet : {};
     const home = isRecord(save.home) ? save.home : {};
@@ -462,11 +526,7 @@ const isModules = (value: unknown): boolean =>
     value.tier === 2 ||
     value.tier === 3);
 
-/**
- * Checks the shape of the save, not its meaning: passing means no screen will
- * crash reading a field. Economic invariants (balance >= 0 and the rest) are
- * held by whoever changes those numbers.
- */
+/** Checks the shape of the save, not its meaning: passing means no screen will crash reading a field. */
 export const isUserSave = (value: unknown): value is UserSave =>
   isRecord(value) &&
   value.version === USER_SAVE_VERSION &&
@@ -477,8 +537,8 @@ export const isUserSave = (value: unknown): value is UserSave =>
   isArcade(value.arcade) &&
   Array.isArray(value.completedLessonCells) &&
   value.completedLessonCells.length <= 90 &&
-  // Shape only: which cells exist is the layout's business, and a save must
-  // not be thrown away because the content grew a row.
+  // Shape only: which cells exist is the layout's business, and a save must not be thrown
+  // away because the content grew a row.
   value.completedLessonCells.every(
     (key) => typeof key === 'string' && /^\d{1,2}-\d{1,2}-\d{1,2}$/.test(key),
   ) &&
@@ -504,23 +564,14 @@ export const isUserSave = (value: unknown): value is UserSave =>
 // MIGRATE
 // ═══════════════════════════════════════════
 
-/**
- * Brings a save of any past version up to the current one.
- *
- * Returns `null` when the save is unreadable: a corrupted file gives a clean
- * profile rather than a crash at startup. `persist` gets that same `null` and
- * the store stays on its starting state.
- *
- * @param persisted whatever was sitting in storage
- * @param version the version it was written under
- */
+/** Brings a save of any past version up to the current one. */
 export const migrateUser = (
   persisted: unknown,
   version: number,
 ): UserSave | null => {
   if (!isRecord(persisted)) return null;
-  // A save from the future means the app was rolled back. There is nothing to
-  // migrate downwards, and guessing is worse than starting over.
+  // A save from the future means the app was rolled back. There is nothing to migrate
+  // downwards, and guessing is worse than starting over.
   if (!Number.isInteger(version) || version > USER_SAVE_VERSION) return null;
 
   let save = persisted;

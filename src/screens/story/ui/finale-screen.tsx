@@ -33,8 +33,7 @@ export const FinaleScreen = ({ onContinue }: FinaleScreenProps) => {
   if (!user) return <Redirect href={STATIC_ROUTES.ENTRY} />;
   if (user.platform.level < PLATFORM_LEVEL_COUNT)
     return <Redirect href={STATIC_ROUTES.HOME} />;
-  // Receipts preserve savings spent on the lift; the remaining jar alone
-  // would misleadingly show zero immediately after reaching the surface.
+  // the remaining jar alone would misleadingly show zero immediately after reaching the surface
   const saved =
     user.savings.goals.reduce((sum, goal) => sum + goal.saved, 0) +
     user.platform.receipts.reduce((sum, receipt) => sum + receipt.amount, 0);
@@ -103,24 +102,24 @@ export const FinaleScreen = ({ onContinue }: FinaleScreenProps) => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  actions: { gap: SPACING.one, marginTop: 'auto', paddingTop: SPACING.compact },
+  actions: { gap: SPACING.ONE, marginTop: 'auto', paddingTop: SPACING.COMPACT },
   badge: {
     borderRadius: 8,
-    paddingHorizontal: SPACING.compact,
-    paddingVertical: SPACING.two,
+    paddingHorizontal: SPACING.COMPACT,
+    paddingVertical: SPACING.TWO,
   },
   heading: { flex: 0 },
-  hero: { alignItems: 'center', gap: SPACING.three },
+  hero: { alignItems: 'center', gap: SPACING.THREE },
   number: { fontSize: 20, lineHeight: 28 },
   stat: {
     borderRadius: 12,
     borderWidth: 2,
     flexBasis: 80,
     flexGrow: 1,
-    gap: SPACING.half,
-    padding: SPACING.two,
+    gap: SPACING.HALF,
+    padding: SPACING.TWO,
   },
-  stats: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.one },
+  stats: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.ONE },
   title: { fontSize: 28, lineHeight: 32 },
 });
 

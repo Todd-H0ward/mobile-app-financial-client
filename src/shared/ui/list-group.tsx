@@ -107,10 +107,7 @@ const ListGroupItem = ({
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Rows of one list in one frame, a hairline between them (UI kit 07, screens
- * 08 and 24) — a group reads as one thought instead of a stack of cards.
- */
+/** One framed list with hairlines — reads as one thought, not stacked cards. */
 const ListGroupRoot = ({ children, style }: ListGroupRootProps) => {
   const theme = useTheme();
   const rows = Children.toArray(children).filter(isValidElement);
@@ -155,7 +152,7 @@ const styles = StyleSheet.create({
   item: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.compact,
+    gap: SPACING.COMPACT,
     minHeight: ROW_MIN_HEIGHT,
     paddingHorizontal: 14,
     paddingVertical: 10,

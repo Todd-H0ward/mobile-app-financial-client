@@ -34,7 +34,7 @@ export const ArcadeRecordsBoard = ({
     <View style={styles.root}>
       <Text
         variant="smallBold"
-        style={{ color: theme.arcadeLcd, marginBottom: SPACING.two }}
+        style={{ color: theme.arcadeLcd, marginBottom: SPACING.TWO }}
       >
         {t('games.console.records')}
       </Text>
@@ -66,10 +66,10 @@ export const ArcadeRecordsBoard = ({
 
 const styles = StyleSheet.create({
   list: {
-    gap: SPACING.one,
+    gap: SPACING.ONE,
   },
   root: {
-    gap: SPACING.one,
+    gap: SPACING.ONE,
   },
 });
 

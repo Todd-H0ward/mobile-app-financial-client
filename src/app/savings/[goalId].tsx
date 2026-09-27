@@ -4,7 +4,7 @@ import { GoalRouteScreen } from '@/screens/savings';
 
 import { STATIC_ROUTES } from '@/shared/constants';
 
-/** First value when expo-router hands an array for a dynamic segment. */
+/** First value when expo-router hands an array. */
 const asString = (value: string | string[] | undefined): string | null => {
   if (typeof value === 'string' && value.length > 0) return value;
   if (Array.isArray(value) && typeof value[0] === 'string' && value[0]) {

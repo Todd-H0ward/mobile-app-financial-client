@@ -54,8 +54,8 @@ const iconFor = (action: WatcherDialogAction): PixelIconName | undefined => {
 // ═══════════════════════════════════════════
 
 /**
- * The watcher's own menu (screen 08): the situational line in a frame, then
- * one list of everything this watcher can open. The cross closes the talk.
+ * The watcher's own menu (screen 08): the situational line in a frame, then one list of
+ * everything this watcher can open.
  */
 export const GreetingPage = ({ frame, line, onAction }: GreetingPageProps) => {
   const { t } = useTranslation();
@@ -103,7 +103,7 @@ export const GreetingPage = ({ frame, line, onAction }: GreetingPageProps) => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  stack: { gap: SPACING.two, paddingBottom: SPACING.two },
+  stack: { gap: SPACING.TWO, paddingBottom: SPACING.TWO },
 });
 
 export type { GreetingPageProps };

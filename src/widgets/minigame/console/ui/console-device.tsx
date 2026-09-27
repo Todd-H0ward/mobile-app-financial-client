@@ -19,10 +19,7 @@ interface ConsoleDeviceProps {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Handheld chrome: plastic shell, dark LCD well, optional controls.
- * Fills the parent height — the screen slot grows, controls stay at the bottom.
- */
+/** Handheld chrome: plastic shell, dark LCD well, optional controls. */
 export const ConsoleDevice = ({
   children,
   controls,
@@ -87,17 +84,17 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     flex: 1,
     minHeight: 0,
-    padding: SPACING.two,
+    padding: SPACING.TWO,
   },
   controls: {
     flexShrink: 0,
-    marginTop: SPACING.three,
+    marginTop: SPACING.THREE,
   },
   highlight: {
     alignSelf: 'center',
     borderRadius: RADII.pill,
     height: 4,
-    marginBottom: SPACING.two,
+    marginBottom: SPACING.TWO,
     opacity: 0.55,
     width: '36%',
   },
@@ -106,7 +103,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     flex: 1,
     minHeight: 0,
-    padding: SPACING.three,
+    padding: SPACING.THREE,
   },
   screen: {
     borderRadius: RADII.l,
@@ -114,7 +111,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 0,
     overflow: 'hidden',
-    padding: SPACING.two,
+    padding: SPACING.TWO,
   },
 });
 

@@ -48,8 +48,8 @@ interface TerminalShellProps {
   label: string;
   title: string;
   /**
-   * Shows the back square and the "[ вернуться в яму ]" link; omitted on the
-   * watcher's own menu, which closes with its cross instead.
+   * Shows the back square and the "[ вернуться в яму ]" link; omitted on the watcher's own
+   * menu, which closes with its cross instead.
    */
   onBack?: () => void;
   /** Right side of the header: "?", the wallet, or the close cross. */
@@ -186,8 +186,8 @@ export const TerminalCard = ({
 };
 
 /**
- * The watcher's line as speech (UI kit 09): the Keeper's bubble is rounded
- * with an ear at the top left, the Overseer's has his cut corner.
+ * The watcher's line as speech (UI kit 09): the Keeper's bubble is rounded with an ear at
+ * the top left, the Overseer's has his cut corner.
  */
 export const TerminalBubble = ({ children }: TerminalBubbleProps) => {
   const theme = useTheme();
@@ -330,11 +330,7 @@ export const TerminalText = memo(
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * The terminal a watcher talks through (concept B2, D1, E1): back square,
- * the voice's machine label over a readable title, one action at the bottom
- * and the "[ вернуться в яму ]" link that always leads out.
- */
+/** The terminal a watcher talks through (concept B2, D1, E1): back square, the voice's machine label over a. */
 export const TerminalShell = ({
   watcher,
   label,
@@ -416,29 +412,29 @@ export const TerminalShell = ({
 const styles = StyleSheet.create({
   body: {
     flexShrink: 1,
-    gap: SPACING.compact,
+    gap: SPACING.COMPACT,
     minHeight: 0,
-    paddingBottom: SPACING.three,
+    paddingBottom: SPACING.THREE,
     paddingHorizontal: 14,
-    paddingTop: SPACING.three,
+    paddingTop: SPACING.THREE,
   },
   bubble: {
     borderBottomLeftRadius: RADII.m,
     borderBottomRightRadius: RADII.m,
-    borderTopLeftRadius: SPACING.one,
+    borderTopLeftRadius: SPACING.ONE,
     borderTopRightRadius: RADII.m,
     borderWidth: 2,
-    paddingHorizontal: SPACING.compact,
+    paddingHorizontal: SPACING.COMPACT,
     paddingVertical: 10,
   },
   card: {
     borderRadius: RADII.m,
     borderWidth: 2,
-    gap: SPACING.two,
-    padding: SPACING.compact,
+    gap: SPACING.TWO,
+    padding: SPACING.COMPACT,
   },
-  // Shrinks, never grows: the terminal is as tall as what it says, and a
-  // long page scrolls once the dock's cap is reached.
+  // Shrinks, never grows: the terminal is as tall as what it says, and a long page scrolls
+  // once the dock's cap is reached.
   content: {
     flexShrink: 1,
     minHeight: 0,
@@ -448,12 +444,12 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     borderTopWidth: 2,
   },
-  done: { alignItems: 'center', flexDirection: 'row', gap: SPACING.one },
-  footer: { gap: SPACING.one },
+  done: { alignItems: 'center', flexDirection: 'row', gap: SPACING.ONE },
+  footer: { gap: SPACING.ONE },
   hairline: { height: 1 },
   header: { alignItems: 'center', flexDirection: 'row', gap: 10 },
   heading: { flex: 1, gap: 2, minWidth: 0 },
-  leave: { marginBottom: -SPACING.compact },
+  leave: { marginBottom: -SPACING.COMPACT },
   menu: {
     borderRadius: RADII.m,
     borderWidth: 2,
@@ -463,7 +459,7 @@ const styles = StyleSheet.create({
   menuRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: SPACING.compact,
+    gap: SPACING.COMPACT,
     minHeight: 56,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -472,7 +468,7 @@ const styles = StyleSheet.create({
   root: { flexShrink: 1, minHeight: 0 },
   rule: {
     borderBottomWidth: 1,
-    marginVertical: SPACING.one,
+    marginVertical: SPACING.ONE,
   },
 });
 

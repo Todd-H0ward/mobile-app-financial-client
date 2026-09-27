@@ -11,25 +11,11 @@ type RobotDogTextureSlot = 'body' | 'dark' | 'mid';
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * Geometry and the four clips, once — every coat shares them.
- *
- * `scripts/strip-glb-textures.mjs` took the embedded pictures out: the app
- * dresses the dog from loose files instead, so seven near-identical five
- * megabyte models became one of three and a half.
- */
+/** Geometry and the four clips, once — every coat shares them. */
 const ROBOT_DOG_MODEL =
   require('../../../../assets/robot-dog/robot-dog.glb') as number;
 
-/**
- * Albedo per coat, one file per material group.
- *
- * The textures live outside the GLB on purpose. expo-gl uploads a texture by
- * handing the native side a `file://` path, and a picture packed inside the
- * model is bytes in memory, not a file — that is the
- * `GLTFLoader: Couldn't load texture` you get otherwise. Loose files also mean
- * one geometry for all seven coats instead of seven copies of the same mesh.
- */
+/** Albedo per coat, one file per material group. The textures live outside the GLB on purpose. */
 const ROBOT_DOG_TEXTURES: Record<
   RobotDogSkin,
   Record<RobotDogTextureSlot, number>
@@ -71,13 +57,7 @@ const ROBOT_DOG_TEXTURES: Record<
   },
 };
 
-/**
- * Which albedo each material in the GLB wears.
- *
- * Read off the file: `Body` and `Dark` carry their own maps, `Metal` wears the
- * one the artist calls `mid`. `Glow` and `Accent` are flat colours with no map
- * at all, which is why they are missing here.
- */
+/** Which albedo each material in the GLB wears. */
 const ROBOT_DOG_MATERIAL_SLOTS: Record<string, RobotDogTextureSlot> = {
   Body: 'body',
   Dark: 'dark',

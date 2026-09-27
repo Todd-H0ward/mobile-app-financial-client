@@ -2,13 +2,7 @@
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/**
- * The coats the robot dog ships with, in the order the picker shows them.
- *
- * Every skin is the same mesh and the same four clips — only the textures
- * differ. That is why the picker can swap one for another without the game
- * knowing anything about geometry.
- */
+/** The coats the robot dog ships with, in the order the picker shows them. */
 const ROBOT_DOG_SKINS = [
   'factory',
   'arctic',

@@ -38,7 +38,7 @@ const withHistory = (): UserSave => {
         plan: { needs: 20, wants: 10, savings: 10 },
         fact: { needs: 20, wants: 10, savings: 10 },
         isPlanKept: true,
-        reachedGoalIds: ['paints'],
+        reachedGoalIds: ['coat'],
         endedAt: 2000,
         earned: 18,
         adjustment: 5,
@@ -102,7 +102,7 @@ describe('describeWalletSource', () => {
     });
     expect(describeWalletSource('purchase:bread').kind).toBe('purchase');
     expect(describeWalletSource('task:change-counting').kind).toBe('task');
-    expect(describeWalletSource('savings:deposit:paints').kind).toBe(
+    expect(describeWalletSource('savings:deposit:coat').kind).toBe(
       'savingsDeposit',
     );
     expect(describeWalletSource('mystery').kind).toBe('unknown');

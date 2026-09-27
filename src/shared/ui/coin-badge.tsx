@@ -92,9 +92,9 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     borderRadius: 12,
     flexDirection: 'row',
-    gap: SPACING.two,
-    paddingHorizontal: SPACING.two,
-    paddingVertical: SPACING.one,
+    gap: SPACING.TWO,
+    paddingHorizontal: SPACING.TWO,
+    paddingVertical: SPACING.ONE,
   },
   amount: {
     fontFamily: FONTS.monoStrong,

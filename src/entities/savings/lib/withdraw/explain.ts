@@ -12,18 +12,13 @@ interface WithdrawExplainInput {
   /** Goal title — for the confirm screen, already chosen language. */
   goalTitle: string;
   /**
-   * Planned deposit per period (`plan.savings`). Used only for the rough
-   * "примерно N периодов" line — never for the wallet math.
+   * Planned deposit per period (`plan.savings`). Used only for the rough "примерно N
+   * периодов" line — never for the wallet math.
    */
   plannedDeposit: number;
 }
 
-/**
- * Consequence of a withdrawal — shown on the confirm screen before coins move
- * (2.5.7 / roadmap 1.15).
- *
- * Naming the cost of the decision is the requirement; blocking it is not.
- */
+/** Consequence of a withdrawal — shown on the confirm screen before coins move (2.5.7 / roadmap 1.15). */
 interface WithdrawExplain {
   amount: number;
   goalTitle: string;
@@ -51,12 +46,7 @@ interface WithdrawExplain {
 // PUBLIC API
 // ═══════════════════════════════════════════
 
-/**
- * Recalculates every consequence number for the withdraw confirm screen.
- *
- * Pure: no wallet mutation. The screen shows remaining before/after and a
- * soft period estimate — docs/economy.md.
- */
+/** Recalculates every consequence number for the withdraw confirm screen. */
 export const explainWithdraw = (
   input: WithdrawExplainInput,
 ): WithdrawExplain => {

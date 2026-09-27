@@ -36,12 +36,6 @@ type TaskResult = TaskOk | TaskFail;
 // HELPERS
 // ═══════════════════════════════════════════
 
-/**
- * Puts the next open chore on the HUD, in catalogue order.
- *
- * Pure re-issue: does not clear completions. Called after a finish and when
- * a new period starts.
- */
 export const issueNextTask = (user: UserSave): UserSave => {
   const activeTaskId = nextTaskId(user.tasks.completedThisPeriod);
   if (user.tasks.activeTaskId === activeTaskId) return user;
@@ -55,9 +49,7 @@ export const issueNextTask = (user: UserSave): UserSave => {
   };
 };
 
-/**
- * Focuses one available chore on the HUD without completing it.
- */
+/** Focuses one available chore on the HUD without completing it. */
 export const selectTask = (user: UserSave, taskId: string): TaskResult => {
   const task = getTaskById(taskId);
   if (!task) return { ok: false, reason: 'unknown_task' };
@@ -84,11 +76,8 @@ export const selectTask = (user: UserSave, taskId: string): TaskResult => {
 // ═══════════════════════════════════════════
 
 /**
- * Completes a chore: credits the wallet with a named `task:<id>` source and
- * advances the queue (2.5.8 / roadmap 1.16).
- *
- * `rewardShare` (0…1) lets a wrong answer still pay something — arcade rule
- * "nothing can be failed". Defaults to a full payout.
+ * Completes a chore: credits the wallet with a named `task:<id>` source and advances the
+ * queue (2.5.8 / roadmap 1.16).
  */
 export const applyCompleteTask = (
   user: UserSave,

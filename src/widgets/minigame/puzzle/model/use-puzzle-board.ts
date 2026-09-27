@@ -43,11 +43,7 @@ interface UsePuzzleBoardOptions {
 // HOOK
 // ═══════════════════════════════════════════
 
-/**
- * Sitting state for one puzzle: placements, tray order, drag + snap target.
- * Pure transitions live in `@/entities/minigame/puzzle`; this hook owns refs
- * and React state.
- */
+/** Sitting state for one puzzle: placements, tray order, drag + snap target. */
 export const usePuzzleBoard = ({
   puzzleId,
   difficulty,

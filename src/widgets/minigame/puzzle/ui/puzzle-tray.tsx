@@ -103,9 +103,7 @@ const TrayPiece = ({
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/**
- * Horizontal tray of remaining pieces. No hint/ad sheet in v1 — reshuffle only.
- */
+/** Horizontal tray of remaining pieces. */
 export const PuzzleTray = ({
   image,
   trayPieces,
@@ -168,11 +166,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: SPACING.two,
+    marginBottom: SPACING.TWO,
   },
   piece: {
     height: TRAY_PIECE_SIZE,
-    marginRight: SPACING.two,
+    marginRight: SPACING.TWO,
     width: TRAY_PIECE_SIZE,
   },
   pieceHidden: {
@@ -181,14 +179,14 @@ const styles = StyleSheet.create({
   root: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    paddingBottom: SPACING.three,
-    paddingHorizontal: SPACING.three,
-    paddingTop: SPACING.three,
+    paddingBottom: SPACING.THREE,
+    paddingHorizontal: SPACING.THREE,
+    paddingTop: SPACING.THREE,
   },
   row: {
     alignItems: 'center',
     flexDirection: 'row',
-    paddingVertical: SPACING.one,
+    paddingVertical: SPACING.ONE,
   },
 });
 

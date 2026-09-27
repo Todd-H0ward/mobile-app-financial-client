@@ -21,8 +21,8 @@ describe('hashSeed', () => {
   });
 
   it('is stable for the same string', () => {
-    expect(hashSeed('scooter')).toBe(hashSeed('scooter'));
-    expect(hashSeed('scooter')).not.toBe(hashSeed('paint'));
+    expect(hashSeed('radar')).toBe(hashSeed('radar'));
+    expect(hashSeed('radar')).not.toBe(hashSeed('paint'));
   });
 });
 

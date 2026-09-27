@@ -113,10 +113,6 @@ export const fireBullet = (session: SpacewarSession): SpacewarSession => {
   };
 };
 
-/**
- * Advance bullets and targets; resolve hits. Destroyed targets respawn until
- * WIN_HITS so the sitting stays short but readable.
- */
 export const tickSpacewar = (
   session: SpacewarSession,
   dtSeconds: number,
@@ -164,8 +160,7 @@ export const tickSpacewar = (
     if (!consumed) remainingBullets.push(bullet);
   }
 
-  // Keep two targets on screen until the win so the child always has something
-  // to aim at.
+  // Keep two targets on screen until the win so the child always has something to aim at.
   while (targets.length < 2 && hits < WIN_HITS) {
     const fromLeft = targets.length % 2 === 0;
     const id = nextId;
