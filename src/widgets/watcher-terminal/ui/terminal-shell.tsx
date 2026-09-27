@@ -18,9 +18,10 @@ import {
 
 import type { WatcherId } from '@/entities/watcher';
 
-import { RADII, SPACING } from '@/shared/constants';
+import { RADII, SOUNDS, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
+import { playSfx } from '@/shared/lib';
 import {
   Button,
   type ButtonVariant,
@@ -274,7 +275,10 @@ export const TerminalMenuRow = memo(
         accessibilityRole="button"
         accessibilityState={{ disabled, selected: isSelected }}
         disabled={disabled}
-        onPress={onPress}
+        onPress={() => {
+          playSfx(SOUNDS.UI_TAP);
+          onPress();
+        }}
         style={({ pressed }) => [
           styles.menuRow,
           (pressed || isSelected) && { backgroundColor: theme.surfaceSoft },

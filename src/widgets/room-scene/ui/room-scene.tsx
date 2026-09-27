@@ -21,6 +21,7 @@ import {
 
 import { lessonAccess, lessonOrdinalForKey } from '@/entities/lesson';
 import {
+  bondReaction,
   DEFAULT_ROBOT_ASSEMBLY,
   DEFAULT_ROBOT_DOG_ACTION,
   DEFAULT_ROBOT_DOG_SKIN,
@@ -50,8 +51,8 @@ import {
   type WatcherId,
 } from '@/entities/watcher';
 
-import { CONTENT_PADDING, SPACING } from '@/shared/constants';
-import { hapticLight } from '@/shared/lib';
+import { CONTENT_PADDING, SOUNDS, SPACING } from '@/shared/constants';
+import { hapticLight, playSfx } from '@/shared/lib';
 
 import { buildScene, type SceneModel } from '../lib';
 import { type CameraTune, DEFAULT_CAMERA_TUNE } from '../model/camera-tune';
@@ -932,8 +933,23 @@ export const RoomScene = ({
     const now = Date.now();
     if (now - lastBondReactMs.current < ROBOT_DOG_REACTION_SEC * 1000) return;
     lastBondReactMs.current = now;
-    built.reactBond(kind, bondMoodRef.current, robotActionRef.current);
+    const mood = bondMoodRef.current;
+    const reaction = bondReaction(mood, kind);
+    built.reactBond(kind, mood, robotActionRef.current);
     hapticLight();
+    if (kind === 'kick') {
+      playSfx(
+        reaction.action === 'joy'
+          ? SOUNDS.DOG_KICK_PLAY
+          : SOUNDS.DOG_KICK_FLINCH,
+      );
+    } else {
+      playSfx(
+        reaction.burst === 'steam' || reaction.action === 'sad'
+          ? SOUNDS.DOG_STROKE_SOFT
+          : SOUNDS.DOG_STROKE_JOY,
+      );
+    }
   };
 
   const tap = Gesture.Tap()
@@ -1005,12 +1021,14 @@ export const RoomScene = ({
       // between bays anymore. From the map, the same tap walks in.
       if (view === 'top') {
         built.selectCell(null);
+        playSfx(SOUNDS.NAV_WHOOSH);
         onViewChange(cell.segment);
         return;
       }
 
       if (view !== cell.segment) {
         built.selectCell(null);
+        playSfx(SOUNDS.NAV_WHOOSH);
         onViewChange('top');
       }
       // Same-segment cell: lesson entry is the hold gesture, not a tap.
@@ -1044,6 +1062,7 @@ export const RoomScene = ({
         fireBondReaction(velocity >= BOND_KICK_VELOCITY ? 'kick' : 'stroke');
         return;
       }
+      playSfx(SOUNDS.NAV_WHOOSH);
       onViewChange(camera.endDrag());
     })
     .onFinalize((_event, success) => {
@@ -1069,6 +1088,7 @@ export const RoomScene = ({
       };
       model.current?.beginCellHold(cell);
       holdRef.current.frame = requestAnimationFrame(tickCellHold);
+      playSfx(SOUNDS.CELL_HOLD);
     })
     .onStart(() => {
       const hold = holdRef.current;
@@ -1077,6 +1097,7 @@ export const RoomScene = ({
       const cell = hold.cell;
       clearCellHold();
       hapticLight();
+      playSfx(SOUNDS.CELL_OPEN);
       onCellPress?.(cell);
     })
     .onFinalize(() => {

@@ -18,6 +18,9 @@ import {
 import { cellFromKey, cellKey, cellOrdinal } from '@/entities/scene';
 import { useCompleteLesson, useUser } from '@/entities/user';
 
+import { SOUNDS } from '@/shared/constants';
+import { playSfx } from '@/shared/lib';
+
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
@@ -108,6 +111,12 @@ export const useLesson = (cellId: string): LessonState => {
     void lesson?.id;
     dispatch({ type: 'reset' });
   }, [cellId, lesson?.id]);
+
+  useEffect(() => {
+    if (!verdict) return;
+    playSfx(verdict.isRight ? SOUNDS.CORRECT : SOUNDS.WRONG);
+  }, [verdict]);
+
   const theoryCount = lesson?.theory.length ?? 0;
   const questionCount = lesson?.questions.length ?? 0;
   const total = stage === 'theory' ? theoryCount : questionCount;

@@ -16,6 +16,7 @@ import {
 import { useAppLanguage, useReducedTransparency } from '@/shared/hooks';
 import {
   bindHapticsSoundGate,
+  bindSfxSoundGate,
   realTimeSource,
   TimeSourceContext,
 } from '@/shared/lib';
@@ -44,10 +45,11 @@ const AccessibilityBridge = ({ children }: { children: ReactNode }) => {
   const isTransparencyReduced = useReducedTransparency();
   const isGlassEnabled = isGlassPreferred && !isTransparencyReduced;
 
-  // Shared haptics must not import the user store — FSD; gate is bound here.
-  bindHapticsSoundGate(
-    () => useUserStore.getState().user?.settings.isSoundEnabled ?? true,
-  );
+  // Shared haptics / sfx must not import the user store — FSD; gate is bound here.
+  const soundGate = () =>
+    useUserStore.getState().user?.settings.isSoundEnabled ?? true;
+  bindHapticsSoundGate(soundGate);
+  bindSfxSoundGate(soundGate);
 
   return (
     <MotionEnabledProvider isEnabled={isMotionEnabled}>

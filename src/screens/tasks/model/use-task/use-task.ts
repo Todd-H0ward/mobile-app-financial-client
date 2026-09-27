@@ -13,7 +13,8 @@ import {
   useUserStore,
 } from '@/entities/user';
 
-import { hapticSuccess, useTimeSource } from '@/shared/lib';
+import { SOUNDS } from '@/shared/constants';
+import { hapticSuccess, playSfx, useTimeSource } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -128,6 +129,7 @@ export const useTaskPlay = (taskId: string): TaskPlayController | null => {
       if (!outcome.ok || !commitUser(current, outcome.user)) return false;
 
       hapticSuccess();
+      playSfx(SOUNDS.CORRECT);
       showFeedback({
         before: current,
         after: outcome.user,

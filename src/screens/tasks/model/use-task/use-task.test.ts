@@ -31,16 +31,17 @@ const { renderToString } = createRequire(import.meta.url)(
 // MOCKS
 // ═══════════════════════════════════════════
 
-const { storage, showFeedback, hapticSuccess } = vi.hoisted(() => ({
+const { storage, showFeedback, hapticSuccess, playSfx } = vi.hoisted(() => ({
   storage: new Map<string, string>(),
   showFeedback: vi.fn(),
   hapticSuccess: vi.fn(),
+  playSfx: vi.fn(),
 }));
 
-vi.mock(
-  '@/shared/constants',
-  async () => await import('@/shared/constants/storage-keys'),
-);
+vi.mock('@/shared/constants', async () => ({
+  ...(await import('@/shared/constants/storage-keys')),
+  ...(await import('@/shared/constants/sounds')),
+}));
 
 vi.mock('expo-sqlite/kv-store', () => ({
   default: {
@@ -63,6 +64,7 @@ vi.mock('@/shared/hooks', () => ({
 
 vi.mock('@/shared/lib', () => ({
   hapticSuccess,
+  playSfx,
   useTimeSource: () => makeDemoTimeSource(),
 }));
 
