@@ -80,11 +80,24 @@ const localFileOf = async (module: number): Promise<LocalFile> => {
 /**
  * A bundled asset's bytes — how a GLB reaches `GLTFLoader.parseAsync`.
  *
- * Read from the local copy rather than from whatever `require` resolved to,
- * for the reason above. `fetch` of a `file://` URL goes through React
- * Native's blob handler on Android and through the file loader on iOS.
+ * Prefer the source `uri` when it is an http(s) Metro URL: Expo Go's
+ * `downloadAsync` lands a `file://` under ExperienceData that Android's
+ * `fetch` answers with 404, so reading the cached path kills the dog and
+ * both watchers in development while the release APK (real on-disk copy)
+ * keeps working. Release builds still go through `localFileOf` + `fetch`
+ * of the copied `file://`, which is what the blob handler can open.
  */
 const readAssetBytes = async (module: number): Promise<ArrayBuffer> => {
+  const bundled = Asset.fromModule(module);
+  const source = bundled.uri;
+  if (/^https?:\/\//.test(source)) {
+    const response = await fetch(source);
+    if (!response.ok && response.status !== 0) {
+      throw new Error(`Failed to read ${source} (${response.status})`);
+    }
+    return response.arrayBuffer();
+  }
+
   const file = await localFileOf(module);
   const response = await fetch(file.uri);
   if (!response.ok && response.status !== 0) {
