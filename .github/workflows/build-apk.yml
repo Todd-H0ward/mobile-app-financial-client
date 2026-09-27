@@ -16,6 +16,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # softprops/action-gh-release needs to create/update the tag and release;
+    # without this (or with repo Workflow permissions = read-only) the step
+    # fails with 403 "Resource not accessible by integration".
+    permissions:
+      contents: write
     # Missing secrets fail the credentials step with a clear message rather
     # than falling back to a debug-signed APK (docs/android-release.md warns
     # that a differently-signed build can't upgrade an installed one).
