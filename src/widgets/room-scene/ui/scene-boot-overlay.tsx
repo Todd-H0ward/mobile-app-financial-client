@@ -78,7 +78,10 @@ export const SceneBootOverlay = ({ isReady }: SceneBootOverlayProps) => {
         <Text variant="display" style={styles.title} numberOfLines={1}>
           {t('app.name')}
         </Text>
-        <Text variant="machine" numberOfLines={1}>{`> ${t('app.loadingScene')}`}</Text>
+        <Text
+          variant="machine"
+          numberOfLines={1}
+        >{`> ${t('app.loadingScene')}`}</Text>
         <View style={styles.cells}>
           {BOOT_CELLS.map((isLit, index) => (
             <View

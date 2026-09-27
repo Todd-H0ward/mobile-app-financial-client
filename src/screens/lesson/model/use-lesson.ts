@@ -58,11 +58,7 @@ export const useLesson = (cellId: string): LessonState => {
   const activeIndex = useMemo(() => {
     if (!user || ordinal === null) return null;
     if (
-      !isLessonPlayable(
-        ordinal,
-        user.completedLessonIds,
-        user.platform.level,
-      )
+      !isLessonPlayable(ordinal, user.completedLessonIds, user.platform.level)
     ) {
       return null;
     }

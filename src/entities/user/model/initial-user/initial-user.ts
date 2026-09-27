@@ -88,9 +88,10 @@ export const createInitialUser = ({
       saved: 0,
       reachedInPeriod: null,
     })),
-    activeGoalId: listGoals().find((goal) => goal.id === 'lift')?.id
-      ?? listGoals()[0]?.id
-      ?? null,
+    activeGoalId:
+      listGoals().find((goal) => goal.id === 'lift')?.id ??
+      listGoals()[0]?.id ??
+      null,
     depositsThisPeriod: 0,
   },
   tasks: {

@@ -89,9 +89,7 @@ describe('explainShortage', () => {
     expect(explain.jar.isAvailable).toBe(true);
     expect(explain.jar.goalTitle).toBe(radar.title);
     expect(explain.jar.remainingBefore).toBe(radar.price - saved);
-    expect(explain.jar.remainingAfter).toBe(
-      radar.price - (saved - shortfall),
-    );
+    expect(explain.jar.remainingAfter).toBe(radar.price - (saved - shortfall));
   });
 
   it('marks the jar unavailable when savings are short', () => {
