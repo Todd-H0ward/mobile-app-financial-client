@@ -38,7 +38,7 @@ describe('explainWithdraw', () => {
   });
 
   it('matches the economy.md shape: farther from the goal after a take', () => {
-    // «До самоката останется 85 вместо 45» — remaining grows when you withdraw.
+    // «До радара останется 85 вместо 45» — remaining grows when you withdraw.
     const explain = explainWithdraw({
       amount: 40,
       saved: 95,

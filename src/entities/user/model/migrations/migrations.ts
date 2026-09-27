@@ -1,5 +1,6 @@
 import { MODULE_IDS } from '@/entities/catalogue';
 import { PLATFORM_GOAL_ID, PLATFORM_LEVEL_COUNT } from '@/entities/economy';
+import { listGoals } from '@/entities/goal';
 import { completedCellKeysFromLessons, listLessons } from '@/entities/lesson';
 import {
   DEFAULT_ROBOT_ASSEMBLY,
@@ -41,6 +42,93 @@ const STAGE_FROM_PET: Record<string, RobotDogStage> = {
 
 /** One step at a time: the key is the version coming in, the value is how to get to the next one. */
 const MIGRATIONS: Record<number, MigrationStep> = {
+  // Pit goals replace the old coat / radar / beacon catalogue.
+  18: (save) => {
+    const GOAL_REMAP: Record<string, string> = {
+      coat: 'coat',
+      radar: 'radar',
+      beacon: 'beacon',
+    };
+    const TASK_REMAP: Record<string, string> = {
+      'save-for-radar': 'save-for-radar',
+    };
+    const remapId = (id: string, table: Record<string, string>) =>
+      table[id] ?? id;
+
+    const savings = isRecord(save.savings) ? save.savings : {};
+    const rawGoals = Array.isArray(savings.goals) ? savings.goals : [];
+    const byId = new Map<
+      string,
+      { goalId: string; saved: number; reachedInPeriod: number | null }
+    >();
+
+    for (const row of rawGoals) {
+      if (!isRecord(row) || typeof row.goalId !== 'string') continue;
+      const goalId = remapId(row.goalId, GOAL_REMAP);
+      const saved = isFiniteNumber(row.saved) ? Math.max(0, row.saved) : 0;
+      const reachedInPeriod =
+        row.reachedInPeriod === null || isFiniteNumber(row.reachedInPeriod)
+          ? (row.reachedInPeriod as number | null)
+          : null;
+      const previous = byId.get(goalId);
+      byId.set(goalId, {
+        goalId,
+        saved: Math.max(previous?.saved ?? 0, saved),
+        reachedInPeriod: previous?.reachedInPeriod ?? reachedInPeriod,
+      });
+    }
+
+    for (const goal of listGoals()) {
+      if (!byId.has(goal.id)) {
+        byId.set(goal.id, {
+          goalId: goal.id,
+          saved: 0,
+          reachedInPeriod: null,
+        });
+      }
+    }
+
+    const catalogueIds = new Set(listGoals().map((goal) => goal.id));
+    const goals = [...byId.values()].filter((row) =>
+      catalogueIds.has(row.goalId),
+    );
+
+    const activeRaw =
+      typeof savings.activeGoalId === 'string' ? savings.activeGoalId : null;
+    const activeMapped = activeRaw ? remapId(activeRaw, GOAL_REMAP) : null;
+    const activeGoalId =
+      activeMapped && catalogueIds.has(activeMapped)
+        ? activeMapped
+        : catalogueIds.has(PLATFORM_GOAL_ID)
+          ? PLATFORM_GOAL_ID
+          : (goals[0]?.goalId ?? null);
+
+    const tasks = isRecord(save.tasks) ? save.tasks : {};
+    const completed = Array.isArray(tasks.completedThisPeriod)
+      ? tasks.completedThisPeriod
+      : [];
+    const activeTaskId =
+      typeof tasks.activeTaskId === 'string'
+        ? remapId(tasks.activeTaskId, TASK_REMAP)
+        : tasks.activeTaskId;
+
+    return {
+      ...save,
+      version: 19,
+      savings: {
+        ...savings,
+        goals,
+        activeGoalId,
+      },
+      tasks: {
+        ...tasks,
+        activeTaskId,
+        completedThisPeriod: completed.map((id) =>
+          typeof id === 'string' ? remapId(id, TASK_REMAP) : id,
+        ),
+      },
+    };
+  },
   // The arena was re-cut: the platform ring holds no cells and the steps carry more than six
   // each, so a key like `0-0-0` names another cell now — or none.
   17: (save) => {

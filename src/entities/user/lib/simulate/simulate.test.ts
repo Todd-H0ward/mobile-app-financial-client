@@ -93,10 +93,10 @@ describe('the balance table: a child who does every chore', () => {
   });
 
   it('reaches the main goal in two to four periods', () => {
-    // docs/economy.md: "не тривиально и не безнадёжно". The scooter is the
-    // mandatory scenario's goal, and content/goals.json promises 3–4 periods.
-    expect(run.goalsReachedIn.scooter).toBeGreaterThanOrEqual(2);
-    expect(run.goalsReachedIn.scooter).toBeLessThanOrEqual(4);
+    // docs/economy.md: "не тривиально и не безнадёжно". The lift jar is the
+    // default goal; content/goals.json prices it for a few periods of saving.
+    expect(run.goalsReachedIn.lift).toBeGreaterThanOrEqual(2);
+    expect(run.goalsReachedIn.lift).toBeLessThanOrEqual(4);
   });
 
   it('keeps the plan every period', () => {
@@ -129,8 +129,8 @@ describe('the balance table: half the chores', () => {
     }
   });
 
-  it('reaches the first goal and upgrades the robot once', () => {
-    expect(run.goalsReachedIn.paints).toBeLessThanOrEqual(5);
+  it('reaches the lift jar within five periods and upgrades the robot once', () => {
+    expect(run.goalsReachedIn.lift).toBeLessThanOrEqual(5);
     expect(run.stage).toBe('upgraded');
   });
 });
@@ -158,16 +158,16 @@ describe('the balance table: spending instead of saving', () => {
   it('never reaches the main goal, on the same income as the diligent run', () => {
     // The lesson of the jar: what separates this run from the diligent one is
     // where the coins went, not how many were earned — both do every chore.
-    expect(run.goalsReachedIn.scooter).toBeUndefined();
+    expect(run.goalsReachedIn.lift).toBeUndefined();
     expect(run.periods.every((period) => period.isShoppingDone)).toBe(true);
   });
 
-  it('is at least two periods behind on the first goal', () => {
+  it('is at least two periods behind on the lift jar', () => {
     const diligent = simulate(DILIGENT);
 
     expect(
-      run.goalsReachedIn.paints ?? Number.POSITIVE_INFINITY,
-    ).toBeGreaterThanOrEqual(diligent.goalsReachedIn.paints + 2);
+      run.goalsReachedIn.lift ?? Number.POSITIVE_INFINITY,
+    ).toBeGreaterThanOrEqual((diligent.goalsReachedIn.lift ?? 0) + 2);
   });
 
   it('reports spending newly earned coins beyond the opening plan', () => {

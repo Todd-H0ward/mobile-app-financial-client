@@ -10,7 +10,7 @@ describe('isLiquid', () => {
   });
 
   it('treats every other goal as liquid', () => {
-    expect(isLiquid('scooter')).toBe(true);
-    expect(isLiquid('paints')).toBe(true);
+    expect(isLiquid('radar')).toBe(true);
+    expect(isLiquid('coat')).toBe(true);
   });
 });

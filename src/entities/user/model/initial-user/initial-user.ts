@@ -13,7 +13,7 @@ import type { UserSave } from '../types';
 // ═══════════════════════════════════════════
 
 /** Save schema version. Bumped on every incompatible change. */
-const USER_SAVE_VERSION = 18;
+const USER_SAVE_VERSION = 19;
 
 /** Player name before the introduction asks for one. */
 const DEFAULT_PLAYER_NAME = '';
@@ -88,7 +88,9 @@ export const createInitialUser = ({
       saved: 0,
       reachedInPeriod: null,
     })),
-    activeGoalId: listGoals()[0]?.id ?? null,
+    activeGoalId: listGoals().find((goal) => goal.id === 'lift')?.id
+      ?? listGoals()[0]?.id
+      ?? null,
     depositsThisPeriod: 0,
   },
   tasks: {

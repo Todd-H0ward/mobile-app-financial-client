@@ -91,7 +91,7 @@ describe('tasks', () => {
       withWallet([
         entry({ source: 'task:enough-for-all', amount: 10 }),
         entry({ source: 'task:buy-first', amount: 10 }),
-        entry({ source: 'task:save-for-scooter', amount: 18 }),
+        entry({ source: 'task:save-for-radar', amount: 18 }),
       ]),
     );
 
@@ -154,7 +154,7 @@ describe('growth', () => {
             plan: { needs: 10, wants: 5, savings: 5 },
             fact: { needs: 8, wants: 4, savings: 5 },
             isPlanKept: true,
-            reachedGoalIds: ['paints'],
+            reachedGoalIds: ['coat'],
             endedAt: 1,
             earned: 0,
             adjustment: 5,

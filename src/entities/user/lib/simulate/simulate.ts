@@ -109,12 +109,20 @@ const planFor = (
   return { needs, wants, savings: Math.floor(spare * profile.saveShare) };
 };
 
-/** The nearest goal still short of its price, or `null` when all are full. */
-const nextOpenGoalId = (user: UserSave): string | null =>
-  user.savings.goals.find((row) => {
-    const goal = getGoalById(row.goalId);
-    return goal ? row.saved < goal.price : false;
-  })?.goalId ?? null;
+/** The active jar if it still has room, otherwise the nearest open goal. */
+const nextOpenGoalId = (user: UserSave): string | null => {
+  const hasRoom = (goalId: string): boolean => {
+    const goal = getGoalById(goalId);
+    const row = user.savings.goals.find((entry) => entry.goalId === goalId);
+    return Boolean(goal && row && row.saved < goal.price);
+  };
+
+  if (user.savings.activeGoalId && hasRoom(user.savings.activeGoalId)) {
+    return user.savings.activeGoalId;
+  }
+
+  return user.savings.goals.find((row) => hasRoom(row.goalId))?.goalId ?? null;
+};
 
 /** How many coins one goal still has room for. */
 const roomFor = (user: UserSave, goalId: string): number => {
