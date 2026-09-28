@@ -47,10 +47,37 @@ const WATCHER_PLACEMENT = {
 /** Ceiling / FX meshes shipped with the GLBs — larger than the arena if left in. */
 const WATCHER_HIDDEN_MATERIALS = ['Ceiling', 'FX_Field', 'FX_FloorGlow'];
 
-/** Mild yaw toward the pit centre so they look at the dog, faces still readable from the map. */
+/** Aim point on the dog (chest height in arena units). */
+const WATCHER_DOG_AIM_Y = 40;
+
+/** Yaw / pitch so each screen (+Z) faces the dog, not the map camera. */
+const aimAtDog = (spot: {
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+}) => {
+  const dx = -spot.x;
+  const dy = WATCHER_DOG_AIM_Y - spot.y;
+  const dz = -spot.z;
+  const yawBias = spot.x >= 0 ? -20 : 20;
+
+  return {
+    yaw: (Math.atan2(dx, dz) * 180) / Math.PI + yawBias,
+    pitch: (Math.atan2(-dy, Math.hypot(dx, dz)) * 180) / Math.PI,
+  };
+};
+
+const overseerAim = aimAtDog(WATCHER_PLACEMENT.overseer);
+const keeperAim = aimAtDog(WATCHER_PLACEMENT.keeper);
+
 const WATCHER_YAW = {
-  overseer: -50,
-  keeper: 50,
+  overseer: overseerAim.yaw,
+  keeper: keeperAim.yaw,
+} as const;
+
+const WATCHER_PITCH = {
+  overseer: overseerAim.pitch,
+  keeper: keeperAim.pitch,
 } as const;
 
 /** Camera stand-off when focused — face stays above the React terminal (~40%). */
@@ -87,6 +114,7 @@ export {
   WATCHER_FOCUS_LIFT,
   WATCHER_HIDDEN_MATERIALS,
   WATCHER_IDS,
+  WATCHER_PITCH,
   WATCHER_PLACEMENT,
   WATCHER_SCALE,
   WATCHER_YAW,

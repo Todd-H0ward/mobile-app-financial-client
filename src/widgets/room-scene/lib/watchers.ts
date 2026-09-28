@@ -24,7 +24,8 @@ import {
   WATCHER_HIDDEN_MATERIALS,
   WATCHER_IDS,
   WATCHER_PLACEMENT,
-  WATCHER_UNITS_PER_METRE,
+  WATCHER_PITCH,
+  WATCHER_SCALE,
   WATCHER_YAW,
   type WatcherAction,
   type WatcherId,
@@ -207,7 +208,7 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
 
       const screenMaterial = dress(root, faceList[0]);
       if (screenMaterial) screens.set(watcher, screenMaterial);
-      root.scale.setScalar(WATCHER_UNITS_PER_METRE);
+      root.scale.setScalar(WATCHER_SCALE[watcher]);
 
       // Pivot on the face, not the artist's bracket origin.
       const screen =
@@ -219,7 +220,10 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
       const spot = WATCHER_PLACEMENT[watcher];
       const pivot = new Group();
       pivot.position.set(spot.x, spot.y, spot.z);
+      // YXZ: yaw toward the dog, then pitch down at its chest.
+      pivot.rotation.order = 'YXZ';
       pivot.rotation.y = (WATCHER_YAW[watcher] * Math.PI) / 180;
+      pivot.rotation.x = (WATCHER_PITCH[watcher] * Math.PI) / 180;
       root.position.set(-centre.x, -centre.y, -centre.z);
       pivot.add(root);
 
