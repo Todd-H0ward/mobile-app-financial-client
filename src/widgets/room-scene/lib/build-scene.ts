@@ -18,7 +18,9 @@ import {
   MeshPhongMaterial,
   type Object3D,
   PointLight,
+  RepeatWrapping,
   Scene,
+  type Texture,
   Vector3,
 } from 'three';
 
@@ -90,8 +92,11 @@ import {
 import type { CenterCharacter } from './center-character';
 import { createHazeBackdrop } from './haze-backdrop';
 import { createLiftEffects, type LiftEffects } from './lift-effects';
+import { loadGlTexture } from './local-asset';
 import { createMapHud, type MapHudStats } from './map-hud';
 import type { WatcherFocus, Watchers } from './watchers';
+
+import { ARENA_TEXTURES } from './arena-textures';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -300,6 +305,9 @@ const HIGHLIGHT_SMOOTHING = 0.002;
 /** Below this a faded piece is dropped from the draw and the raycast. */
 const HIGHLIGHT_EPSILON = 0.02;
 
+/** World units per albedo tile — matches cell-geometry UV scale. */
+const TEX_SCALE = 180;
+
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
@@ -310,6 +318,45 @@ const fillVertexColors = (geometry: BufferGeometry) => {
   const colors = new Float32Array(count * 3);
   colors.fill(1);
   geometry.setAttribute('color', new BufferAttribute(colors, 3));
+};
+
+/** Box-projected UVs from positions + normals — gears ship without UV in scene.json. */
+const fillBoxUvs = (geometry: BufferGeometry) => {
+  const position = geometry.getAttribute('position');
+  const normal = geometry.getAttribute('normal');
+  if (!position || !normal) return;
+  const uv = new Float32Array(position.count * 2);
+  for (let i = 0; i < position.count; i += 1) {
+    const x = position.getX(i);
+    const y = position.getY(i);
+    const z = position.getZ(i);
+    const nx = Math.abs(normal.getX(i));
+    const ny = Math.abs(normal.getY(i));
+    const nz = Math.abs(normal.getZ(i));
+    let u: number;
+    let v: number;
+    if (ny >= nx && ny >= nz) {
+      u = x / TEX_SCALE;
+      v = z / TEX_SCALE;
+    } else if (nx >= nz) {
+      u = z / TEX_SCALE;
+      v = y / TEX_SCALE;
+    } else {
+      u = x / TEX_SCALE;
+      v = y / TEX_SCALE;
+    }
+    uv[i * 2] = u;
+    uv[i * 2 + 1] = v;
+  }
+  geometry.setAttribute('uv', new BufferAttribute(uv, 2));
+};
+
+/** Tile an albedo for expo-gl — RepeatWrapping needs a power-of-two source. */
+const dressAlbedo = (texture: Texture) => {
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+  texture.needsUpdate = true;
+  return texture;
 };
 
 /** Bakes model nodes into one buffer (position + normals + white colour). */
@@ -355,6 +402,7 @@ const mergeNodes = (nodes: SceneNode[]): BufferGeometry => {
   merged.setAttribute('position', new BufferAttribute(position, 3));
   merged.setAttribute('normal', new BufferAttribute(normal, 3));
   fillVertexColors(merged);
+  fillBoxUvs(merged);
   return merged;
 };
 
@@ -713,6 +761,33 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     const isBare = ARENA_LAYOUT.rows.every((bay) => (bay[terrace] ?? 0) === 0);
     if (isBare) buildPlainRing(terrace);
   }
+
+  /** Concrete on cells, rust on gears — loaded async so the arena still boots bare. */
+  const albedos: Texture[] = [];
+  let surfacesDisposed = false;
+  void Promise.all([
+    loadGlTexture(ARENA_TEXTURES.concrete, { isFlipped: true }),
+    loadGlTexture(ARENA_TEXTURES.rust, { isFlipped: true }),
+  ])
+    .then(([concrete, rust]) => {
+      if (surfacesDisposed) {
+        concrete.dispose();
+        rust.dispose();
+        return;
+      }
+      dressAlbedo(concrete);
+      dressAlbedo(rust);
+      for (const room of rooms) {
+        room.map = concrete;
+        room.needsUpdate = true;
+      }
+      gearMaterial.map = rust;
+      gearMaterial.needsUpdate = true;
+      albedos.push(concrete, rust);
+    })
+    .catch((error: unknown) => {
+      console.warn('[room-scene] arena textures failed to load', error);
+    });
 
   /** Which way the tops of the digits on the tiles point on the map: away from its camera. */
   const mapUp = new Vector3(
@@ -1238,6 +1313,9 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     // Unblock any boot cover waiting on this instance.
     pendingAssets = 0;
     settleReady();
+    surfacesDisposed = true;
+    for (const texture of albedos) texture.dispose();
+    albedos.length = 0;
     watchersDisposed = true;
     watchers?.dispose();
     watchers = null;

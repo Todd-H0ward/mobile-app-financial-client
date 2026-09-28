@@ -80,15 +80,32 @@ const fullArc = (ring: SceneTileRing): RingArc => {
   return { from: start, to: start + 360, ring };
 };
 
+/** World units per texture tile — concrete / rust scale on the arena. */
+const TEX_SCALE = 180;
+
 /** A block of ring as triangles with flat normals: top, both risers and ends. */
 const arcSolid = ({ from, to, ring }: RingArc): BufferGeometry => {
   const position: number[] = [];
   const normal: number[] = [];
+  const uv: number[] = [];
+
+  const projectUv = (point: Vector3, n: Vector3): [number, number] => {
+    if (Math.abs(n.y) >= Math.abs(n.x) && Math.abs(n.y) >= Math.abs(n.z)) {
+      return [point.x / TEX_SCALE, point.z / TEX_SCALE];
+    }
+    if (Math.abs(n.x) >= Math.abs(n.z)) {
+      return [point.z / TEX_SCALE, point.y / TEX_SCALE];
+    }
+    return [point.x / TEX_SCALE, point.y / TEX_SCALE];
+  };
 
   const quad = (a: Vector3, b: Vector3, c: Vector3, d: Vector3, n: Vector3) => {
-    for (const point of [a, b, c, a, c, d]) {
+    const corners = [a, b, c, a, c, d];
+    for (const point of corners) {
       position.push(point.x, point.y, point.z);
       normal.push(n.x, n.y, n.z);
+      const [u, v] = projectUv(point, n);
+      uv.push(u, v);
     }
   };
 
@@ -157,6 +174,7 @@ const arcSolid = ({ from, to, ring }: RingArc): BufferGeometry => {
     'normal',
     new BufferAttribute(new Float32Array(normal), 3),
   );
+  geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uv), 2));
   return geometry;
 };
 
@@ -226,20 +244,28 @@ const mergeParts = (
     0,
   );
   const hasNormals = flat.every((part) => part.getAttribute('normal'));
+  const hasUvs = flat.every((part) => part.getAttribute('uv'));
 
   const position = new Float32Array(total);
   const normal = hasNormals ? new Float32Array(total) : null;
+  const uv = hasUvs ? new Float32Array((total / 3) * 2) : null;
   const color = new Float32Array(total).fill(1);
   const ranges: { from: number; to: number }[] = [];
   const starts: number[] = [];
 
   let offset = 0;
+  let uvOffset = 0;
   flat.forEach((part, index) => {
     const source = part.getAttribute('position');
     const length = source?.array.length ?? 0;
     if (source) position.set(source.array as Float32Array, offset);
     if (normal) {
       normal.set(part.getAttribute('normal').array as Float32Array, offset);
+    }
+    if (uv) {
+      const sourceUv = part.getAttribute('uv').array as Float32Array;
+      uv.set(sourceUv, uvOffset);
+      uvOffset += sourceUv.length;
     }
     const tint = colors?.[index];
     if (tint) {
@@ -261,6 +287,7 @@ const mergeParts = (
   const geometry = new BufferGeometry();
   geometry.setAttribute('position', new BufferAttribute(position, 3));
   if (normal) geometry.setAttribute('normal', new BufferAttribute(normal, 3));
+  if (uv) geometry.setAttribute('uv', new BufferAttribute(uv, 2));
   geometry.setAttribute('color', new BufferAttribute(color, 3));
   geometry.computeBoundingSphere();
   return { geometry, ranges, starts };

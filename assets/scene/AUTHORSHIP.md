@@ -7,6 +7,8 @@
 | --- | --- | --- |
 | `сцена.fbx` | Исходник арены (Cinema 4D 2026.1.0 → FBX) | © команда Finni |
 | `scene.json` | Производная для рантайма (`scripts/fbx-to-scene.mjs`) | © команда Finni |
+| `textures/concrete.png` | Альбедо бетона на ячейках | © команда Finni |
+| `textures/rust.png` | Альбедо ржавчины на шестернях (`scripts/generate-rust-texture.py`) | © команда Finni |
 | `watchers/keeper.glb`, `watchers/screens/keeper/*` | Хранитель — оригинальная модель и кадры экрана | © команда Finni / художник проекта |
 | `watchers/overseer.glb`, `watchers/screens/overseer/*` | Смотритель — оригинальная модель и кадры экрана | © команда Finni / художник проекта |
 

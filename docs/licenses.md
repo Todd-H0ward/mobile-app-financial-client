@@ -31,6 +31,8 @@ Mixamo и т.п. Метаданные указывают на пайплайн �
 | --- | --- | --- | --- |
 | `assets/scene/сцена.fbx` | Оригинальная арена; экспорт Maxon Cinema 4D 2026.1.0 | © команда Finni; использование в прототипе разрешено | подтверждено |
 | `assets/scene/scene.json` | Производная арены (`scripts/fbx-to-scene.mjs`) | то же, производная работа | подтверждено |
+| `assets/scene/textures/concrete.png` | Текстура бетона для ячеек; поставлена для прототипа | © команда Finni; использование в прототипе разрешено | подтверждено |
+| `assets/scene/textures/rust.png` | Процедурная ржавчина для шестерён (`scripts/generate-rust-texture.py`) | © команда Finni; синтез без сторонних семплов | подтверждено |
 | `assets/scene/watchers/keeper.glb` + `screens/keeper/*` | Оригинальная поставка художника для проекта (рабочее имя `Hranitel_kind_AI`); README — техническая инструкция | © команда Finni / художник проекта; использование в прототипе разрешено | подтверждено |
 | `assets/scene/watchers/overseer.glb` + `screens/overseer/*` | Оригинальная поставка (`Smotritel_evil_AI`) | то же | подтверждено |
 | `assets/robot-dog/robot-dog.glb` | Оригинальная модель робопса для проекта | © команда Finni; внесена в репозиторий участницей команды (Ekaterina Bulgakova) | подтверждено |

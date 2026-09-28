@@ -8,6 +8,14 @@ vi.mock('./center-character', () => ({
 vi.mock('./watchers', () => ({
   attachWatchers: () => new Promise(() => {}),
 }));
+vi.mock('./local-asset', () => ({
+  loadGlTexture: () => new Promise(() => {}),
+  localFileOf: () => new Promise(() => {}),
+  readAssetBytes: () => new Promise(() => {}),
+}));
+vi.mock('./arena-textures', () => ({
+  ARENA_TEXTURES: { concrete: 1, rust: 2 },
+}));
 
 import { ARENA_LAYOUT } from '@/entities/lesson';
 

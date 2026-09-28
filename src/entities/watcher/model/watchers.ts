@@ -69,7 +69,9 @@ const aimAtDog = (spot: {
 
   return {
     yaw: ((Math.atan2(dx, dz) * 180) / Math.PI) * WATCHER_AIM_BLEND,
-    pitch: ((Math.atan2(-dy, Math.hypot(dx, dz)) * 180) / Math.PI) * WATCHER_AIM_BLEND,
+    pitch:
+      ((Math.atan2(-dy, Math.hypot(dx, dz)) * 180) / Math.PI) *
+      WATCHER_AIM_BLEND,
   };
 };
 
@@ -118,8 +120,8 @@ export type { WatcherAction, WatcherId };
 export {
   DEFAULT_WATCHER_ACTION,
   WATCHER_ACTIONS,
-  WATCHER_CLIPS,
   WATCHER_CLIP_WEIGHT,
+  WATCHER_CLIPS,
   WATCHER_FADE_SEC,
   WATCHER_FOCUS_ACTION,
   WATCHER_FOCUS_AIM_DOWN,
