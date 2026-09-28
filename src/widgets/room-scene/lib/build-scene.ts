@@ -73,6 +73,7 @@ import type { WatcherAction, WatcherId } from '@/entities/watcher';
 
 import { clamp } from '@/shared/utils';
 
+import { ARENA_TEXTURES } from './arena-textures';
 import { createBondBursts } from './bond-bursts';
 import {
   arcAnchor,
@@ -95,8 +96,6 @@ import { createLiftEffects, type LiftEffects } from './lift-effects';
 import { loadGlTexture } from './local-asset';
 import { createMapHud, type MapHudStats } from './map-hud';
 import type { WatcherFocus, Watchers } from './watchers';
-
-import { ARENA_TEXTURES } from './arena-textures';
 
 // ═══════════════════════════════════════════
 // TYPES
