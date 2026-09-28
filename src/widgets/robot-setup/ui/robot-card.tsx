@@ -103,7 +103,7 @@ export const RobotCard = ({
         <View style={styles.heading}>
           <Text variant="bodyBold">{t('settings.robotSkin')}</Text>
           <Text variant="small" themeColor="textMuted">
-            {t('settings.petSkinSubtitle')}
+            {t('settings.robotSkinSubtitle')}
           </Text>
         </View>
         <ScrollView
@@ -126,7 +126,7 @@ export const RobotCard = ({
             <View style={styles.heading}>
               <Text variant="bodyBold">{t('settings.robotAction')}</Text>
               <Text variant="small" themeColor="textMuted">
-                {t('settings.petActionSubtitle')}
+                {t('settings.robotActionSubtitle')}
               </Text>
             </View>
             <View style={styles.actions}>
@@ -143,7 +143,7 @@ export const RobotCard = ({
           </>
         )}
         <Text variant="small" themeColor="textMuted">
-          {t('settings.petTapHint')}
+          {t('settings.robotTapHint')}
         </Text>
       </Card.Content>
     </Card>

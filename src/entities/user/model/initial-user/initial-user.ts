@@ -12,8 +12,12 @@ import type { UserSave } from '../types';
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** Save schema version. Bumped on every incompatible change. */
-const USER_SAVE_VERSION = 19;
+/**
+ * Save schema version. Nothing has shipped yet, so there are no migrations: a save of
+ * any other version is dropped and the player starts over. Bump it on every incompatible
+ * change to the save until the first release.
+ */
+const USER_SAVE_VERSION = 1;
 
 /** Player name before the introduction asks for one. */
 const DEFAULT_PLAYER_NAME = '';
@@ -113,7 +117,7 @@ export const createInitialUser = ({
     isParentGateEnabled: true,
     isSoundEnabled: true,
     isAnimationEnabled: true,
-    isGlassEnabled: true,
+    isTextureEnabled: true,
     isCameraRigEnabled: false,
     isDemoMode: false,
     robotSkin: DEFAULT_ROBOT_DOG_SKIN,

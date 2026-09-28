@@ -364,19 +364,10 @@ files rather than inside the GLB, and that is not a style choice — expo-gl can
 only upload a texture from a `file://` path. See
 [docs/scene.md](docs/scene.md) before touching it.
 
-The flat rooms that preceded this are **deleted**, not parked:
-`widgets/room-pager`, `screens/home/ui/rooms`, `entities/room` and the
-`SceneControls` tab strip all went when the rooms did.
-
-**The pet concept is gone too.** The game is about climbing out of a pit, not
-about looking after a pet in a house: `entities/pet` (species, coats,
-patterns, traits, the 2D rig), `entities/onboarding`, the onboarding,
-pet-create and pet-grew screens, `widgets/pet-box`, the 2D HUD companion and
-the whole house — thermostat, insulation, heating bill, furniture — are
-deleted, not parked. What the new game still needs moved to
-`entities/robot-dog`: the three build stages, the charge / spirit mood and the
-name rules. A first launch makes a guest profile and drops straight into the
-pit; the introduction is to be built inside the game. The HUD data
+The game is about climbing out of a pit: the character's build stages, the
+charge / spirit mood and the name rules live in `entities/robot-dog`. A first
+launch makes a guest profile, asks for the names on `/setup` and plays the
+intro; the intro scene itself is still to be built. The HUD data
 (`useHomeHud`) is still computed for when the coins, the goal and the task
 get a place on the 3D world; until then the home screen deliberately shows
 the model, the level card and nothing else.

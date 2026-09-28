@@ -1,9 +1,5 @@
 export { durablePersist } from './durable-persist';
 export {
-  GlassEnabledProvider,
-  useGlassEnabled,
-} from './glass-enabled';
-export {
   MotionEnabledProvider,
   useMotionEnabled,
 } from './motion-enabled';
@@ -20,3 +16,7 @@ export {
   useThemePreference,
 } from './preferences-store';
 export { reportStorageIssue, useStorageHealth } from './storage-health';
+export {
+  TextureEnabledProvider,
+  useTextureEnabled,
+} from './texture-enabled';

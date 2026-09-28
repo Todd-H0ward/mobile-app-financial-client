@@ -72,9 +72,8 @@ Biome's `organizeImports` groups imports in that order (`biome.json`), so a
 misplaced import is visible in the diff.
 
 Wallet and period machine live under `entities/user/lib/` (`wallet`,
-`period`, `purchase`, …) — there is no separate `entities/wallet`. The old
-pet-in-a-house concept (`entities/pet`, onboarding, heating) is deleted; see
-[robot-dog.md](./robot-dog.md).
+`period`, `purchase`, …) — there is no separate `entities/wallet`. The
+character lives in `entities/robot-dog`, see [robot-dog.md](./robot-dog.md).
 
 ## Adding a screen
 

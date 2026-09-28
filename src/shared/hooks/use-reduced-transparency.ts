@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { AccessibilityInfo } from 'react-native';
 
-/** System Reduce Transparency — a11y wins over the glass preference. */
+/** System Reduce Transparency — a11y wins over the texture preference. */
 export const useReducedTransparency = (): boolean => {
   const [isReduced, setIsReduced] = useState(false);
 
