@@ -10,7 +10,14 @@ export {
 export type { SoundId } from './sounds';
 export { SOUNDS } from './sounds';
 export { STORAGE_KEYS } from './storage-keys';
-export type { Spacing, ThemeColor } from './theme';
+export type { ScreenPresentation, TerminalVariant } from './terminal';
+export { SCREEN_PRESENTATION, TERMINAL_VARIANT } from './terminal';
+export type {
+  Spacing,
+  TerminalVoice,
+  ThemeColor,
+  ThemeColors,
+} from './theme';
 export {
   COLORS,
   CONTENT_PADDING,
@@ -20,4 +27,5 @@ export {
   RADII,
   SPACING,
   SPACING_BASE,
+  TERMINAL_VOICE_PALETTES,
 } from './theme';

@@ -16,7 +16,13 @@ import {
   useUser,
 } from '@/entities/user';
 
-import { DYNAMIC_ROUTES, SPACING, STATIC_ROUTES } from '@/shared/constants';
+import {
+  DYNAMIC_ROUTES,
+  SCREEN_PRESENTATION,
+  SPACING,
+  STATIC_ROUTES,
+  TERMINAL_VARIANT,
+} from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import {
@@ -75,7 +81,11 @@ export const ModulesScreen = () => {
   };
 
   return (
-    <Screen presentation="sheet" gap={SPACING.COMPACT}>
+    <Screen
+      presentation={SCREEN_PRESENTATION.SHEET}
+      gap={SPACING.COMPACT}
+      terminalVariant={TERMINAL_VARIANT.KEEPER}
+    >
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

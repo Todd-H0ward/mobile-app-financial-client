@@ -5,7 +5,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { SPACING, STATIC_ROUTES } from '@/shared/constants';
+import { SPACING, STATIC_ROUTES, TERMINAL_VARIANT } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, ListRow, Screen, Text } from '@/shared/ui';
 
@@ -30,7 +30,7 @@ export const RecoveryScreen = () => {
     recovery.options[0];
 
   return (
-    <Screen gap={SPACING.COMPACT} terminalVariant="keeper">
+    <Screen gap={SPACING.COMPACT} terminalVariant={TERMINAL_VARIANT.KEEPER}>
       <Screen.Header>
         <Screen.Heading>
           <Screen.Label>{t('recovery.label')}</Screen.Label>

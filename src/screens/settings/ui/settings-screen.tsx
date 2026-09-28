@@ -18,7 +18,11 @@ import {
   useUpdateUser,
 } from '@/entities/user';
 
-import { SPACING, STATIC_ROUTES } from '@/shared/constants';
+import {
+  SCREEN_PRESENTATION,
+  SPACING,
+  STATIC_ROUTES,
+} from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import type { LanguagePreference } from '@/shared/types';
 import {
@@ -92,7 +96,7 @@ export const SettingsScreen = () => {
     }));
 
   return (
-    <Screen presentation="sheet" gap={SPACING.COMPACT}>
+    <Screen presentation={SCREEN_PRESENTATION.SHEET} gap={SPACING.COMPACT}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

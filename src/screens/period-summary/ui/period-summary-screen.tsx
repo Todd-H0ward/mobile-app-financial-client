@@ -4,7 +4,12 @@ import { StyleSheet, View } from 'react-native';
 import { HintButton } from '@/widgets/hint-button';
 import { ComparisonRow } from '@/widgets/plan-fact-bars';
 
-import { FONTS, SPACING, STATIC_ROUTES } from '@/shared/constants';
+import {
+  FONTS,
+  SPACING,
+  STATIC_ROUTES,
+  TERMINAL_VARIANT,
+} from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Card, ListGroup, Screen, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
@@ -41,7 +46,7 @@ export const PeriodSummaryScreen = () => {
   );
 
   return (
-    <Screen gap={SPACING.COMPACT} terminalVariant="keeper">
+    <Screen gap={SPACING.COMPACT} terminalVariant={TERMINAL_VARIANT.KEEPER}>
       <Screen.Header>
         <Screen.Heading>
           <Screen.Label>

@@ -5,7 +5,7 @@ import { ComparisonRow } from '@/widgets/plan-fact-bars';
 import { DemoModeCard } from '@/features/demo-mode';
 import { RestartProfileButton } from '@/features/profile-restart';
 
-import { RADII, SPACING } from '@/shared/constants';
+import { RADII, SPACING, TERMINAL_VARIANT } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { Card, PixelIcon, Screen, Segmented, Text } from '@/shared/ui';
@@ -39,7 +39,7 @@ export const ParentsScreen = () => {
   const report = parents.report;
 
   return (
-    <Screen gap={SPACING.COMPACT} terminalVariant="adult">
+    <Screen gap={SPACING.COMPACT} terminalVariant={TERMINAL_VARIANT.ADULT}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

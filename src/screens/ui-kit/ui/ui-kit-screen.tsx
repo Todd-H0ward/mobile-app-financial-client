@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { SPACING } from '@/shared/constants';
+import { SPACING, TERMINAL_VARIANT } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import {
   Button,
@@ -154,7 +154,13 @@ export const UiKitScreen = () => {
             isChecked={playground.isTextureEnabled}
             onChange={playground.setIsTextureEnabled}
           />
-          {(['keeper', 'overseer', 'adult'] as const).map((variant) => (
+          {(
+            [
+              TERMINAL_VARIANT.KEEPER,
+              TERMINAL_VARIANT.OVERSEER,
+              TERMINAL_VARIANT.ADULT,
+            ] as const
+          ).map((variant) => (
             <TerminalPanel
               key={variant}
               variant={variant}
@@ -163,11 +169,15 @@ export const UiKitScreen = () => {
             >
               <Text
                 variant="machine"
-                themeColor={variant === 'overseer' ? 'overseerLcd' : 'phosphor'}
+                themeColor={
+                  variant === TERMINAL_VARIANT.OVERSEER
+                    ? 'overseerLcd'
+                    : 'phosphor'
+                }
               >
-                {variant === 'keeper'
+                {variant === TERMINAL_VARIANT.KEEPER
                   ? '> хранитель на связи'
-                  : variant === 'overseer'
+                  : variant === TERMINAL_VARIANT.OVERSEER
                     ? '// СМОТРИТЕЛЬ'
                     : '> служебный · взрослым'}
               </Text>

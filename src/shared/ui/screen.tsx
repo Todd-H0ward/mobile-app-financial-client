@@ -25,9 +25,13 @@ import {
 import {
   CONTENT_PADDING,
   MAX_CONTENT_WIDTH,
+  SCREEN_PRESENTATION,
+  type ScreenPresentation,
   SPACING,
   type Spacing,
   STATIC_ROUTES,
+  TERMINAL_VARIANT,
+  type TerminalVariant,
   type ThemeColor,
 } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
@@ -35,16 +39,13 @@ import { useTheme } from '@/shared/hooks';
 import { Button } from './button';
 import { PixelIcon } from './pixel-icon';
 import { RingsBackdrop } from './rings-backdrop';
-import { TerminalPanel, type TerminalVariant } from './terminal-panel';
+import { TerminalPanel } from './terminal-panel';
 import { Text, type TextProps } from './text';
 import { ThemedView } from './themed-view';
 
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
-
-/** `sheet` needs `transparentModal` so the pit shows through (`_layout`). */
-type ScreenPresentation = 'full' | 'sheet';
 
 interface ScreenRootProps {
   children?: ReactNode;
@@ -154,15 +155,18 @@ const ScreenBack = ({ accessibilityLabel }: ScreenBackProps) => {
   );
 };
 
-const ScreenLabel = ({ children, voice = 'keeper' }: ScreenLabelProps) => {
-  if (voice === 'overseer') {
+const ScreenLabel = ({
+  children,
+  voice = TERMINAL_VARIANT.KEEPER,
+}: ScreenLabelProps) => {
+  if (voice === TERMINAL_VARIANT.OVERSEER) {
     return (
       <Text variant="machine" themeColor="overseerLcd" style={styles.overseer}>
         {`// ${children.toLocaleUpperCase()}`}
       </Text>
     );
   }
-  if (voice === 'adult') {
+  if (voice === TERMINAL_VARIANT.ADULT) {
     return (
       <Text variant="code" themeColor="textMuted" style={styles.adult}>
         {children.toLocaleUpperCase()}
@@ -218,9 +222,9 @@ const ScreenFooter = ({ children, style }: ScreenFooterProps) => (
 
 const ScreenRoot = ({
   children,
-  terminalVariant = 'keeper',
+  terminalVariant,
   presentation = 'full',
-  isPitVisible = terminalVariant !== 'adult',
+  isPitVisible = terminalVariant !== TERMINAL_VARIANT.ADULT,
   gap = SPACING.TWO,
   isScrollable = true,
   style,
@@ -258,7 +262,7 @@ const ScreenRoot = ({
   const footerNode = footer ? (
     <View
       style={
-        presentation === 'sheet'
+        presentation === SCREEN_PRESENTATION.SHEET
           ? styles.sheetFooterPad
           : { paddingBottom: bottomPad }
       }
@@ -267,7 +271,7 @@ const ScreenRoot = ({
     </View>
   ) : null;
 
-  if (presentation === 'sheet') {
+  if (presentation === SCREEN_PRESENTATION.SHEET) {
     const close = () => {
       if (router.canGoBack()) router.back();
       else router.dismissTo(STATIC_ROUTES.HOME);

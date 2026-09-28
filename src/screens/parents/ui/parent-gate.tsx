@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import type { GateChallenge } from '@/entities/settings';
 
-import { FONTS, RADII, SPACING } from '@/shared/constants';
+import { FONTS, RADII, SPACING, TERMINAL_VARIANT } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { Screen, Text } from '@/shared/ui';
@@ -79,7 +79,7 @@ export const ParentGate = ({ challenge, onPass, onMiss }: ParentGateProps) => {
   };
 
   return (
-    <Screen gap={SPACING.COMPACT} terminalVariant="adult">
+    <Screen gap={SPACING.COMPACT} terminalVariant={TERMINAL_VARIANT.ADULT}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

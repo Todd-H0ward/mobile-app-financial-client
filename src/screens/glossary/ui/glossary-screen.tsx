@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { RADII, SPACING } from '@/shared/constants';
+import { RADII, SCREEN_PRESENTATION, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { PixelIcon, type PixelIconName, Screen, Text } from '@/shared/ui';
@@ -37,7 +37,7 @@ export const GlossaryScreen = () => {
   const [openId, setOpenId] = useState<string | null>(null);
 
   return (
-    <Screen presentation="sheet" gap={SPACING.COMPACT}>
+    <Screen presentation={SCREEN_PRESENTATION.SHEET} gap={SPACING.COMPACT}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

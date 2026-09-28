@@ -1,7 +1,7 @@
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
-import { SPACING, STATIC_ROUTES } from '@/shared/constants';
+import { SPACING, STATIC_ROUTES, TERMINAL_VARIANT } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Screen, Text } from '@/shared/ui';
 
@@ -185,7 +185,9 @@ export const LessonScreen = () => {
     <Screen
       gap={SPACING.THREE}
       terminalVariant={
-        stage === 'test' || stage === 'scenario' ? 'overseer' : 'keeper'
+        stage === 'test' || stage === 'scenario'
+          ? TERMINAL_VARIANT.OVERSEER
+          : TERMINAL_VARIANT.KEEPER
       }
     >
       <Screen.Header>

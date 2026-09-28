@@ -5,7 +5,12 @@ import { GAME_REWARDS, PLAYKIT_GAME_IDS } from '@/entities/minigame';
 import { ownedPuzzles } from '@/entities/minigame/puzzle';
 import { useUser } from '@/entities/user';
 
-import { DYNAMIC_ROUTES, SPACING, STATIC_ROUTES } from '@/shared/constants';
+import {
+  DYNAMIC_ROUTES,
+  SPACING,
+  STATIC_ROUTES,
+  TERMINAL_VARIANT,
+} from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, ListRow, PixelIcon, Screen, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
@@ -21,7 +26,7 @@ export const GamesScreen = () => {
   const levels = ownedPuzzles(user?.ownedItemIds ?? []);
 
   return (
-    <Screen gap={SPACING.THREE} terminalVariant="overseer">
+    <Screen gap={SPACING.THREE} terminalVariant={TERMINAL_VARIANT.OVERSEER}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
