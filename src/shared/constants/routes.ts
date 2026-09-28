@@ -79,6 +79,24 @@ export const SHEET_ROUTE_NAMES = [
   'tasks/[taskId]',
 ] as const;
 
+/**
+ * Full-screen routes that still leave home's GL surface attached.
+ * Opaque card pushes detach the previous screen and force `buildScene` again;
+ * `transparentModal` keeps the fragment (sheets do the same for a different reason).
+ * Not in `SHEET_ROUTE_NAMES` — the arena must stay covered and the RAF paused.
+ */
+export const ARENA_COVER_ROUTE_NAMES = [
+  'lesson/[cellId]',
+  'games/index',
+  'games/market',
+  'games/weekly',
+  'games/console/index',
+  'games/snake/index',
+  'games/spacewar/index',
+  'games/play/[gameId]',
+  'games/puzzle/[puzzleId]',
+] as const;
+
 const SHEET_PATH_PATTERNS = SHEET_ROUTE_NAMES.map(
   (name) =>
     new RegExp(
