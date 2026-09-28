@@ -56,7 +56,7 @@
     },
     "label": "settings",
     "appearance": "Names and look",
-    "appearanceSubtitle": "Repaint Bolt or give a new name"
+    "appearanceSubtitle": "Repaint the robot dog or give it a new name"
   },
   "demoMode": {
     "title": "Demo mode",
@@ -423,7 +423,7 @@
       "bonus": "Plan bonus",
       "penalty": "Slip penalty",
       "goal": "Goal",
-      "charge2": "Bolt’s charge",
+      "charge2": "Robot dog’s charge",
       "tier": "Tier"
     }
   },
@@ -579,7 +579,7 @@
       "liftTitle": "Start the lift?",
       "liftFrom": "From the jar",
       "liftLeft": "Left in the jar",
-      "liftRise": "Bolt goes up",
+      "liftRise": "The platform goes up",
       "liftTier": "tier {{from}} → {{to}}",
       "liftNote": "The tier stays for good.",
       "liftAction": "Start the lift",
@@ -1014,7 +1014,7 @@
     "playerName": "Your game name",
     "robotName": "Robot’s name",
     "defaultPlayer": "Explorer",
-    "defaultRobot": "Spark",
+    "defaultRobot": "Kuzya-01",
     "emptyName": "Fill in both names. Spaces do not count.",
     "start": "Start the adventure",
     "save": "Save",
@@ -1132,7 +1132,7 @@
         "remainderLabel": "Not split yet",
         "checkLabel": "check the plan",
         "needsZeroTitle": "Nothing set aside for charge",
-        "needsZeroBody": "Bolt will tire fast and trials will pay less. You can save it this way — it is your choice.",
+        "needsZeroBody": "The robot dog will tire fast and trials will pay less. You can save it this way — it is your choice.",
         "needsZeroKeep": "Back to the plan",
         "needsZeroConfirm": "Save anyway"
       },
@@ -1300,6 +1300,7 @@
     "understood": "Continue",
     "remaining": "Paid games remaining today: {{count}}. After that, practice stays open without coins.",
     "noPenalty": "Mistakes never remove coins. A completed game with mistakes earns half the usual reward when payment is available.",
+    "planningPractice": "Until the budget plan is confirmed, it is practice without coins. Rewards open after the plan.",
     "weeklyPractice": "This week’s reward has been paid. This is free practice. A new week starts on Monday UTC.",
     "result": {
       "paid": "Earned {{coins}} coins.",

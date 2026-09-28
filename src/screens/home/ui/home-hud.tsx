@@ -14,6 +14,7 @@ import {
   type PixelIconName,
   TerminalPanel,
   Text,
+  toast,
 } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
@@ -351,8 +352,12 @@ export const HomeDock = ({
               accessibilityLabel={t(key)}
               accessibilityHint={isLocked ? t('home.hud.planFirst') : undefined}
               accessibilityState={{ disabled: isLocked, selected: isSelected }}
-              disabled={isLocked}
-              onPress={() => onOpen(watcher, page)}
+              // A locked tab still answers a tap: a silent one reads as a broken game.
+              onPress={() =>
+                isLocked
+                  ? toast(t('home.hud.planFirst'), { variant: 'warning' })
+                  : onOpen(watcher, page)
+              }
               style={({ pressed }) => [
                 styles.tab,
                 (isSelected || pressed) && {

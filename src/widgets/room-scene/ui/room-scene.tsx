@@ -154,6 +154,19 @@ const READOUT_MS = 500;
 /** Cap GL pixel density — Phong fill-bound; HUD stays native/sharp above this. */
 const MAX_RENDER_DENSITY = 1.75;
 
+/**
+ * Frame rate once nothing on the arena is travelling. three.js renders on the JS thread, so a
+ * full 60 at rest leaves no room for touches and sheets; the idle clip and the haze read the
+ * same at half the rate.
+ */
+const IDLE_FPS = 30;
+
+/** Frames land on vsync, a little early or late — without slack every third one is skipped. */
+const IDLE_SLACK_MS = 4;
+
+/** Camera, climb and focus closer than this to their targets count as settled. */
+const SETTLE_EPSILON = 0.01;
+
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
@@ -592,11 +605,24 @@ export const RoomScene = ({
         }
 
         const now = Date.now();
-        const delta = Math.min((now - last) / 1000, MAX_DELTA);
-        last = now;
-
         const target = camera.target.current;
         const state = camera.current.current;
+
+        // Nothing is travelling: drop to the idle rate. Anything the child starts — a drag, a
+        // tap on a cell or a watcher, a climb — moves a target and brings back every frame.
+        const isSettled =
+          Math.abs(target.azimuth - state.azimuth) < SETTLE_EPSILON &&
+          Math.abs(target.elevation - state.elevation) < SETTLE_EPSILON &&
+          Math.abs(target.distance - state.distance) < SETTLE_EPSILON &&
+          Math.abs(liftTarget.current - lift.current) < SETTLE_EPSILON &&
+          Math.abs(
+            (focusRef.current || isBondingRef.current ? 1 : 0) -
+              focusBlend.current,
+          ) < FOCUS_EPSILON;
+        if (isSettled && now - last < 1000 / IDLE_FPS - IDLE_SLACK_MS) return;
+
+        const delta = Math.min((now - last) / 1000, MAX_DELTA);
+        last = now;
 
         if (isAnimatedRef.current) {
           state.azimuth = damp(state.azimuth, target.azimuth, SMOOTHING, delta);

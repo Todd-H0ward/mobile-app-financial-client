@@ -10,7 +10,7 @@
     {
       "name": "android-device",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["-lc", "export ANDROID_HOME=\"$HOME/Library/Android/sdk\" JAVA_HOME=\"$(/usr/libexec/java_home -v 17)\"; export PATH=\"$ANDROID_HOME/platform-tools:$PATH\"; pnpm run:android"],
+      "runtimeArgs": ["-lc", "export ANDROID_HOME=\"$HOME/Library/Android/sdk\" JAVA_HOME=\"$(/usr/libexec/java_home -v 17)\"; export PATH=\"$ANDROID_HOME/platform-tools:$PATH\"; pnpm run:android --device \"${ANDROID_DEVICE_NAME:-TA_1004}\""],
       "port": 8081
     }
   ]

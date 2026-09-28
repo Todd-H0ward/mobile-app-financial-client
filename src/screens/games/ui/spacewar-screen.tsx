@@ -174,6 +174,8 @@ const styles = StyleSheet.create({
   menu: {
     flex: 1,
     minHeight: 0,
+    // Clears the panel's bottom frame, which otherwise clips the start key.
+    paddingBottom: SPACING.FOUR,
     paddingHorizontal: SPACING.TWO,
   },
   menuBody: {

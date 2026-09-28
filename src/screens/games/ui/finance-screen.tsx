@@ -83,9 +83,11 @@ export const FinanceScreen = ({ game }: FinanceScreenProps) => {
       ) : (
         <>
           <Text>
-            {isWeeklyPaid
-              ? t('financeGame.weeklyPractice')
-              : t('financeGame.remaining', { count: session.paidRemaining })}
+            {user?.period.phase === 'planning'
+              ? t('financeGame.planningPractice')
+              : isWeeklyPaid
+                ? t('financeGame.weeklyPractice')
+                : t('financeGame.remaining', { count: session.paidRemaining })}
           </Text>
           <Text>{t('financeGame.noPenalty')}</Text>
           <Text variant="subtitle">{round.question}</Text>
