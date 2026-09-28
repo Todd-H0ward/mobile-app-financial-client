@@ -19,7 +19,13 @@ import {
   scoreQuiz,
 } from '@/entities/task';
 
-import { DYNAMIC_ROUTES, SPACING, STATIC_ROUTES } from '@/shared/constants';
+import {
+  DYNAMIC_ROUTES,
+  SCREEN_PRESENTATION,
+  SPACING,
+  STATIC_ROUTES,
+  TERMINAL_VARIANT,
+} from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import {
   Button,
@@ -146,7 +152,11 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
   };
 
   return (
-    <Screen presentation="sheet" gap={SPACING.THREE} terminalVariant="overseer">
+    <Screen
+      presentation={SCREEN_PRESENTATION.SHEET}
+      gap={SPACING.THREE}
+      terminalVariant={TERMINAL_VARIANT.OVERSEER}
+    >
       <Screen.Header>
         <Screen.Heading>
           <Text

@@ -3,7 +3,13 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { RADII, SPACING, STATIC_ROUTES } from '@/shared/constants';
+import {
+  RADII,
+  SCREEN_PRESENTATION,
+  SPACING,
+  STATIC_ROUTES,
+  TERMINAL_VARIANT,
+} from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Screen, Text } from '@/shared/ui';
@@ -27,7 +33,11 @@ export const EndPeriodScreen = () => {
   }
 
   return (
-    <Screen presentation="sheet" gap={SPACING.COMPACT}>
+    <Screen
+      presentation={SCREEN_PRESENTATION.SHEET}
+      gap={SPACING.COMPACT}
+      terminalVariant={TERMINAL_VARIANT.KEEPER}
+    >
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

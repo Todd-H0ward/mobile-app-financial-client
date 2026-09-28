@@ -182,28 +182,15 @@ export const LessonScreen = () => {
           : null;
 
   return (
-    <Screen
-      gap={SPACING.THREE}
-      terminalVariant={
-        stage === 'test' || stage === 'scenario' ? 'overseer' : 'keeper'
-      }
-    >
+    <Screen gap={SPACING.THREE}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
-          <Text
-            variant="code"
-            themeColor={
-              stage === 'test' || stage === 'scenario'
-                ? 'overseerLcd'
-                : 'primary'
-            }
-          >
-            {stage === 'test' || stage === 'scenario' ? '// ' : '> '}
-            {t('lesson.header', {
+          <Text variant="code" themeColor="phosphor">
+            {`> ${t('lesson.header', {
               number: lessonState.number,
               total: lessonState.lessonCount,
-            })}
+            })}`}
           </Text>
           <Screen.Title>{lesson.title}</Screen.Title>
         </Screen.Heading>

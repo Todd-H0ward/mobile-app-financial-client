@@ -25,7 +25,11 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MAX_CONTENT_WIDTH, RADII, SPACING } from '@/shared/constants';
-import { useTheme } from '@/shared/hooks';
+import {
+  TerminalPaletteProvider,
+  useTerminalPalette,
+  useTheme,
+} from '@/shared/hooks';
 import { useMotionEnabled } from '@/shared/model';
 
 import { Text, type TextProps } from './text';
@@ -159,6 +163,9 @@ const SheetModal = ({
   style,
 }: SheetModalProps) => {
   const theme = useTheme();
+  // RN Modal mounts in a native host; without re-providing, a sheet opened over a
+  // watcher terminal drops back to the base green palette.
+  const voicePalette = useTerminalPalette();
   const isMotionEnabled = useMotionEnabled();
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -227,6 +234,52 @@ const SheetModal = ({
 
   if (!isVisible) return null;
 
+  const body = (
+    <GestureHandlerRootView style={styles.modalRoot}>
+      <Animated.View
+        style={[
+          styles.overlay,
+          { backgroundColor: theme.overlay },
+          overlayStyle,
+        ]}
+      >
+        <Pressable style={styles.scrim} onPress={close} />
+      </Animated.View>
+
+      <Animated.View
+        onLayout={(event) => {
+          sheetHeight.value = event.nativeEvent.layout.height;
+        }}
+        style={[styles.sheetSlot, sheetStyle]}
+      >
+        <SheetRoot
+          variant={variant}
+          isGrabberVisible={false}
+          style={[
+            styles.attached,
+            { paddingBottom: Math.max(insets.bottom, SPACING.THREE) },
+            style,
+          ]}
+        >
+          {isDismissible && (
+            <GestureDetector gesture={dragGesture}>
+              <View style={styles.grabberArea}>
+                <View
+                  style={[
+                    styles.grabber,
+                    { backgroundColor: theme.borderStrong },
+                  ]}
+                />
+              </View>
+            </GestureDetector>
+          )}
+
+          {children}
+        </SheetRoot>
+      </Animated.View>
+    </GestureHandlerRootView>
+  );
+
   return (
     <Modal
       visible
@@ -236,49 +289,13 @@ const SheetModal = ({
       animationType="none"
       onRequestClose={close}
     >
-      <GestureHandlerRootView style={styles.modalRoot}>
-        <Animated.View
-          style={[
-            styles.overlay,
-            { backgroundColor: theme.overlay },
-            overlayStyle,
-          ]}
-        >
-          <Pressable style={styles.scrim} onPress={close} />
-        </Animated.View>
-
-        <Animated.View
-          onLayout={(event) => {
-            sheetHeight.value = event.nativeEvent.layout.height;
-          }}
-          style={[styles.sheetSlot, sheetStyle]}
-        >
-          <SheetRoot
-            variant={variant}
-            isGrabberVisible={false}
-            style={[
-              styles.attached,
-              { paddingBottom: Math.max(insets.bottom, SPACING.THREE) },
-              style,
-            ]}
-          >
-            {isDismissible && (
-              <GestureDetector gesture={dragGesture}>
-                <View style={styles.grabberArea}>
-                  <View
-                    style={[
-                      styles.grabber,
-                      { backgroundColor: theme.borderStrong },
-                    ]}
-                  />
-                </View>
-              </GestureDetector>
-            )}
-
-            {children}
-          </SheetRoot>
-        </Animated.View>
-      </GestureHandlerRootView>
+      {voicePalette ? (
+        <TerminalPaletteProvider value={voicePalette}>
+          {body}
+        </TerminalPaletteProvider>
+      ) : (
+        body
+      )}
     </Modal>
   );
 };

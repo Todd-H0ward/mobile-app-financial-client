@@ -10,9 +10,14 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { MAX_CONTENT_WIDTH, SPACING } from '@/shared/constants';
+import type { TerminalVariant } from '@/shared/constants';
+import {
+  MAX_CONTENT_WIDTH,
+  SPACING,
+  TERMINAL_VARIANT,
+} from '@/shared/constants';
 
-import { TerminalPanel, type TerminalVariant } from './terminal-panel';
+import { TerminalPanel } from './terminal-panel';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -39,7 +44,7 @@ const DEFAULT_MAX_SHARE = 0.54;
 /** Bottom terminal capped at `maxShare` so the camera view stays visible. */
 export const TerminalDock = ({
   children,
-  variant = 'keeper',
+  variant = TERMINAL_VARIANT.KEEPER,
   maxShare = DEFAULT_MAX_SHARE,
   style,
 }: TerminalDockProps) => {

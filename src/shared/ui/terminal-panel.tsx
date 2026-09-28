@@ -1,4 +1,4 @@
-import { type ReactNode, useId } from 'react';
+import { type ReactNode, useId, useMemo } from 'react';
 
 import {
   Platform,
@@ -15,15 +15,20 @@ import Svg, {
   Stop,
 } from 'react-native-svg';
 
-import { RADII, SPACING } from '@/shared/constants';
-import { useTheme } from '@/shared/hooks';
+import type { TerminalVariant } from '@/shared/constants';
+import { COLORS, RADII, SPACING, TERMINAL_VARIANT } from '@/shared/constants';
+import {
+  paletteForVoice,
+  TerminalPaletteProvider,
+  useColorScheme,
+  useTheme,
+} from '@/shared/hooks';
 import { useMotionEnabled, useTextureEnabled } from '@/shared/model';
 
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
 
-type TerminalVariant = 'keeper' | 'overseer' | 'adult';
 /** `l` a full terminal, `m` a docked card or the action bar, `s` the HUD board. */
 type TerminalSize = 'l' | 'm' | 's';
 interface TerminalPanelProps {
@@ -69,27 +74,39 @@ const SIZE_STYLES: Record<
 /** Static texture is behind content, so text and touch targets stay clear. */
 export const TerminalPanel = ({
   children,
-  variant = 'keeper',
+  variant,
   size = 'l',
   isLampVisible = true,
   isTextureEnabled,
   style,
   frameStyle,
 }: TerminalPanelProps) => {
-  const theme = useTheme();
+  const scheme = useColorScheme();
+  const outerTheme = useTheme();
+  // Voice tint only when the panel is a watcher's screen — HUD boards omit variant
+  // and keep the base green field.
+  const voicePalette =
+    variant === TERMINAL_VARIANT.KEEPER || variant === TERMINAL_VARIANT.OVERSEER
+      ? paletteForVoice(variant)
+      : null;
+  // Own chrome uses the voice field even when nested; children read it via context.
+  const theme = useMemo(
+    () => (voicePalette ? { ...COLORS[scheme], ...voicePalette } : outerTheme),
+    [outerTheme, scheme, voicePalette],
+  );
   const isMotionEnabled = useMotionEnabled();
   const isTexturePreferred = useTextureEnabled();
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
   const hasTexture =
     isMotionEnabled && (isTextureEnabled ?? isTexturePreferred);
   const lamp =
-    variant === 'overseer'
+    variant === TERMINAL_VARIANT.OVERSEER
       ? theme.overseerLcd
-      : variant === 'adult'
+      : variant === TERMINAL_VARIANT.ADULT
         ? theme.borderStrong
         : theme.phosphor;
 
-  return (
+  const screen = (
     <View
       style={[
         styles.root,
@@ -167,6 +184,14 @@ export const TerminalPanel = ({
         {children}
       </View>
     </View>
+  );
+
+  if (!voicePalette) return screen;
+
+  return (
+    <TerminalPaletteProvider value={voicePalette}>
+      {screen}
+    </TerminalPaletteProvider>
   );
 };
 

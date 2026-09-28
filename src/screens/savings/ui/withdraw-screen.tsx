@@ -6,8 +6,10 @@ import { HintButton } from '@/widgets/hint-button';
 import {
   DYNAMIC_ROUTES,
   RADII,
+  SCREEN_PRESENTATION,
   SPACING,
   STATIC_ROUTES,
+  TERMINAL_VARIANT,
 } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
@@ -82,7 +84,11 @@ export const WithdrawScreen = ({ goalId, amount }: WithdrawScreenProps) => {
   ];
 
   return (
-    <Screen presentation="sheet" gap={SPACING.COMPACT} terminalVariant="keeper">
+    <Screen
+      presentation={SCREEN_PRESENTATION.SHEET}
+      gap={SPACING.COMPACT}
+      terminalVariant={TERMINAL_VARIANT.KEEPER}
+    >
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

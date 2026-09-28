@@ -5,7 +5,12 @@ import { HintButton } from '@/widgets/hint-button';
 import { PLATFORM_LEVEL_COUNT } from '@/entities/economy';
 import type { WatcherId, WatcherPageId } from '@/entities/watcher';
 
-import { FONTS, MAX_CONTENT_WIDTH, SPACING } from '@/shared/constants';
+import {
+  FONTS,
+  MAX_CONTENT_WIDTH,
+  SPACING,
+  TERMINAL_VARIANT,
+} from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import {
@@ -301,7 +306,7 @@ export const HomeDock = ({
       ) : trial ? (
         <TerminalPanel
           size="m"
-          variant="overseer"
+          variant={TERMINAL_VARIANT.OVERSEER}
           style={[styles.card, styles.trialCard]}
         >
           <View style={styles.cardCopy}>

@@ -10,7 +10,7 @@ import {
   type WalletHistoryRow,
 } from '@/entities/user';
 
-import { RADII, SPACING } from '@/shared/constants';
+import { RADII, SCREEN_PRESENTATION, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import {
@@ -186,7 +186,7 @@ export const HistoryScreen = () => {
 
   if (tab === 'periods') {
     return (
-      <Screen presentation="sheet" gap={SPACING.COMPACT}>
+      <Screen presentation={SCREEN_PRESENTATION.SHEET} gap={SPACING.COMPACT}>
         {header}
         {receipts && receipts.length > 0 ? (
           <Card>
@@ -220,7 +220,11 @@ export const HistoryScreen = () => {
   }
 
   return (
-    <Screen presentation="sheet" gap={SPACING.COMPACT} isScrollable={false}>
+    <Screen
+      presentation={SCREEN_PRESENTATION.SHEET}
+      gap={SPACING.COMPACT}
+      isScrollable={false}
+    >
       <FlatList
         data={rows}
         keyExtractor={keyExtractor}

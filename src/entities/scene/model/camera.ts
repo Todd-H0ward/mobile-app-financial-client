@@ -1,12 +1,17 @@
+import { SCENE_GEAR_ANGLES } from './source';
+
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
 
 /** The map view: an isometric three-quarters, not a plan. */
-const TOP_ELEVATION = 30;
+const TOP_ELEVATION = 36;
 
-/** The heading the map view always settles on. */
-const TOP_AZIMUTH = 285;
+/**
+ * Map heading: stand in a bay's middle so the opposite gear sits dead centre on
+ * the far rim (`gear + 180°`).
+ */
+const TOP_AZIMUTH = ((SCENE_GEAR_ANGLES[0] ?? 0) + 180) % 360;
 
 /** Level with the rim of the pit, near enough to be standing on it. */
 const ROOM_ELEVATION = 13.5;

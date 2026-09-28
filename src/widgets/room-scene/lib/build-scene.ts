@@ -18,7 +18,9 @@ import {
   MeshPhongMaterial,
   type Object3D,
   PointLight,
+  RepeatWrapping,
   Scene,
+  type Texture,
   Vector3,
 } from 'three';
 
@@ -71,6 +73,7 @@ import type { WatcherAction, WatcherId } from '@/entities/watcher';
 
 import { clamp } from '@/shared/utils';
 
+import { ARENA_TEXTURES } from './arena-textures';
 import { createBondBursts } from './bond-bursts';
 import {
   arcAnchor,
@@ -90,6 +93,7 @@ import {
 import type { CenterCharacter } from './center-character';
 import { createHazeBackdrop } from './haze-backdrop';
 import { createLiftEffects, type LiftEffects } from './lift-effects';
+import { loadGlTexture } from './local-asset';
 import { createMapHud, type MapHudStats } from './map-hud';
 import type { WatcherFocus, Watchers } from './watchers';
 
@@ -202,8 +206,13 @@ interface CellRecord {
   /** Its slice of the row's tile buffer — what the tint is painted on. */
   tile: Slice;
   frame: Slice;
-  /** Whether its lesson is passed — it lights up green, and stays put. */
+  /** Whether its lesson is passed — it lights up green. */
   isDone: boolean;
+  /**
+   * How far the slices are pushed down so a passed tile stays on the disc when its
+   * terrace rises out of the map flatten (`0` = built pose).
+   */
+  diskPin: number;
 }
 
 interface RowRecord {
@@ -295,6 +304,9 @@ const HIGHLIGHT_SMOOTHING = 0.002;
 /** Below this a faded piece is dropped from the draw and the raycast. */
 const HIGHLIGHT_EPSILON = 0.02;
 
+/** World units per albedo tile — matches cell-geometry UV scale. */
+const TEX_SCALE = 180;
+
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
@@ -305,6 +317,45 @@ const fillVertexColors = (geometry: BufferGeometry) => {
   const colors = new Float32Array(count * 3);
   colors.fill(1);
   geometry.setAttribute('color', new BufferAttribute(colors, 3));
+};
+
+/** Box-projected UVs from positions + normals — gears ship without UV in scene.json. */
+const fillBoxUvs = (geometry: BufferGeometry) => {
+  const position = geometry.getAttribute('position');
+  const normal = geometry.getAttribute('normal');
+  if (!position || !normal) return;
+  const uv = new Float32Array(position.count * 2);
+  for (let i = 0; i < position.count; i += 1) {
+    const x = position.getX(i);
+    const y = position.getY(i);
+    const z = position.getZ(i);
+    const nx = Math.abs(normal.getX(i));
+    const ny = Math.abs(normal.getY(i));
+    const nz = Math.abs(normal.getZ(i));
+    let u: number;
+    let v: number;
+    if (ny >= nx && ny >= nz) {
+      u = x / TEX_SCALE;
+      v = z / TEX_SCALE;
+    } else if (nx >= nz) {
+      u = z / TEX_SCALE;
+      v = y / TEX_SCALE;
+    } else {
+      u = x / TEX_SCALE;
+      v = y / TEX_SCALE;
+    }
+    uv[i * 2] = u;
+    uv[i * 2 + 1] = v;
+  }
+  geometry.setAttribute('uv', new BufferAttribute(uv, 2));
+};
+
+/** Tile an albedo for expo-gl — RepeatWrapping needs a power-of-two source. */
+const dressAlbedo = (texture: Texture) => {
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+  texture.needsUpdate = true;
+  return texture;
 };
 
 /** Bakes model nodes into one buffer (position + normals + white colour). */
@@ -350,6 +401,7 @@ const mergeNodes = (nodes: SceneNode[]): BufferGeometry => {
   merged.setAttribute('position', new BufferAttribute(position, 3));
   merged.setAttribute('normal', new BufferAttribute(normal, 3));
   fillVertexColors(merged);
+  fillBoxUvs(merged);
   return merged;
 };
 
@@ -374,6 +426,21 @@ const tintSlice = (
     values[i + 2] = b;
   }
   colors.needsUpdate = true;
+};
+
+/**
+ * Nudges every Y in a slice. Used to keep a passed cell on the disc when its terrace
+ * rises out of the map flatten — the row stays one draw call.
+ */
+const shiftSlice = (part: Slice, delta: number) => {
+  if (delta === 0 || part.to <= part.from) return;
+  const attribute = part.geometry.getAttribute('position');
+  if (!attribute) return;
+  const values = attribute.array as Float32Array;
+  for (let i = part.from + 1; i < part.to; i += 3) {
+    values[i] += delta;
+  }
+  attribute.needsUpdate = true;
 };
 
 /** A hex colour as the linear triple a vertex colour wants. */
@@ -617,6 +684,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         tile: { geometry: unmerged, from: 0, to: 0 },
         frame: { geometry: unmerged, from: 0, to: 0 },
         isDone: false,
+        diskPin: 0,
       });
     }
 
@@ -693,6 +761,33 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     if (isBare) buildPlainRing(terrace);
   }
 
+  /** Concrete on cells, rust on gears — loaded async so the arena still boots bare. */
+  const albedos: Texture[] = [];
+  let surfacesDisposed = false;
+  void Promise.all([
+    loadGlTexture(ARENA_TEXTURES.concrete, { isFlipped: true }),
+    loadGlTexture(ARENA_TEXTURES.rust, { isFlipped: true }),
+  ])
+    .then(([concrete, rust]) => {
+      if (surfacesDisposed) {
+        concrete.dispose();
+        rust.dispose();
+        return;
+      }
+      dressAlbedo(concrete);
+      dressAlbedo(rust);
+      for (const room of rooms) {
+        room.map = concrete;
+        room.needsUpdate = true;
+      }
+      gearMaterial.map = rust;
+      gearMaterial.needsUpdate = true;
+      albedos.push(concrete, rust);
+    })
+    .catch((error: unknown) => {
+      console.warn('[room-scene] arena textures failed to load', error);
+    });
+
   /** Which way the tops of the digits on the tiles point on the map: away from its camera. */
   const mapUp = new Vector3(
     -Math.sin((TOP_AZIMUTH * Math.PI) / 180),
@@ -729,17 +824,17 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       row.cells.map((record, index) =>
         cellNumberGeometry(
           labels[index] ?? 0,
-          arcAnchor(record.arc, CELL_NUMBER_LIFT),
+          arcAnchor(record.arc, CELL_NUMBER_LIFT - record.diskPin),
           undefined,
           up,
         ),
       );
-    const onFronts = row.cells.map(({ arc }, index) =>
+    const onFronts = row.cells.map(({ arc, diskPin }, index) =>
       cellFrontNumberGeometry(
         labels[index] ?? 0,
         (arc.from + arc.to) / 2,
         arc.ring.inner,
-        (arc.ring.bottom + arc.ring.top) / 2,
+        (arc.ring.bottom + arc.ring.top) / 2 - diskPin,
       ),
     );
 
@@ -754,6 +849,31 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       mesh.geometry = merged.geometry;
       previous.dispose();
     }
+  };
+
+  /**
+   * How far above the map disc a terrace sits. Passed tiles are pushed back down by this
+   * so they never rise with the wall when the bay opens.
+   */
+  const diskPinTarget = (step: number, progress: number): number =>
+    terraceSinkY(step, progress) - terraceSinkY(step, 1);
+
+  /** Pins every passed cell to the disc plane for the current climb. */
+  const applyDiskPins = (progress: number) => {
+    let didPin = false;
+    for (const record of cells.values()) {
+      const target = record.isDone
+        ? diskPinTarget(record.cell.step, progress)
+        : 0;
+      const delta = target - record.diskPin;
+      if (delta === 0) continue;
+      shiftSlice(record.tile, -delta);
+      shiftSlice(record.frame, -delta);
+      record.diskPin = target;
+      didPin = true;
+    }
+    if (!didPin) return;
+    for (const row of rows) rebuildNumbers(row);
   };
 
   const platform = new Group();
@@ -948,7 +1068,10 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     tintSlice(record.frame, tint);
   };
 
-  /** Lights up the cells whose lesson is passed. */
+  /** Last progress written — the loop calls every frame, the rings rarely move. */
+  let appliedProgress = Number.NaN;
+
+  /** Lights up the cells whose lesson is passed; pins them to the disc if their terrace is up. */
   const setCellsDone = (doneKeys: readonly string[]) => {
     const done = new Set(doneKeys);
     for (const [cellId, record] of cells) {
@@ -957,6 +1080,9 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       record.isDone = isDone;
       paintCell(record);
     }
+    // No climb yet — leave the buffers where they were built.
+    if (!Number.isFinite(appliedProgress)) return;
+    applyDiskPins(appliedProgress);
   };
 
   /** Picks one cell out of its row, or clears the pick. */
@@ -972,6 +1098,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
 
     selection.geometry = record.outline;
     selection.visible = true;
+    selection.position.y = -record.diskPin;
     terraces[next.step]?.add(selection);
   };
 
@@ -993,7 +1120,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     holdMesh.geometry = holdSolid(record.arc);
     previous.dispose();
 
-    holdBaseY = record.arc.ring.bottom;
+    holdBaseY = record.arc.ring.bottom - record.diskPin;
     holdFullHeight = record.arc.ring.top - record.arc.ring.bottom;
     holdMaterial.opacity = 0;
     holdMesh.visible = true;
@@ -1060,9 +1187,6 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
 
   const axles = gears.map(axleOf);
 
-  /** Last progress written — the loop calls every frame, the rings rarely move. */
-  let appliedProgress = Number.NaN;
-
   const setLevelProgress = (progress: number) => {
     if (progress === appliedProgress) return;
     appliedProgress = progress;
@@ -1085,6 +1209,19 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         gearAngle(index, progress),
       );
     });
+
+    // Passed tiles stay on the disc when a bay opens out of the map flatten.
+    applyDiskPins(progress);
+    if (selected) {
+      const record = cells.get(cellKey(selected));
+      if (record) {
+        selection.position.y = -record.diskPin;
+        if (holdMesh.visible) {
+          holdBaseY = record.arc.ring.bottom - record.diskPin;
+          holdMesh.position.y = holdBaseY;
+        }
+      }
+    }
   };
 
   const burstLift = (level: number) => {
@@ -1175,6 +1312,9 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     // Unblock any boot cover waiting on this instance.
     pendingAssets = 0;
     settleReady();
+    surfacesDisposed = true;
+    for (const texture of albedos) texture.dispose();
+    albedos.length = 0;
     watchersDisposed = true;
     watchers?.dispose();
     watchers = null;

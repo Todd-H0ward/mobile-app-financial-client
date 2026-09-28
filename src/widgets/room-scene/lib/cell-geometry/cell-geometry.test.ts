@@ -83,6 +83,14 @@ describe('arcSolid', () => {
       narrow.getAttribute('position').count,
     );
   });
+
+  it('carries UVs for every vertex so albedo can tile', () => {
+    const solid = arcSolid({ from: 10, to: 40, ring });
+    const position = solid.getAttribute('position');
+    const uv = solid.getAttribute('uv');
+    expect(uv).toBeTruthy();
+    expect(uv?.count).toBe(position.count);
+  });
 });
 
 describe('mergeParts', () => {

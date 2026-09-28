@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Original, deterministic short game cues; no recordings or third-party samples."""
+"""Original, deterministic short game cues; no recordings or third-party samples.
+
+AI voices are techno gibberish (`techno_babble`): Keeper calm and warm,
+Overseer clipped and aggressive — no real speech.
+"""
 import math
 from pathlib import Path
 import struct
@@ -45,6 +49,69 @@ def mix(*parts):
     for part in parts:
         out.extend(part)
     return out
+
+
+def _rng(seed):
+    return (seed * 1103515245 + 12345) & 0x7FFFFFFF
+
+
+def techno_babble(
+    duration,
+    *,
+    seed,
+    base_f,
+    spread=0.18,
+    syllable_ms=55,
+    gap_ms=35,
+    volume=0.14,
+    harsh=0.0,
+    warmth=0.25,
+    vibrato=0.0,
+    attack=0.008,
+):
+    """
+    Techno gibberish — syllable bursts with no real words.
+    Keeper: low, warm, slow. Overseer: high, harsh, clipped.
+    """
+    samples = []
+    t = 0.0
+    state = seed
+    end = duration
+
+    while t < end:
+        state = _rng(state)
+        pitch = base_f * (1 + spread * ((state / 0x7FFFFFFF) * 2 - 1))
+        state = _rng(state)
+        syllable = (syllable_ms / 1000) * (0.65 + 0.7 * (state / 0x7FFFFFFF))
+        state = _rng(state)
+        gap = (gap_ms / 1000) * (0.45 + 0.9 * (state / 0x7FFFFFFF))
+
+        n_syl = int(RATE * syllable)
+        for n in range(n_syl):
+            if t >= end:
+                break
+            local = n / RATE
+            envelope = min(local / attack, 1.0) * max(0.0, 1 - local / syllable) ** 1.15
+            vib = 1 + vibrato * math.sin(2 * math.pi * 4.5 * (t + local))
+            freq = pitch * vib
+            wave = math.sin(2 * math.pi * freq * local)
+            wave += warmth * math.sin(4 * math.pi * freq * local)
+            if harsh > 0:
+                # Hard edge — square + faint saw, aggressive machine talk.
+                phase = (local * freq) % 1.0
+                wave += harsh * 0.45 * (1.0 if phase < 0.5 else -1.0)
+                wave += harsh * 0.2 * (phase * 2 - 1)
+            samples.append(volume * envelope * max(-1.0, min(1.0, wave)))
+            t += 1 / RATE
+
+        n_gap = int(RATE * gap)
+        for _ in range(n_gap):
+            if t >= end:
+                break
+            samples.append(0.0)
+            t += 1 / RATE
+
+    return samples
 
 
 def write(name, samples):
@@ -106,37 +173,70 @@ write(
     ),
 )
 
-# Keeper — warm, rounded
-write('keeper_on', mix(tone(349.23, 0.08, 0.12), tone(523.25, 0.1, 0.11)))
+# Keeper — calm, kind techno gibberish (soft syllables, warm mids)
 write(
-    'keeper_talk',
+    'keeper_on',
     mix(
-        tone(392, 0.04, 0.1, harm=0.05),
-        tone(466.16, 0.045, 0.09, harm=0.05),
-        tone(523.25, 0.05, 0.08, harm=0.05),
+        tone(261.63, 0.07, 0.1, harm=0.08, attack=0.02),
+        tone(392, 0.1, 0.11, harm=0.1, attack=0.015),
     ),
 )
-write('keeper_off', tone(349.23, 0.08, volume=0.1, harm=0.05, attack=0.01))
+write(
+    'keeper_talk',
+    techno_babble(
+        1.35,
+        seed=42,
+        base_f=310,
+        spread=0.14,
+        syllable_ms=70,
+        gap_ms=48,
+        volume=0.13,
+        harsh=0.0,
+        warmth=0.35,
+        vibrato=0.012,
+        attack=0.012,
+    ),
+)
+write(
+    'keeper_off',
+    mix(
+        tone(392, 0.06, 0.09, harm=0.08, attack=0.015),
+        tone(261.63, 0.09, 0.08, harm=0.05, attack=0.02),
+    ),
+)
 
-# Overseer — sharp, digital
+# Overseer — aggressive techno gibberish (clipped, harsh, higher)
 write(
     'overseer_on',
     mix(
-        tone(740, 0.05, 0.14, harm=0.5),
-        tone(987.77, 0.06, 0.12, harm=0.45),
+        tone(740, 0.04, 0.15, harm=0.55, attack=0.002),
+        tone(987.77, 0.05, 0.13, harm=0.5, attack=0.002),
+        [s * 0.35 for s in noise(0.03, 0.1)],
     ),
 )
 write(
     'overseer_talk',
-    mix(
-        tone(880, 0.035, 0.12, harm=0.6),
-        tone(740, 0.035, 0.11, harm=0.55),
-        tone(987.77, 0.04, 0.1, harm=0.5),
+    techno_babble(
+        1.15,
+        seed=99,
+        base_f=620,
+        spread=0.28,
+        syllable_ms=38,
+        gap_ms=18,
+        volume=0.15,
+        harsh=0.85,
+        warmth=0.12,
+        vibrato=0.0,
+        attack=0.003,
     ),
 )
 write(
     'overseer_off',
-    mix(tone(987.77, 0.05, 0.12, harm=0.5), tone(554.37, 0.08, 0.1, harm=0.4)),
+    mix(
+        tone(987.77, 0.04, 0.13, harm=0.55, attack=0.002),
+        tone(554.37, 0.07, 0.11, harm=0.45, attack=0.004),
+        [s * 0.4 for s in noise(0.04, 0.1)],
+    ),
 )
 
 # Robot dog bond

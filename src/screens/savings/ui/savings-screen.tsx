@@ -3,7 +3,12 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
-import { DYNAMIC_ROUTES, SPACING } from '@/shared/constants';
+import {
+  DYNAMIC_ROUTES,
+  SCREEN_PRESENTATION,
+  SPACING,
+  TERMINAL_VARIANT,
+} from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { CoinBadge, Screen, Text } from '@/shared/ui';
 
@@ -21,7 +26,11 @@ export const SavingsScreen = () => {
   const savings = useSavings();
 
   return (
-    <Screen presentation="sheet" gap={SPACING.THREE} terminalVariant="keeper">
+    <Screen
+      presentation={SCREEN_PRESENTATION.SHEET}
+      gap={SPACING.THREE}
+      terminalVariant={TERMINAL_VARIANT.KEEPER}
+    >
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 import { StyleSheet, View } from 'react-native';
 
-import { SPACING } from '@/shared/constants';
+import { SPACING, TERMINAL_VARIANT } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Screen, Sheet, Text } from '@/shared/ui';
 
@@ -44,7 +44,7 @@ export const PlayShell = ({
 }: PlayShellProps) => {
   const { t } = useTranslation();
   return (
-    <Screen terminalVariant="overseer" gap={SPACING.THREE}>
+    <Screen terminalVariant={TERMINAL_VARIANT.OVERSEER} gap={SPACING.THREE}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
