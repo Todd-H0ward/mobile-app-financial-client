@@ -39,6 +39,7 @@ import {
   damp,
   levelProgress,
   orbitPosition,
+  SCENE_LEVEL_COUNT,
   SCENE_LIFT_SEC,
   SCENE_PALETTE,
   SCENE_PIVOT,
@@ -153,6 +154,13 @@ const READOUT_MS = 500;
 
 /** Cap GL pixel density — Phong fill-bound; HUD stays native/sharp above this. */
 const MAX_RENDER_DENSITY = 1.75;
+
+/**
+ * The overhead map lays every terrace flush so the arena reads as a disc.
+ * A bay keeps the real climb — the pit only opens when a sector is chosen.
+ */
+const liftProgressFor = (view: SceneView, level: number): number =>
+  view === 'top' ? levelProgress(SCENE_LEVEL_COUNT) : levelProgress(level);
 
 /**
  * Frame rate once nothing on the arena is travelling. three.js renders on the JS thread, so a
@@ -303,10 +311,13 @@ export const RoomScene = ({
   /** The close-up on the dog is measured once, when it starts. */
   const isBondShotHeld = useRef(false);
 
-  /** Where each tier is heading, and where it is now: `[segment][step]`. */
   /** Where the platform is heading, and where it is now: `0 … 1`. */
-  const liftTarget = useRef(levelProgress(level));
-  const lift = useRef(levelProgress(level));
+  const liftTarget = useRef(liftProgressFor(view, level));
+  const lift = useRef(liftProgressFor(view, level));
+  /** Last paid tier — dust fires only when this rises, not on the map disc. */
+  const paidLevel = useRef(level);
+  /** Last view that drove the lift — a change snaps, so rows do not ease out of the disc. */
+  const liftView = useRef(view);
 
   /** Read by the loop, which outlives every render that changes them. */
   const clearColor = useRef(SCENE_PALETTE.background);
@@ -401,19 +412,24 @@ export const RoomScene = ({
   }, [isCovered, pauseLoop, resume]);
 
   useEffect(() => {
-    const next = levelProgress(level);
-    const isClimbing = next > liftTarget.current;
+    const next = liftProgressFor(view, level);
+    const climbed = level > paidLevel.current;
+    const switchedView = liftView.current !== view;
+    paidLevel.current = level;
+    liftView.current = view;
     liftTarget.current = next;
 
-    if (!isAnimatedRef.current) {
+    // Map ↔ bay must snap. Easing walls up out of the disc reads as completed
+    // rows stretching; the paid climb below still damps in the render loop.
+    if (switchedView || !isAnimatedRef.current) {
       lift.current = next;
       model.current?.setLevelProgress(next);
       return;
     }
 
-    // Dust on the way up only.
-    if (isClimbing) model.current?.burstLift(level);
-  }, [level]);
+    // Dust on a paid climb only — the map closing into a disc is not a lift.
+    if (climbed) model.current?.burstLift(level);
+  }, [level, view]);
 
   useEffect(() => {
     if (isAnimated) camera.applyView(view);

@@ -1,7 +1,7 @@
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
-import { SPACING, STATIC_ROUTES, TERMINAL_VARIANT } from '@/shared/constants';
+import { SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Screen, Text } from '@/shared/ui';
 
@@ -182,30 +182,15 @@ export const LessonScreen = () => {
           : null;
 
   return (
-    <Screen
-      gap={SPACING.THREE}
-      terminalVariant={
-        stage === 'test' || stage === 'scenario'
-          ? TERMINAL_VARIANT.OVERSEER
-          : TERMINAL_VARIANT.KEEPER
-      }
-    >
+    <Screen gap={SPACING.THREE}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>
-          <Text
-            variant="code"
-            themeColor={
-              stage === 'test' || stage === 'scenario'
-                ? 'overseerLcd'
-                : 'primary'
-            }
-          >
-            {stage === 'test' || stage === 'scenario' ? '// ' : '> '}
-            {t('lesson.header', {
+          <Text variant="code" themeColor="phosphor">
+            {`> ${t('lesson.header', {
               number: lessonState.number,
               total: lessonState.lessonCount,
-            })}
+            })}`}
           </Text>
           <Screen.Title>{lesson.title}</Screen.Title>
         </Screen.Heading>

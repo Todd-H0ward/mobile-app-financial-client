@@ -52,6 +52,50 @@ describe('buildScene', () => {
     model.dispose();
   });
 
+  it('pins a passed cell to the disc when the bay rises out of the flatten', () => {
+    const model = buildScene('factory', 'idle');
+    const [row] = model.cellTargets() as Mesh[];
+    if (!row) throw new Error('no pressable row');
+    const position = row.geometry.getAttribute('position');
+
+    model.setLevelProgress(0);
+    const pristine = Array.from(position.array as Float32Array);
+
+    model.setCellsDone(['0-1-0']);
+    const pinned = Array.from(position.array as Float32Array);
+    expect(pinned).not.toEqual(pristine);
+
+    // Only sinks — a passed tile never rides the wall up.
+    for (let i = 1; i < pinned.length; i += 3) {
+      expect(pinned[i]).toBeLessThanOrEqual(pristine[i] as number);
+    }
+
+    model.setCellsDone([]);
+    expect(Array.from(position.array as Float32Array)).toEqual(pristine);
+    model.dispose();
+  });
+
+  it('keeps a passed cell on the disc when leaving the map for a bay', () => {
+    const model = buildScene('factory', 'idle');
+    const [row] = model.cellTargets() as Mesh[];
+    if (!row) throw new Error('no pressable row');
+    const position = row.geometry.getAttribute('position');
+
+    model.setLevelProgress(1);
+    model.setCellsDone(['0-1-0']);
+    const onDisk = Array.from(position.array as Float32Array);
+
+    model.setLevelProgress(0);
+    const opened = Array.from(position.array as Float32Array);
+    expect(opened).not.toEqual(onDisk);
+
+    for (let i = 1; i < opened.length; i += 3) {
+      expect(opened[i]).toBeLessThanOrEqual(onDisk[i] as number);
+    }
+
+    model.dispose();
+  });
+
   it('turns a ray hit on a row back into its cell', () => {
     const model = buildScene('factory', 'idle');
     const [row] = model.cellTargets() as Mesh[];
