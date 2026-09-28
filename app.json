@@ -7,6 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "mobilehackathon",
     "userInterfaceStyle": "automatic",
+    "backgroundColor": "#C9CBC4",
     "ios": {
       "icon": "./assets/images/icon.png",
       "bundleIdentifier": "com.mobilehackathon.app"

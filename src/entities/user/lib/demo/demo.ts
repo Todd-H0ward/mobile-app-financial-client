@@ -23,7 +23,7 @@ import { applyCompleteTask } from '../tasks';
 const DEMO_PLAYER_NAME = 'Демо';
 
 /** Robot name used in the demo profile. */
-const DEMO_ROBOT_NAME = 'Болт';
+const DEMO_ROBOT_NAME = 'Кузя-01';
 
 /** One affordable purchase of each kind, using the shipped catalogue prices. */
 const DEMO_BASKET = ['need', 'want'].map((kind) => {
