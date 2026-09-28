@@ -50,7 +50,14 @@ const WATCHER_HIDDEN_MATERIALS = ['Ceiling', 'FX_Field', 'FX_FloorGlow'];
 /** Aim point on the dog (chest height in arena units). */
 const WATCHER_DOG_AIM_Y = 40;
 
-/** Yaw / pitch so each screen (+Z) faces the dog, not the map camera. */
+/**
+ * How far to turn from facing the map toward the dog, `0…1`.
+ * From behind the pit, pure face-on still reads as "at the camera"; a clear
+ * inward glance needs a real fraction of the look-at yaw.
+ */
+const WATCHER_AIM_BLEND = 0.55;
+
+/** Soft yaw / pitch so screens glance at the dog without spinning hard. */
 const aimAtDog = (spot: {
   readonly x: number;
   readonly y: number;
@@ -59,11 +66,10 @@ const aimAtDog = (spot: {
   const dx = -spot.x;
   const dy = WATCHER_DOG_AIM_Y - spot.y;
   const dz = -spot.z;
-  const yawBias = spot.x >= 0 ? -20 : 20;
 
   return {
-    yaw: (Math.atan2(dx, dz) * 180) / Math.PI + yawBias,
-    pitch: (Math.atan2(-dy, Math.hypot(dx, dz)) * 180) / Math.PI,
+    yaw: ((Math.atan2(dx, dz) * 180) / Math.PI) * WATCHER_AIM_BLEND,
+    pitch: ((Math.atan2(-dy, Math.hypot(dx, dz)) * 180) / Math.PI) * WATCHER_AIM_BLEND,
   };
 };
 
@@ -81,7 +87,7 @@ const WATCHER_PITCH = {
 } as const;
 
 /** Camera stand-off when focused — face stays above the React terminal (~40%). */
-const WATCHER_FOCUS_DISTANCE = 300;
+const WATCHER_FOCUS_DISTANCE = 520;
 
 /** Rise while focused so the face clears the arena rim above the terminal. */
 const WATCHER_FOCUS_LIFT = 140;
@@ -93,6 +99,12 @@ const WATCHER_FOCUS_ACTION = 'talk';
 
 /** Crossfade between clips — never a hard cut. */
 const WATCHER_FADE_SEC = 0.4;
+
+/**
+ * How much of each clip's rock reaches the model. The shipped idles sway hard;
+ * keep a light weight so they still glance without lurching.
+ */
+const WATCHER_CLIP_WEIGHT = 0.18;
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -107,6 +119,7 @@ export {
   DEFAULT_WATCHER_ACTION,
   WATCHER_ACTIONS,
   WATCHER_CLIPS,
+  WATCHER_CLIP_WEIGHT,
   WATCHER_FADE_SEC,
   WATCHER_FOCUS_ACTION,
   WATCHER_FOCUS_AIM_DOWN,

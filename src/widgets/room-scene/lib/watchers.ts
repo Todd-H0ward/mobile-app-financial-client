@@ -17,6 +17,7 @@ import {
   DEFAULT_WATCHER_ACTION,
   WATCHER_ACTIONS,
   WATCHER_CLIPS,
+  WATCHER_CLIP_WEIGHT,
   WATCHER_FADE_SEC,
   WATCHER_FOCUS_AIM_DOWN,
   WATCHER_FOCUS_DISTANCE,
@@ -238,7 +239,11 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
       const actions = new Map<WatcherAction, AnimationAction>();
       for (const [action, name] of Object.entries(WATCHER_CLIPS[watcher])) {
         const clip = gltf.animations.find((entry) => entry.name === name);
-        if (clip) actions.set(action as WatcherAction, mixer.clipAction(clip));
+        if (!clip) continue;
+        const played = mixer.clipAction(clip);
+        // Weight dampens the shipped sway — fadeIn still ramps up to this, not to 1.
+        played.weight = WATCHER_CLIP_WEIGHT;
+        actions.set(action as WatcherAction, played);
       }
       clips.set(watcher, actions);
 
@@ -257,10 +262,14 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
     const anchor = centre.clone();
     anchor.y -= WATCHER_FOCUS_AIM_DOWN;
 
-    // Eye from pivot yaw so clip rocking does not shake the camera.
-    const ahead = new Vector3(0, 0, 1)
-      .applyQuaternion(pivot.getWorldQuaternion(new Quaternion()))
-      .multiplyScalar(WATCHER_FOCUS_DISTANCE);
+    // Stand in front of the screen on the horizontal plane. The pivot also pitches
+    // down at the dog — keeping that tilt on the eye drops the camera under the face.
+    const ahead = new Vector3(0, 0, 1).applyQuaternion(
+      pivot.getWorldQuaternion(new Quaternion()),
+    );
+    ahead.y = 0;
+    if (ahead.lengthSq() < 1e-8) ahead.set(0, 0, 1);
+    ahead.normalize().multiplyScalar(WATCHER_FOCUS_DISTANCE);
 
     const eye = centre.clone().add(ahead);
 
