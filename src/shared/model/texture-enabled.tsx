@@ -1,19 +1,20 @@
 import { createContext, type ReactNode, useContext } from 'react';
 
-const GlassEnabledContext = createContext(false);
+const TextureEnabledContext = createContext(false);
 
 /** Wired in Providers — shared UI must not import `@/entities/user`. */
-export const GlassEnabledProvider = ({
+export const TextureEnabledProvider = ({
   isEnabled,
   children,
 }: {
   isEnabled: boolean;
   children: ReactNode;
 }) => (
-  <GlassEnabledContext.Provider value={isEnabled}>
+  <TextureEnabledContext.Provider value={isEnabled}>
     {children}
-  </GlassEnabledContext.Provider>
+  </TextureEnabledContext.Provider>
 );
 
 /** Terminal static texture on when preference + transparency allow it. */
-export const useGlassEnabled = (): boolean => useContext(GlassEnabledContext);
+export const useTextureEnabled = (): boolean =>
+  useContext(TextureEnabledContext);

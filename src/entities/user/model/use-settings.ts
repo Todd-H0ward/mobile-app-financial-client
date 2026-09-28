@@ -28,9 +28,9 @@ export const useIsMotionEnabled = (): boolean => {
 export const useIsSoundEnabled = () =>
   useUserStore((state) => state.user?.settings.isSoundEnabled ?? true);
 
-/** Saved terminal-texture switch; legacy key preserves existing profiles. */
-export const useIsGlassEnabled = () =>
-  useUserStore((state) => state.user?.settings.isGlassEnabled ?? true);
+/** Saved terminal-texture switch. */
+export const useIsTextureEnabled = () =>
+  useUserStore((state) => state.user?.settings.isTextureEnabled ?? true);
 
 export const useIsDemoMode = () =>
   useUserStore((state) => state.user?.settings.isDemoMode ?? false);
@@ -64,7 +64,7 @@ export const useSettings = () => ({
   isAnimationEnabled: useIsAnimationEnabled(),
   isMotionEnabled: useIsMotionEnabled(),
   isSoundEnabled: useIsSoundEnabled(),
-  isGlassEnabled: useIsGlassEnabled(),
+  isTextureEnabled: useIsTextureEnabled(),
   isDemoMode: useIsDemoMode(),
   isParentGateEnabled: useIsParentGateEnabled(),
   isCameraRigEnabled: useIsCameraRigEnabled(),

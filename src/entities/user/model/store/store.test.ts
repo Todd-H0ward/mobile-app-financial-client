@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { lessonCellKey } from '@/entities/lesson';
-
 import { STORAGE_KEYS } from '@/shared/constants';
 
 import { createInitialUser, USER_SAVE_VERSION } from '../initial-user';
@@ -165,26 +163,26 @@ describe('useUserStore', () => {
   });
 
   it('starts clean, and still starts, when the save is unreadable', () => {
-    writeAndRehydrate({ user: { version: 1, playerName: 42 } });
+    writeAndRehydrate({ user: { version: USER_SAVE_VERSION, playerName: 42 } });
 
     expect(useUserStore.getState().user).toBeNull();
   });
 
-  it('migrates a save written by an older version', () => {
-    const save: Record<string, unknown> = {
-      ...createInitialUser({ playerName: 'Аня' }),
-    };
-    delete save.version;
-    delete save.home;
-
+  it('drops a save written by another schema version and starts over', () => {
     storage.set(
       STORAGE_KEYS.USER,
-      JSON.stringify({ state: { user: save }, version: 0 }),
+      JSON.stringify({
+        state: {
+          user: createInitialUser({ playerName: 'Аня' }),
+          demoBackup: null,
+        },
+        version: USER_SAVE_VERSION + 1,
+      }),
     );
     useUserStore.persist.rehydrate();
 
-    expect(useUserStore.getState().user?.version).toBe(USER_SAVE_VERSION);
-    expect(useUserStore.getState().user?.playerName).toBe('Аня');
+    expect(useUserStore.getState().user).toBeNull();
+    expect(useUserStore.getState().demoBackup).toBeNull();
   });
 
   it('resets to the starting state, keeping the name and the settings', async () => {
@@ -294,40 +292,6 @@ describe('useUserStore', () => {
     actions.resetUser();
     expect(useUserStore.getState().user?.completedLessonCells).toEqual([]);
     expect(useUserStore.getState().user?.arcade.scores.snake).toEqual([]);
-  });
-
-  it('imports pre-v9 lesson and score keys once, then reset survives rehydration', () => {
-    storage.set(
-      STORAGE_KEYS.LESSONS,
-      JSON.stringify({ state: { doneCells: ['0-1-2'] } }),
-    );
-    storage.set(
-      STORAGE_KEYS.ARCADE_SCORES,
-      JSON.stringify({ state: { snake: [12], spacewarMs: [1000] } }),
-    );
-    storage.set(
-      STORAGE_KEYS.USER,
-      JSON.stringify({
-        version: 8,
-        state: {
-          user: { ...createInitialUser(), version: 8 },
-          demoBackup: null,
-        },
-      }),
-    );
-    useUserStore.persist.rehydrate();
-    // Old-grid `0-1-2` was the ninth lesson; it lands on its cell today.
-    expect(useUserStore.getState().user?.completedLessonCells).toEqual([
-      lessonCellKey(8),
-    ]);
-    expect(useUserStore.getState().user?.arcade.scores.snake).toEqual([12]);
-    useUserStore.getState().resetUser();
-    useUserStore.persist.rehydrate();
-    expect(useUserStore.getState().user?.completedLessonCells).toEqual([]);
-    expect(useUserStore.getState().user?.arcade.scores.snake).toEqual([]);
-    useUserStore.getState().deleteUser();
-    expect(storage.has(STORAGE_KEYS.LESSONS)).toBe(false);
-    expect(storage.has(STORAGE_KEYS.ARCADE_SCORES)).toBe(false);
   });
 
   it('ignores a demo toggle that changes nothing', () => {

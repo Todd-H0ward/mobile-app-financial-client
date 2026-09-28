@@ -5,7 +5,6 @@ import { listTasks, rewardForTask } from '@/entities/task';
 import { makeDemoTimeSource } from '@/shared/lib/time-source';
 
 import { createInitialUser } from '../../model/initial-user';
-import { migrateUser } from '../../model/migrations';
 import { applyPurchase } from '../purchase';
 import { applyCompleteTask, rewardForUserTask } from '../tasks';
 
@@ -52,23 +51,5 @@ describe('optional module equipment', () => {
       applyPurchase(fitted, 'module-sensor', makeDemoTimeSource()),
     ).toMatchObject({ ok: false, reason: 'already_owned' });
     expect(fitted.modules.installed).toEqual(['module-sensor']);
-  });
-
-  it('preserves the old active bonuses, appearance and progress when upgrading a v16 save', () => {
-    const user = active();
-    const legacy = {
-      ...user,
-      version: 16,
-      modules: { owned: ['module-sensor', 'module-core'], tier: 2 },
-    };
-    const migrated = migrateUser(legacy, 16);
-    expect(migrated?.modules.installed).toEqual([
-      'module-sensor',
-      'module-core',
-    ]);
-    expect(migrated?.wallet).toEqual(user.wallet);
-    expect(migrated?.robot).toEqual(user.robot);
-    expect(migrated?.history).toEqual(user.history);
-    expect(migrated?.savings).toEqual(user.savings);
   });
 });

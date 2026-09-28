@@ -17,7 +17,7 @@ import Svg, {
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
-import { useGlassEnabled, useMotionEnabled } from '@/shared/model';
+import { useMotionEnabled, useTextureEnabled } from '@/shared/model';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -78,7 +78,7 @@ export const TerminalPanel = ({
 }: TerminalPanelProps) => {
   const theme = useTheme();
   const isMotionEnabled = useMotionEnabled();
-  const isTexturePreferred = useGlassEnabled();
+  const isTexturePreferred = useTextureEnabled();
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
   const hasTexture =
     isMotionEnabled && (isTextureEnabled ?? isTexturePreferred);

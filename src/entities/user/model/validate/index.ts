@@ -1,0 +1,1 @@
+export { isUserSave } from './validate';

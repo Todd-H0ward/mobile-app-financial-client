@@ -1,6 +1,5 @@
 export type { CreateUserInput } from './initial-user';
 export { createInitialUser, USER_SAVE_VERSION } from './initial-user';
-export { isUserSave, migrateUser } from './migrations';
 export type { UserPersistedState, UserStore } from './store';
 export {
   useCommitUser,
@@ -39,11 +38,12 @@ export {
   useIsAnimationEnabled,
   useIsCameraRigEnabled,
   useIsDemoMode,
-  useIsGlassEnabled,
   useIsMotionEnabled,
   useIsParentGateEnabled,
   useIsSoundEnabled,
+  useIsTextureEnabled,
   useRobotAction,
   useRobotSkin,
   useSettings,
 } from './use-settings';
+export { isUserSave } from './validate';

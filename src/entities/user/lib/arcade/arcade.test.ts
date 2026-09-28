@@ -2,14 +2,21 @@ import { describe, expect, it } from 'vitest';
 
 import type { GameId } from '@/entities/minigame';
 
-import { createInitialUser, USER_SAVE_VERSION } from '../../model/initial-user';
-import { migrateUser } from '../../model/migrations';
+import { createInitialUser } from '../../model/initial-user';
 import type { UserSave } from '../../model/types';
+import { isUserSave } from '../../model/validate';
 import { startPeriod } from '../period';
 
 import { beginArcadeSession, completeArcadeSession } from './arcade';
 
 const DAY = 86_400_000;
+
+/** A save written to disk and read back, the way the store reads it on launch. */
+const restore = (user: UserSave): UserSave | null => {
+  const saved: unknown = JSON.parse(JSON.stringify(user));
+  return isUserSave(saved) ? saved : null;
+};
+
 const activeUser = () => {
   const user = createInitialUser();
   return startPeriod({
@@ -44,10 +51,7 @@ describe('durable arcade payouts', () => {
 
   it('consumes a session once across saving and restoring the profile', () => {
     const started = beginArcadeSession(activeUser(), 'snake');
-    const restored = migrateUser(
-      JSON.parse(JSON.stringify(started)),
-      USER_SAVE_VERSION,
-    );
+    const restored = restore(started);
     if (!restored) throw new Error('Cannot restore');
     const first = completeArcadeSession(
       restored,
@@ -55,10 +59,7 @@ describe('durable arcade payouts', () => {
       'snake',
       { now: () => DAY },
     );
-    const reloaded = migrateUser(
-      JSON.parse(JSON.stringify(first.user)),
-      USER_SAVE_VERSION,
-    );
+    const reloaded = restore(first.user);
     if (!reloaded) throw new Error('Cannot restore');
     const duplicate = completeArcadeSession(
       reloaded,
@@ -110,10 +111,7 @@ describe('durable arcade payouts', () => {
   it('does not refill the allowance on restart or moving the clock backwards', () => {
     let user = activeUser();
     for (let i = 0; i < 3; i++) user = play(user, 'snake', DAY * 3).user;
-    const restored = migrateUser(
-      JSON.parse(JSON.stringify(user)),
-      USER_SAVE_VERSION,
-    );
+    const restored = restore(user);
     if (!restored) throw new Error('Cannot restore');
     expect(play(restored, 'snake', DAY).reason).toBe('limit');
     expect(play(restored, 'snake', DAY * 4).reason).toBe('paid');
@@ -125,21 +123,6 @@ describe('durable arcade payouts', () => {
     expect(result.reason).toBe('planning');
     expect(result.coins).toBe(0);
     expect(result.user.arcade.paidCount).toBe(0);
-  });
-
-  it('migrates v7 without changing any earned money or platform progress', () => {
-    const { arcade: _, ...old } = activeUser();
-    const migrated = migrateUser({ ...old, version: 7 }, 7);
-    expect(migrated?.wallet).toEqual(old.wallet);
-    expect(migrated?.platform).toEqual(old.platform);
-    expect(migrated?.arcade).toEqual({
-      sequence: 0,
-      active: null,
-      paidDay: -1,
-      paidWeek: -1,
-      paidCount: 0,
-      scores: { snake: [], spacewarMs: [] },
-    });
   });
 });
 

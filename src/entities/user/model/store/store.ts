@@ -20,15 +20,14 @@ import {
 } from '@/shared/model';
 
 import { enterDemoMode, exitDemoMode } from '../../lib/demo';
-import { importLegacyProgress } from '../../lib/legacy-progress';
 import { resetUser } from '../../lib/reset';
 import {
   type CreateUserInput,
   createInitialUser,
   USER_SAVE_VERSION,
 } from '../initial-user';
-import { isUserSave, migrateUser } from '../migrations';
 import type { UserSave } from '../types';
+import { isUserSave } from '../validate';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -152,9 +151,6 @@ export const useUserStore = create<UserStore>()(
         set({ user: null, demoBackup: null });
         if (get().user !== null) return;
         useUserStore.persist.clearStorage();
-        const legacy = createPersistStorage();
-        legacy.removeItem(STORAGE_KEYS.LESSONS);
-        legacy.removeItem(STORAGE_KEYS.ARCADE_SCORES);
       },
     }),
     {
@@ -172,39 +168,9 @@ export const useUserStore = create<UserStore>()(
         user,
         demoBackup,
       }),
-      migrate: (persisted, version) => {
-        const saved = persisted as Partial<UserPersistedState> | undefined;
-
-        if (!saved || typeof saved !== 'object' || !('user' in saved))
-          throw new Error('Invalid saved envelope');
-        const migrated = {
-          user: migrateUser(saved?.user, version),
-          demoBackup: migrateUser(saved?.demoBackup, version),
-        };
-        if (
-          (saved?.user != null && !migrated.user) ||
-          (saved?.demoBackup != null && !migrated.demoBackup)
-        )
-          throw new Error('Cannot migrate save');
-        if (version < 9) {
-          const readLegacy = (key: string): unknown => {
-            try {
-              return createPersistStorage<unknown>().getItem(key)?.state;
-            } catch {
-              return undefined;
-            }
-          };
-          const target = migrated.demoBackup ? 'demoBackup' : 'user';
-          const profile = migrated[target];
-          if (profile)
-            migrated[target] = importLegacyProgress(
-              profile,
-              readLegacy(STORAGE_KEYS.LESSONS),
-              readLegacy(STORAGE_KEYS.ARCADE_SCORES),
-            );
-        }
-        return migrated;
-      },
+      // Nothing has shipped, so a save of another schema version is not carried over:
+      // the player starts from the first screen with a fresh profile.
+      migrate: (): UserPersistedState => ({ user: null, demoBackup: null }),
       // `migrate` only runs when the version changed, `merge` always does, so the shape is
       // checked here: a save of the current version can be broken too.
       merge: (persisted, current) => {

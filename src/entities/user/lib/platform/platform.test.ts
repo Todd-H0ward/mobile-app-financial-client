@@ -7,13 +7,20 @@ import { SCENE_LEVEL_COUNT } from '@/entities/scene';
 import { makeDemoTimeSource } from '@/shared/lib/time-source';
 
 import { createInitialUser } from '../../model/initial-user';
-import { isUserSave, migrateUser } from '../../model/migrations';
 import type { UserSave } from '../../model/types';
+import { isUserSave } from '../../model/validate';
 import { endPeriod, finishPeriod } from '../period';
 
 import { applyPlatformUpgrade } from './platform';
 
 const time = makeDemoTimeSource();
+
+/** A save written to disk and read back, the way the store reads it on launch. */
+const restore = (user: UserSave): UserSave | null => {
+  const saved: unknown = JSON.parse(JSON.stringify(user));
+  return isUserSave(saved) ? saved : null;
+};
+
 const funded = (): UserSave => {
   const user = createInitialUser();
   return {
@@ -43,10 +50,7 @@ describe('paid platform progress', () => {
       user = { ...user, savings: funded().savings };
       const result = applyPlatformUpgrade(user, target, time);
       if (!result.ok) throw new Error(`Stage ${target} was refused`);
-      const restored = migrateUser(
-        JSON.parse(JSON.stringify(result.user)),
-        result.user.version,
-      );
+      const restored = restore(result.user);
       if (!restored) throw new Error(`Stage ${target} failed to restore`);
       user = restored;
       expect(user.platform.level).toBe(target);
@@ -77,13 +81,10 @@ describe('paid platform progress', () => {
     expect(user.platform.level).toBe(0);
   });
 
-  it('rejects a repeated confirmation even after serialization and migration', () => {
+  it('rejects a repeated confirmation even after serialization and restore', () => {
     const result = applyPlatformUpgrade(funded(), 1, time);
     if (!result.ok) throw new Error('Expected a purchase');
-    const restored = migrateUser(
-      JSON.parse(JSON.stringify(result.user)),
-      result.user.version,
-    );
+    const restored = restore(result.user);
     if (!restored) throw new Error('Expected a valid restored save');
     expect(restored.platform.level).toBe(1);
     expect(applyPlatformUpgrade(restored, 1, time)).toEqual({
@@ -128,26 +129,5 @@ describe('paid platform progress', () => {
     const settled = endPeriod(finishPeriod(result.user));
     expect(settled.platform).toEqual(result.user.platform);
     expect(settled.history.at(-1)?.reachedGoalIds).toContain(PLATFORM_GOAL_ID);
-  });
-
-  it('migrates v6 without changing existing money, goals or robot', () => {
-    const user = funded();
-    const old = {
-      ...user,
-      version: 6,
-      platform: undefined,
-      savings: {
-        ...user.savings,
-        goals: user.savings.goals.filter(
-          (row) => row.goalId !== PLATFORM_GOAL_ID,
-        ),
-      },
-    };
-    const migrated = migrateUser(old, 6);
-    expect(migrated?.wallet).toEqual(user.wallet);
-    expect(migrated?.robot).toEqual(user.robot);
-    expect(migrated?.platform).toEqual({ level: 0, receipts: [] });
-    expect(migrated?.savings.goals.slice(0, -1)).toEqual(old.savings.goals);
-    expect(migrated?.savings.goals.at(-1)?.saved).toBe(0);
   });
 });

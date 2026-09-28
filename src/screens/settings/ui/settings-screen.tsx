@@ -11,8 +11,8 @@ import type { RobotDogAction, RobotDogSkin } from '@/entities/robot-dog';
 import {
   useIsAnimationEnabled,
   useIsCameraRigEnabled,
-  useIsGlassEnabled,
   useIsSoundEnabled,
+  useIsTextureEnabled,
   useRobotAction,
   useRobotSkin,
   useUpdateUser,
@@ -53,12 +53,12 @@ export const SettingsScreen = () => {
   const updateUser = useUpdateUser();
   const isAnimationEnabled = useIsAnimationEnabled();
   const isSoundEnabled = useIsSoundEnabled();
-  const isGlassEnabled = useIsGlassEnabled();
+  const isTextureEnabled = useIsTextureEnabled();
   const isCameraRigEnabled = useIsCameraRigEnabled();
   const robotSkin = useRobotSkin();
   const robotAction = useRobotAction();
 
-  const setPetSkin = (skin: RobotDogSkin) =>
+  const setRobotSkin = (skin: RobotDogSkin) =>
     updateUser((u) => ({ ...u, settings: { ...u.settings, robotSkin: skin } }));
 
   const setPetAction = (action: RobotDogAction) =>
@@ -79,10 +79,10 @@ export const SettingsScreen = () => {
       settings: { ...u.settings, isSoundEnabled: isEnabled },
     }));
 
-  const setGlass = (isEnabled: boolean) =>
+  const setTexture = (isEnabled: boolean) =>
     updateUser((u) => ({
       ...u,
-      settings: { ...u.settings, isGlassEnabled: isEnabled },
+      settings: { ...u.settings, isTextureEnabled: isEnabled },
     }));
 
   const setCameraRig = (isEnabled: boolean) =>
@@ -125,13 +125,13 @@ export const SettingsScreen = () => {
           }
         />
         <ListGroup.Item
-          title={t('settings.glass')}
-          subtitle={t('settings.glassSubtitle')}
+          title={t('settings.texture')}
+          subtitle={t('settings.textureSubtitle')}
           trailing={
             <Switch
-              isChecked={isGlassEnabled}
-              onChange={setGlass}
-              label={t('settings.glass')}
+              isChecked={isTextureEnabled}
+              onChange={setTexture}
+              label={t('settings.texture')}
             />
           }
         />
@@ -173,7 +173,7 @@ export const SettingsScreen = () => {
       <RobotCard
         skin={robotSkin}
         action={robotAction}
-        onSkinChange={setPetSkin}
+        onSkinChange={setRobotSkin}
         onActionChange={setPetAction}
       />
 

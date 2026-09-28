@@ -168,12 +168,12 @@ interface SettingsSave {
   /** Animations. Turned off for a weak device and for 3.6. */
   isAnimationEnabled: boolean;
   /**
-   * Terminal scanline texture. The legacy key keeps existing saves compatible.
+   * Terminal scanline texture.
    *
    * Off renders a clean screen. Reduce Transparency and disabled animations
    * also suppress the texture so accessibility wins over decoration.
    */
-  isGlassEnabled: boolean;
+  isTextureEnabled: boolean;
   /**
    * Camera-rig overlay on the arena — elevations, fit, dump.
    *
