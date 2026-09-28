@@ -1,6 +1,7 @@
 export { HIT_SLOP_SIZE } from './a11y';
 export { APP_VERSION } from './app-version';
 export {
+  ARENA_COVER_ROUTE_NAMES,
   DYNAMIC_ROUTES,
   isSheetPath,
   type RoutePath,
