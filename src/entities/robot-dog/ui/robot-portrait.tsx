@@ -5,7 +5,7 @@ import { useTheme } from '@/shared/hooks';
 
 import type { RobotDogSkin } from '../model';
 
-import { ROBOT_SKIN_PREVIEWS } from './previews';
+import { ROBOT_CHOICE_IMAGES } from './choice-assets';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -27,7 +27,7 @@ export const RobotPortrait = ({
   const theme = useTheme();
   return (
     <Image
-      source={ROBOT_SKIN_PREVIEWS[skin]}
+      source={ROBOT_CHOICE_IMAGES.coat[skin]}
       contentFit="cover"
       accessible={false}
       style={[styles.root, styles[variant], { borderColor: theme.sceneLight }]}

@@ -74,6 +74,13 @@ describe('the scene palette', () => {
       SCENE_PALETTE.skyBottom,
       SCENE_PALETTE.haze,
       SCENE_PALETTE.background,
+      SCENE_PALETTE.stageSky,
+      SCENE_PALETTE.stageGround,
+      SCENE_PALETTE.stageSlab,
+      SCENE_PALETTE.stageShadow,
+      SCENE_PALETTE.stageKey,
+      SCENE_PALETTE.stageHemiSky,
+      SCENE_PALETTE.stageHemiGround,
     ];
 
     for (const color of colors) {

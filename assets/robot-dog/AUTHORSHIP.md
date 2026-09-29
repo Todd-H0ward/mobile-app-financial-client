@@ -6,8 +6,8 @@
 | Файл | Назначение | Права |
 | --- | --- | --- |
 | `robot-dog.glb` | Геометрия и клипы персонажа | © команда Finni |
-| `skins/<окрас>/{body,mid,dark}.png` | Семь окрасов (loose textures для expo-gl) | © команда Finni |
-| `previews/*.jpg` | Превью окрасов в UI | © команда Finni |
+| `skins/<окрас>/{body,mid,dark}.png` | Семь окрасов (loose textures для expo-gl). `rescue/body` и `rust/body` перекрашены из `factory/body` в цвета палитры (`ROBOT_PALETTE`), чтобы 3D совпадал с превью и комиксом | © команда Finni |
+| `choices/*.jpg`, `creator/*.jpg` | Превью окрасов, ушей и глаз в UI (рендер `scripts/art`) | © команда Finni |
 
 Модель внесена в репозиторий участницей команды. Сторонних стоковых ассетов в
 поставке нет.

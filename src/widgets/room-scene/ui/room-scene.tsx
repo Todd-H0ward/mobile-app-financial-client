@@ -16,7 +16,7 @@ import {
   Raycaster,
   Vector2,
   Vector3,
-  WebGLRenderer,
+  type WebGLRenderer,
 } from 'three';
 
 import { isLessonPlayable, lessonOrdinalForKey } from '@/entities/lesson';
@@ -55,7 +55,12 @@ import {
 import { CONTENT_PADDING, SOUNDS, SPACING } from '@/shared/constants';
 import { hapticLight, playSfx } from '@/shared/lib';
 
-import { buildScene, type SceneModel } from '../lib';
+import {
+  buildScene,
+  createRenderer,
+  renderScaleFor,
+  type SceneModel,
+} from '../lib';
 import { type CameraTune, DEFAULT_CAMERA_TUNE } from '../model/camera-tune';
 import { type SceneView, useSceneCamera } from '../model/use-scene-camera';
 
@@ -159,9 +164,6 @@ const BOND_STROKE_MIN = 28;
 /** How often the dev readout samples the camera and the frame counter, in ms. */
 const READOUT_MS = 500;
 
-/** Cap GL pixel density — Phong fill-bound; HUD stays native/sharp above this. */
-const MAX_RENDER_DENSITY = 1.75;
-
 /**
  * The overhead map lays every terrace flush so the arena reads as a disc.
  * A bay keeps the real climb — the pit only opens when a sector is chosen.
@@ -181,47 +183,6 @@ const IDLE_SLACK_MS = 4;
 
 /** Camera, climb and focus closer than this to their targets count as settled. */
 const SETTLE_EPSILON = 0.01;
-
-// ═══════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════
-
-/** Scale factor ≥1: shrink `GLView` layout so the drawing buffer has fewer pixels. */
-const renderScaleFor = (pixelRatio: number): number =>
-  Math.max(1, pixelRatio / MAX_RENDER_DENSITY);
-
-/** Shim canvas for three — expo-gl gives a context, not a DOM node (avoids expo-three). */
-const canvasFor = (gl: ExpoWebGLRenderingContext) =>
-  ({
-    width: gl.drawingBufferWidth,
-    height: gl.drawingBufferHeight,
-    clientWidth: gl.drawingBufferWidth,
-    clientHeight: gl.drawingBufferHeight,
-    style: {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    getContext: () => gl,
-  }) as unknown as HTMLCanvasElement;
-
-/**
- * Past three's WebGL 1 guard: expo-gl's WebGL 2 context still `instanceof`
- * `WebGLRenderingContext`, so hide that global for the constructor only.
- */
-const createRenderer = (gl: ExpoWebGLRenderingContext): WebGLRenderer => {
-  const scope = globalThis as { WebGLRenderingContext?: unknown };
-  const guard = scope.WebGLRenderingContext;
-  scope.WebGLRenderingContext = undefined;
-
-  try {
-    return new WebGLRenderer({
-      canvas: canvasFor(gl),
-      context: gl,
-      antialias: true,
-    });
-  } finally {
-    scope.WebGLRenderingContext = guard;
-  }
-};
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT

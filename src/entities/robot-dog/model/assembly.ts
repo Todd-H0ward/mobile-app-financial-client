@@ -1,10 +1,19 @@
 import { isRecord } from '@/shared/utils';
 
+/** Free ear silhouettes, in the order the picker shows them. */
+const ROBOT_EARS = ['floppy', 'blade', 'radar'] as const;
+
+/** Free eye shapes, in the order the picker shows them. */
+const ROBOT_FACES = ['dots', 'happy', 'wide'] as const;
+
+type RobotEars = (typeof ROBOT_EARS)[number];
+type RobotFace = (typeof ROBOT_FACES)[number];
+
 interface RobotAssembly {
   /** Free ear silhouette; absent in older saves means floppy ears. */
-  ears?: 'floppy' | 'blade' | 'radar';
+  ears?: RobotEars;
   /** Free eye shape; absent in older saves means round eyes. */
-  face?: 'dots' | 'happy' | 'wide';
+  face?: RobotFace;
   /** Head module: scout ears, radar dish or twin antennae. */
   head: number;
   /** Chassis module: light shell, cargo rack or protective armour. */
@@ -23,10 +32,10 @@ export const isRobotAssembly = (value: unknown): value is RobotAssembly =>
   isRecord(value) &&
   (value.ears === undefined ||
     (typeof value.ears === 'string' &&
-      ['floppy', 'blade', 'radar'].includes(value.ears))) &&
+      (ROBOT_EARS as readonly string[]).includes(value.ears))) &&
   (value.face === undefined ||
     (typeof value.face === 'string' &&
-      ['dots', 'happy', 'wide'].includes(value.face))) &&
+      (ROBOT_FACES as readonly string[]).includes(value.face))) &&
   ['head', 'body', 'legs'].every(
     (key) =>
       Number.isInteger(value[key]) &&
@@ -34,4 +43,5 @@ export const isRobotAssembly = (value: unknown): value is RobotAssembly =>
       Number(value[key]) < 3,
   );
 
-export type { RobotAssembly };
+export type { RobotAssembly, RobotEars, RobotFace };
+export { ROBOT_EARS, ROBOT_FACES };

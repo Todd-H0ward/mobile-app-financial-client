@@ -1,99 +1,29 @@
-import { Image } from 'expo-image';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import {
-  ROBOT_DOG_ACTIONS,
-  ROBOT_DOG_SKINS,
-  type RobotDogAction,
-  type RobotDogSkin,
-} from '@/entities/robot-dog';
-import { ROBOT_SKIN_PREVIEWS } from '@/entities/robot-dog/ui';
+import { ROBOT_DOG_ACTIONS, type RobotDogAction } from '@/entities/robot-dog';
 
-import { RADII, SPACING } from '@/shared/constants';
-import { useTheme } from '@/shared/hooks';
+import { SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { Card, Chip, PixelIcon, Text } from '@/shared/ui';
+import { Card, Chip, Text } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
 
 interface RobotCardProps {
-  skin: RobotDogSkin;
   action?: RobotDogAction;
-  onSkinChange: (skin: RobotDogSkin) => void;
-  onActionChange?: (action: RobotDogAction) => void;
+  onActionChange: (action: RobotDogAction) => void;
 }
-
-interface SkinTileProps {
-  skin: RobotDogSkin;
-  isSelected: boolean;
-  onPress: () => void;
-}
-
-// ═══════════════════════════════════════════
-// CONSTANTS
-// ═══════════════════════════════════════════
-
-/** Wide enough to read the coat, small enough that four fit a phone. */
-const TILE_WIDTH = 104;
-const TILE_HEIGHT = 72;
-
-// ═══════════════════════════════════════════
-// COMPONENTS
-// ═══════════════════════════════════════════
-
-const SkinTile = ({ skin, isSelected, onPress }: SkinTileProps) => {
-  const { t } = useTranslation();
-  const theme = useTheme();
-  const label = t(`settings.skin.${skin}`);
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ selected: isSelected }}
-      onPress={onPress}
-      style={({ pressed }) => [styles.tile, { opacity: pressed ? 0.7 : 1 }]}
-    >
-      <Image
-        source={ROBOT_SKIN_PREVIEWS[skin]}
-        style={[
-          styles.preview,
-          {
-            borderColor: isSelected ? theme.primary : theme.border,
-            borderWidth: isSelected ? 3 : 1,
-          },
-        ]}
-        contentFit="cover"
-        transition={120}
-      />
-      {isSelected ? (
-        <View style={[styles.selected, { backgroundColor: theme.surface }]}>
-          <PixelIcon name="check20" size={20} />
-        </View>
-      ) : null}
-      <Text
-        variant={isSelected ? 'bodyBold' : 'body'}
-        themeColor={isSelected ? 'primaryStrong' : 'textSecondary'}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-};
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/** The grown-up's controls for the dog: how it looks and what it does. */
-export const RobotCard = ({
-  skin,
-  action,
-  onSkinChange,
-  onActionChange,
-}: RobotCardProps) => {
+/**
+ * What the dog does on the arena. The look — coat, ears, eyes — lives in one place, the
+ * "names and look" sheet, so a second coat picker here cannot disagree with it.
+ */
+export const RobotCard = ({ action, onActionChange }: RobotCardProps) => {
   const { t } = useTranslation();
 
   return (
@@ -101,47 +31,22 @@ export const RobotCard = ({
       <Card.Title>{t('settings.robot')}</Card.Title>
       <Card.Content style={styles.content}>
         <View style={styles.heading}>
-          <Text variant="bodyBold">{t('settings.robotSkin')}</Text>
+          <Text variant="bodyBold">{t('settings.robotAction')}</Text>
           <Text variant="small" themeColor="textMuted">
-            {t('settings.robotSkinSubtitle')}
+            {t('settings.robotActionSubtitle')}
           </Text>
         </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tiles}
-        >
-          {ROBOT_DOG_SKINS.map((value) => (
-            <SkinTile
+        <View style={styles.actions}>
+          {ROBOT_DOG_ACTIONS.map((value) => (
+            <Chip
               key={value}
-              skin={value}
-              isSelected={value === skin}
-              onPress={() => onSkinChange(value)}
-            />
+              variant={value === action ? 'selected' : 'neutral'}
+              onPress={() => onActionChange(value)}
+            >
+              {t(`settings.action.${value}`)}
+            </Chip>
           ))}
-        </ScrollView>
-
-        {onActionChange && (
-          <>
-            <View style={styles.heading}>
-              <Text variant="bodyBold">{t('settings.robotAction')}</Text>
-              <Text variant="small" themeColor="textMuted">
-                {t('settings.robotActionSubtitle')}
-              </Text>
-            </View>
-            <View style={styles.actions}>
-              {ROBOT_DOG_ACTIONS.map((value) => (
-                <Chip
-                  key={value}
-                  variant={value === action ? 'selected' : 'neutral'}
-                  onPress={() => onActionChange(value)}
-                >
-                  {t(`settings.action.${value}`)}
-                </Chip>
-              ))}
-            </View>
-          </>
-        )}
+        </View>
         <Text variant="small" themeColor="textMuted">
           {t('settings.robotTapHint')}
         </Text>
@@ -164,26 +69,6 @@ const styles = StyleSheet.create({
     gap: SPACING.COMPACT,
   },
   heading: { gap: 2 },
-  preview: {
-    borderRadius: RADII.m,
-    height: TILE_HEIGHT,
-    width: TILE_WIDTH,
-  },
-  selected: {
-    borderRadius: RADII.xs,
-    padding: SPACING.ONE,
-    position: 'absolute',
-    right: SPACING.ONE,
-    top: SPACING.ONE,
-  },
-  tile: {
-    alignItems: 'center',
-    gap: SPACING.ONE,
-  },
-  tiles: {
-    gap: SPACING.TWO,
-    paddingVertical: SPACING.ONE,
-  },
 });
 
 export type { RobotCardProps };

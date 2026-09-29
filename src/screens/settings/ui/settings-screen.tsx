@@ -7,14 +7,13 @@ import { RobotCard, RobotSetup } from '@/widgets/robot-setup';
 
 import { useChangeLanguage } from '@/features/change-language';
 
-import type { RobotDogAction, RobotDogSkin } from '@/entities/robot-dog';
+import type { RobotDogAction } from '@/entities/robot-dog';
 import {
   useIsAnimationEnabled,
   useIsCameraRigEnabled,
   useIsSoundEnabled,
   useIsTextureEnabled,
   useRobotAction,
-  useRobotSkin,
   useUpdateUser,
 } from '@/entities/user';
 
@@ -59,11 +58,7 @@ export const SettingsScreen = () => {
   const isSoundEnabled = useIsSoundEnabled();
   const isTextureEnabled = useIsTextureEnabled();
   const isCameraRigEnabled = useIsCameraRigEnabled();
-  const robotSkin = useRobotSkin();
   const robotAction = useRobotAction();
-
-  const setRobotSkin = (skin: RobotDogSkin) =>
-    updateUser((u) => ({ ...u, settings: { ...u.settings, robotSkin: skin } }));
 
   const setPetAction = (action: RobotDogAction) =>
     updateUser((u) => ({
@@ -174,12 +169,7 @@ export const SettingsScreen = () => {
       </ListGroup>
       {isSetupVisible && <RobotSetup onClose={() => setSetupVisible(false)} />}
 
-      <RobotCard
-        skin={robotSkin}
-        action={robotAction}
-        onSkinChange={setRobotSkin}
-        onActionChange={setPetAction}
-      />
+      <RobotCard action={robotAction} onActionChange={setPetAction} />
 
       {__DEV__ ? (
         <ListGroup>

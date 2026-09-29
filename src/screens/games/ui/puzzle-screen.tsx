@@ -66,7 +66,7 @@ export const PuzzleScreen = ({ puzzleId }: PuzzleScreenProps) => {
   }
 
   return (
-    <Screen isScrollable={false}>
+    <Screen backdrop="arena" isScrollable={false}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

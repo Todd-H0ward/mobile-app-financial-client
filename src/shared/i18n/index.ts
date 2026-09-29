@@ -4,6 +4,8 @@ import { initReactI18next } from 'react-i18next';
 
 import type { AppLanguage, LanguagePreference } from '@/shared/types';
 
+import { formatNoun, type NounForms } from './noun';
+
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
@@ -76,5 +78,16 @@ i18n.use(initReactI18next).init({
   },
 });
 
+/**
+ * `{{count, noun(one: монета; few: монеты; many: монет)}}` — the word agrees with the number.
+ * The forms live in the string, so each phrase picks its own case: "не хватает 21 монеты",
+ * "ты получил 21 монету", "уйдёт 21 монета".
+ */
+i18n.services.formatter?.add('noun', (value, language, options) =>
+  formatNoun(value, language ?? i18n.language, options as NounForms),
+);
+
 export { useTranslation } from 'react-i18next';
+
+export { formatNoun } from './noun';
 export default i18n;

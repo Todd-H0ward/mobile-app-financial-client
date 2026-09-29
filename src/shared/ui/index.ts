@@ -37,6 +37,7 @@ export { ProgressBar } from './progress-bar';
 export type { RingsBackdropProps } from './rings-backdrop';
 export { RingsBackdrop } from './rings-backdrop';
 export type {
+  ScreenBackdrop,
   ScreenBackProps,
   ScreenFooterProps,
   ScreenHeaderProps,
