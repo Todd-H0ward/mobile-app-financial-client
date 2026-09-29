@@ -31,7 +31,11 @@ export const GamesScreen = () => {
   const levels = ownedPuzzles(user?.ownedItemIds ?? []);
 
   return (
-    <Screen gap={SPACING.THREE} terminalVariant={TERMINAL_VARIANT.OVERSEER}>
+    <Screen
+      backdrop="arena"
+      gap={SPACING.THREE}
+      terminalVariant={TERMINAL_VARIANT.OVERSEER}
+    >
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

@@ -104,19 +104,25 @@ export const attachRobotLook = (
       dish.position.y = 0.2;
       ear.add(dish);
     } else {
-      ear.rotation.x = side * 0.5;
+      // Same flap as the rendered previews (scripts/art/scene.mjs): broad side-on, hanging down
+      // and out from the mast. Hanging straight down it sank into the head and never showed.
+      ear.scale.z = side;
+      const hinge = new Group();
+      hinge.position.y = 0.12;
+      hinge.rotation.set(-0.62, 0, -0.3);
+      ear.add(hinge);
       const flap = new Mesh(
-        new RoundedBoxGeometry(0.42, 0.82, 0.16, 2, 0.065),
+        new RoundedBoxGeometry(0.2, 1.1, 0.6, 3, 0.09),
         dark,
       );
-      flap.position.y = -0.24;
-      ear.add(flap);
+      flap.position.y = -0.5;
+      hinge.add(flap);
       const tip = new Mesh(
-        new RoundedBoxGeometry(0.43, 0.16, 0.17, 2, 0.03),
+        new RoundedBoxGeometry(0.22, 0.22, 0.52, 3, 0.08),
         accent,
       );
-      tip.position.y = -0.57;
-      ear.add(tip);
+      tip.position.y = -1.0;
+      hinge.add(tip);
     }
   }
   return {

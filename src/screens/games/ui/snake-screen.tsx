@@ -56,7 +56,7 @@ export const SnakeScreen = () => {
   );
 
   return (
-    <Screen isScrollable={false}>
+    <Screen backdrop="arena" isScrollable={false}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

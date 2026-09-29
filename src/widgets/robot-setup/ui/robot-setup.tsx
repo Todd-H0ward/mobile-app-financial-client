@@ -11,8 +11,10 @@ import {
 } from 'react-native';
 
 import {
+  DEFAULT_ROBOT_ASSEMBLY,
   isRobotNameValid,
   ROBOT_NAME_MAX_LENGTH,
+  type RobotAssembly,
   type RobotDogSkin,
 } from '@/entities/robot-dog';
 import {
@@ -28,7 +30,7 @@ import { SPACING } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Input, Sheet, Text } from '@/shared/ui';
 
-import { RobotCard } from './robot-card';
+import { RobotLookPicker } from './robot-look-picker';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -42,7 +44,7 @@ interface RobotSetupProps {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-/** Edit names and coat from settings. */
+/** Edit names and the whole look — coat, ears, eyes — from settings. */
 export const RobotSetup = ({ onClose }: RobotSetupProps) => {
   const { t } = useTranslation();
   const user = useUser();
@@ -58,6 +60,10 @@ export const RobotSetup = ({ onClose }: RobotSetupProps) => {
   const [skin, setSkin] = useState<RobotDogSkin>(
     user?.settings.robotSkin ?? 'factory',
   );
+  const [assembly, setAssembly] = useState<RobotAssembly>({
+    ...DEFAULT_ROBOT_ASSEMBLY,
+    ...user?.robot.assembly,
+  });
   const isValid = isPlayerNameValid(playerName) && isRobotNameValid(robotName);
 
   const save = () => {
@@ -67,7 +73,12 @@ export const RobotSetup = ({ onClose }: RobotSetupProps) => {
         playerName,
         robotName,
         skin,
-        assembly: current.robot.assembly,
+        // Ears and eyes from the picker; bought modules stay as they are in the save.
+        assembly: {
+          ...current.robot.assembly,
+          ears: assembly.ears,
+          face: assembly.face,
+        },
       }),
     );
     Keyboard.dismiss();
@@ -117,7 +128,17 @@ export const RobotSetup = ({ onClose }: RobotSetupProps) => {
           <Text variant="small" themeColor="textMuted">
             {t('setup.nameHint')}
           </Text>
-          <RobotCard skin={skin} onSkinChange={setSkin} />
+          <RobotLookPicker
+            skin={skin}
+            assembly={assembly}
+            onSkinChange={setSkin}
+            onEarsChange={(ears) =>
+              setAssembly((current) => ({ ...current, ears }))
+            }
+            onFaceChange={(face) =>
+              setAssembly((current) => ({ ...current, face }))
+            }
+          />
           {!isValid && (
             <Text accessibilityLiveRegion="polite">{t('setup.emptyName')}</Text>
           )}

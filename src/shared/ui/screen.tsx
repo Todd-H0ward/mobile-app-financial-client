@@ -54,6 +54,12 @@ interface ScreenRootProps {
   presentation?: ScreenPresentation;
   /** Pit strip above the terminal; off for parents (not the game). */
   isPitVisible?: boolean;
+  /**
+   * What shows through the pit strip and behind the status bar. `arena` is for
+   * routes stacked over home (`ARENA_COVER_ROUTE_NAMES`): the live pit stays
+   * under a scrim instead of a painted still.
+   */
+  backdrop?: ScreenBackdrop;
   gap?: Spacing;
   /** False when a child owns scroll (`FlatList`) so lists stay virtualized. */
   isScrollable?: boolean;
@@ -80,6 +86,8 @@ interface ScreenLabelProps {
   children: string;
   voice?: TerminalVariant;
 }
+
+type ScreenBackdrop = 'illustration' | 'arena';
 
 type ScreenTitleProps = TextProps;
 
@@ -225,6 +233,7 @@ const ScreenRoot = ({
   terminalVariant,
   presentation = 'full',
   isPitVisible = terminalVariant !== TERMINAL_VARIANT.ADULT,
+  backdrop = 'illustration',
   gap = SPACING.TWO,
   isScrollable = true,
   style,
@@ -344,15 +353,22 @@ const ScreenRoot = ({
     );
   }
 
+  const isOverArena = backdrop === 'arena';
+
   return (
-    <ThemedView variant="sceneBase" style={styles.root}>
+    <ThemedView
+      variant="sceneBase"
+      style={[styles.root, isOverArena && { backgroundColor: theme.scrim }]}
+    >
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         {isPitVisible ? (
           <View style={styles.pit}>
-            <IllustratedBackdrop
-              source={require('../../../assets/images/terminal-backdrop.jpg')}
-              variant="muted"
-            />
+            {isOverArena ? null : (
+              <IllustratedBackdrop
+                source={require('../../../assets/images/terminal-backdrop.jpg')}
+                variant="muted"
+              />
+            )}
           </View>
         ) : null}
         <TerminalPanel
@@ -500,6 +516,7 @@ const styles = StyleSheet.create({
 });
 
 export type {
+  ScreenBackdrop,
   ScreenBackProps,
   ScreenFooterProps,
   ScreenHeaderProps,

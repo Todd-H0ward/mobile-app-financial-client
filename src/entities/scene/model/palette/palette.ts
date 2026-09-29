@@ -67,6 +67,20 @@ const SCENE_PALETTE = {
   haze: '#F8B070',
   /** GL clear fallback while the sky sphere boots. */
   background: '#345868',
+  /** Setup stand — daylight haze over the concrete waste, kit scene tone. */
+  stageSky: '#D7D9D2',
+  /** Setup stand — the concrete the dog stands on. */
+  stageGround: '#C9CBC4',
+  /** Setup stand — slabs and a leaning column on the horizon. */
+  stageSlab: '#B9BCB4',
+  /** Setup stand — the soft contact shadow under the dog. */
+  stageShadow: '#1E2A22',
+  /** Setup stand — warm daylight key. */
+  stageKey: '#FFF4E4',
+  /** Setup stand — hemisphere sky bounce. */
+  stageHemiSky: '#EEF2EA',
+  /** Setup stand — hemisphere ground bounce off the concrete. */
+  stageHemiGround: '#8E948C',
 } as const;
 
 export { SCENE_PALETTE };

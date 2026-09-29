@@ -22,7 +22,7 @@ export const ConsoleScreen = () => {
   const router = useRouter();
 
   return (
-    <Screen gap={SPACING.TWO} isScrollable={false}>
+    <Screen backdrop="arena" gap={SPACING.TWO} isScrollable={false}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

@@ -1,4 +1,6 @@
-import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect } from 'react';
+
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { SPACING, STATIC_ROUTES } from '@/shared/constants';
@@ -159,9 +161,12 @@ export const LessonScreen = () => {
   };
 
   const { lesson, stage } = lessonState;
-  if (!lesson) {
-    return <Redirect href={STATIC_ROUTES.HOME} />;
-  }
+  // Back to the arena that is already underneath — a `<Redirect>` would replace this route with
+  // a second home and rebuild the whole GL scene behind a loading screen.
+  useEffect(() => {
+    if (!lesson) router.dismissTo(STATIC_ROUTES.HOME);
+  }, [lesson, router]);
+  if (!lesson) return null;
 
   const question = lesson.questions[lessonState.index];
   const primaryLabel =
@@ -182,7 +187,7 @@ export const LessonScreen = () => {
           : null;
 
   return (
-    <Screen gap={SPACING.THREE}>
+    <Screen backdrop="arena" gap={SPACING.THREE}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

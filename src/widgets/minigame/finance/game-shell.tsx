@@ -40,7 +40,7 @@ export const GameShell = ({
 }: GameShellProps) => {
   const { t } = useTranslation();
   return (
-    <Screen gap={SPACING.THREE}>
+    <Screen backdrop="arena" gap={SPACING.THREE}>
       <Screen.Header>
         <Screen.Back />
         <Screen.Title>{title}</Screen.Title>

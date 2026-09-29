@@ -48,7 +48,11 @@ export const PlayShell = ({
 }: PlayShellProps) => {
   const { t } = useTranslation();
   return (
-    <Screen terminalVariant={TERMINAL_VARIANT.OVERSEER} gap={SPACING.THREE}>
+    <Screen
+      backdrop="arena"
+      terminalVariant={TERMINAL_VARIANT.OVERSEER}
+      gap={SPACING.THREE}
+    >
       <Screen.Header>
         <Screen.Back />
         <Screen.Heading>

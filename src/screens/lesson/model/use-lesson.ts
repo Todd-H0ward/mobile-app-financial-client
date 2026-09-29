@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 
 import {
   ARENA_LAYOUT,
@@ -13,12 +13,14 @@ import {
   lessonAt,
   listLessons,
   passMark,
+  personalizeLesson,
   transitionLesson,
 } from '@/entities/lesson';
 import { cellFromKey, cellKey, cellOrdinal } from '@/entities/scene';
 import { useCompleteLesson, useUser } from '@/entities/user';
 
 import { SOUNDS } from '@/shared/constants';
+import { useTranslation } from '@/shared/i18n';
 import { playSfx } from '@/shared/lib';
 
 // ═══════════════════════════════════════════
@@ -47,6 +49,7 @@ interface LessonState {
 
 /** Keyed by cell so the pressed tile is what sinks after the lesson. */
 export const useLesson = (cellId: string): LessonState => {
+  const { t } = useTranslation();
   const completeCell = useCompleteLesson();
   const user = useUser();
 
@@ -55,7 +58,7 @@ export const useLesson = (cellId: string): LessonState => {
     () => (cell ? cellOrdinal(cell, ARENA_LAYOUT) : null),
     [cell],
   );
-  const activeIndex = useMemo(() => {
+  const liveIndex = useMemo(() => {
     if (!user || ordinal === null) return null;
     if (
       !isLessonPlayable(ordinal, user.completedLessonIds, user.platform.level)
@@ -65,9 +68,26 @@ export const useLesson = (cellId: string): LessonState => {
     return activeLessonIndexForCell(ordinal, user.completedLessonIds);
   }, [ordinal, user]);
 
+  // Pinned when the cell opens. Passing marks the cell done, and a live lookup would then find
+  // no lesson (or the next one) — the result screen would vanish and the fallback redirect
+  // would stack a second arena over the first, which is the "loading after a lesson" bug.
+  const [opened, setOpened] = useState({ cellId, index: liveIndex });
+  if (
+    opened.cellId !== cellId ||
+    (opened.index === null && liveIndex !== null)
+  ) {
+    setOpened({ cellId, index: liveIndex });
+  }
+  const activeIndex = opened.cellId === cellId ? opened.index : liveIndex;
+
+  // The examples are about the child's own dog, not a stock hero.
+  const robotName = user?.robot.name || t('setup.defaultRobot');
   const lesson = useMemo(
-    () => (activeIndex === null ? null : lessonAt(activeIndex)),
-    [activeIndex],
+    () =>
+      activeIndex === null
+        ? null
+        : personalizeLesson(lessonAt(activeIndex), robotName),
+    [activeIndex, robotName],
   );
 
   const [session, dispatch] = useReducer(
