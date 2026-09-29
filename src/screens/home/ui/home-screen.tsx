@@ -348,7 +348,8 @@ export const HomeScreen = () => {
           </TerminalDock>
         ) : null}
 
-        {isSceneReady && !talkingTo && !isRobotOpen ? (
+        {/* A lesson or a game shows the pit through its top strip — not the HUD. */}
+        {isSceneReady && !talkingTo && !isRobotOpen && !isArenaCovered ? (
           <>
             <HomeHudBoard
               hud={hud}

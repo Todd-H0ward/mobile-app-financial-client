@@ -5,7 +5,6 @@ import { Providers } from '@/_app/providers';
 
 import {
   ARENA_COVER_ROUTE_NAMES,
-  COLORS,
   LESSON_FADE_MS,
   SHEET_ROUTE_NAMES,
 } from '@/shared/constants';
@@ -22,14 +21,15 @@ const SHEET_OPTIONS = {
 } as const;
 
 /**
- * Same keep-alive as sheets, but opaque — lessons and games fully cover the
- * pit and `isArenaCovered` still pauses the loop. A default card push would
- * detach home and force expo-gl to rebuild the whole arena on the way back.
+ * Same keep-alive as sheets — lessons and games cover the pit with a terminal,
+ * `isArenaCovered` pauses the loop, and the last frame shows through the strip
+ * above it (`Screen backdrop="arena"`). A default card push would detach home
+ * and force expo-gl to rebuild the whole arena on the way back.
  */
 const ARENA_COVER_OPTIONS = {
   animation: 'fade',
   animationDuration: LESSON_FADE_MS,
-  contentStyle: { backgroundColor: COLORS.light.terminalScreen },
+  contentStyle: { backgroundColor: 'transparent' },
   presentation: 'transparentModal',
 } as const;
 

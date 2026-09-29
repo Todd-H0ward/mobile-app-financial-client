@@ -10,6 +10,7 @@ export {
   lessonsForCell,
   placeLessons,
 } from './layout';
+export { NAME_TOKEN, personalizeLesson } from './personalize';
 export { assertLessonContent } from './schema';
 export { isPassed, LESSON_PASS_SHARE, passMark } from './score';
 export type { LessonAction, LessonStage } from './session';

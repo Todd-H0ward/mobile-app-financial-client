@@ -60,6 +60,37 @@ describe('content/lessons.json', () => {
       expect([1, 2, 3, 4]).toContain(entry.level);
     }
   });
+
+  it('agrees every number with «монета» and «период»', () => {
+    // 1, 21 монета(у) · 2–4, 22–24 монеты · the rest монет. A genitive after «до», «из»,
+    // «после» and friends takes монет / периодов for any number, so those are let through.
+    const genitive =
+      /(до|из|после|больше|меньше|около|более|менее|хватает|нет)\s+$/i;
+    const categoryOf = (count: number) => {
+      const last = count % 10;
+      const lastTwo = count % 100;
+      if (last === 1 && lastTwo !== 11) return 'one';
+      if (last >= 2 && last <= 4 && (lastTwo < 12 || lastTwo > 14))
+        return 'few';
+      return 'many';
+    };
+    const text = JSON.stringify(LESSON_CONTENT);
+    const wrong: string[] = [];
+
+    for (const match of text.matchAll(
+      /(?<![\d.,])(\d+) (монет|периодов)(?![а-я])/g,
+    )) {
+      const before = text.slice(
+        Math.max(0, (match.index ?? 0) - 20),
+        match.index,
+      );
+      if (categoryOf(Number(match[1])) !== 'many' && !genitive.test(before)) {
+        wrong.push(`${before}${match[0]}`);
+      }
+    }
+
+    expect(wrong).toEqual([]);
+  });
 });
 
 describe('assertLessonContent', () => {

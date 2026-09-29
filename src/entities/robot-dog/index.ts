@@ -18,13 +18,13 @@ export {
   moodFor,
   normalizeRobotName,
   progressToNextStage,
-  stageTransition,
   ROBOT_DOG_EASE_RATE,
   ROBOT_DOG_MOOD_HIGH,
   ROBOT_DOG_MOOD_LOW,
   ROBOT_NAME_MAX_LENGTH,
   ROBOT_NAME_MIN_LENGTH,
   stageFor,
+  stageTransition,
   validateRobotName,
 } from './lib';
 export type {
@@ -52,6 +52,15 @@ export {
   ROBOT_DOG_SKINS,
   ROBOT_DOG_STAGES,
 } from './model';
-export type { RobotAssembly } from './model/assembly';
-export { DEFAULT_ROBOT_ASSEMBLY, isRobotAssembly } from './model/assembly';
+export type {
+  RobotAssembly,
+  RobotEars,
+  RobotFace,
+} from './model/assembly';
+export {
+  DEFAULT_ROBOT_ASSEMBLY,
+  isRobotAssembly,
+  ROBOT_EARS,
+  ROBOT_FACES,
+} from './model/assembly';
 export { ROBOT_PALETTE } from './model/palette';

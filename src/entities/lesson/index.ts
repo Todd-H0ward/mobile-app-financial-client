@@ -15,7 +15,9 @@ export {
   lessonIndicesForCell,
   lessonsForCell,
   listLessons,
+  NAME_TOKEN,
   passMark,
+  personalizeLesson,
   placeLessons,
   transitionLesson,
 } from './lib';
