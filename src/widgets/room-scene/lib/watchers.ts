@@ -33,13 +33,14 @@ import {
 } from '@/entities/watcher';
 
 import { loadGlTexture, readAssetBytes } from './local-asset';
+import { animateWatcherFace, type WatcherFace } from './watcher-face';
 
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
 
 interface Watchers {
-  tick: (deltaSec: number) => void;
+  tick: (deltaSec: number, isAnimated: boolean) => void;
   play: (watcher: WatcherId, action: WatcherAction) => void;
   /** Tap target; `null` until loaded. */
   root: (watcher: WatcherId) => Object3D | null;
@@ -168,6 +169,7 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
   const faces = new Map<WatcherId, Object3D>();
   const screens = new Map<WatcherId, MeshStandardMaterial>();
   const looks = new Map<WatcherId, Map<WatcherAction, Texture>>();
+  const animatedFaces = new Map<WatcherId, WatcherFace>();
 
   const play = (watcher: WatcherId, action: WatcherAction) => {
     // Swap the face even when this action has no clip.
@@ -177,6 +179,7 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
       screen.map = look;
       screen.emissiveMap = look;
       screen.needsUpdate = true;
+      animatedFaces.get(watcher)?.setAction(action);
     }
 
     const next = clips.get(watcher)?.get(action);
@@ -208,7 +211,10 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
       const root = gltf.scene;
 
       const screenMaterial = dress(root, faceList[0]);
-      if (screenMaterial) screens.set(watcher, screenMaterial);
+      if (screenMaterial) {
+        screens.set(watcher, screenMaterial);
+        animatedFaces.set(watcher, animateWatcherFace(screenMaterial, watcher));
+      }
       root.scale.setScalar(WATCHER_SCALE[watcher]);
 
       // Pivot on the face, not the artist's bracket origin.
@@ -279,8 +285,13 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
   return {
     focus,
     root: (watcher) => pivots.get(watcher) ?? null,
-    tick: (deltaSec) => {
-      for (const mixer of mixers.values()) mixer.update(deltaSec);
+    tick: (deltaSec, isAnimated) => {
+      if (!rig.visible) return;
+      for (const face of animatedFaces.values())
+        face.tick(deltaSec, isAnimated);
+      if (isAnimated) {
+        for (const mixer of mixers.values()) mixer.update(deltaSec);
+      }
     },
     play,
     setLifted: (watcher) => {
@@ -301,6 +312,7 @@ const attachWatchers = async (mount: Group): Promise<Watchers> => {
         for (const texture of look.values()) texture.dispose();
       }
       looks.clear();
+      animatedFaces.clear();
       mount.remove(rig);
       for (const root of roots) disposeTree(root);
     },

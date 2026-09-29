@@ -122,7 +122,7 @@ interface SceneModel {
   /** Platform height in world units, for the camera to follow. */
   platformHeight: () => number;
   /** Drifts the sky haze and advances the center character. */
-  tick: (timeSec: number, deltaSec: number) => void;
+  tick: (timeSec: number, deltaSec: number, isAnimated?: boolean) => void;
   /** Current module assembly and earned visual growth stage. */
   setCharacterAssembly: (assembly: RobotAssembly, stage: RobotDogStage) => void;
   /** Swaps the dog's coat. */
@@ -1314,10 +1314,10 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   // World Y: arena is offset under look-at; local platform Y would miss by that much.
   const platformHeight = () => root.position.y + platform.position.y;
 
-  const tick = (timeSec: number, deltaSec: number) => {
+  const tick = (timeSec: number, deltaSec: number, isAnimated = true) => {
     haze.tick(timeSec);
     character?.tick(deltaSec);
-    watchers?.tick(deltaSec);
+    watchers?.tick(deltaSec, isAnimated);
     effects.tick(deltaSec);
     bondBursts.tick(deltaSec);
     tickHighlight(deltaSec);
