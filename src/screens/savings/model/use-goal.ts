@@ -16,7 +16,7 @@ import {
   useUser,
 } from '@/entities/user';
 
-import { DYNAMIC_ROUTES, STATIC_ROUTES } from '@/shared/constants';
+import { DYNAMIC_ROUTES } from '@/shared/constants';
 import { useTimeSource } from '@/shared/lib';
 import { formatMoney } from '@/shared/utils';
 
@@ -24,7 +24,8 @@ import { formatMoney } from '@/shared/utils';
 // TYPES
 // ═══════════════════════════════════════════
 
-type GoalSheet = 'planning' | 'lift' | null;
+/** `liftPlanning` is the plan-first sheet reached from the lift button, which says so. */
+type GoalSheet = 'planning' | 'liftPlanning' | 'lift' | null;
 
 interface GoalController {
   goalId: string;
@@ -43,6 +44,11 @@ interface GoalController {
    * Lift jar is full enough to pay the next tier — only for `PLATFORM_GOAL_ID`.
    */
   canLift: boolean;
+  /**
+   * The lift jar is full and a tier is left to buy, whatever the phase. The button shows on
+   * this; pressing it outside an active period explains that the plan comes first.
+   */
+  isLiftReady: boolean;
   /** Next platform level the jar would buy, or `null`. */
   nextTier: number | null;
   amount: number;
@@ -66,7 +72,10 @@ interface GoalController {
 // HOOK
 // ═══════════════════════════════════════════
 
-export const useGoal = (goalId: string): GoalController | null => {
+export const useGoal = (
+  goalId: string,
+  isLiftRequested = false,
+): GoalController | null => {
   const user = useUser();
   const commitUser = useCommitUser();
   const time = useTimeSource();
@@ -77,8 +86,6 @@ export const useGoal = (goalId: string): GoalController | null => {
   const row = user?.savings.goals.find((entry) => entry.goalId === goalId);
 
   const [amount, setAmount] = useState(0);
-  const [sheet, setSheet] = useState<GoalSheet>(null);
-
   const saved = row?.saved ?? 0;
   const balance = user?.wallet.balance ?? 0;
   const remaining = goal ? remainingFor(saved, goal.price) : 0;
@@ -87,13 +94,18 @@ export const useGoal = (goalId: string): GoalController | null => {
   const maxWithdraw = isLiquid(goalId) ? saved : 0;
   const canTransfer = user?.period.phase === 'active';
   const nextTier = user ? user.platform.level + 1 : null;
-  const canLift =
+  const isLiftReady =
     goalId === PLATFORM_GOAL_ID &&
-    Boolean(canTransfer) &&
     Boolean(goal) &&
     saved >= (goal?.price ?? Number.POSITIVE_INFINITY) &&
     nextTier !== null &&
     nextTier <= PLATFORM_LEVEL_COUNT;
+  const canLift = isLiftReady && Boolean(canTransfer);
+
+  const [sheet, setSheet] = useState<GoalSheet>(() => {
+    if (!isLiftRequested || !isLiftReady) return null;
+    return canLift ? 'lift' : 'liftPlanning';
+  });
 
   if (!goal || !user || !row) return null;
 
@@ -113,6 +125,7 @@ export const useGoal = (goalId: string): GoalController | null => {
     balance,
     canTransfer: Boolean(canTransfer),
     canLift,
+    isLiftReady,
     nextTier,
     amount,
     maxDeposit,
@@ -162,8 +175,10 @@ export const useGoal = (goalId: string): GoalController | null => {
     },
 
     requestLift: () => {
-      if (!canLift) return;
-      setSheet('lift');
+      if (!isLiftReady) return;
+      // The rule is the entity's (`applyPlatformUpgrade` wants an active period); the button
+      // stays in sight and says why instead of vanishing.
+      setSheet(canLift ? 'lift' : 'liftPlanning');
     },
 
     confirmLift: () => {
@@ -179,7 +194,12 @@ export const useGoal = (goalId: string): GoalController | null => {
           result.user.platform.level >= PLATFORM_LEVEL_COUNT &&
           !hasSeenStory(result.user, 'finale');
         if (climbedOut) router.replace(DYNAMIC_ROUTES.story('finale'));
-        else router.dismissTo(STATIC_ROUTES.HOME);
+        // Back to the pit with the terminal shut: the climb waits for the camera and plays
+        // in front of the child instead of behind this sheet.
+        else
+          router.dismissTo(
+            DYNAMIC_ROUTES.liftedHome(result.user.platform.level),
+          );
       }
     },
 

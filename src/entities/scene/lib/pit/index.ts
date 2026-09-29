@@ -1,4 +1,5 @@
 export {
+  columnTravel,
   flushSteps,
   gearAngle,
   levelProgress,
