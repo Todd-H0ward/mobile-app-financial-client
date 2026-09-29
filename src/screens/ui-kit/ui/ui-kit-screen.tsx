@@ -21,9 +21,11 @@ import {
   CoinBadge,
   clearToasts,
   dismissToast,
+  IllustratedBackdrop,
   Input,
   ListGroup,
   ListRow,
+  LoadingArtwork,
   PIXEL_ICON_NAMES,
   PixelArt,
   PixelIcon,
@@ -317,6 +319,31 @@ export const UiKitScreen = () => {
             onChange={playground.setSegment}
             style={styles.fullWidth}
           />
+        </KitSection>
+
+        <KitSection
+          title="IllustratedBackdrop"
+          caption="Фон: чистый и приглушённый для панелей."
+        >
+          <View style={styles.rings}>
+            <IllustratedBackdrop
+              source={require('../../../../assets/images/terminal-backdrop.jpg')}
+            />
+          </View>
+          <View style={styles.rings}>
+            <IllustratedBackdrop
+              source={require('../../../../assets/images/terminal-backdrop.jpg')}
+              variant="muted"
+            />
+          </View>
+        </KitSection>
+        <KitSection
+          title="LoadingArtwork"
+          caption="Настоящее ожидание, без выдуманных процентов."
+        >
+          <View style={{ height: 520, width: '100%' }}>
+            <LoadingArtwork status="Готовим приключение" />
+          </View>
         </KitSection>
 
         <KitSection
@@ -1076,6 +1103,7 @@ export const UiKitScreen = () => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
+  loadingPreview: { height: 520, width: '100%' },
   dockStage: {
     alignSelf: 'stretch',
     backgroundColor: 'transparent',

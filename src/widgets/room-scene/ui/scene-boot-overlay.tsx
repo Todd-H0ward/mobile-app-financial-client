@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Animated, {
   Easing,
   runOnJS,
@@ -11,10 +11,8 @@ import Animated, {
 
 import { SCENE_PALETTE } from '@/entities/scene';
 
-import { SPACING } from '@/shared/constants';
-import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { RingsBackdrop, TerminalPanel, Text } from '@/shared/ui';
+import { LoadingArtwork } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -29,9 +27,6 @@ interface SceneBootOverlayProps {
 // CONSTANTS
 // ═══════════════════════════════════════════
 
-/** Same boot meter as the app splash — three of five cells lit. */
-const BOOT_CELLS = [true, true, true, false, false];
-
 const FADE_MS = 360;
 
 // ═══════════════════════════════════════════
@@ -42,7 +37,6 @@ const FADE_MS = 360;
 export const SceneBootOverlay = ({ isReady }: SceneBootOverlayProps) => {
   const [isMounted, setIsMounted] = useState(true);
   const opacity = useSharedValue(1);
-  const theme = useTheme();
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -73,29 +67,7 @@ export const SceneBootOverlay = ({ isReady }: SceneBootOverlayProps) => {
         fadeStyle,
       ]}
     >
-      <RingsBackdrop centerY={0.5} />
-      <TerminalPanel frameStyle={styles.frame} style={styles.screen}>
-        <Text variant="display" style={styles.title} numberOfLines={1}>
-          {t('app.name')}
-        </Text>
-        <Text
-          variant="machine"
-          numberOfLines={1}
-        >{`> ${t('app.loadingScene')}`}</Text>
-        <View style={styles.cells}>
-          {BOOT_CELLS.map((isLit, index) => (
-            <View
-              key={index}
-              style={[
-                styles.cell,
-                {
-                  backgroundColor: isLit ? theme.phosphor : theme.surfaceSoft,
-                },
-              ]}
-            />
-          ))}
-        </View>
-      </TerminalPanel>
+      <LoadingArtwork status={t('app.loadingScene')} />
     </Animated.View>
   );
 };
@@ -105,21 +77,7 @@ export const SceneBootOverlay = ({ isReady }: SceneBootOverlayProps) => {
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  cell: { height: 10, width: 18 },
-  cells: { flexDirection: 'row', gap: 3 },
-  frame: { width: 300 },
-  root: {
-    ...StyleSheet.absoluteFill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 20,
-  },
-  screen: {
-    alignItems: 'center',
-    gap: SPACING.COMPACT,
-    paddingVertical: SPACING.SIX,
-  },
-  title: { fontSize: 38, lineHeight: 44 },
+  root: { ...StyleSheet.absoluteFill, zIndex: 20 },
 });
 
 export type { SceneBootOverlayProps };

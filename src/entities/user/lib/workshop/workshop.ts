@@ -1,20 +1,19 @@
 import { MODULE_PRICE } from '@/entities/economy';
-import type { RobotAssembly } from '@/entities/robot-dog';
 
 import type { UserSave } from '../../model/types';
 import { debitWallet } from '../wallet';
-export const moduleId = (part: keyof RobotAssembly, variant: number) =>
+export const moduleId = (part: 'head' | 'body' | 'legs', variant: number) =>
   `module:${part}:${variant}`;
 export const hasModule = (
   user: UserSave,
-  part: keyof RobotAssembly,
+  part: 'head' | 'body' | 'legs',
   variant: number,
 ) =>
   user.robot.assembly[part] === variant ||
   user.ownedItemIds.includes(moduleId(part, variant));
 export const installModule = (
   user: UserSave,
-  part: keyof RobotAssembly,
+  part: 'head' | 'body' | 'legs',
   variant: number,
   at: number,
 ): {

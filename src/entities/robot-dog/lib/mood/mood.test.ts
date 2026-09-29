@@ -71,6 +71,10 @@ describe('moodFor names the state', () => {
 // ═══════════════════════════════════════════
 
 describe('the cause is never missing', () => {
+  it('does not invent a completed plan from full starting meters', () => {
+    expect(moodFor(1, 1).reason).toBe('charged');
+    expect(moodFor(1, 1, { spirit: 'plan-kept' }).reason).toBe('plan-kept');
+  });
   it('names one for every pair of axes, so the dog is never mute', () => {
     for (const [charge, spirit] of grid()) {
       expect(ROBOT_DOG_REASONS).toContain(moodFor(charge, spirit).reason);

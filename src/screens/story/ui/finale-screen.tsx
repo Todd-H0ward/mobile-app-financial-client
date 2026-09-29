@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { RobotTerminal } from '@/widgets/robot-profile';
 
 import { PLATFORM_LEVEL_COUNT } from '@/entities/economy';
-import { RobotPortrait } from '@/entities/robot-dog/ui';
+import { RobotDuo } from '@/entities/robot-dog/ui';
 import { useUser } from '@/entities/user';
 
 import { SPACING, STATIC_ROUTES } from '@/shared/constants';
@@ -55,7 +55,12 @@ export const FinaleScreen = ({ onContinue }: FinaleScreenProps) => {
               {t('finale.surface', { level: PLATFORM_LEVEL_COUNT })}
             </Text>
           </View>
-          <RobotPortrait skin={user.settings.robotSkin} variant="finale" />
+          <View style={styles.scene}>
+            <RobotDuo
+              skin={user.settings.robotSkin}
+              assembly={user.robot.assembly}
+            />
+          </View>
         </View>
       }
     >
@@ -109,7 +114,8 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.TWO,
   },
   heading: { flex: 0 },
-  hero: { alignItems: 'center', gap: SPACING.THREE },
+  hero: { alignItems: 'center', gap: SPACING.THREE, width: '100%', flex: 1 },
+  scene: { flex: 1, width: '100%' },
   number: { fontSize: 20, lineHeight: 28 },
   stat: {
     borderRadius: 12,

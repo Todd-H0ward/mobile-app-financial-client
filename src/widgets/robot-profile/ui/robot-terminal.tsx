@@ -10,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MAX_CONTENT_WIDTH, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
-import { RingsBackdrop, TerminalPanel } from '@/shared/ui';
+import { IllustratedBackdrop, TerminalPanel } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -48,9 +48,9 @@ export const RobotTerminal = ({
   const heroHeight = Math.min(HERO_HEIGHT[variant], Math.max(0, height - 460));
   return (
     <View style={[styles.root, { backgroundColor: theme.sceneBase }]}>
-      <RingsBackdrop
-        centerY={0.3}
-        variant={variant === 'finale' ? 'surface' : 'pit'}
+      <IllustratedBackdrop
+        source={require('../../../../assets/images/terminal-backdrop.jpg')}
+        variant="muted"
       />
       <SafeAreaView style={styles.safe}>
         <View style={[styles.hero, { height: heroHeight }]}>{hero}</View>

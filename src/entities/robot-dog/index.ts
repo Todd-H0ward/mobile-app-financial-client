@@ -53,3 +53,4 @@ export {
 } from './model';
 export type { RobotAssembly } from './model/assembly';
 export { DEFAULT_ROBOT_ASSEMBLY, isRobotAssembly } from './model/assembly';
+export { ROBOT_PALETTE } from './model/palette';

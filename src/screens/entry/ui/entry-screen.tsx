@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 
+import { Image } from 'expo-image';
 import { Redirect, useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
@@ -41,7 +42,18 @@ export const EntryScreen = () => {
     return <Redirect href={DYNAMIC_ROUTES.story('intro')} />;
 
   return (
-    <RobotTerminal variant="welcome">
+    <RobotTerminal
+      variant="welcome"
+      hero={
+        <Image
+          source={require('../../../../assets/images/launch-duo.jpg')}
+          contentFit="cover"
+          contentPosition={{ top: '62%', left: '50%' }}
+          style={styles.hero}
+          accessible={false}
+        />
+      }
+    >
       <Screen.Heading style={styles.heading}>
         <Screen.Label>{t('returning.label')}</Screen.Label>
         <Screen.Title>{t('returning.title')}</Screen.Title>
@@ -101,6 +113,7 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
   heading: { flex: 0 },
+  hero: { width: '100%', height: '100%', borderRadius: 16 },
   identity: { flexBasis: 100, flexGrow: 1, gap: SPACING.ONE },
   profile: {
     alignItems: 'center',

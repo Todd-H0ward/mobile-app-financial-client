@@ -1,9 +1,7 @@
 export {
   assertStoryContent,
   getCutsceneById,
-  hasStoryAsset,
   listCutscenes,
-  storyAssetModule,
 } from './lib';
 export type {
   StoryBeat,

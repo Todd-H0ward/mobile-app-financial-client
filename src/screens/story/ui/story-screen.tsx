@@ -1,129 +1,175 @@
 import { useState } from 'react';
 
+import { Image } from 'expo-image';
 import { Redirect } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { PLATFORM_LEVEL_COUNT } from '@/entities/economy';
+import { storyImage } from '@/entities/story/ui';
+import { useUser } from '@/entities/user';
 
 import { MAX_CONTENT_WIDTH, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import {
-  Button,
-  PixelIcon,
-  RingsBackdrop,
-  TerminalPanel,
-  Text,
-} from '@/shared/ui';
+import { Button, Text } from '@/shared/ui';
 
 import { useStory } from '../model';
 
 import { FinaleScreen } from './finale-screen';
 
 // ═══════════════════════════════════════════
-// MAIN COMPONENT
+// COMPONENTS
 // ═══════════════════════════════════════════
-
-/** Placeholder frames from story.json until mp4 assets are wired. */
 export const StoryScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { cutscene, isAssetReady, isKnownId, finish } = useStory();
+  const user = useUser();
+  const { cutscene, isKnownId, finish } = useStory();
   const [beatIndex, setBeatIndex] = useState(0);
-
-  if (!isKnownId || !cutscene) {
+  const [isSummaryVisible, setSummaryVisible] = useState(false);
+  if (!user) return <Redirect href={STATIC_ROUTES.ENTRY} />;
+  if (!isKnownId || !cutscene) return <Redirect href={STATIC_ROUTES.HOME} />;
+  if (cutscene.id === 'finale' && user.platform.level < PLATFORM_LEVEL_COUNT)
     return <Redirect href={STATIC_ROUTES.HOME} />;
-  }
-
-  if (cutscene.id === 'finale') return <FinaleScreen onContinue={finish} />;
-
-  const beats = cutscene.beats;
-  const beat = beats[Math.min(beatIndex, beats.length - 1)];
-  const isLast = beatIndex >= beats.length - 1;
-
+  if (isSummaryVisible) return <FinaleScreen onContinue={finish} />;
+  const beat = cutscene.beats[Math.min(beatIndex, cutscene.beats.length - 1)];
+  const isLast = beatIndex === cutscene.beats.length - 1;
+  const complete = () =>
+    cutscene.id === 'finale' ? setSummaryVisible(true) : finish();
   return (
-    <View style={styles.root}>
-      <RingsBackdrop centerY={0.55} />
-      <SafeAreaView style={styles.safe}>
-        <View style={styles.top}>
+    <SafeAreaView style={[styles.root, { backgroundColor: theme.background }]}>
+      <View style={styles.header}>
+        <Text variant="machine">
+          {t('story.frame', {
+            index: beatIndex + 1,
+            total: cutscene.beats.length,
+          })}
+        </Text>
+        <Button variant="ghost" size="s" onPress={complete}>
+          {t('story.skipLink')}
+        </Button>
+      </View>
+      <ScrollView contentContainerStyle={styles.scroll}>
+        <View
+          style={[
+            styles.frame,
+            { borderColor: theme.bezel, backgroundColor: theme.sceneInk },
+          ]}
+        >
+          <Image
+            key={beat.id}
+            source={storyImage(
+              beat.id,
+              user.settings.robotSkin,
+              user.robot.assembly.ears,
+              user.robot.assembly.face,
+            )}
+            contentFit="contain"
+            cachePolicy="disk"
+            accessibilityLabel={t(
+              `story.${cutscene.id}.descriptions.${beat.id}`,
+            )}
+            style={StyleSheet.absoluteFill}
+          />
+          {beat.id === 'fall' && (
+            <Text
+              variant="display"
+              style={[styles.sound, { color: theme.coin }]}
+            >
+              А-а-а!
+            </Text>
+          )}
           <View
-            style={[styles.skip, { backgroundColor: theme.terminalScreen }]}
+            style={[
+              styles.bubble,
+              {
+                backgroundColor: theme.surfaceLight,
+                borderColor: theme.sceneInk,
+              },
+            ]}
           >
-            <Button variant="ghost" size="s" onPress={finish}>
-              {t('story.skipLink')}
-            </Button>
+            <Text
+              variant="subtitle"
+              style={{ color: theme.sceneInk }}
+              accessibilityLiveRegion="polite"
+            >
+              {t(`story.${cutscene.id}.beats.${beat.id}`, {
+                name: user.robot.name,
+                defaultValue: beat.caption,
+              })}
+            </Text>
           </View>
         </View>
-
-        <TerminalPanel frameStyle={styles.frame} style={styles.screen}>
-          <Text variant="machine">
-            {`> ${t('story.frame', {
-              index: Math.min(beatIndex, beats.length - 1) + 1,
-              total: beats.length,
-            })}`}
-          </Text>
-          <Text style={styles.caption} accessibilityLiveRegion="polite">
-            {isAssetReady
-              ? t('story.videoReady')
-              : beat
-                ? t(`story.${cutscene.id}.beats.${beat.id}`, {
-                    defaultValue: beat.caption,
-                  })
-                : t(`story.${cutscene.id}.title`, {
-                    defaultValue: cutscene.title,
-                  })}
-          </Text>
-          <View style={styles.footer}>
-            <View style={styles.dots}>
-              {beats.map((row, index) => (
-                <View
-                  key={row.id}
-                  style={[
-                    index === beatIndex ? styles.dotActive : styles.dot,
-                    {
-                      backgroundColor:
-                        index === beatIndex
-                          ? theme.phosphor
-                          : theme.borderStrong,
-                    },
-                  ]}
-                />
-              ))}
-            </View>
-            <Button
-              accessibilityLabel={t(isLast ? 'story.skip' : 'story.next')}
-              onPress={() => (isLast ? finish() : setBeatIndex(beatIndex + 1))}
-            >
-              <PixelIcon name="arrow" tone="onAccent" />
-            </Button>
-          </View>
-        </TerminalPanel>
-      </SafeAreaView>
-    </View>
+      </ScrollView>
+      <View style={styles.actions}>
+        {beatIndex > 0 && (
+          <Button variant="ghost" onPress={() => setBeatIndex((i) => i - 1)}>
+            {t('common.back')}
+          </Button>
+        )}
+        <Button
+          onPress={() => (isLast ? complete() : setBeatIndex((i) => i + 1))}
+        >
+          {t(isLast ? 'story.letsGo' : 'story.next')}
+        </Button>
+      </View>
+    </SafeAreaView>
   );
 };
 
 // ═══════════════════════════════════════════
 // STYLES
 // ═══════════════════════════════════════════
-
 const styles = StyleSheet.create({
-  caption: { fontSize: 18, lineHeight: 26 },
-  dot: { borderRadius: 3, height: 6, width: 6 },
-  dotActive: { borderRadius: 3, height: 6, width: 18 },
-  dots: { alignItems: 'center', flexDirection: 'row', gap: 6 },
-  footer: {
-    alignItems: 'center',
+  actions: {
+    alignSelf: 'center',
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap: SPACING.TWO,
+    maxWidth: MAX_CONTENT_WIDTH,
+    padding: SPACING.COMPACT,
+    width: '100%',
   },
-  frame: { alignSelf: 'center', maxWidth: MAX_CONTENT_WIDTH, width: '100%' },
-  root: { flex: 1 },
-  safe: {
-    flex: 1,
-    justifyContent: 'space-between',
+  bubble: {
+    position: 'absolute',
+    bottom: SPACING.THREE,
+    left: SPACING.THREE,
+    right: SPACING.THREE,
+    borderWidth: 2,
+    borderRadius: 18,
     padding: SPACING.COMPACT,
   },
-  screen: { gap: SPACING.COMPACT, padding: SPACING.THREE },
-  skip: { borderRadius: 12 },
-  top: { alignItems: 'flex-end' },
+  frame: {
+    aspectRatio: 3 / 4,
+    borderRadius: 16,
+    borderWidth: 3,
+    maxWidth: MAX_CONTENT_WIDTH,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  header: {
+    alignItems: 'center',
+    alignSelf: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: SPACING.TWO,
+    maxWidth: MAX_CONTENT_WIDTH,
+    padding: SPACING.COMPACT,
+    width: '100%',
+  },
+  root: { flex: 1 },
+  scroll: {
+    alignItems: 'center',
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.COMPACT,
+  },
+  sound: {
+    position: 'absolute',
+    right: SPACING.THREE,
+    bottom: '27%',
+    transform: [{ rotate: '-8deg' }],
+  },
 });

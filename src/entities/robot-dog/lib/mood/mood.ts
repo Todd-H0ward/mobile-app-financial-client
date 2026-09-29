@@ -27,7 +27,7 @@ const ROBOT_DOG_EASE_EPSILON = 0.001;
 
 /** The cause used when the caller names none. */
 const DEFAULT_REASONS: Record<RobotDogMoodName, RobotDogReason> = {
-  proud: 'plan-kept',
+  proud: 'charged',
   content: 'charged',
   bored: 'nothing-to-do',
   tired: 'drained',

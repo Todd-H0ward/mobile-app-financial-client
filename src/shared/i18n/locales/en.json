@@ -3,7 +3,8 @@
     "back": "Back",
     "close": "Close",
     "cancel": "Cancel",
-    "understood": "Got it"
+    "understood": "Got it",
+    "retry": "Try again"
   },
   "settings": {
     "title": "Settings",
@@ -257,7 +258,7 @@
       "sad": "sad"
     },
     "reason": {
-      "charged": "fully charged",
+      "charged": "enough energy for an adventure",
       "drained": "running low on charge",
       "goal-near": "the goal is close",
       "tasks-done": "got things done",
@@ -1050,7 +1051,7 @@
     "defaultPlayer": "Explorer",
     "defaultRobot": "Kuzya-01",
     "emptyName": "Fill in both names. Spaces do not count.",
-    "start": "Start the adventure",
+    "start": "Let’s go!",
     "save": "Save",
     "edit": "Names and appearance",
     "modules": {
@@ -1089,30 +1090,62 @@
         "hint": "It pays for the lift"
       }
     },
-    "nameHint": "Make up a name. Do not use your real one."
+    "nameHint": "Use a made-up name. Your game stays on this device.",
+    "look": {
+      "coat": "Coat",
+      "ears": "Ears",
+      "face": "Eyes",
+      "floppy": "Floppy",
+      "blade": "Pointed",
+      "radar": "Radar",
+      "dots": "Round",
+      "happy": "Smile",
+      "wide": "Bright"
+    },
+    "knopka": {
+      "coat": "Knopka: “That colour suits him!”",
+      "ears": "Knopka: “He will hear everything!”",
+      "face": "Knopka: “Ready for a walk?”"
+    },
+    "nickname": "Your callsign: {{name}}"
   },
   "story": {
     "skip": "Continue",
-    "placeholder": "Video comes later. For now — the story in words.",
-    "videoReady": "Video is wired.",
     "intro": {
       "title": "The walk",
       "beats": {
-        "walk": "The robot dog walks with its friend. An ordinary day, an ordinary road.",
-        "event": "Something happens — the ground gives way.",
-        "fall": "It falls into the pit. The friend stays at the rim. Now they must climb out."
+        "walk": "Knopka: “Race you to that slab!”",
+        "low": "What is that ring? Let’s take a look.",
+        "name": "Knopka: “{{name}}, stop! Something is humming!”",
+        "edge": "Knopka: “Careful! The edge!”",
+        "fall": "Cr-r-rack! The slab slips away.",
+        "bottom": "Knopka: “I’m here! I’ll wait for you!”"
+      },
+      "descriptions": {
+        "walk": "The robot dog and masked Knopka walk across the concrete plain.",
+        "low": "A huge ring is visible in the distance between the dog’s legs.",
+        "name": "Knopka turns toward us and calls to the dog. Her eyes and smile are visible.",
+        "edge": "The friends look into a round stepped pit with three gears.",
+        "fall": "The slab crumbles. The dog slides down while Knopka stays above.",
+        "bottom": "The dog is safe at the bottom. Knopka and her glowing tail are visible on the rim."
       }
     },
     "finale": {
       "title": "Out",
       "beats": {
-        "climb": "The last tier is behind. The rim is close.",
-        "reunion": "They are together again. The story is not over — more adventures wait."
+        "climb": "Knopka: “One more step! Take my paw!”",
+        "reunion": "Together again! The ring can wait."
+      },
+      "descriptions": {
+        "climb": "The dog climbs out. Knopka stands beside him to welcome him.",
+        "reunion": "Both friends walk toward us, their faces visible, leaving the distant ring behind."
       }
     },
     "skipLink": "skip",
     "frame": "frame {{index}} of {{total}}",
-    "next": "Next frame"
+    "next": "Next frame",
+    "sceneError": "The scene could not load. Try again or continue.",
+    "letsGo": "Let’s go!"
   },
   "action": {
     "tasks": "Open chores",
