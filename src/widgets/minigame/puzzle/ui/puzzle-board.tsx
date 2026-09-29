@@ -15,6 +15,7 @@ import type {
 import { SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 
+import type { PuzzlePicture } from '../lib/puzzle-picture';
 import { pieceBodyOf } from '../model/use-piece-drag';
 
 import { PuzzlePiece } from './puzzle-piece';
@@ -27,7 +28,7 @@ interface PuzzleBoardProps {
   pieces: BoardPiece[];
   rows: number;
   cols: number;
-  image: string;
+  image: PuzzlePicture;
   snapTargetId: number | null;
   draggingId: number | null;
   panFor: (id: number) => GestureType;
@@ -55,7 +56,7 @@ const measureView = (
 
 interface DraggablePieceProps {
   piece: BoardPiece;
-  image: string;
+  image: PuzzlePicture;
   cols: number;
   rows: number;
   isFitCell: boolean;

@@ -16,6 +16,8 @@ import type {
   PlaykitRound,
   ScalesRound,
 } from '@/entities/minigame/playkit';
+import type { SpriteName } from '@/entities/sprite';
+import { Sprite } from '@/entities/sprite/ui';
 
 import { FONTS, RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
@@ -37,14 +39,43 @@ interface SceneProps<T extends PlaykitRound> {
 }
 
 // ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+const BIN_SPRITE: Record<BinId, SpriteName> = {
+  needs: 'crate',
+  wants: 'gift',
+  savings: 'piggy',
+};
+
+/** What a weight on each pan looks like: charge on needs, modules on wants. */
+const SCALE_SPRITE: Record<'needs' | 'wants', SpriteName> = {
+  needs: 'bolt',
+  wants: 'chip',
+};
+
+/** More weights than this would wrap the pan onto a second line. */
+const MAX_WEIGHTS = 10;
+
+const PATH_SIDE = 3;
+
+const ORBIT_WIDTH = 140;
+const ORBIT_HEIGHT = 100;
+const ORBIT_COIN = 32;
+const ORBIT_RADIUS_X = 60;
+const ORBIT_RADIUS_Y = 40;
+
+// ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
 
-const BIN_GLYPH: Record<BinId, string> = {
-  needs: '▣',
-  wants: '◇',
-  savings: '◎',
-};
+/** Grid indices with row 0 at the bottom, so the climb reads upwards. */
+const PATH_ORDER = Array.from({ length: PATH_SIDE }, (_, row) =>
+  Array.from(
+    { length: PATH_SIDE },
+    (__, col) => (PATH_SIDE - 1 - row) * PATH_SIDE + col,
+  ),
+).flat();
 
 // ═══════════════════════════════════════════
 // SCENES
@@ -66,7 +97,7 @@ export const ConveyorScene = ({
   return (
     <TrialPanel isWell style={styles.panelFill}>
       <View style={styles.cargo}>
-        <Text style={[styles.cargoGlyph, { color: theme.primary }]}>◆</Text>
+        <Sprite name={round.itemSprite} size={96} />
         <Text style={[styles.monoTitle, { color: theme.primary }]}>
           {round.item}
         </Text>
@@ -78,7 +109,7 @@ export const ConveyorScene = ({
         {(['needs', 'wants', 'savings'] as const).map((bin) => (
           <TrialChip
             key={bin}
-            glyph={BIN_GLYPH[bin]}
+            icon={<Sprite name={BIN_SPRITE[bin]} size={40} />}
             label={t(`playkit.bins.${bin}`)}
             isSelected={picked === bin}
             disabled={isLocked}
@@ -125,16 +156,18 @@ export const ScalesScene = ({
               {`tgt ${target}`}
             </Text>
           </View>
-          <View style={styles.beam}>
-            <View
-              style={[
-                styles.weight,
-                {
-                  width: `${Math.min(100, value * 12)}%`,
-                  backgroundColor: theme.primary,
-                },
-              ]}
-            />
+          <View style={styles.weights}>
+            {Array.from(
+              { length: Math.min(MAX_WEIGHTS, Math.max(value, target)) },
+              (_, unit) => (
+                <Sprite
+                  key={unit}
+                  name={SCALE_SPRITE[side]}
+                  size={28}
+                  style={unit < value ? undefined : styles.ghost}
+                />
+              ),
+            )}
           </View>
           <View style={styles.row}>
             <TrialChip
@@ -176,12 +209,17 @@ export const CashierScene = ({
   };
   return (
     <TrialPanel isWell style={styles.panelFill}>
-      <TrialReadout>
-        {t('playkit.cashier.brief', {
-          price: round.price,
-          paid: round.paid,
-        })}
-      </TrialReadout>
+      <View style={styles.brief}>
+        <Sprite name="register" size={48} />
+        <View style={styles.briefText}>
+          <TrialReadout>
+            {t('playkit.cashier.brief', {
+              price: round.price,
+              paid: round.paid,
+            })}
+          </TrialReadout>
+        </View>
+      </View>
       <Text style={[styles.monoBig, { color: theme.primary }]}>
         {t('playkit.cashier.change', { count: sum })}
       </Text>
@@ -189,21 +227,18 @@ export const CashierScene = ({
         {coins.map((coin) => (
           <Pressable
             key={coin}
+            accessibilityRole="button"
+            accessibilityLabel={String(coin)}
             disabled={isLocked}
             onPress={() => add(coin)}
-            style={({ pressed }) => [
-              styles.coin,
-              {
-                borderColor: theme.primary,
-                backgroundColor: pressed
-                  ? theme.primarySoft
-                  : theme.surfaceDeep,
-              },
-            ]}
+            style={({ pressed }) => [styles.coin, pressed && styles.pressed]}
           >
-            <Text style={[styles.monoTitle, { color: theme.primary }]}>
-              {coin}
-            </Text>
+            <Sprite name="coin" size={56} />
+            <View style={styles.coinFace}>
+              <Text style={[styles.monoTitle, { color: theme.onAccent }]}>
+                {coin}
+              </Text>
+            </View>
           </Pressable>
         ))}
       </View>
@@ -224,7 +259,11 @@ export const CashierScene = ({
   );
 };
 
-export const JarScene = ({ onReady, isLocked }: SceneProps<JarRound>) => {
+export const JarScene = ({
+  round,
+  onReady,
+  isLocked,
+}: SceneProps<JarRound>) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const [caught, setCaught] = useState<number[]>([]);
@@ -240,31 +279,37 @@ export const JarScene = ({ onReady, isLocked }: SceneProps<JarRound>) => {
     <TrialPanel isWell style={styles.panelFill}>
       <TrialReadout isDim>{t('playkit.jar.hint')}</TrialReadout>
       <View style={styles.row}>
-        {[0, 1, 2, 3, 4].map((slot) => {
+        {round.slotSprites.map((sprite, slot) => {
           const isOn = caught.includes(slot);
           return (
             <Pressable
               key={slot}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isOn, disabled: isLocked }}
+              accessibilityLabel={t(
+                sprite === 'coin' ? 'playkit.jar.coin' : 'playkit.jar.fake',
+              )}
               disabled={isLocked}
               onPress={() => toggle(slot)}
               style={[
-                styles.coin,
+                styles.tile,
                 {
                   borderColor: isOn ? theme.primary : theme.textSecondary,
                   backgroundColor: isOn ? theme.primarySoft : theme.surface,
                 },
               ]}
             >
-              <Text style={[styles.monoTitle, { color: theme.primary }]}>
-                {isOn ? '●' : '○'}
-              </Text>
+              <Sprite name={sprite} size={40} />
             </Pressable>
           );
         })}
       </View>
-      <Text style={[styles.monoDim, { color: theme.textSecondary }]}>
-        {t('playkit.jar.picked', { count: caught.length })}
-      </Text>
+      <View style={styles.jarFooter}>
+        <Sprite name="jar" size={48} />
+        <Text style={[styles.monoDim, { color: theme.textSecondary }]}>
+          {t('playkit.jar.picked', { count: caught.length })}
+        </Text>
+      </View>
     </TrialPanel>
   );
 };
@@ -306,26 +351,34 @@ export const PinballScene = ({
           },
         ]}
       >
+        <Sprite name="gear" size={48} />
         <Text style={[styles.monoTitle, { color: theme.primary }]}>
           {t('playkit.pinball.swipe')}
         </Text>
         <View style={styles.row}>
           {[0, 1, 2].map((pocket) => (
-            <View
-              key={pocket}
-              style={[
-                styles.pocket,
-                {
-                  borderColor:
-                    aim === pocket ? theme.primary : theme.textSecondary,
-                  backgroundColor:
-                    aim === pocket ? theme.primarySoft : 'transparent',
-                },
-              ]}
-            >
-              <Text style={[styles.monoTitle, { color: theme.primary }]}>
-                {pocket + 1}
-              </Text>
+            <View key={pocket} style={styles.pocketColumn}>
+              <View style={styles.pocketMark}>
+                {pocket === round.target ? (
+                  <Sprite name="coin" size={24} />
+                ) : null}
+              </View>
+              <View
+                style={[
+                  styles.pocket,
+                  {
+                    borderColor:
+                      aim === pocket ? theme.primary : theme.textSecondary,
+                    backgroundColor:
+                      aim === pocket ? theme.primarySoft : 'transparent',
+                  },
+                ]}
+              >
+                <Sprite name="pocket" size={48} />
+                <Text style={[styles.monoTitle, { color: theme.primary }]}>
+                  {pocket + 1}
+                </Text>
+              </View>
             </View>
           ))}
         </View>
@@ -379,6 +432,8 @@ export const MemoryScene = ({
           return (
             <Pressable
               key={`${label}-${index}`}
+              accessibilityRole="button"
+              accessibilityLabel={isFace ? label : t('playkit.memory.back')}
               onPress={() => flip(index)}
               style={[
                 styles.memoryCard,
@@ -392,9 +447,21 @@ export const MemoryScene = ({
                 },
               ]}
             >
-              <Text style={[styles.monoTitle, { color: theme.primary }]}>
-                {isFace ? label : '??'}
-              </Text>
+              {isFace ? (
+                <>
+                  <Sprite name={round.cardSprites[index] ?? 'coin'} size={28} />
+                  <Text
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.7}
+                    style={[styles.monoTitle, { color: theme.primary }]}
+                  >
+                    {label}
+                  </Text>
+                </>
+              ) : (
+                <Sprite name="cardBack" size={44} />
+              )}
             </Pressable>
           );
         })}
@@ -421,31 +488,39 @@ export const PathScene = ({
     <TrialPanel isWell style={styles.panelFill}>
       <TrialReadout isDim>{t('playkit.path.hint')}</TrialReadout>
       <View style={styles.grid3}>
-        {round.safe.map((isSafe, index) => (
-          <Pressable
-            key={index}
-            disabled={!isSafe || isLocked}
-            onPress={() => tap(index)}
-            style={[
-              styles.cell,
-              {
-                borderColor: path.includes(index)
-                  ? theme.primary
-                  : theme.textSecondary,
-                backgroundColor: !isSafe
-                  ? theme.surface
-                  : path.includes(index)
-                    ? theme.primarySoft
-                    : theme.surfaceDeep,
-                opacity: isSafe ? 1 : 0.35,
-              },
-            ]}
-          >
-            <Text style={[styles.monoTitle, { color: theme.primary }]}>
-              {path.includes(index) ? '↑' : isSafe ? '·' : '×'}
-            </Text>
-          </Pressable>
-        ))}
+        {PATH_ORDER.map((index) => {
+          const isSafe = round.safe[index] ?? false;
+          const isStepped = path.includes(index);
+          return (
+            <Pressable
+              key={index}
+              accessibilityRole="button"
+              accessibilityState={{
+                selected: isStepped,
+                disabled: !isSafe || isLocked,
+              }}
+              disabled={!isSafe || isLocked}
+              onPress={() => tap(index)}
+              style={[
+                styles.cell,
+                !isSafe && styles.trapCell,
+                {
+                  borderColor: isStepped ? theme.primary : theme.textSecondary,
+                  backgroundColor: !isSafe
+                    ? theme.surface
+                    : isStepped
+                      ? theme.primarySoft
+                      : theme.surfaceDeep,
+                },
+              ]}
+            >
+              <Sprite
+                name={isStepped ? 'paw' : isSafe ? 'block' : 'trap'}
+                size={48}
+              />
+            </Pressable>
+          );
+        })}
       </View>
       <Pressable
         onPress={() => {
@@ -495,6 +570,8 @@ export const AssembleScene = ({
               if (isLocked) return;
               setHeld(index);
             }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: held === index }}
             style={[
               styles.part,
               {
@@ -505,6 +582,7 @@ export const AssembleScene = ({
               },
             ]}
           >
+            <Sprite name={round.partSprites[index] ?? 'dogBody'} size={48} />
             <Text style={[styles.monoTitle, { color: theme.primary }]}>
               {part}
             </Text>
@@ -514,9 +592,12 @@ export const AssembleScene = ({
       <View style={styles.stackGap}>
         {round.slots.map((slot, slotIndex) => {
           const partIndex = assignment.indexOf(slotIndex);
+          const partSprite =
+            partIndex >= 0 ? round.partSprites[partIndex] : undefined;
           return (
             <Pressable
               key={slot}
+              accessibilityRole="button"
               disabled={isLocked}
               onPress={() => place(slotIndex)}
               style={[
@@ -527,6 +608,9 @@ export const AssembleScene = ({
                 },
               ]}
             >
+              <View style={styles.slotArt}>
+                {partSprite ? <Sprite name={partSprite} size={32} /> : null}
+              </View>
               <Text style={[styles.mono, { color: theme.primary }]}>
                 {`${slot}: ${partIndex >= 0 ? round.parts[partIndex] : '—'}`}
               </Text>
@@ -562,6 +646,8 @@ export const LaserScene = ({
         return (
           <Pressable
             key={line}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: isOn, disabled: isLocked }}
             disabled={isLocked}
             onPress={() => toggle(index)}
             style={[
@@ -572,8 +658,20 @@ export const LaserScene = ({
               },
             ]}
           >
-            <Text style={[styles.mono, { color: theme.primary }]}>
-              {`${isOn ? '▣' : '□'} ${line}`}
+            <Sprite
+              name={round.lineSprites[index] ?? 'receipt'}
+              size={32}
+              style={isOn ? styles.ghost : undefined}
+            />
+            <Text
+              style={[
+                styles.mono,
+                styles.receiptText,
+                isOn && styles.struck,
+                { color: theme.primary },
+              ]}
+            >
+              {line}
             </Text>
           </Pressable>
         );
@@ -626,18 +724,24 @@ export const OrbitScene = ({
           {inWindow ? t('playkit.orbit.ready') : t('playkit.orbit.spin')}
         </Text>
         <View style={styles.orbitRing}>
+          <Sprite name="piggy" size={72} />
           <View
             style={[
-              styles.orbitDot,
+              styles.orbitCoin,
               {
-                backgroundColor: inWindow ? theme.primary : theme.textSecondary,
                 transform: [
-                  { translateX: Math.cos(angle * Math.PI * 2) * 60 },
-                  { translateY: Math.sin(angle * Math.PI * 2) * 40 },
+                  {
+                    translateX: Math.cos(angle * Math.PI * 2) * ORBIT_RADIUS_X,
+                  },
+                  {
+                    translateY: Math.sin(angle * Math.PI * 2) * ORBIT_RADIUS_Y,
+                  },
                 ],
               },
             ]}
-          />
+          >
+            <Sprite name="coin" size={ORBIT_COIN} />
+          </View>
         </View>
         <Text style={[styles.monoDim, { color: theme.textSecondary }]}>
           {`${Math.round(angle * 100)}%`}
@@ -652,20 +756,18 @@ export const OrbitScene = ({
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  beam: {
-    borderRadius: 2,
-    height: 10,
-    overflow: 'hidden',
-    width: '100%',
+  brief: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: SPACING.TWO,
+  },
+  briefText: {
+    flex: 1,
   },
   cargo: {
     alignItems: 'center',
     gap: SPACING.ONE,
     paddingVertical: SPACING.THREE,
-  },
-  cargoGlyph: {
-    fontFamily: FONTS.monoStrong,
-    fontSize: 36,
   },
   cell: {
     alignItems: 'center',
@@ -677,11 +779,14 @@ const styles = StyleSheet.create({
   },
   coin: {
     alignItems: 'center',
-    borderRadius: 28,
-    borderWidth: 2,
     height: 56,
     justifyContent: 'center',
     width: 56,
+  },
+  coinFace: {
+    ...StyleSheet.absoluteFill,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   field: {
     alignItems: 'center',
@@ -692,6 +797,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 180,
     padding: SPACING.THREE,
+  },
+  ghost: {
+    opacity: 0.35,
   },
   grid: {
     flexDirection: 'row',
@@ -704,13 +812,20 @@ const styles = StyleSheet.create({
     gap: SPACING.TWO,
     justifyContent: 'space-between',
   },
+  jarFooter: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: SPACING.TWO,
+  },
   linkHit: { minHeight: 44, justifyContent: 'center' },
   memoryCard: {
     alignItems: 'center',
     borderRadius: RADII.s,
     borderWidth: 2,
+    gap: SPACING.HALF,
     height: 68,
     justifyContent: 'center',
+    paddingHorizontal: SPACING.ONE,
     width: '30%',
   },
   mono: {
@@ -733,16 +848,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
-  orbitDot: {
-    borderRadius: 12,
-    height: 24,
-    width: 24,
+  orbitCoin: {
+    left: (ORBIT_WIDTH - ORBIT_COIN) / 2,
+    position: 'absolute',
+    top: (ORBIT_HEIGHT - ORBIT_COIN) / 2,
   },
   orbitRing: {
     alignItems: 'center',
-    height: 100,
+    height: ORBIT_HEIGHT,
     justifyContent: 'center',
-    width: 140,
+    width: ORBIT_WIDTH,
   },
   pan: { gap: SPACING.ONE },
   panHead: {
@@ -752,8 +867,10 @@ const styles = StyleSheet.create({
   },
   panelFill: { gap: SPACING.TWO },
   part: {
+    alignItems: 'center',
     borderRadius: RADII.s,
     borderWidth: 2,
+    gap: SPACING.ONE,
     paddingHorizontal: SPACING.TWO,
     paddingVertical: SPACING.TWO,
   },
@@ -761,16 +878,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: RADII.s,
     borderWidth: 2,
-    height: 52,
     justifyContent: 'center',
-    width: 52,
+    paddingBottom: SPACING.ONE,
+    width: 64,
+  },
+  pocketColumn: {
+    alignItems: 'center',
+    gap: SPACING.ONE,
+  },
+  pocketMark: {
+    alignItems: 'center',
+    height: 24,
+    justifyContent: 'center',
+  },
+  pressed: {
+    opacity: 0.7,
   },
   receiptLine: {
+    alignItems: 'center',
     borderRadius: RADII.s,
     borderWidth: 1,
-    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: SPACING.TWO,
     minHeight: 48,
     paddingHorizontal: SPACING.TWO,
+  },
+  receiptText: {
+    flex: 1,
   },
   row: {
     alignItems: 'center',
@@ -779,12 +913,40 @@ const styles = StyleSheet.create({
     gap: SPACING.TWO,
   },
   slot: {
+    alignItems: 'center',
     borderRadius: RADII.s,
     borderWidth: 1,
-    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: SPACING.TWO,
     minHeight: 48,
     paddingHorizontal: SPACING.TWO,
   },
+  slotArt: {
+    alignItems: 'center',
+    height: 32,
+    justifyContent: 'center',
+    width: 32,
+  },
   stackGap: { gap: SPACING.TWO },
-  weight: { borderRadius: 2, height: '100%' },
+  struck: {
+    opacity: 0.6,
+    textDecorationLine: 'line-through',
+  },
+  tile: {
+    alignItems: 'center',
+    borderRadius: RADII.s,
+    borderWidth: 2,
+    height: 56,
+    justifyContent: 'center',
+    width: 56,
+  },
+  trapCell: {
+    opacity: 0.7,
+  },
+  weights: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.HALF,
+    minHeight: 28,
+  },
 });

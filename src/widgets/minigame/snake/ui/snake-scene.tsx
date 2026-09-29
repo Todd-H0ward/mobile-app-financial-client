@@ -21,6 +21,7 @@ import {
   TICK_MS,
   tickSnake,
 } from '@/entities/minigame/snake';
+import { Sprite } from '@/entities/sprite/ui';
 
 import { RADII, SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
@@ -42,6 +43,9 @@ interface SnakeSceneProps {
 
 const SWIPE_THRESHOLD = 24;
 
+/** The LCD never grows past this, however wide the screen. */
+const MAX_BOARD = 280;
+
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
@@ -55,8 +59,14 @@ export const SnakeScene = ({ onComplete }: SnakeSceneProps) => {
     createSnakeSession(),
   );
   const [isClaimed, setIsClaimed] = useState(false);
+  // On a short phone the LCD is shorter than it is wide; a board sized by width
+  // alone overflows it and the hint text lands on top of the field.
+  const [hostHeight, setHostHeight] = useState<number | null>(null);
 
-  const boardSize = Math.min(width - SHELL_INSET, 280);
+  const boardSize = Math.max(
+    0,
+    Math.min(width - SHELL_INSET, MAX_BOARD, hostHeight ?? MAX_BOARD),
+  );
   const cell = boardSize / GRID_SIZE;
   const isClaimReady = canClaimSnake(session) && !isClaimed;
 
@@ -129,7 +139,12 @@ export const SnakeScene = ({ onComplete }: SnakeSceneProps) => {
         </Text>
 
         <GestureDetector gesture={gesture}>
-          <View style={styles.boardHost}>
+          <View
+            style={styles.boardHost}
+            onLayout={(event) =>
+              setHostHeight(Math.floor(event.nativeEvent.layout.height))
+            }
+          >
             <View
               style={[
                 styles.board,
@@ -142,34 +157,42 @@ export const SnakeScene = ({ onComplete }: SnakeSceneProps) => {
               ]}
               accessibilityLabel={t('games.snake.fieldA11y')}
             >
-              <View
+              <Sprite
+                name="apple"
+                size={cell}
                 style={[
-                  styles.apple,
-                  {
-                    backgroundColor: theme.snakeApple,
-                    height: cell * 0.7,
-                    left: session.apple.x * cell + cell * 0.15,
-                    top: session.apple.y * cell + cell * 0.15,
-                    width: cell * 0.7,
-                  },
+                  styles.cellArt,
+                  { left: session.apple.x * cell, top: session.apple.y * cell },
                 ]}
               />
-              {session.snake.map((segment, index) => (
-                <View
-                  key={`${segment.x}-${segment.y}-${index}`}
-                  style={[
-                    styles.segment,
-                    {
-                      backgroundColor:
-                        index === 0 ? theme.snakeHead : theme.snakeBody,
-                      height: cell * 0.85,
-                      left: segment.x * cell + cell * 0.075,
-                      top: segment.y * cell + cell * 0.075,
-                      width: cell * 0.85,
-                    },
-                  ]}
-                />
-              ))}
+              {session.snake.map((segment, index) =>
+                index === 0 ? (
+                  // The dog leads the snake: its head is the head.
+                  <Sprite
+                    key={`${segment.x}-${segment.y}-${index}`}
+                    name="dogHead"
+                    size={cell}
+                    style={[
+                      styles.cellArt,
+                      { left: segment.x * cell, top: segment.y * cell },
+                    ]}
+                  />
+                ) : (
+                  <View
+                    key={`${segment.x}-${segment.y}-${index}`}
+                    style={[
+                      styles.segment,
+                      {
+                        backgroundColor: theme.snakeBody,
+                        height: cell * 0.85,
+                        left: segment.x * cell + cell * 0.075,
+                        top: segment.y * cell + cell * 0.075,
+                        width: cell * 0.85,
+                      },
+                    ]}
+                  />
+                ),
+              )}
             </View>
           </View>
         </GestureDetector>
@@ -192,10 +215,6 @@ export const SnakeScene = ({ onComplete }: SnakeSceneProps) => {
 const SHELL_INSET = SPACING.FIVE * 2 + SPACING.THREE * 2;
 
 const styles = StyleSheet.create({
-  apple: {
-    borderRadius: RADII.pill,
-    position: 'absolute',
-  },
   board: {
     borderRadius: RADII.m,
     borderWidth: 1,
@@ -206,6 +225,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     minHeight: 0,
+  },
+  cellArt: {
+    position: 'absolute',
   },
   controlRow: {
     alignItems: 'center',

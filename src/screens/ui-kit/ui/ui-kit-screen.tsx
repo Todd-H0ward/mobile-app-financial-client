@@ -2,6 +2,14 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
+import {
+  PUZZLE_SCENES,
+  type SceneName,
+  SPRITE_PALETTE,
+  SPRITES,
+  type SpriteName,
+} from '@/entities/sprite';
+
 import { SPACING, TERMINAL_VARIANT } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import {
@@ -17,6 +25,7 @@ import {
   ListGroup,
   ListRow,
   PIXEL_ICON_NAMES,
+  PixelArt,
   PixelIcon,
   ProgressBar,
   RingsBackdrop,
@@ -44,6 +53,13 @@ import { KitSection } from './kit-section';
 // ═══════════════════════════════════════════
 
 const BUTTON_VARIANTS = ['primary', 'secondary', 'ghost', 'warning'] as const;
+
+const SPRITE_NAMES = Object.keys(SPRITES) as SpriteName[];
+
+const SCENE_NAMES = Object.keys(PUZZLE_SCENES) as SceneName[];
+
+/** Only the outline ink: every other pixel falls back to transparent. */
+const OUTLINE_ONLY = { k: SPRITE_PALETTE.k };
 
 const BUTTON_SIZES = ['xl', 'l', 'm', 's'] as const;
 
@@ -367,6 +383,73 @@ export const UiKitScreen = () => {
                 <PixelIcon key={tone} name="heart" tone={tone} />
               ),
             )}
+          </KitSection.Row>
+        </KitSection>
+
+        <KitSection
+          title="PixelArt"
+          caption="Многоцветный пиксель-арт из строк · здесь — весь лист спрайтов игры"
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              gap: SPACING.THREE,
+            }}
+          >
+            {SPRITE_NAMES.map((name) => (
+              <View
+                key={name}
+                style={{ alignItems: 'center', gap: SPACING.TWO, minWidth: 72 }}
+              >
+                <PixelArt
+                  rows={SPRITES[name]}
+                  palette={SPRITE_PALETTE}
+                  size={48}
+                />
+                <Text variant="small">{name}</Text>
+              </View>
+            ))}
+          </View>
+          <KitSection.Row label="16 / 32 / 40 / 96" isInline>
+            {[16, 32, 40, 96].map((size) => (
+              <PixelArt
+                key={size}
+                rows={SPRITES.coin}
+                palette={SPRITE_PALETTE}
+                size={size}
+              />
+            ))}
+          </KitSection.Row>
+          <KitSection.Row
+            label="неизвестные чернила прозрачны · не квадратная сетка · пусто"
+            isInline
+          >
+            <PixelArt rows={SPRITES.dogHead} palette={OUTLINE_ONLY} size={48} />
+            <PixelArt
+              rows={SPRITES.candy.slice(4, 12)}
+              palette={SPRITE_PALETTE}
+              size={48}
+            />
+            <PixelArt rows={[]} palette={SPRITE_PALETTE} size={48} />
+          </KitSection.Row>
+          <KitSection.Row label="сцены пазлов 48×48 — из тех же спрайтов">
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: SPACING.TWO,
+              }}
+            >
+              {SCENE_NAMES.map((name) => (
+                <PixelArt
+                  key={name}
+                  rows={PUZZLE_SCENES[name]}
+                  palette={SPRITE_PALETTE}
+                  size={96}
+                />
+              ))}
+            </View>
           </KitSection.Row>
         </KitSection>
 

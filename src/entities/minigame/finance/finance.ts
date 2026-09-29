@@ -1,9 +1,19 @@
+import type { SpriteName } from '@/entities/sprite';
+
 type FinanceGame = 'market' | 'weekly';
+/** One group in the picture over a question: a sprite drawn `count` times. */
+interface FinanceArt {
+  sprite: SpriteName;
+  /** How many to draw, 1 or more — «3 детали» is three gears. */
+  count: number;
+}
 interface FinanceRound {
   question: string;
   options: string[];
   correct: number;
   explanation: string;
+  /** The question as a picture, left to right. */
+  art: FinanceArt[];
 }
 /** Monday-based UTC week, stable on every device without a server. */
 export const financeWeek = (at: number) =>
@@ -18,33 +28,55 @@ export const financeRound = (
   const a = 5 + ((((seed * 17 + index * 11) % 13) + 13) % 13);
   const b = 2 + ((((seed + index) % 4) + 4) % 4);
   let question: string, answer: number, explanation: string;
+  let art: FinanceArt[];
   if (game === 'market') {
     if (index === 0) {
       answer = a * b;
       question = `Одна деталь стоит ${a} монет. Сколько стоят ${b} детали?`;
       explanation = `Цена × количество: ${a} × ${b} = ${answer}.`;
+      art = [{ sprite: 'gear', count: b }];
     } else if (index === 1) {
       answer = a * b + b;
       question = `Корзина стоит ${a * b} монет, доставка — ${b}. Сколько заплатишь всего?`;
       explanation = `Доставку тоже учитываем: ${a * b} + ${b} = ${answer}.`;
+      art = [
+        { sprite: 'crate', count: 1 },
+        { sprite: 'truck', count: 1 },
+      ];
     } else {
       answer = a * b;
       question = `У тебя ${a * b + a} монет, покупка стоит ${a}. Сколько останется?`;
       explanation = `${a * b + a} − ${a} = ${answer}. Остаток доступен для других целей.`;
+      art = [
+        { sprite: 'coin', count: 3 },
+        { sprite: 'gift', count: 1 },
+      ];
     }
   } else {
     if (index === 0) {
       answer = a * 2;
       question = `На неделю есть ${a * 5} монет. На нужды нужно ${a * 3}. Сколько останется распределить?`;
       explanation = `${a * 5} − ${a * 3} = ${answer}. Сначала обеспечиваем нужды.`;
+      art = [
+        { sprite: 'coin', count: 3 },
+        { sprite: 'chargeFull', count: 1 },
+      ];
     } else if (index === 1) {
       answer = a;
       question = `После нужд осталось ${a * 3}. В копилку отложим ${a * 2}. Сколько можно выделить на желания?`;
       explanation = `${a * 3} − ${a * 2} = ${answer}. Отложенные деньги не входят в остаток кошелька.`;
+      art = [
+        { sprite: 'piggy', count: 1 },
+        { sprite: 'sticker', count: 1 },
+      ];
     } else {
       answer = a * b;
       question = `Цель стоит ${a * (b + 2)}, уже накоплено ${a * 2}. Сколько ещё нужно?`;
       explanation = `${a * (b + 2)} − ${a * 2} = ${answer}. Пересматриваем план в конце недели.`;
+      art = [
+        { sprite: 'jar', count: 1 },
+        { sprite: 'stairs', count: 1 },
+      ];
     }
   }
   const values = [answer, answer + b, Math.max(0, answer - b)];
@@ -57,6 +89,7 @@ export const financeRound = (
     options,
     correct: options.indexOf(String(answer)),
     explanation,
+    art,
   };
 };
-export type { FinanceGame, FinanceRound };
+export type { FinanceArt, FinanceGame, FinanceRound };

@@ -1,4 +1,5 @@
 import type { BudgetDirection } from '@/entities/economy';
+import { isSpriteName } from '@/entities/sprite';
 
 import { isNonEmptyString, isRecord } from '@/shared/utils';
 
@@ -73,6 +74,9 @@ const assertItem = (item: unknown, path: string): CatalogueItem => {
   }
   if (item.note !== undefined && !isNonEmptyString(item.note)) {
     throw new Error(`${path}.note: non-empty string when present`);
+  }
+  if (item.sprite !== undefined && !isSpriteName(item.sprite)) {
+    throw new Error(`${path}.sprite: a sprite from the sheet when present`);
   }
 
   return item as unknown as CatalogueItem;

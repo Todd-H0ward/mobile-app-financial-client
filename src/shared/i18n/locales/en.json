@@ -514,7 +514,31 @@
       },
       "puzzle-arena": {
         "title": "Arena puzzle",
-        "note": "Buy it — the puzzle unlocks in the mini-games."
+        "note": "A puzzle of the arena — buy it and it unlocks in the mini-games."
+      },
+      "toy-ball": {
+        "title": "Ball",
+        "note": "A bouncy ball the dog chases round the pit. Buy it — a puzzle unlocks in the mini-games."
+      },
+      "toy-bone": {
+        "title": "Nut-and-bolt bone",
+        "note": "An iron bone — not for eating, fine for chewing. Buy it — a puzzle unlocks in the mini-games."
+      },
+      "toy-frisbee": {
+        "title": "Frisbee",
+        "note": "A flying disc the dog catches mid-jump. Buy it — a puzzle unlocks in the mini-games."
+      },
+      "toy-duck": {
+        "title": "Robo-duck",
+        "note": "A duck for the puddle at the bottom of the pit. Buy it — a puzzle unlocks in the mini-games."
+      },
+      "toy-yoyo": {
+        "title": "Yo-yo",
+        "note": "A yo-yo on a cable — up and down, like the lift. Buy it — a puzzle unlocks in the mini-games."
+      },
+      "toy-cube": {
+        "title": "Building blocks",
+        "note": "Blocks to stack into a tower. Buy it — a puzzle unlocks in the mini-games."
       }
     }
   },
@@ -855,7 +879,9 @@
     },
     "jar": {
       "hint": "Tap real coins — skip the fakes",
-      "picked": "Picked: {{count}}"
+      "picked": "Picked: {{count}}",
+      "coin": "Coin",
+      "fake": "A want — not a coin"
     },
     "pinball": {
       "hint": "Swipe left, centre or right toward a pocket",
@@ -863,7 +889,8 @@
       "target": "Target: pocket {{pocket}}"
     },
     "memory": {
-      "hint": "Open pairs: price and item"
+      "hint": "Open pairs: price and item",
+      "back": "Face-down card"
     },
     "path": {
       "hint": "Tap safe cells from bottom to top",
@@ -972,7 +999,13 @@
       "completeBody": "You earned {{reward}} coins.",
       "completeClose": "Back to the room",
       "levels": {
-        "rooms-living": "Living room"
+        "rooms-living": "The arena",
+        "toy-bone": "The bone",
+        "toy-ball": "The ball",
+        "toy-yoyo": "The yo-yo",
+        "toy-frisbee": "The frisbee",
+        "toy-duck": "The duck",
+        "toy-cube": "The blocks"
       },
       "empty": "No puzzles on the shelf yet.",
       "goToys": "Go to toys"

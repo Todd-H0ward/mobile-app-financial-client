@@ -1,3 +1,5 @@
+import type { SpriteName } from '@/entities/sprite';
+
 import type { PieceTabs } from '../lib/piece-path';
 
 // ═══════════════════════════════════════════
@@ -23,10 +25,12 @@ interface PuzzleLevel {
   /** Pack grouping for unlock ladders. */
   pack: string;
   /**
-   * Key into the widget image map. Entity stays free of `require()` so node tests can import
-   * the catalogue without RN assets.
+   * The picture: a scene name from `@/entities/sprite`, or a key into the widget's photo map.
+   * Entity stays free of `require()` so node tests can import the catalogue without RN assets.
    */
   imageKey: string;
+  /** Small picture for the level's row in the arcade list — the toy that opened it. */
+  cover: SpriteName;
 }
 
 type Placement =

@@ -26,6 +26,8 @@ export type { ListGroupItemProps, ListGroupRootProps } from './list-group';
 export { ListGroup } from './list-group';
 export type { ListRowIconProps, ListRowRootProps } from './list-row';
 export { ListRow } from './list-row';
+export type { PixelArtProps } from './pixel-art';
+export { PixelArt } from './pixel-art';
 export type { PixelIconName, PixelIconProps } from './pixel-icon';
 export { PIXEL_ICON_NAMES, PixelIcon } from './pixel-icon';
 export type { ProgressBarProps } from './progress-bar';

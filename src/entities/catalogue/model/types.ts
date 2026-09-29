@@ -1,3 +1,5 @@
+import type { SpriteName } from '@/entities/sprite';
+
 const SHOP_IDS = ['workshop'] as const;
 
 /** Id of one of the street shops. */
@@ -32,6 +34,11 @@ interface CatalogueItem {
   moduleTier?: 1 | 2 | 3;
   /** Extra line under the title — why it exists. */
   note?: string;
+  /**
+   * Picture on the shelf, a name from `@/entities/sprite`. Optional so a new
+   * row can land before its art; the shelf then falls back to the kind icon.
+   */
+  sprite?: SpriteName;
 }
 
 interface CatalogueFile {

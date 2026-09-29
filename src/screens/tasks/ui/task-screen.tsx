@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
+import { Sprite } from '@/entities/sprite/ui';
 import {
   type BasketPayload,
   type ChangePayload,
@@ -188,9 +189,12 @@ export const TaskScreen = ({ taskId }: TaskScreenProps) => {
         fillTone="overseerSurface"
         style={styles.brief}
       >
-        <Text variant="title" style={styles.briefTitle}>
-          {title}
-        </Text>
+        <View style={styles.briefHead}>
+          {task.sprite ? <Sprite name={task.sprite} size={48} /> : null}
+          <Text variant="title" style={styles.briefTitle}>
+            {title}
+          </Text>
+        </View>
         <Text>{brief}</Text>
       </ChamferCard>
 
@@ -310,7 +314,12 @@ export const TaskRouteScreen = ({ taskId }: { taskId: string }) => {
 
 const styles = StyleSheet.create({
   brief: { gap: SPACING.ONE, paddingHorizontal: 14, paddingVertical: 14 },
-  briefTitle: { fontSize: 20, lineHeight: 25 },
+  briefHead: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: SPACING.COMPACT,
+  },
+  briefTitle: { flexShrink: 1, fontSize: 20, lineHeight: 25 },
   footer: { gap: SPACING.COMPACT },
   overseerLabel: { letterSpacing: 1 },
   reward: {

@@ -1,3 +1,5 @@
+import type { SpriteName } from '@/entities/sprite';
+
 import type { PlaykitGameId } from '../lib/payout';
 
 // ═══════════════════════════════════════════
@@ -10,6 +12,8 @@ interface ConveyorRound {
   kind: 'conveyor';
   /** Label shown on the travelling item. */
   item: string;
+  /** Picture of the travelling item. */
+  itemSprite: SpriteName;
   correctBin: BinId;
   explanation: string;
 }
@@ -36,6 +40,8 @@ interface JarRound {
   kind: 'jar';
   /** Indices (0…4) that are real coins to catch. */
   goodSlots: number[];
+  /** Picture per slot: a coin on every good slot, a «хотелка» elsewhere. */
+  slotSprites: SpriteName[];
   explanation: string;
 }
 
@@ -52,6 +58,8 @@ interface MemoryRound {
   cards: string[];
   /** Pair mate index for each card. */
   mates: number[];
+  /** Picture per card: a coin on a price, the goods on the other half. */
+  cardSprites: SpriteName[];
   explanation: string;
 }
 
@@ -72,12 +80,16 @@ interface AssembleRound {
   parts: string[];
   /** Correct slot index for each part. */
   map: number[];
+  /** Picture per part, in `parts` order. */
+  partSprites: SpriteName[];
   explanation: string;
 }
 
 interface LaserRound {
   kind: 'laser';
   lines: string[];
+  /** Picture per receipt line, in `lines` order. */
+  lineSprites: SpriteName[];
   /** Indices that are waste and must be marked. */
   waste: number[];
   explanation: string;
@@ -102,6 +114,60 @@ type PlaykitRound =
   | AssembleRound
   | LaserRound
   | OrbitRound;
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+
+/** Conveyor cargo: label and picture, by the bin it belongs in. */
+const CONVEYOR_ITEMS: Record<BinId, readonly [string, SpriteName][]> = {
+  needs: [
+    ['Заряд', 'bolt'],
+    ['Батарея', 'battery'],
+    ['Ремонт', 'wrench'],
+  ],
+  wants: [
+    ['Наклейка', 'sticker'],
+    ['Антенна', 'antenna'],
+    ['Скин', 'paint'],
+  ],
+  savings: [
+    ['Монета в банку', 'jar'],
+    ['На ярус', 'stairs'],
+    ['Отложить', 'piggy'],
+  ],
+};
+
+/** What lands in the jar instead of a coin — every one of them a «хотелка». */
+const JAR_FAKES: readonly SpriteName[] = [
+  'candy',
+  'sticker',
+  'iceCream',
+  'gift',
+];
+
+/** Memory pairs: a price and the goods it buys. */
+const MEMORY_PAIRS: readonly (readonly [string, string, SpriteName])[] = [
+  ['10', 'Хлеб', 'bread'],
+  ['25', 'Заряд', 'bolt'],
+  ['40', 'Модуль', 'chip'],
+  ['15', 'Наклейка', 'sticker'],
+  ['50', 'Ярус', 'stairs'],
+];
+
+const ASSEMBLE_SLOTS: readonly (readonly [string, SpriteName])[] = [
+  ['Голова', 'dogHead'],
+  ['Корпус', 'dogBody'],
+  ['Лапы', 'dogLegs'],
+];
+
+const LASER_LINES: readonly (readonly [string, SpriteName])[] = [
+  ['Заряд батареи', 'battery'],
+  ['Мороженое', 'iceCream'],
+  ['Наклейка-единорог', 'sticker'],
+  ['Ремонт антенны', 'antenna'],
+  ['Игрушка-сюрприз', 'gift'],
+];
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -133,15 +199,12 @@ export const playkitRound = (
 
   if (gameId === 'conveyor') {
     const bins: BinId[] = ['needs', 'wants', 'savings'];
-    const items: Record<BinId, string[]> = {
-      needs: ['Заряд', 'Батарея', 'Ремонт'],
-      wants: ['Наклейка', 'Антенна', 'Скин'],
-      savings: ['Монета в банку', 'На ярус', 'Отложить'],
-    };
     const correctBin = bins[seed % 3] as BinId;
+    const [item, itemSprite] = pick(seed >> 3, CONVEYOR_ITEMS[correctBin]);
     return {
       kind: 'conveyor',
-      item: pick(seed >> 3, items[correctBin]),
+      item,
+      itemSprite,
       correctBin,
       explanation:
         correctBin === 'needs'
@@ -182,9 +245,13 @@ export const playkitRound = (
       if ((seed >> i) % 3 !== 0) goodSlots.push(i);
     }
     if (goodSlots.length === 0) goodSlots.push(seed % 5);
+    const slotSprites = [0, 1, 2, 3, 4].map((slot) =>
+      goodSlots.includes(slot) ? 'coin' : pick(seed + slot, JAR_FAKES),
+    );
     return {
       kind: 'jar',
       goodSlots,
+      slotSprites,
       explanation: 'В банку кладём только настоящие монеты, не «хотелки».',
     };
   }
@@ -199,25 +266,23 @@ export const playkitRound = (
   }
 
   if (gameId === 'memory') {
-    const pairs = [
-      ['10', 'Хлеб'],
-      ['25', 'Заряд'],
-      ['40', 'Модуль'],
-      ['15', 'Наклейка'],
-      ['50', 'Ярус'],
-    ];
-    const chosen = [0, 1, 2].map((i) => pairs[(seed + i) % pairs.length]!);
+    const chosen = [0, 1, 2].map(
+      (i) => MEMORY_PAIRS[(seed + i) % MEMORY_PAIRS.length]!,
+    );
     const cards: string[] = [];
     const mates: number[] = [];
     const order = [0, 1, 2, 3, 4, 5].sort(
       (a, b) => ((seed >> a) & 7) - ((seed >> b) & 7),
     );
+    const cardSprites: SpriteName[] = [];
     const placed = new Array<string>(6);
+    const placedSprites = new Array<SpriteName>(6);
     const mateOf = new Array<number>(6);
     order.forEach((slot, i) => {
-      const pair = chosen[Math.floor(i / 2)]!;
-      const face = i % 2 === 0 ? pair[0]! : pair[1]!;
-      placed[slot] = face;
+      const [price, goods, sprite] = chosen[Math.floor(i / 2)]!;
+      const isPrice = i % 2 === 0;
+      placed[slot] = isPrice ? price : goods;
+      placedSprites[slot] = isPrice ? 'coin' : sprite;
     });
     for (let i = 0; i < 3; i += 1) {
       const a = order[i * 2]!;
@@ -227,12 +292,14 @@ export const playkitRound = (
     }
     for (let i = 0; i < 6; i += 1) {
       cards.push(placed[i]!);
+      cardSprites.push(placedSprites[i]!);
       mates.push(mateOf[i]!);
     }
     return {
       kind: 'memory',
       cards,
       mates,
+      cardSprites,
       explanation: 'Цена и товар — одна пара. Так читают чек.',
     };
   }
@@ -264,33 +331,32 @@ export const playkitRound = (
   }
 
   if (gameId === 'assemble') {
-    const slots = ['Голова', 'Корпус', 'Лапы'];
+    const slots = ASSEMBLE_SLOTS.map(([slot]) => slot);
     const parts = [...slots].sort(
       (a, b) => ((seed + a.charCodeAt(0)) % 5) - ((seed + b.charCodeAt(0)) % 5),
     );
     const map = parts.map((part) => slots.indexOf(part));
+    const partSprites = map.map(
+      (slot): SpriteName => ASSEMBLE_SLOTS[slot]?.[1] ?? 'dogBody',
+    );
     return {
       kind: 'assemble',
       slots,
       parts,
       map,
+      partSprites,
       explanation: 'Каждая деталь — в свой слот. Модуль собран.',
     };
   }
 
   if (gameId === 'laser') {
-    const lines = [
-      'Заряд батареи',
-      'Мороженое',
-      'Наклейка-единорог',
-      'Ремонт антенны',
-      'Игрушка-сюрприз',
-    ];
+    const lines = LASER_LINES.map(([line]) => line);
     const waste = [1, 2, 4].map((i) => (i + seed) % lines.length);
     const unique = [...new Set(waste)].slice(0, 2);
     return {
       kind: 'laser',
       lines,
+      lineSprites: LASER_LINES.map(([, sprite]) => sprite),
       waste: unique,
       explanation: 'Лишние траты — желаемое. Отметь их, нужное оставь.',
     };

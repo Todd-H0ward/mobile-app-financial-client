@@ -18,6 +18,7 @@ const ROUNDS = {
   conveyor: {
     kind: 'conveyor',
     item: 'bread',
+    itemSprite: 'bread',
     correctBin: 'needs',
     explanation: EXPLANATION,
   },
@@ -34,12 +35,18 @@ const ROUNDS = {
     change: 7,
     explanation: EXPLANATION,
   },
-  jar: { kind: 'jar', goodSlots: [3, 0], explanation: EXPLANATION },
+  jar: {
+    kind: 'jar',
+    goodSlots: [3, 0],
+    slotSprites: ['coin', 'candy', 'gift', 'coin', 'sticker'],
+    explanation: EXPLANATION,
+  },
   pinball: { kind: 'pinball', target: 1, explanation: EXPLANATION },
   memory: {
     kind: 'memory',
     cards: ['a', 'b', 'c', 'a', 'b', 'c'],
     mates: [3, 4, 5, 0, 1, 2],
+    cardSprites: ['coin', 'coin', 'coin', 'bread', 'bolt', 'chip'],
     explanation: EXPLANATION,
   },
   path: {
@@ -53,11 +60,13 @@ const ROUNDS = {
     slots: ['head', 'body', 'legs'],
     parts: ['legs', 'head', 'body'],
     map: [2, 0, 1],
+    partSprites: ['dogLegs', 'dogHead', 'dogBody'],
     explanation: EXPLANATION,
   },
   laser: {
     kind: 'laser',
     lines: ['a', 'b', 'c', 'd'],
+    lineSprites: ['battery', 'iceCream', 'sticker', 'gift'],
     waste: [2, 1],
     explanation: EXPLANATION,
   },
@@ -88,6 +97,41 @@ describe('playkitRound', () => {
     expect(isPlaykitAnswerCorrect(round, 'needs')).toBe(
       round.correctBin === 'needs',
     );
+  });
+
+  it('dresses every dealt round in pictures that line up with it', () => {
+    for (let day = 0; day < 40; day += 1) {
+      for (let index = 0; index < 3; index += 1) {
+        const at = day * 86_400_000;
+        const jar = playkitRound('jar', at, index);
+        if (jar.kind === 'jar') {
+          expect(jar.slotSprites).toHaveLength(5);
+          jar.slotSprites.forEach((sprite, slot) => {
+            expect(sprite === 'coin').toBe(jar.goodSlots.includes(slot));
+          });
+        }
+        const memory = playkitRound('memory', at, index);
+        if (memory.kind === 'memory') {
+          expect(memory.cardSprites).toHaveLength(memory.cards.length);
+          memory.mates.forEach((mate, card) => {
+            // A pair is one price and one purchase, never two coins.
+            const coins = [card, mate].filter(
+              (i) => memory.cardSprites[i] === 'coin',
+            );
+            expect(coins).toHaveLength(1);
+          });
+        }
+        const assemble = playkitRound('assemble', at, index);
+        if (assemble.kind === 'assemble') {
+          expect(assemble.partSprites).toHaveLength(assemble.parts.length);
+          expect(new Set(assemble.partSprites).size).toBe(3);
+        }
+        const laser = playkitRound('laser', at, index);
+        if (laser.kind === 'laser') {
+          expect(laser.lineSprites).toHaveLength(laser.lines.length);
+        }
+      }
+    }
   });
 
   it('keeps the same round for the same day seed', () => {

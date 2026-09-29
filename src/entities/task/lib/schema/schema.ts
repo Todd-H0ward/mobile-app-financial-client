@@ -1,3 +1,5 @@
+import { isSpriteName } from '@/entities/sprite';
+
 import {
   isNonEmptyString,
   isOneOf,
@@ -120,6 +122,11 @@ const assertBasketPayload = (
         `${path}.items[${index}].price: positive integer required`,
       );
     }
+    if (item.sprite !== undefined && !isSpriteName(item.sprite)) {
+      throw new Error(
+        `${path}.items[${index}].sprite: a sprite from the sheet when present`,
+      );
+    }
   }
 };
 
@@ -150,6 +157,11 @@ const assertPriorityPayload = (
     }
     if (item.kind !== 'need' && item.kind !== 'want') {
       throw new Error(`${path}.items[${index}].kind: "need" | "want"`);
+    }
+    if (item.sprite !== undefined && !isSpriteName(item.sprite)) {
+      throw new Error(
+        `${path}.items[${index}].sprite: a sprite from the sheet when present`,
+      );
     }
   }
 };
@@ -251,6 +263,10 @@ const assertTask = (task: unknown, path: string): TaskContent => {
   }
   if (!isNonEmptyString(task.explanation)) {
     throw new Error(`${path}.explanation: non-empty string required`);
+  }
+
+  if (task.sprite !== undefined && !isSpriteName(task.sprite)) {
+    throw new Error(`${path}.sprite: a sprite from the sheet when present`);
   }
 
   assertPayload(task.mechanic, task.payload, `${path}.payload`);

@@ -87,9 +87,10 @@ entities/budget/lib/compare/
    its own from the layer. `entities/economy` (the balance table),
    `entities/goal` / `entities/task` / `entities/catalogue` / `entities/glossary`
    / `entities/hint` (validated content), `entities/robot-dog` (the character's
-   coats, clips, stages and mood rules) and `entities/settings` (parent-gate
-   math only — `SettingsSave` switches live on `entities/user`) are those
-   leaves. The rule that does not bend: a slice never
+   coats, clips, stages and mood rules), `entities/sprite` (the pixel-art
+   sheet, its palette and the puzzle scenes) and `entities/settings`
+   (parent-gate math only — `SettingsSave` switches live on `entities/user`)
+   are those leaves. The rule that does not bend: a slice never
    **re-exports** another slice's API. `STARTING_BALANCE` is imported from
    `@/entities/economy` by everyone who needs it, never through `@/entities/user`.
 7. `shared/` knows nothing about the domain. No entity types, no feature logic.
@@ -486,8 +487,8 @@ Full rationale: [docs/layout.md](docs/layout.md).
   is an entity's own art data — the arena's colours belong to the world, not
   the design system, and `shared/` may not know about them (rule 7). Such
   colors live in a **single** palette file inside that entity
-  (`entities/scene/model/palette`), nothing else in the slice writes a hex,
-  and a test asserts it.
+  (`entities/scene/model/palette`, `entities/sprite/model/palette`), nothing
+  else in the slice writes a hex, and a test asserts it.
 - Do not add barrels that re-export a whole layer (`src/screens/index.ts`);
   import the slice.
 - Do not use `export *` in a barrel — list every export by name, values and

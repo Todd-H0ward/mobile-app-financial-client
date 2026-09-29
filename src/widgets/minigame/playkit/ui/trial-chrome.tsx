@@ -28,7 +28,8 @@ interface TrialChipProps {
   isSelected?: boolean;
   onPress?: () => void;
   disabled?: boolean;
-  glyph?: string;
+  /** Picture over the label — a sprite, sized by the caller. */
+  icon?: ReactNode;
   /** Compact dial / ± without flex grow. */
   isCompact?: boolean;
 }
@@ -114,7 +115,7 @@ export const TrialChip = ({
   isSelected = false,
   onPress,
   disabled,
-  glyph,
+  icon,
   isCompact = false,
 }: TrialChipProps) => {
   const theme = useTheme();
@@ -134,9 +135,7 @@ export const TrialChip = ({
         },
       ]}
     >
-      {glyph ? (
-        <Text style={[styles.glyph, { color: theme.primary }]}>{glyph}</Text>
-      ) : null}
+      {icon}
       <Text
         numberOfLines={1}
         adjustsFontSizeToFit
@@ -209,10 +208,6 @@ const styles = StyleSheet.create({
     height: 14,
     marginLeft: 4,
     width: 8,
-  },
-  glyph: {
-    fontFamily: FONTS.monoStrong,
-    fontSize: 22,
   },
   lamp: {
     borderRadius: 8,

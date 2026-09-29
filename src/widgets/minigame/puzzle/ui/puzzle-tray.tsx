@@ -19,6 +19,7 @@ import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 import { Text } from '@/shared/ui';
 
+import type { PuzzlePicture } from '../lib/puzzle-picture';
 import { pieceBodyOf } from '../model/use-piece-drag';
 
 import { PuzzlePiece } from './puzzle-piece';
@@ -28,7 +29,7 @@ import { PuzzlePiece } from './puzzle-piece';
 // ═══════════════════════════════════════════
 
 interface PuzzleTrayProps {
-  image: string;
+  image: PuzzlePicture;
   trayPieces: BoardPiece[];
   boardCols: number;
   boardRows: number;
@@ -50,7 +51,7 @@ const TRAY_PIECE_SIZE = 72;
 
 interface TrayPieceProps {
   piece: BoardPiece;
-  image: string;
+  image: PuzzlePicture;
   boardCols: number;
   boardRows: number;
   isHidden: boolean;

@@ -21,6 +21,8 @@ import {
 
 import { useTheme } from '@/shared/hooks';
 
+import type { PuzzlePicture } from '../lib/puzzle-picture';
+
 // ═══════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════
@@ -33,8 +35,8 @@ type PuzzlePieceVariant =
   | 'loose';
 
 interface PuzzlePhotoProps {
-  /** Full puzzle photo URI — when set, the piece shows its fragment instead of the decorative fill pattern. */
-  image: string;
+  /** The whole puzzle picture — when set, the piece shows its fragment instead of the decorative fill pattern. */
+  image: PuzzlePicture;
   row: number;
   col: number;
   boardCols: number;
@@ -68,6 +70,25 @@ const BOX_PERCENT = `${(1 + PIECE_TAB_OVERHANG * 2) * 100}%` as const;
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
+
+/**
+ * Where the piece's cell sits inside a pixel scene, fitted like a photo with
+ * `slice`: the scene covers the whole board and is centred on it.
+ */
+const pixelTransform = (
+  picture: { width: number; height: number },
+  photo: PuzzlePhotoProps,
+): string => {
+  const boardWidth = photo.boardCols * 100;
+  const boardHeight = photo.boardRows * 100;
+  const scale = Math.max(
+    boardWidth / picture.width,
+    boardHeight / picture.height,
+  );
+  const left = (boardWidth - picture.width * scale) / 2 - photo.col * 100;
+  const top = (boardHeight - picture.height * scale) / 2 - photo.row * 100;
+  return `translate(${left} ${top}) scale(${scale})`;
+};
 
 const withAlpha = (hex: string, alpha: number): string => {
   if (!hex.startsWith('#') || (hex.length !== 7 && hex.length !== 4)) {
@@ -186,14 +207,22 @@ export const PuzzlePiece = ({
 
         {photo ? (
           <G clipPath={`url(#${clipId})`}>
-            <Image
-              href={photo.image}
-              x={-photo.col * 100}
-              y={-photo.row * 100}
-              width={photo.boardCols * 100}
-              height={photo.boardRows * 100}
-              preserveAspectRatio="xMidYMid slice"
-            />
+            {photo.image.kind === 'pixel' ? (
+              <G transform={pixelTransform(photo.image, photo)}>
+                {photo.image.paths.map((path) => (
+                  <Path key={path.ink} d={path.d} fill={path.color} />
+                ))}
+              </G>
+            ) : (
+              <Image
+                href={photo.image.uri}
+                x={-photo.col * 100}
+                y={-photo.row * 100}
+                width={photo.boardCols * 100}
+                height={photo.boardRows * 100}
+                preserveAspectRatio="xMidYMid slice"
+              />
+            )}
           </G>
         ) : (
           <Path d={d} fill={fill} stroke="none" />

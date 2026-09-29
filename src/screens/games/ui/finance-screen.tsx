@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useRouter } from 'expo-router';
+import { StyleSheet } from 'react-native';
 
-import { DebriefSheet, GameShell } from '@/widgets/minigame/finance';
+import {
+  DebriefSheet,
+  GameShell,
+  QuestionArt,
+} from '@/widgets/minigame/finance';
 
 import { useArcadeSession } from '@/features/arcade-session';
 
@@ -11,6 +16,7 @@ import {
   financeRound,
   financeWeek,
 } from '@/entities/minigame/finance';
+import { Sprite } from '@/entities/sprite/ui';
 import { useUser } from '@/entities/user';
 
 import { SOUNDS, STATIC_ROUTES } from '@/shared/constants';
@@ -79,7 +85,10 @@ export const FinanceScreen = ({ game }: FinanceScreenProps) => {
       isDisabled={index < 3 && choice === null}
     >
       {index === 3 ? (
-        <Text>{result}</Text>
+        <>
+          <Sprite name="dogJoy" size={96} style={styles.result} />
+          <Text>{result}</Text>
+        </>
       ) : (
         <>
           <Text>
@@ -90,6 +99,7 @@ export const FinanceScreen = ({ game }: FinanceScreenProps) => {
                 : t('financeGame.remaining', { count: session.paidRemaining })}
           </Text>
           <Text>{t('financeGame.noPenalty')}</Text>
+          <QuestionArt art={round.art} />
           <Text variant="subtitle">{round.question}</Text>
           {round.options.map((option, n) => (
             <Button
@@ -117,4 +127,14 @@ export const FinanceScreen = ({ game }: FinanceScreenProps) => {
 };
 export const MarketScreen = () => <FinanceScreen game="market" />;
 export const WeeklyScreen = () => <FinanceScreen game="weekly" />;
+
+// ═══════════════════════════════════════════
+// STYLES
+// ═══════════════════════════════════════════
+const styles = StyleSheet.create({
+  result: {
+    alignSelf: 'center',
+  },
+});
+
 export type { FinanceScreenProps };

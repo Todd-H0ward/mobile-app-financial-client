@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 
 import { StyleSheet, View } from 'react-native';
 
+import { Sprite } from '@/entities/sprite/ui';
+
 import { SPACING, TERMINAL_VARIANT } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
 import { Button, Screen, Sheet, Text } from '@/shared/ui';
@@ -24,6 +26,8 @@ interface PlayShellProps {
 
 interface PlayDebriefProps {
   isVisible: boolean;
+  /** Picks the dog's face: joy for a hit, a thinking look for a miss. */
+  isCorrect: boolean;
   summary: string;
   explanation: string;
   onClose: () => void;
@@ -72,6 +76,7 @@ export const PlayShell = ({
 
 export const PlayDebrief = ({
   isVisible,
+  isCorrect,
   summary,
   explanation,
   onClose,
@@ -79,6 +84,9 @@ export const PlayDebrief = ({
   const { t } = useTranslation();
   return (
     <Sheet.Modal isVisible={isVisible} isDismissible={false} onClose={onClose}>
+      <View style={styles.face}>
+        <Sprite name={isCorrect ? 'dogJoy' : 'dogThink'} size={64} />
+      </View>
       <Text variant="machine">{`> ${t('scene.watchers.keeper.name')}`}</Text>
       <Sheet.Title>{t('playkit.ui.debrief')}</Sheet.Title>
       <Text variant="bodyBold">{summary}</Text>
@@ -97,6 +105,9 @@ export const PlayDebrief = ({
 // ═══════════════════════════════════════════
 
 const styles = StyleSheet.create({
+  face: {
+    alignItems: 'center',
+  },
   round: {
     alignItems: 'center',
     flexDirection: 'row',

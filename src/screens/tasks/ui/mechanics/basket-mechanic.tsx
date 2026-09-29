@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { Sprite } from '@/entities/sprite/ui';
 import type { BasketPayload } from '@/entities/task';
 
 import { FONTS, RADII, SPACING } from '@/shared/constants';
@@ -69,6 +70,7 @@ export const BasketMechanic = ({
                   <PixelIcon name="check" size={12} />
                 </View>
               ) : null}
+              {item.sprite ? <Sprite name={item.sprite} size={40} /> : null}
               <Text variant="bodyBold" style={styles.itemTitle}>
                 {item.title}
               </Text>

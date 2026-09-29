@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { Sprite } from '@/entities/sprite/ui';
 import { listTasks, TASK_THEMES, type TaskTheme } from '@/entities/task';
 import {
   rewardForUserTask,
@@ -133,6 +134,9 @@ export const TrialsPage = ({ frame, onArcade }: TrialsPageProps) => {
           if (isDone) {
             return (
               <TerminalCard key={task.id} style={styles.row}>
+                {task.sprite ? (
+                  <Sprite name={task.sprite} size={32} style={styles.done} />
+                ) : null}
                 <View style={styles.copy}>
                   <Text
                     variant="code"
@@ -163,6 +167,7 @@ export const TrialsPage = ({ frame, onArcade }: TrialsPageProps) => {
                   borderTone={canPlay ? 'overseerLcd' : 'border'}
                   style={styles.row}
                 >
+                  {task.sprite ? <Sprite name={task.sprite} size={40} /> : null}
                   <View style={styles.copy}>
                     <Text
                       variant="code"
@@ -206,6 +211,7 @@ export const TrialsPage = ({ frame, onArcade }: TrialsPageProps) => {
 
 const styles = StyleSheet.create({
   copy: { flex: 1, gap: 2, minWidth: 0 },
+  done: { opacity: 0.5 },
   filters: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.TWO },
   meta: { fontSize: 12, letterSpacing: 1, lineHeight: 16 },
   row: { alignItems: 'center', flexDirection: 'row', gap: SPACING.TWO },

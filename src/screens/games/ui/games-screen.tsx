@@ -1,8 +1,13 @@
 import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
-import { GAME_REWARDS, PLAYKIT_GAME_IDS } from '@/entities/minigame';
+import {
+  GAME_COVER_SPRITES,
+  GAME_REWARDS,
+  PLAYKIT_GAME_IDS,
+} from '@/entities/minigame';
 import { ownedPuzzles } from '@/entities/minigame/puzzle';
+import { Sprite } from '@/entities/sprite/ui';
 import { useUser } from '@/entities/user';
 
 import {
@@ -12,7 +17,7 @@ import {
   TERMINAL_VARIANT,
 } from '@/shared/constants';
 import { useTranslation } from '@/shared/i18n';
-import { Button, ListRow, PixelIcon, Screen, Text } from '@/shared/ui';
+import { Button, ListRow, Screen, Text } from '@/shared/ui';
 import { formatMoney } from '@/shared/utils';
 
 // ═══════════════════════════════════════════
@@ -43,8 +48,8 @@ export const GamesScreen = () => {
         <ListRow
           key={gameId}
           icon={
-            <ListRow.Icon>
-              <PixelIcon name="face" size={24} tone="overseerLcd" />
+            <ListRow.Icon size={44}>
+              <Sprite name={GAME_COVER_SPRITES[gameId]} size={32} />
             </ListRow.Icon>
           }
           title={t(`playkit.games.${gameId}.title`)}
@@ -108,6 +113,11 @@ export const GamesScreen = () => {
             return (
               <ListRow
                 key={level.id}
+                icon={
+                  <ListRow.Icon size={44}>
+                    <Sprite name={level.cover} size={32} />
+                  </ListRow.Icon>
+                }
                 title={title}
                 subtitle={`${level.difficulty} · #${index + 1}`}
                 onPress={() => router.push(DYNAMIC_ROUTES.puzzle(level.id))}
