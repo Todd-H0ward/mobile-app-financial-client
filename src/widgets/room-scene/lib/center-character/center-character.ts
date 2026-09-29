@@ -31,6 +31,7 @@ import {
   ROBOT_DOG_TEXTURES,
   type RobotDogTextureSlot,
 } from '../robot-dog-assets';
+import { attachRobotLook } from '../robot-look';
 import { attachRobotModules } from '../robot-modules';
 
 // ═══════════════════════════════════════════
@@ -211,6 +212,10 @@ export const attachCenterCharacter = async (
   dressMaterials(painted, coat);
   mount.add(root);
   let modules = attachRobotModules(root, DEFAULT_ROBOT_ASSEMBLY, 'basic');
+  let currentSkin = skin;
+  let assemblyKey = JSON.stringify([DEFAULT_ROBOT_ASSEMBLY, 'basic']);
+  let currentMood = action;
+  let look = attachRobotLook(root, DEFAULT_ROBOT_ASSEMBLY, skin);
 
   const mixer = new AnimationMixer(root);
   const clips = new Map<RobotDogAction, AnimationClip>();
@@ -225,6 +230,8 @@ export const attachCenterCharacter = async (
 
   const start = (next: RobotDogAction, isOnce: boolean) => {
     if (isDisposed) return;
+    currentMood = next;
+    look.setAction(next);
     const clip = clips.get(next);
     if (!clip) return;
 
@@ -266,8 +273,14 @@ export const attachCenterCharacter = async (
     root,
     setAssembly: (assembly, stage) => {
       if (isDisposed) return;
+      const nextKey = JSON.stringify([assembly, stage]);
+      if (nextKey === assemblyKey) return;
+      assemblyKey = nextKey;
       modules.dispose();
+      look.dispose();
       modules = attachRobotModules(root, assembly, stage);
+      look = attachRobotLook(root, assembly, currentSkin);
+      look.setAction(currentMood);
     },
     tick: (deltaSec) => {
       if (!isDisposed) mixer.update(deltaSec);
@@ -283,6 +296,8 @@ export const attachCenterCharacter = async (
       const previous = coat;
       coat = loaded;
       dressMaterials(painted, loaded);
+      currentSkin = next;
+      look.setSkin(next);
       // Only now: the old textures were still bound while the new ones loaded.
       for (const texture of previous.values()) texture.dispose();
     },
@@ -296,6 +311,7 @@ export const attachCenterCharacter = async (
       mixer.uncacheRoot(root);
       mount.remove(root);
       modules.dispose();
+      look.dispose();
       disposeTree(root);
       for (const texture of coat.values()) texture.dispose();
     },

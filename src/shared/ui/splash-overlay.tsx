@@ -1,68 +1,31 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import * as SplashScreen from 'expo-splash-screen';
 import { StyleSheet, View } from 'react-native';
 
-import { SPACING } from '@/shared/constants';
-import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
 
-import { RingsBackdrop } from './rings-backdrop';
-import { TerminalPanel } from './terminal-panel';
-import { Text } from './text';
-
-// ═══════════════════════════════════════════
-// CONSTANTS
-// ═══════════════════════════════════════════
-
-/** Five cells, three lit: a boot scale with no percentages (screen 01). */
-const BOOT_CELLS = [true, true, true, false, false];
+import { LoadingArtwork } from './loading-artwork';
 
 // ═══════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════
-
-/** The terminal switching on over the pit — the first look at the style. */
 export const SplashOverlay = () => {
-  const [isVisible, setIsVisible] = useState(true);
-  const theme = useTheme();
+  const [isVisible, setVisible] = useState(true);
   const { t } = useTranslation();
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(false), 1400);
+    return () => clearTimeout(timer);
+  }, []);
   if (!isVisible) return null;
   return (
     <View
-      onLayout={() => {
-        void SplashScreen.hideAsync()
-          .catch(() => {})
-          .finally(() => setIsVisible(false));
-      }}
       style={styles.root}
+      onLayout={() => {
+        void SplashScreen.hideAsync().catch(() => {});
+      }}
     >
-      <RingsBackdrop centerY={0.5} />
-      <TerminalPanel frameStyle={styles.frame} style={styles.screen}>
-        <Text variant="display" style={styles.title} numberOfLines={1}>
-          {t('app.name')}
-        </Text>
-        <Text
-          variant="machine"
-          numberOfLines={1}
-        >{`> ${t('app.booting')}`}</Text>
-        <View style={styles.cells}>
-          {BOOT_CELLS.map((isLit, index) => (
-            <View
-              key={index}
-              style={[
-                styles.cell,
-                {
-                  backgroundColor: isLit ? theme.phosphor : theme.surfaceSoft,
-                },
-              ]}
-            />
-          ))}
-        </View>
-      </TerminalPanel>
-      <Text variant="code" themeColor="textDisabled" style={styles.offline}>
-        {t('app.offline')}
-      </Text>
+      <LoadingArtwork status={t('app.booting')} />
     </View>
   );
 };
@@ -70,22 +33,6 @@ export const SplashOverlay = () => {
 // ═══════════════════════════════════════════
 // STYLES
 // ═══════════════════════════════════════════
-
 const styles = StyleSheet.create({
-  cell: { height: 10, width: 18 },
-  cells: { flexDirection: 'row', gap: 3 },
-  frame: { width: 300 },
-  offline: { bottom: SPACING.SIX, fontSize: 12, position: 'absolute' },
-  root: {
-    ...StyleSheet.absoluteFill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-  },
-  screen: {
-    alignItems: 'center',
-    gap: SPACING.COMPACT,
-    paddingVertical: SPACING.SIX,
-  },
-  title: { fontSize: 38, lineHeight: 44 },
+  root: { ...StyleSheet.absoluteFill, zIndex: 1000 },
 });

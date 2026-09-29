@@ -1,23 +1,27 @@
 import { useState } from 'react';
 
+import { Image } from 'expo-image';
 import { Redirect, useRouter } from 'expo-router';
 import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   StyleSheet,
   View,
 } from 'react-native';
 
-import { RobotCard } from '@/widgets/robot-setup';
+import { RobotTerminal } from '@/widgets/robot-profile';
 
 import {
   DEFAULT_ROBOT_ASSEMBLY,
   isRobotNameValid,
+  ROBOT_DOG_SKINS,
   ROBOT_NAME_MAX_LENGTH,
   type RobotAssembly,
   type RobotDogSkin,
 } from '@/entities/robot-dog';
+import { ROBOT_CHOICE_IMAGES, RobotDuo } from '@/entities/robot-dog/ui';
 import {
   applyIdentity,
   isPlayerNameValid,
@@ -26,46 +30,75 @@ import {
   useUser,
 } from '@/entities/user';
 
-import {
-  DYNAMIC_ROUTES,
-  RADII,
-  SPACING,
-  STATIC_ROUTES,
-} from '@/shared/constants';
+import { DYNAMIC_ROUTES, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import {
-  Button,
-  Card,
-  Chip,
-  Input,
-  PixelIcon,
-  type PixelIconName,
-  Screen,
-  Text,
-} from '@/shared/ui';
+import { Button, Chip, Input, Screen, Text } from '@/shared/ui';
+
+// ═══════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════
+interface LookChoiceProps {
+  source: number;
+  label: string;
+  isSelected: boolean;
+  onPress: () => void;
+}
 
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
+const EARS = ['floppy', 'blade', 'radar'] as const;
+const FACES = ['dots', 'happy', 'wide'] as const;
 
-const BOXES: { icon: PixelIconName; key: 'needs' | 'wants' | 'savings' }[] = [
-  { icon: 'battery', key: 'needs' },
-  { icon: 'gear', key: 'wants' },
-  { icon: 'piggy', key: 'savings' },
-];
+// ═══════════════════════════════════════════
+// COMPONENTS
+// ═══════════════════════════════════════════
+const LookChoice = ({
+  source,
+  label,
+  isSelected,
+  onPress,
+}: LookChoiceProps) => {
+  const theme = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="radio"
+      accessibilityLabel={label}
+      accessibilityState={{ checked: isSelected }}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.choice,
+        {
+          backgroundColor: theme.terminalScreen,
+          borderColor: isSelected ? theme.phosphor : theme.border,
+          opacity: pressed ? 0.7 : 1,
+        },
+      ]}
+    >
+      <Image
+        source={source}
+        contentFit="contain"
+        style={styles.preview}
+        accessible={false}
+        cachePolicy="disk"
+      />
+      <Text variant="small" style={styles.choiceLabel}>
+        {isSelected ? '✓ ' : ''}
+        {label}
+      </Text>
+    </Pressable>
+  );
+};
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
-
 export const SetupScreen = () => {
   const { t } = useTranslation();
-  const theme = useTheme();
   const router = useRouter();
   const user = useUser();
   const updateUser = useUpdateUser();
-  const [isStoryVisible, setStoryVisible] = useState(true);
   const [playerName, setPlayerName] = useState(
     user?.playerName || t('setup.defaultPlayer'),
   );
@@ -75,16 +108,18 @@ export const SetupScreen = () => {
   const [skin, setSkin] = useState<RobotDogSkin>(
     user?.settings.robotSkin ?? 'factory',
   );
-  const [assembly, setAssembly] = useState<RobotAssembly>(
-    user?.robot.assembly ?? DEFAULT_ROBOT_ASSEMBLY,
-  );
-  const isValid = isPlayerNameValid(playerName) && isRobotNameValid(robotName);
-
+  const [assembly, setAssembly] = useState<RobotAssembly>({
+    ...DEFAULT_ROBOT_ASSEMBLY,
+    ...user?.robot.assembly,
+    ears: user?.robot.assembly.ears ?? 'floppy',
+    face: user?.robot.assembly.face ?? 'dots',
+  });
+  const [tab, setTab] = useState<'coat' | 'ears' | 'face'>('coat');
+  const [isNicknameVisible, setNicknameVisible] = useState(false);
   if (!user) return <Redirect href={STATIC_ROUTES.ENTRY} />;
-  if (user.playerName && user.robot.name) {
+  if (user.playerName && user.robot.name)
     return <Redirect href={STATIC_ROUTES.HOME} />;
-  }
-
+  const isValid = isPlayerNameValid(playerName) && isRobotNameValid(robotName);
   const save = () => {
     if (!isValid) return;
     updateUser((current) =>
@@ -93,145 +128,125 @@ export const SetupScreen = () => {
     Keyboard.dismiss();
     router.replace(DYNAMIC_ROUTES.story('intro'));
   };
-
   return (
-    <Screen gap={SPACING.THREE}>
-      <Screen.Header>
-        <Screen.Heading>
-          <Screen.Label>
-            {t(isStoryVisible ? 'setup.storyLabel' : 'setup.formLabel')}
-          </Screen.Label>
-          <Screen.Title>
-            {t(isStoryVisible ? 'setup.welcome' : 'setup.title')}
-          </Screen.Title>
-        </Screen.Heading>
-      </Screen.Header>
-
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <RobotTerminal
+        variant="equipment"
+        hero={<RobotDuo skin={skin} assembly={assembly} />}
       >
-        {isStoryVisible ? (
-          <View style={styles.stack}>
-            <Text themeColor="textSecondary">{t('setup.story')}</Text>
-            {BOXES.map(({ icon, key }) => (
-              <Card key={key}>
-                <View style={styles.direction}>
-                  <View
-                    style={[
-                      styles.iconBox,
-                      { backgroundColor: theme.surfaceSoft },
-                    ]}
-                  >
-                    <PixelIcon name={icon} />
-                  </View>
-                  <View style={styles.directionText}>
-                    <Text variant="bodyBold">
-                      {t(`setup.boxes.${key}.title`)}
-                    </Text>
-                    <Text variant="small" themeColor="textMuted">
-                      {t(`setup.boxes.${key}.hint`)}
-                    </Text>
-                  </View>
-                </View>
-              </Card>
-            ))}
-            <Text variant="small" themeColor="textSecondary">
-              {t('setup.safeError')}
-            </Text>
-            <Button isFullWidth onPress={() => setStoryVisible(false)}>
-              {t('setup.meet')}
-            </Button>
-          </View>
-        ) : (
-          <View style={styles.stack}>
-            <Text themeColor="textSecondary">{t('setup.privacy')}</Text>
-            <Text variant="small" themeColor="textSecondary">
-              {t('setup.playerName')}
-            </Text>
-            <Input
-              accessibilityLabel={t('setup.playerName')}
-              value={playerName}
-              onChangeText={setPlayerName}
-              maxLength={PLAYER_NAME_MAX_LENGTH}
-              isCounterVisible
-              autoCorrect={false}
-            />
-            <Text variant="small" themeColor="textSecondary">
-              {t('setup.robotName')}
-            </Text>
-            <Input
-              accessibilityLabel={t('setup.robotName')}
-              value={robotName}
-              onChangeText={setRobotName}
-              maxLength={ROBOT_NAME_MAX_LENGTH}
-              isCounterVisible
-              autoCorrect={false}
-            />
-            <Text variant="small" themeColor="textMuted">
-              {t('setup.nameHint')}
-            </Text>
-            <RobotCard skin={skin} onSkinChange={setSkin} />
-            {(['head', 'body', 'legs'] as const).map((part) => (
-              <View key={part} style={styles.part}>
-                <Text variant="small" themeColor="textSecondary">
-                  {t(`setup.modules.${part}.title`)}
-                </Text>
-                <View style={styles.chips}>
-                  {[0, 1, 2].map((choice) => (
-                    <Chip
-                      key={choice}
-                      variant={
-                        assembly[part] === choice ? 'selected' : 'neutral'
-                      }
-                      onPress={() =>
-                        setAssembly((current) => ({
-                          ...current,
-                          [part]: choice,
-                        }))
-                      }
-                    >
-                      {t(`setup.modules.${part}.${choice}`)}
-                    </Chip>
-                  ))}
-                </View>
-              </View>
-            ))}
-            {!isValid && (
-              <Text accessibilityLiveRegion="polite">
-                {t('setup.emptyName')}
-              </Text>
-            )}
-            <Button isFullWidth disabled={!isValid} onPress={save}>
-              {t('setup.start')}
-            </Button>
-          </View>
+        <Screen.Heading style={styles.heading}>
+          <Screen.Label>{t('setup.formLabel')}</Screen.Label>
+          <Screen.Title>{t('setup.robotName')}</Screen.Title>
+        </Screen.Heading>
+        <Input
+          accessibilityLabel={t('setup.robotName')}
+          value={robotName}
+          onChangeText={setRobotName}
+          maxLength={ROBOT_NAME_MAX_LENGTH}
+          autoCorrect={false}
+          isCounterVisible
+        />
+        <View style={styles.tabs}>
+          {(['coat', 'ears', 'face'] as const).map((key) => (
+            <Chip
+              key={key}
+              variant={tab === key ? 'selected' : 'neutral'}
+              onPress={() => setTab(key)}
+            >
+              {t(`setup.look.${key}`)}
+            </Chip>
+          ))}
+        </View>
+        <View style={styles.choices}>
+          {tab === 'coat'
+            ? ROBOT_DOG_SKINS.map((value) => (
+                <LookChoice
+                  key={value}
+                  source={ROBOT_CHOICE_IMAGES.coat[value]}
+                  label={t(`settings.skin.${value}`)}
+                  isSelected={skin === value}
+                  onPress={() => setSkin(value)}
+                />
+              ))
+            : tab === 'ears'
+              ? EARS.map((value) => (
+                  <LookChoice
+                    key={value}
+                    source={ROBOT_CHOICE_IMAGES.ears[value]}
+                    label={t(`setup.look.${value}`)}
+                    isSelected={assembly.ears === value}
+                    onPress={() => setAssembly((a) => ({ ...a, ears: value }))}
+                  />
+                ))
+              : FACES.map((value) => (
+                  <LookChoice
+                    key={value}
+                    source={ROBOT_CHOICE_IMAGES.face[value]}
+                    label={t(`setup.look.${value}`)}
+                    isSelected={assembly.face === value}
+                    onPress={() => setAssembly((a) => ({ ...a, face: value }))}
+                  />
+                ))}
+        </View>
+        <Text
+          variant="small"
+          themeColor="textSecondary"
+          accessibilityLiveRegion="polite"
+        >
+          {t(`setup.knopka.${tab}`)}
+        </Text>
+        <Button
+          variant="ghost"
+          size="s"
+          onPress={() => setNicknameVisible((v) => !v)}
+        >
+          {t('setup.nickname', { name: playerName })}
+        </Button>
+        {isNicknameVisible && (
+          <Input
+            accessibilityLabel={t('setup.playerName')}
+            value={playerName}
+            onChangeText={setPlayerName}
+            maxLength={PLAYER_NAME_MAX_LENGTH}
+            autoCorrect={false}
+          />
         )}
-      </KeyboardAvoidingView>
-    </Screen>
+        {!isValid && (
+          <Text accessibilityLiveRegion="polite">{t('setup.emptyName')}</Text>
+        )}
+        <Button isFullWidth size="l" disabled={!isValid} onPress={save}>
+          {t('setup.start')}
+        </Button>
+        <Text variant="small" themeColor="textMuted">
+          {t('setup.nameHint')}
+        </Text>
+      </RobotTerminal>
+    </KeyboardAvoidingView>
   );
 };
 
 // ═══════════════════════════════════════════
 // STYLES
 // ═══════════════════════════════════════════
-
 const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.TWO },
-  direction: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: SPACING.COMPACT,
+  choice: {
+    flexBasis: '30%',
+    flexGrow: 1,
+    maxWidth: '33%',
+    borderWidth: 2,
+    borderRadius: 12,
+    overflow: 'hidden',
+    paddingBottom: SPACING.TWO,
   },
-  directionText: { flex: 1 },
-  flex: { flex: 1 },
-  iconBox: {
-    alignItems: 'center',
-    borderRadius: RADII.s,
-    height: 36,
-    justifyContent: 'center',
-    width: 36,
-  },
-  part: { gap: SPACING.TWO, marginTop: SPACING.ONE },
-  stack: { gap: SPACING.TWO },
+  choiceLabel: { textAlign: 'center', paddingHorizontal: SPACING.ONE },
+  preview: { width: '100%', aspectRatio: 1.2 },
+  choices: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.TWO },
+  heading: { flex: 0 },
+  root: { flex: 1 },
+  tabs: { flexDirection: 'row', gap: SPACING.TWO },
 });
+
+export type { LookChoiceProps };

@@ -38,3 +38,24 @@ describe('local game identity', () => {
     },
   );
 });
+
+describe('saved appearance', () => {
+  it('persists free ear and eye choices without touching the wallet', () => {
+    const before = createInitialUser();
+    const assembly = {
+      head: 0,
+      body: 0,
+      legs: 0,
+      ears: 'radar',
+      face: 'wide',
+    } as const;
+    const after = applyIdentity(before, {
+      playerName: 'Пилот',
+      robotName: 'Кузя-01',
+      skin: 'carbon',
+      assembly,
+    });
+    expect(after.robot.assembly).toEqual(assembly);
+    expect(after.wallet).toBe(before.wallet);
+  });
+});

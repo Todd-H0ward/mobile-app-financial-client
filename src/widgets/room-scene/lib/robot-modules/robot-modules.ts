@@ -57,10 +57,7 @@ export const attachRobotModules = (
     return mesh;
   };
   const head = socket('Socket_HeadModule', 'Body', -1.1, 0.55);
-  if (assembly.head === 0) {
-    for (const z of [-0.5, 0.5])
-      part(head, new BoxGeometry(0.22, 0.48, 0.14), 0, 0.2, z, 1);
-  } else if (assembly.head === 1) {
+  if (assembly.head === 1) {
     part(head, new CylinderGeometry(0.08, 0.08, 0.3, 6), 0, 0.15, 0, 1);
     const dish = part(
       head,
@@ -70,7 +67,7 @@ export const attachRobotModules = (
       0,
     );
     dish.rotation.z = 0.55;
-  } else {
+  } else if (assembly.head === 2) {
     for (const z of [-0.4, 0.4]) {
       part(head, new CylinderGeometry(0.045, 0.07, 0.65, 6), 0, 0.3, z, 1);
       part(head, new SphereGeometry(0.12, 8, 6), 0, 0.65, z, 2);

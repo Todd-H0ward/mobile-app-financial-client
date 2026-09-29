@@ -368,7 +368,7 @@ only upload a texture from a `file://` path. See
 The game is about climbing out of a pit: the character's build stages, the
 charge / spirit mood and the name rules live in `entities/robot-dog`. A first
 launch makes a guest profile, asks for the names on `/setup` and plays the
-intro; the intro scene itself is still to be built. The HUD data
+intro; the intro and finale use pre-rendered comic frames (see docs/visual-identity.md). The HUD data
 (`useHomeHud`) is still computed for when the coins, the goal and the task
 get a place on the 3D world; until then the home screen deliberately shows
 the model, the level card and nothing else.

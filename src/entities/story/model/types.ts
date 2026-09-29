@@ -2,10 +2,10 @@
 // TYPES
 // ═══════════════════════════════════════════
 
-/** Stable cutscene ids — also the keys under `assets/story/`. */
+/** Stable cutscene ids used by saves. */
 type StoryCutsceneId = 'intro' | 'finale';
 
-/** One caption card shown while the video is missing (or under it later). */
+/** One illustrated comic frame with its short caption. */
 interface StoryBeat {
   /** Stable id inside the cutscene. */
   id: string;
@@ -19,9 +19,7 @@ interface StoryCutscene {
   id: StoryCutsceneId;
   /** Short label for the screen header. */
   title: string;
-  /** Filename under `assets/story/` once the mp4 ships. */
-  asset: string;
-  /** Ordered caption beats for the placeholder (and later as subtitles). */
+  /** Ordered pre-rendered comic frames. */
   beats: StoryBeat[];
 }
 

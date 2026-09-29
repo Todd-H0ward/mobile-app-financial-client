@@ -7,14 +7,14 @@
     "icon": "./assets/images/icon.png",
     "scheme": "mobilehackathon",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#C9CBC4",
+    "backgroundColor": "#0E2016",
     "ios": {
       "icon": "./assets/images/icon.png",
       "bundleIdentifier": "com.mobilehackathon.app"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#D4EEF8",
+        "backgroundColor": "#0E2016",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
@@ -37,7 +37,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#C9CBC4",
+          "backgroundColor": "#0E2016",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 240
         }

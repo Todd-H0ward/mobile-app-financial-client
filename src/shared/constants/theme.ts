@@ -4,6 +4,7 @@
 
 /** Terminal 2b. Hardware keeps its phosphor palette in either system theme. */
 const TERMINAL_COLORS = {
+  launchBackground: '#0D1830',
   sceneLight: '#D7D9D2',
   surfaceLight: '#F2F2EE',
   surfaceShade: '#E3E4DF',

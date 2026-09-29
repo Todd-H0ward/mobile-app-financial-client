@@ -37,8 +37,8 @@ import {
 import { useTheme } from '@/shared/hooks';
 
 import { Button } from './button';
+import { IllustratedBackdrop } from './illustrated-backdrop';
 import { PixelIcon } from './pixel-icon';
-import { RingsBackdrop } from './rings-backdrop';
 import { TerminalPanel } from './terminal-panel';
 import { Text, type TextProps } from './text';
 import { ThemedView } from './themed-view';
@@ -349,7 +349,10 @@ const ScreenRoot = ({
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         {isPitVisible ? (
           <View style={styles.pit}>
-            <RingsBackdrop centerY={0.62} />
+            <IllustratedBackdrop
+              source={require('../../../assets/images/terminal-backdrop.jpg')}
+              variant="muted"
+            />
           </View>
         ) : null}
         <TerminalPanel

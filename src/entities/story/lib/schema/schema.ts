@@ -45,9 +45,6 @@ const assertCutscene = (raw: unknown, path: string): StoryCutscene => {
   if (!isNonEmptyString(raw.title)) {
     throw new Error(`${path}.title: non-empty string required`);
   }
-  if (!isNonEmptyString(raw.asset)) {
-    throw new Error(`${path}.asset: non-empty string required`);
-  }
   if (!Array.isArray(raw.beats) || raw.beats.length === 0) {
     throw new Error(`${path}.beats: non-empty array required`);
   }
@@ -65,7 +62,6 @@ const assertCutscene = (raw: unknown, path: string): StoryCutscene => {
   return {
     id: raw.id,
     title: raw.title,
-    asset: raw.asset,
     beats,
   };
 };

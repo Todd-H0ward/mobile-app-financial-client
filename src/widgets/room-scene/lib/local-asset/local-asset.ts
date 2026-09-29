@@ -1,5 +1,5 @@
 import { Asset } from 'expo-asset';
-import { SRGBColorSpace, Texture } from 'three';
+import { SRGBColorSpace, Texture, TextureLoader } from 'three';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -86,6 +86,14 @@ const loadGlTexture = async (
   module: number,
   { isFlipped }: TextureOptions,
 ): Promise<Texture> => {
+  if (typeof document !== 'undefined') {
+    const texture = await new TextureLoader().loadAsync(
+      Asset.fromModule(module).uri,
+    );
+    texture.flipY = isFlipped;
+    texture.colorSpace = SRGBColorSpace;
+    return texture;
+  }
   const file = await localFileOf(module);
 
   const texture = new Texture();

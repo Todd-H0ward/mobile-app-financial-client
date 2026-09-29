@@ -77,3 +77,11 @@ Import everything from the barrel: `import { Button, Chip } from '@/shared/ui';`
   scene belongs to [scene.md](./scene.md), not to this kit.
 - **App icon** — waiting for the final robodog render (handoff README).
 - **Minigames vs «Смена»** — a team decision, see the handoff README.
+
+## Персонажи и загрузка
+
+Для нового первого запуска используется общая [визуальная спецификация](visual-identity.md).
+`LoadingArtwork` объединяет загрузку приложения и арены; `IllustratedBackdrop`
+показывает поставляемый фон в вариантах `clear` и `muted`. Оба представлены
+на UI-kit. Нативный splash, JS-загрузка и системные иконки используют
+персонажей утверждённого концепта; иконка пса дополнена жетоном со стрелкой вверх.
