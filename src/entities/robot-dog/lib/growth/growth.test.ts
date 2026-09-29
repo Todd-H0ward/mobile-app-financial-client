@@ -8,6 +8,7 @@ import {
   growRobotDog,
   progressToNextStage,
   stageFor,
+  stageTransition,
 } from './growth';
 
 // ═══════════════════════════════════════════
@@ -127,5 +128,19 @@ describe('progressToNextStage', () => {
 
       expect(isClear).toBe(stageFor(current) !== 'basic');
     }
+  });
+});
+
+describe('stageTransition', () => {
+  it('names the stage to celebrate when growth happened', () => {
+    expect(stageTransition('basic', 'upgraded')).toBe('upgraded');
+    expect(stageTransition('upgraded', 'complete')).toBe('complete');
+    expect(stageTransition('basic', 'complete')).toBe('complete');
+  });
+
+  it('is silent when the stage did not move', () => {
+    expect(stageTransition('basic', 'basic')).toBeNull();
+    expect(stageTransition('upgraded', 'upgraded')).toBeNull();
+    expect(stageTransition('complete', 'basic')).toBeNull();
   });
 });

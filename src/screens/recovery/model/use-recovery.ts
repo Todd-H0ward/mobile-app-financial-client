@@ -6,6 +6,7 @@ import {
   type RecoveryDestination,
   type RecoveryOption,
 } from '@/entities/budget';
+import { stageTransition } from '@/entities/robot-dog';
 import { endPeriod, useCommitUser, useUser } from '@/entities/user';
 
 import { DYNAMIC_ROUTES, STATIC_ROUTES } from '@/shared/constants';
@@ -47,7 +48,20 @@ export const useRecovery = (): RecoveryController | null => {
   const options = pickRecoveryOptions(rows);
 
   const settleAndGo = (destination: RecoveryDestination) => {
-    if (!commitUser(user, endPeriod(user))) return;
+    const settled = endPeriod(user);
+    if (!commitUser(user, settled)) return;
+
+    const gained = stageTransition(user.robot.stage, settled.robot.stage);
+    if (gained) {
+      // replace — recovery is done; the ritual sits where the tip was.
+      router.replace(
+        DYNAMIC_ROUTES.stageUp(
+          gained,
+          destination === 'budgetPlan' ? 'plan' : 'home',
+        ),
+      );
+      return;
+    }
 
     // dismissTo, not push — a second home would mount another 3D scene.
     router.dismissTo(routeFor(destination));
