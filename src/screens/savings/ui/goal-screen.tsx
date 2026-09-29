@@ -33,6 +33,8 @@ import { useGoal } from '../model';
 
 interface GoalScreenProps {
   goalId: string;
+  /** Opened from the jar's lift button — the confirmation comes up straight away. */
+  isLiftRequested?: boolean;
 }
 
 interface AmountStepperProps {
@@ -108,11 +110,14 @@ const AmountStepper = ({ value, max, onAdd, onRemove }: AmountStepperProps) => {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 
-export const GoalScreen = ({ goalId }: GoalScreenProps) => {
+export const GoalScreen = ({
+  goalId,
+  isLiftRequested = false,
+}: GoalScreenProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const router = useRouter();
-  const goal = useGoal(goalId);
+  const goal = useGoal(goalId, isLiftRequested);
 
   if (!goal) {
     return <Redirect href={STATIC_ROUTES.SAVINGS} />;
@@ -200,7 +205,7 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
         </Button>
       )}
 
-      {goal.canLift && goal.nextTier !== null ? (
+      {goal.isLiftReady ? (
         <Button isFullWidth onPress={goal.requestLift}>
           <PixelIcon name="up" tone="onAccent" />
           <Button.Label>{t('savings.jar.liftAction')}</Button.Label>
@@ -305,12 +310,16 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
       </View>
 
       <Sheet.Modal
-        isVisible={goal.sheet === 'planning'}
+        isVisible={goal.sheet === 'planning' || goal.sheet === 'liftPlanning'}
         onClose={goal.dismissSheet}
       >
         <Sheet.Label>{t('home.hud.planFirst').toLocaleLowerCase()}</Sheet.Label>
         <Sheet.Title>{t('savings.planFirstTitle')}</Sheet.Title>
-        <Sheet.Description>{t('savings.planFirstBody')}</Sheet.Description>
+        <Sheet.Description>
+          {goal.sheet === 'liftPlanning'
+            ? t('savings.liftPlanFirstBody')
+            : t('savings.planFirstBody')}
+        </Sheet.Description>
         <Sheet.Actions>
           <Button
             isFullWidth
@@ -400,12 +409,15 @@ export const GoalScreen = ({ goalId }: GoalScreenProps) => {
   );
 };
 
-export const GoalRouteScreen = ({ goalId }: { goalId: string }) => {
+export const GoalRouteScreen = ({
+  goalId,
+  isLiftRequested = false,
+}: GoalScreenProps) => {
   if (!goalId) {
     return <Redirect href={STATIC_ROUTES.SAVINGS} />;
   }
 
-  return <GoalScreen goalId={goalId} />;
+  return <GoalScreen goalId={goalId} isLiftRequested={isLiftRequested} />;
 };
 
 // ═══════════════════════════════════════════

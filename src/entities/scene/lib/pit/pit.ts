@@ -1,6 +1,7 @@
 import { clamp } from '@/shared/utils';
 
 import {
+  SCENE_GEAR_PITCH_RADIUS,
   SCENE_GEAR_TURN,
   SCENE_LEVEL_COUNT,
   SCENE_TERRACE_COUNT,
@@ -46,14 +47,25 @@ const terracesInView = (progress: number): number => {
   return tops.size;
 };
 
-/** How far a gear has turned by this point in the climb, in radians. */
-const gearAngle = (gear: number, progress: number): number => {
-  const direction = gear % 2 === 0 ? 1 : -1;
+/**
+ * How far the columns have slid down past the gears, in world units. The platform and its
+ * gears climb and the columns stay put in the world, so from the robot's seat the columns
+ * go down — the climb the camera never has to make.
+ */
+const columnTravel = (progress: number): number =>
+  clamp(progress, 0, 1) * SCENE_GEAR_TURN * SCENE_GEAR_PITCH_RADIUS;
 
-  return direction * clamp(progress, 0, 1) * SCENE_GEAR_TURN;
-};
+/**
+ * How far a gear has turned by this point in the climb, in radians, about its tangential
+ * axle. The wheel rolls up the rack in its column without slipping, so the arc at its
+ * pitch radius is the column's travel. Every wheel runs on a column on its outer side, so all three turn the
+ * same way.
+ */
+const gearAngle = (progress: number): number =>
+  -columnTravel(progress) / SCENE_GEAR_PITCH_RADIUS;
 
 export {
+  columnTravel,
   flushSteps,
   gearAngle,
   levelProgress,

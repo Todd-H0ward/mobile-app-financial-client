@@ -98,6 +98,7 @@ export const HomeScreen = () => {
   const params = useLocalSearchParams<{
     watcher?: string;
     page?: string;
+    lifted?: string;
   }>();
   const robotSkin = useRobotSkin();
   const chosenAction = useRobotAction();
@@ -173,6 +174,17 @@ export const HomeScreen = () => {
       params.watcher === 'keeper' ? SOUNDS.KEEPER_ON : SOUNDS.OVERSEER_ON,
     );
   }, [params.watcher, params.page]);
+
+  // A lift was just paid for: shut the terminal and pull back to the map, where the gears and
+  // the columns are in shot. The climb itself waits for the camera (`RoomScene`).
+  useEffect(() => {
+    if (!params.lifted) return;
+    setTalkingTo(null);
+    setTerminalPage('greeting');
+    setIsBonding(false);
+    setIsRobotOpen(false);
+    setView('top');
+  }, [params.lifted]);
 
   useEffect(() => {
     if (!talkingTo) return;

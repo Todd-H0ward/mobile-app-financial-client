@@ -10,6 +10,8 @@ const SCENE_PALETTE = {
   segmentsMuted: ['#343C48', '#28383C', '#403028'],
   /** Axis gears — dark machined metal. */
   shared: '#3A424C',
+  /** The columns the gears climb — a light base, so the concrete texture multiplies through. */
+  column: '#A8A49C',
   /** Outline around every cell — cool steel rim. */
   cellFrame: '#A8B8C8',
   /** The same outline in a bay the camera is not looking at. */

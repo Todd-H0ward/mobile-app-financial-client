@@ -34,6 +34,7 @@ export {
   orbitPosition,
 } from './orbit';
 export {
+  columnTravel,
   flushSteps,
   gearAngle,
   levelProgress,
