@@ -1,3 +1,5 @@
+import type { SpriteName } from '@/entities/sprite';
+
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
@@ -38,12 +40,16 @@ interface BasketItem {
   id: string;
   title: string;
   price: number;
+  /** Picture on the item's tile, a name from `@/entities/sprite`. */
+  sprite?: SpriteName;
 }
 
 interface PriorityItem {
   id: string;
   title: string;
   kind: 'need' | 'want';
+  /** Picture beside the item, a name from `@/entities/sprite`. */
+  sprite?: SpriteName;
 }
 
 interface DialogChoice {
@@ -100,6 +106,11 @@ interface TaskContent {
   explanation: string;
   /** Mechanic-specific data. Shape depends on `mechanic`. */
   payload: TaskPayload;
+  /**
+   * Picture on the task's card, a name from `@/entities/sprite`. Optional so a
+   * new row can land before its art.
+   */
+  sprite?: SpriteName;
 }
 
 interface TasksFile {

@@ -8,6 +8,8 @@ import {
   MODULE_SLOTS,
   type ModuleSlot,
 } from '@/entities/catalogue';
+import type { SpriteName } from '@/entities/sprite';
+import { Sprite } from '@/entities/sprite/ui';
 import { listTasks } from '@/entities/task';
 import {
   rewardForUserTask,
@@ -44,6 +46,13 @@ const ICONS: Record<ModuleSlot, PixelIconName> = {
   head: 'face',
   body: 'gear',
   legs: 'wrench',
+};
+
+/** The bare part of the dog each slot sits on. */
+const PART_SPRITES: Record<ModuleSlot, SpriteName> = {
+  head: 'dogHead',
+  body: 'dogBody',
+  legs: 'dogLegs',
 };
 
 // ═══════════════════════════════════════════
@@ -97,6 +106,44 @@ export const ModulesScreen = () => {
           <Screen.Title>{t('equipment.title')}</Screen.Title>
         </Screen.Heading>
       </Screen.Header>
+      <View style={styles.blueprint}>
+        {SLOTS.map((part) => {
+          const moduleItem = getCatalogueItem(MODULE_SLOTS[part]);
+          const isPartInstalled = user.modules.installed.includes(
+            MODULE_SLOTS[part],
+          );
+          const isCurrent = part === slot;
+          return (
+            <Pressable
+              key={part}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isCurrent }}
+              accessibilityLabel={t(`equipment.slots.${part}`)}
+              onPress={() => chooseSlot(part)}
+              style={[
+                styles.part,
+                {
+                  backgroundColor: isCurrent
+                    ? theme.surfaceSoft
+                    : theme.surface,
+                  borderColor: isCurrent ? theme.phosphor : theme.border,
+                },
+              ]}
+            >
+              <Sprite
+                name={PART_SPRITES[part]}
+                size={56}
+                style={isCurrent ? undefined : styles.dim}
+              />
+              <View style={styles.badge}>
+                {isPartInstalled && moduleItem?.sprite ? (
+                  <Sprite name={moduleItem.sprite} size={24} />
+                ) : null}
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
       <Segmented
         options={SLOTS.map((part) => ({
           value: part,
@@ -128,7 +175,15 @@ export const ModulesScreen = () => {
               },
             ]}
           >
-            <PixelIcon name={value ? ICONS[slot] : 'close'} size={36} />
+            {value && item.sprite ? (
+              <Sprite name={item.sprite} size={40} />
+            ) : (
+              <Sprite
+                name={PART_SPRITES[slot]}
+                size={40}
+                style={value ? undefined : styles.dim}
+              />
+            )}
             <Text variant="bodyBold">
               {value
                 ? t(`shop.items.${id}.title`, { defaultValue: item.title })
@@ -212,6 +267,21 @@ export const ModulesScreen = () => {
 
 const styles = StyleSheet.create({
   actions: { paddingTop: SPACING.TWO },
+  badge: {
+    height: 24,
+    position: 'absolute',
+    right: SPACING.ONE,
+    top: SPACING.ONE,
+    width: 24,
+  },
+  blueprint: {
+    flexDirection: 'row',
+    gap: SPACING.TWO,
+    justifyContent: 'center',
+  },
+  dim: {
+    opacity: 0.45,
+  },
   effect: {
     borderRadius: 12,
     borderWidth: 1,
@@ -227,4 +297,12 @@ const styles = StyleSheet.create({
     padding: SPACING.COMPACT,
   },
   options: { flexDirection: 'row', gap: SPACING.TWO },
+  part: {
+    alignItems: 'center',
+    borderRadius: 14,
+    borderWidth: 2,
+    flex: 1,
+    justifyContent: 'center',
+    paddingVertical: SPACING.TWO,
+  },
 });

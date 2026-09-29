@@ -35,6 +35,15 @@ describe('content/catalogue.json', () => {
     expect(() => assertCatalogueContent(CATALOGUE_CONTENT)).not.toThrow();
   });
 
+  it('gives every shipped item a picture on the shelf', () => {
+    for (const item of listCatalogue()) {
+      expect({ id: item.id, sprite: item.sprite }).toEqual({
+        id: item.id,
+        sprite: expect.any(String),
+      });
+    }
+  });
+
   it('carries at least eight items', () => {
     expect(listCatalogue().length).toBeGreaterThanOrEqual(8);
   });
@@ -92,6 +101,14 @@ describe('assertCatalogueContent', () => {
     expect(() =>
       assertCatalogueContent(withItems([...valid, { ...EXTRA, title: 1 }])),
     ).toThrow(/title/);
+  });
+
+  it('rejects a sprite that is not on the sheet', () => {
+    expect(() =>
+      assertCatalogueContent(
+        withItems([...valid.slice(0, 7), { ...EXTRA, sprite: 'nope' }]),
+      ),
+    ).toThrow(/sprite/);
   });
 
   it('rejects a non-positive price', () => {

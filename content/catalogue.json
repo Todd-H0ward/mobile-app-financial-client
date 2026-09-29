@@ -8,7 +8,8 @@
       "shop": "workshop",
       "category": "charge",
       "chargeDelta": 0.08,
-      "note": "Базовый заряд батареи — обязательный расход каждый период."
+      "note": "Базовый заряд батареи — обязательный расход каждый период.",
+      "sprite": "chargeSmall"
     },
     {
       "id": "charge-medium",
@@ -18,7 +19,8 @@
       "shop": "workshop",
       "category": "charge",
       "chargeDelta": 0.15,
-      "note": "Хороший заряд — хватит надольше."
+      "note": "Хороший заряд — хватит надольше.",
+      "sprite": "chargeMedium"
     },
     {
       "id": "charge-full",
@@ -28,7 +30,8 @@
       "shop": "workshop",
       "category": "charge",
       "chargeDelta": 0.25,
-      "note": "Максимальный заряд — пёс в отличной форме."
+      "note": "Максимальный заряд — пёс в отличной форме.",
+      "sprite": "chargeFull"
     },
     {
       "id": "module-sensor",
@@ -39,7 +42,8 @@
       "category": "module",
       "ownedId": "module-sensor",
       "moduleTier": 1,
-      "note": "Датчики опор: после установки награда за испытания больше на 10%. Необязательная покупка."
+      "note": "Датчики опор: после установки награда за испытания больше на 10%. Необязательная покупка.",
+      "sprite": "moduleSensor"
     },
     {
       "id": "module-antenna",
@@ -50,7 +54,8 @@
       "category": "module",
       "ownedId": "module-antenna",
       "moduleTier": 2,
-      "note": "Антенна связи: после установки награда за испытания больше на 5%. Необязательная покупка."
+      "note": "Антенна связи: после установки награда за испытания больше на 5%. Необязательная покупка.",
+      "sprite": "antenna"
     },
     {
       "id": "module-core",
@@ -61,7 +66,8 @@
       "category": "module",
       "ownedId": "module-core",
       "moduleTier": 3,
-      "note": "Вычислительное ядро: после установки награда за испытания больше на 15%. Необязательная покупка."
+      "note": "Вычислительное ядро: после установки награда за испытания больше на 15%. Необязательная покупка.",
+      "sprite": "moduleCore"
     },
     {
       "id": "visor-red",
@@ -71,7 +77,8 @@
       "shop": "workshop",
       "category": "cosmetic",
       "ownedId": "visor-red",
-      "note": "Яркий визор — украшение, не обязательное."
+      "note": "Яркий визор — украшение, не обязательное.",
+      "sprite": "visorRed"
     },
     {
       "id": "visor-gold",
@@ -81,7 +88,8 @@
       "shop": "workshop",
       "category": "cosmetic",
       "ownedId": "visor-gold",
-      "note": "Золотой визор — красиво блестит."
+      "note": "Золотой визор — красиво блестит.",
+      "sprite": "visorGold"
     },
     {
       "id": "antenna-long",
@@ -91,7 +99,8 @@
       "shop": "workshop",
       "category": "cosmetic",
       "ownedId": "antenna-long",
-      "note": "Заметная антенна — видно издалека."
+      "note": "Заметная антенна — видно издалека.",
+      "sprite": "antennaLong"
     },
     {
       "id": "sticker-star",
@@ -101,7 +110,8 @@
       "shop": "workshop",
       "category": "cosmetic",
       "ownedId": "sticker-star",
-      "note": "Наклейка на корпус — можно и подождать."
+      "note": "Наклейка на корпус — можно и подождать.",
+      "sprite": "sticker"
     },
     {
       "id": "puzzle-arena",
@@ -111,7 +121,74 @@
       "shop": "workshop",
       "category": "toy",
       "ownedId": "rooms-living",
-      "note": "Купи — пазл откроется в мини-играх."
+      "note": "Пазл с ареной — купи, и он откроется в мини-играх.",
+      "sprite": "puzzle"
+    },
+    {
+      "id": "toy-ball",
+      "title": "Мячик",
+      "price": 12,
+      "kind": "want",
+      "shop": "workshop",
+      "category": "toy",
+      "ownedId": "toy-ball",
+      "sprite": "toyBall",
+      "note": "Прыгучий мячик — пёс гоняет его по яме. Купи — в мини-играх откроется пазл."
+    },
+    {
+      "id": "toy-bone",
+      "title": "Косточка-гайка",
+      "price": 10,
+      "kind": "want",
+      "shop": "workshop",
+      "category": "toy",
+      "ownedId": "toy-bone",
+      "sprite": "toyBone",
+      "note": "Железная косточка — есть нельзя, грызть можно. Купи — в мини-играх откроется пазл."
+    },
+    {
+      "id": "toy-frisbee",
+      "title": "Фрисби",
+      "price": 14,
+      "kind": "want",
+      "shop": "workshop",
+      "category": "toy",
+      "ownedId": "toy-frisbee",
+      "sprite": "toyFrisbee",
+      "note": "Летающая тарелка — пёс ловит её в прыжке. Купи — в мини-играх откроется пазл."
+    },
+    {
+      "id": "toy-duck",
+      "title": "Робо-уточка",
+      "price": 16,
+      "kind": "want",
+      "shop": "workshop",
+      "category": "toy",
+      "ownedId": "toy-duck",
+      "sprite": "toyDuck",
+      "note": "Уточка для лужи на дне ямы. Купи — в мини-играх откроется пазл."
+    },
+    {
+      "id": "toy-yoyo",
+      "title": "Йо-йо",
+      "price": 12,
+      "kind": "want",
+      "shop": "workshop",
+      "category": "toy",
+      "ownedId": "toy-yoyo",
+      "sprite": "toyYoyo",
+      "note": "Йо-йо на тросике — вверх-вниз, как подъёмник. Купи — в мини-играх откроется пазл."
+    },
+    {
+      "id": "toy-cube",
+      "title": "Кубики",
+      "price": 18,
+      "kind": "want",
+      "shop": "workshop",
+      "category": "toy",
+      "ownedId": "toy-cube",
+      "sprite": "toyCube",
+      "note": "Кубики-конструктор — строим башню. Купи — в мини-играх откроется пазл."
     }
   ]
 }

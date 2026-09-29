@@ -86,6 +86,42 @@ describe('content/tasks.json', () => {
     expect(added && rewardForTask(added)).toBe(TASK_REWARD.easy);
   });
 
+  it('gives every shipped task a picture on its card', () => {
+    for (const task of listTasks()) {
+      expect({ id: task.id, sprite: task.sprite }).toEqual({
+        id: task.id,
+        sprite: expect.any(String),
+      });
+    }
+  });
+
+  it('draws every basket and priority item', () => {
+    for (const task of listTasks()) {
+      if (task.mechanic !== 'basket' && task.mechanic !== 'priority') continue;
+      const items = (
+        task.payload as { items: { id: string; sprite?: string }[] }
+      ).items;
+      for (const item of items) {
+        expect({ task: task.id, item: item.id, sprite: item.sprite }).toEqual({
+          task: task.id,
+          item: item.id,
+          sprite: expect.any(String),
+        });
+      }
+    }
+  });
+
+  it('rejects a sprite that is not on the sheet', () => {
+    expect(() =>
+      assertTasksContent({
+        tasks: [
+          ...TASKS_CONTENT.tasks,
+          { ...SEVENTH_TASK, id: 'odd', sprite: 'nope' },
+        ],
+      }),
+    ).toThrow(/sprite/);
+  });
+
   it('rejects an unknown mechanic — new kinds need a component', () => {
     expect(() =>
       assertTasksContent({

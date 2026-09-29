@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { type View as RNView, StyleSheet, View } from 'react-native';
 
@@ -8,7 +8,7 @@ import { SPACING } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { Text } from '@/shared/ui';
 
-import { puzzleImageUri } from '../lib/puzzle-image-uri';
+import { puzzlePicture } from '../lib/puzzle-picture';
 import { usePuzzleBoard } from '../model/use-puzzle-board';
 
 import { PieceGhost } from './piece-ghost';
@@ -31,7 +31,10 @@ interface PuzzleSceneProps {
 /** Board + tray + ghost for one sitting. */
 export const PuzzleScene = ({ puzzle, onComplete }: PuzzleSceneProps) => {
   const theme = useTheme();
-  const image = puzzleImageUri(puzzle.imageKey);
+  const image = useMemo(
+    () => puzzlePicture(puzzle.imageKey),
+    [puzzle.imageKey],
+  );
   const didComplete = useRef(false);
   const rootRef = useRef<RNView>(null);
 

@@ -2,6 +2,7 @@
   "tasks": [
     {
       "id": "enough-for-all",
+      "sprite": "receipt",
       "theme": "planning",
       "mechanic": "basket",
       "title": "Хватит ли на всё?",
@@ -11,15 +12,16 @@
       "payload": {
         "budget": 40,
         "items": [
-          { "id": "bread", "title": "Хлеб", "price": 8 },
-          { "id": "soap", "title": "Мыло", "price": 12 },
-          { "id": "toy", "title": "Игрушка", "price": 25 },
-          { "id": "juice", "title": "Сок", "price": 15 }
+          { "id": "bread", "title": "Хлеб", "sprite": "bread", "price": 8 },
+          { "id": "soap", "title": "Мыло", "sprite": "soap", "price": 12 },
+          { "id": "toy", "title": "Игрушка", "sprite": "toyBall", "price": 25 },
+          { "id": "juice", "title": "Сок", "sprite": "juice", "price": 15 }
         ]
       }
     },
     {
       "id": "buy-first",
+      "sprite": "crate",
       "theme": "planning",
       "mechanic": "priority",
       "title": "Что купить первым",
@@ -28,15 +30,16 @@
       "explanation": "Без еды и тепла не обойтись, а игрушка подождёт.",
       "payload": {
         "items": [
-          { "id": "food", "title": "Еда", "kind": "need" },
-          { "id": "heating", "title": "Отопление", "kind": "need" },
-          { "id": "poster", "title": "Плакат", "kind": "want" },
-          { "id": "stickers", "title": "Наклейки", "kind": "want" }
+          { "id": "food", "title": "Еда", "sprite": "apple", "kind": "need" },
+          { "id": "heating", "title": "Отопление", "sprite": "radiator", "kind": "need" },
+          { "id": "poster", "title": "Плакат", "sprite": "poster", "kind": "want" },
+          { "id": "stickers", "title": "Наклейки", "sprite": "sticker", "kind": "want" }
         ]
       }
     },
     {
       "id": "save-for-radar",
+      "sprite": "moduleSensor",
       "theme": "savings",
       "mechanic": "quiz",
       "title": "Накопить на радар",
@@ -55,6 +58,7 @@
     },
     {
       "id": "put-aside-now",
+      "sprite": "piggy",
       "theme": "savings",
       "mechanic": "dialog",
       "title": "Отложить сразу",
@@ -84,6 +88,7 @@
     },
     {
       "id": "change-counting",
+      "sprite": "register",
       "theme": "payments",
       "mechanic": "change",
       "title": "Посчитай сдачу",
@@ -103,6 +108,7 @@
     },
     {
       "id": "cheaper-pick",
+      "sprite": "scales",
       "theme": "payments",
       "mechanic": "quiz",
       "title": "Что дешевле",

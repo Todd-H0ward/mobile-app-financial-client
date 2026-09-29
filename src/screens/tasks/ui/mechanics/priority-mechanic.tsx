@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { Sprite } from '@/entities/sprite/ui';
 import type { PriorityPayload } from '@/entities/task';
 
 import { RADII, SPACING } from '@/shared/constants';
@@ -61,7 +62,11 @@ export const PriorityMechanic = ({
             <Text variant="machine" style={styles.index}>
               {String(index + 1)}
             </Text>
-            <PixelIcon name={item.kind === 'need' ? 'battery' : 'gear'} />
+            {item.sprite ? (
+              <Sprite name={item.sprite} size={32} />
+            ) : (
+              <PixelIcon name={item.kind === 'need' ? 'battery' : 'gear'} />
+            )}
             <View style={styles.text}>
               <Text variant="bodyBold">{item.title}</Text>
               <Text variant="small" themeColor="textMuted">

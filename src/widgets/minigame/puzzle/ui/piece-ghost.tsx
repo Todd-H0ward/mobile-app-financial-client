@@ -4,6 +4,8 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
 import type { BoardPiece } from '@/entities/minigame/puzzle';
 
+import type { PuzzlePicture } from '../lib/puzzle-picture';
+
 import { PuzzlePiece } from './puzzle-piece';
 
 // ═══════════════════════════════════════════
@@ -12,7 +14,7 @@ import { PuzzlePiece } from './puzzle-piece';
 
 interface PieceGhostProps {
   piece: BoardPiece;
-  image: string;
+  image: PuzzlePicture;
   cols: number;
   rows: number;
   left: SharedValue<number>;

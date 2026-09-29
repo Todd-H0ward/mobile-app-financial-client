@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useRouter } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 
 import { useArcadeSession } from '@/features/arcade-session';
 
@@ -11,6 +12,7 @@ import {
   playkitCorrectLabel,
   playkitRound,
 } from '@/entities/minigame/playkit';
+import { Sprite } from '@/entities/sprite/ui';
 
 import { FONTS, SOUNDS, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
@@ -58,6 +60,7 @@ export const PlaykitScreen = ({ gameId }: PlaykitScreenProps) => {
   const [isDebrief, setDebrief] = useState(false);
   const [result, setResult] = useState('');
   const [isReady, setReady] = useState(false);
+  const [isLastRight, setLastRight] = useState(false);
   const gate = useRef(false);
   const correctCount = useRef(0);
   const round = playkitRound(gameId, at, Math.min(index, 2));
@@ -78,6 +81,7 @@ export const PlaykitScreen = ({ gameId }: PlaykitScreenProps) => {
     const isRight = isPlaykitAnswerCorrect(round, answer);
     if (isRight) correctCount.current += 1;
     playSfx(isRight ? SOUNDS.CORRECT : SOUNDS.WRONG);
+    setLastRight(isRight);
     setDebrief(true);
   };
 
@@ -129,7 +133,14 @@ export const PlaykitScreen = ({ gameId }: PlaykitScreenProps) => {
       }
       isDisabled={index < 3 && !isReady}
     >
-      {index === 3 ? <TrialReadout isPrompt>{result}</TrialReadout> : scene}
+      {index === 3 ? (
+        <View style={styles.result}>
+          <Sprite name="dogJoy" size={96} />
+          <TrialReadout isPrompt>{result}</TrialReadout>
+        </View>
+      ) : (
+        scene
+      )}
       <Text
         style={{
           color: theme.textSecondary,
@@ -143,6 +154,7 @@ export const PlaykitScreen = ({ gameId }: PlaykitScreenProps) => {
       </Text>
       <PlayDebrief
         isVisible={isDebrief}
+        isCorrect={isLastRight}
         summary={t('financeGame.comparison', {
           chosen: playkitAnswerLabel(round, answer, t),
           correct: playkitCorrectLabel(round, t),
@@ -153,5 +165,17 @@ export const PlaykitScreen = ({ gameId }: PlaykitScreenProps) => {
     </PlayShell>
   );
 };
+
+// ═══════════════════════════════════════════
+// STYLES
+// ═══════════════════════════════════════════
+
+const styles = StyleSheet.create({
+  result: {
+    alignItems: 'center',
+    gap: SPACING.THREE,
+    paddingVertical: SPACING.FOUR,
+  },
+});
 
 export type { PlaykitScreenProps };

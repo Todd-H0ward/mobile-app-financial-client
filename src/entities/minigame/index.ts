@@ -1,5 +1,6 @@
 /** Shared arcade rules — sittings, payouts, the game catalogue. */
 
+export { GAME_COVER_SPRITES } from './art';
 export type {
   ClassicGameId,
   GameId,

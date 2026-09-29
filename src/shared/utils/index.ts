@@ -8,4 +8,6 @@ export { isPositiveInt } from './isPositiveInt';
 export { isRecord } from './isRecord';
 export { isTextOnly } from './isTextOnly';
 export { normalizeName } from './normalizeName';
+export type { InkPath } from './pixelPaths';
+export { pixelPaths, pixelSize } from './pixelPaths';
 export { shade } from './shade';

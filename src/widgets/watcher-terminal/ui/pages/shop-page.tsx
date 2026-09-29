@@ -11,6 +11,7 @@ import {
   isModuleItem,
   listCatalogueByShop,
 } from '@/entities/catalogue';
+import { Sprite } from '@/entities/sprite/ui';
 import {
   applyPurchase,
   canAfford,
@@ -49,6 +50,10 @@ interface ShopPageProps {
   frame: TerminalFrame;
 }
 
+interface ItemPictureProps {
+  item: CatalogueItem;
+}
+
 interface ItemCardProps {
   item: CatalogueItem;
   shortfall: number;
@@ -79,6 +84,15 @@ const useItemTitle = () => {
 // COMPONENTS
 // ═══════════════════════════════════════════
 
+/** The item's own picture; a row added before its art shows the kind icon. */
+const ItemPicture = ({ item }: ItemPictureProps) => {
+  return item.sprite ? (
+    <Sprite name={item.sprite} size={48} />
+  ) : (
+    <PixelIcon name={KIND_ICON[item.kind]} size={36} />
+  );
+};
+
 /** UI kit 07 "товар мастерской": plain, or amber dashes when short. */
 const ItemCard = ({ item, shortfall, isOwned, onPress }: ItemCardProps) => {
   const theme = useTheme();
@@ -101,7 +115,7 @@ const ItemCard = ({ item, shortfall, isOwned, onPress }: ItemCardProps) => {
       ]}
     >
       <View style={[styles.picture, { backgroundColor: theme.surfaceSoft }]}>
-        <PixelIcon name={KIND_ICON[item.kind]} size={36} />
+        <ItemPicture item={item} />
       </View>
       <Text variant="bodyBold" style={styles.itemTitle}>
         {titleOf(item)}
@@ -311,7 +325,7 @@ export const ShopPage = ({ frame }: ShopPageProps) => {
                   { backgroundColor: theme.surfaceSoft },
                 ]}
               >
-                <PixelIcon name={KIND_ICON[pending.kind]} size={36} />
+                <ItemPicture item={pending} />
               </View>
               <View style={styles.sheetHeadCopy}>
                 <View style={styles.price}>

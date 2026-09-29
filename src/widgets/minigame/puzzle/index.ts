@@ -1,3 +1,4 @@
+export type { PuzzlePicture } from './lib/puzzle-picture';
 export { pieceBodyOf } from './model/use-piece-drag';
 export { usePuzzleBoard } from './model/use-puzzle-board';
 export type { PieceGhostProps } from './ui/piece-ghost';
