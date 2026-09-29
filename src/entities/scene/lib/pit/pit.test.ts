@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  SCENE_GEAR_PITCH_RADIUS,
   SCENE_LEVEL_COUNT,
   SCENE_TERRACE_COUNT,
   SCENE_TERRACE_RISE,
 } from '../../model/pit';
 
 import {
+  columnTravel,
   flushSteps,
   gearAngle,
   levelProgress,
@@ -123,23 +125,38 @@ describe('terracesInView', () => {
 
 describe('gearAngle', () => {
   it('leaves every gear still before the climb starts', () => {
-    for (let gear = 0; gear < 3; gear += 1) {
-      expect(gearAngle(gear, 0)).toBeCloseTo(0, 10);
-    }
-  });
-
-  it('turns neighbouring gears opposite ways', () => {
-    expect(Math.sign(gearAngle(0, 1))).toBe(-Math.sign(gearAngle(1, 1)));
-    expect(Math.sign(gearAngle(1, 1))).toBe(-Math.sign(gearAngle(2, 1)));
+    expect(gearAngle(0)).toBeCloseTo(0, 10);
   });
 
   it('keeps turning as the floor climbs', () => {
-    let previous = Math.abs(gearAngle(0, 0));
+    let previous = Math.abs(gearAngle(0));
 
     for (let i = 1; i <= 10; i += 1) {
-      const next = Math.abs(gearAngle(0, i / 10));
+      const next = Math.abs(gearAngle(i / 10));
       expect(next).toBeGreaterThan(previous);
       previous = next;
     }
+  });
+
+  it('rolls up its column without slipping', () => {
+    for (let i = 0; i <= 10; i += 1) {
+      const progress = i / 10;
+      expect(-gearAngle(progress) * SCENE_GEAR_PITCH_RADIUS).toBeCloseTo(
+        columnTravel(progress),
+        6,
+      );
+    }
+  });
+});
+
+describe('columnTravel', () => {
+  it('is still at the bottom and grows all the way out of the pit', () => {
+    expect(columnTravel(0)).toBe(0);
+    expect(columnTravel(1)).toBeGreaterThan(columnTravel(0.8));
+  });
+
+  it('stops once the climb is over', () => {
+    expect(columnTravel(1.5)).toBe(columnTravel(1));
+    expect(columnTravel(-1)).toBe(0);
   });
 });

@@ -143,6 +143,13 @@ const FOCUS_SMOOTHING = 0.0006;
 /** Below this the camera is treated as back on the arena, and stops blending. */
 const FOCUS_EPSILON = 0.002;
 
+/**
+ * A paid climb holds until the camera is this close to back on the arena. A lift is bought
+ * from the keeper's terminal, with the camera parked on the keeper; played at once, the whole
+ * climb happened behind the sheet and the child came back to a pit that had already moved.
+ */
+const CLIMB_FOCUS_GATE = 0.05;
+
 /** Finger speed (points / sec) above which a bond-mode pan counts as a kick. */
 const BOND_KICK_VELOCITY = 920;
 
@@ -314,6 +321,11 @@ export const RoomScene = ({
   /** Where the platform is heading, and where it is now: `0 … 1`. */
   const liftTarget = useRef(liftProgressFor(view, level));
   const lift = useRef(liftProgressFor(view, level));
+  /** The machine's climb — gears and columns — heading for the paid level, and where it is. */
+  const climbTarget = useRef(levelProgress(level));
+  const climb = useRef(levelProgress(level));
+  /** A paid tier whose dust has not flown yet — it flies when the climb actually starts. */
+  const pendingBurst = useRef<number | null>(null);
   /** Last paid tier — dust fires only when this rises, not on the map disc. */
   const paidLevel = useRef(level);
   /** Last view that drove the lift — a change snaps, so rows do not ease out of the disc. */
@@ -418,17 +430,22 @@ export const RoomScene = ({
     paidLevel.current = level;
     liftView.current = view;
     liftTarget.current = next;
+    climbTarget.current = levelProgress(level);
+
+    // Dust on a paid climb only — the map closing into a disc is not a lift. It waits for the
+    // camera with the climb itself, and a lift that also switches to the map still gets it.
+    if (climbed && isAnimatedRef.current) pendingBurst.current = level;
+    if (!isAnimatedRef.current) {
+      climb.current = climbTarget.current;
+      model.current?.setClimbProgress(climb.current);
+    }
 
     // Map ↔ bay must snap. Easing walls up out of the disc reads as completed
     // rows stretching; the paid climb below still damps in the render loop.
     if (switchedView || !isAnimatedRef.current) {
       lift.current = next;
       model.current?.setLevelProgress(next);
-      return;
     }
-
-    // Dust on a paid climb only — the map closing into a disc is not a lift.
-    if (climbed) model.current?.burstLift(level);
   }, [level, view]);
 
   useEffect(() => {
@@ -545,6 +562,7 @@ export const RoomScene = ({
       // Seed the platform where the game already is, so a rebuilt context does not replay the
       // whole climb from the bottom of the pit.
       built.setLevelProgress(lift.current);
+      built.setClimbProgress(climb.current);
       built.setWatchersVisible(
         viewRef.current === 'top' || focusRef.current !== null,
       );
@@ -631,6 +649,7 @@ export const RoomScene = ({
           Math.abs(target.elevation - state.elevation) < SETTLE_EPSILON &&
           Math.abs(target.distance - state.distance) < SETTLE_EPSILON &&
           Math.abs(liftTarget.current - lift.current) < SETTLE_EPSILON &&
+          Math.abs(climbTarget.current - climb.current) < SETTLE_EPSILON &&
           Math.abs(
             (focusRef.current || isBondingRef.current ? 1 : 0) -
               focusBlend.current,
@@ -660,10 +679,35 @@ export const RoomScene = ({
           state.distance = target.distance;
         }
 
-        lift.current = isAnimatedRef.current
-          ? damp(lift.current, liftTarget.current, LIFT_SMOOTHING, delta)
-          : liftTarget.current;
+        // A climb plays only with the arena in shot — never behind a watcher or the dog.
+        const isArenaInShot =
+          !focusRef.current &&
+          !isBondingRef.current &&
+          focusBlend.current < CLIMB_FOCUS_GATE;
+
+        if (!isAnimatedRef.current) {
+          lift.current = liftTarget.current;
+          climb.current = climbTarget.current;
+        } else if (isArenaInShot) {
+          if (pendingBurst.current !== null) {
+            built.burstLift(pendingBurst.current);
+            pendingBurst.current = null;
+          }
+          lift.current = damp(
+            lift.current,
+            liftTarget.current,
+            LIFT_SMOOTHING,
+            delta,
+          );
+          climb.current = damp(
+            climb.current,
+            climbTarget.current,
+            LIFT_SMOOTHING,
+            delta,
+          );
+        }
         built.setLevelProgress(lift.current);
+        built.setClimbProgress(climb.current);
 
         const { x, y, z } = orbitPosition(
           state.azimuth,

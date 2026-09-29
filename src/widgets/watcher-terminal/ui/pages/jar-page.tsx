@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { HintButton } from '@/widgets/hint-button';
 
+import { PLATFORM_GOAL_ID, PLATFORM_LEVEL_COUNT } from '@/entities/economy';
 import { listGoals } from '@/entities/goal';
 import { progressFor, remainingFor } from '@/entities/savings';
 import { setActiveGoal, useCommitUser, useUser } from '@/entities/user';
@@ -61,6 +62,14 @@ export const JarPage = ({ frame }: JarPageProps) => {
   const active = goals.find((row) => row.goal.id === activeId) ?? null;
   const others = goals.filter((row) => row.goal.id !== activeId);
 
+  // A full lift jar is the moment the whole jar exists for — its button takes the footer
+  // instead of a deposit that has nowhere left to go.
+  const isLiftReady =
+    active !== null &&
+    active.goal.id === PLATFORM_GOAL_ID &&
+    active.saved >= active.goal.price &&
+    (user?.platform.level ?? PLATFORM_LEVEL_COUNT) < PLATFORM_LEVEL_COUNT;
+
   const openGoal = (goalId: string) => {
     if (user && goalId !== activeId) {
       const result = setActiveGoal(user, goalId);
@@ -76,7 +85,17 @@ export const JarPage = ({ frame }: JarPageProps) => {
       title={t('watcher.terminal.pages.jar.title')}
       trailing={<HintButton screen="savings" />}
       footer={
-        active ? (
+        isLiftReady ? (
+          <Button
+            isFullWidth
+            onPress={() =>
+              router.push(DYNAMIC_ROUTES.goal(PLATFORM_GOAL_ID, 'lift'))
+            }
+          >
+            <PixelIcon name="up" tone="onAccent" />
+            <Button.Label>{t('savings.jar.liftAction')}</Button.Label>
+          </Button>
+        ) : active ? (
           <Button
             isFullWidth
             disabled={user?.period.phase !== 'active'}

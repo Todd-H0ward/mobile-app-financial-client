@@ -34,10 +34,20 @@ export const DYNAMIC_ROUTES = {
       pathname: '/story/[cutsceneId]' as const,
       params: { cutsceneId },
     }) as const,
-  goal: (goalId: string) =>
+  /** A jar; `'lift'` opens it with the lift confirmation already up. */
+  goal: (goalId: string, action?: 'lift') =>
     ({
       pathname: '/savings/[goalId]' as const,
-      params: { goalId },
+      params: action ? { goalId, action } : { goalId },
+    }) as const,
+  /**
+   * Home on the map with every terminal closed, so a lift that was just paid for plays in
+   * front of the child. The level makes each lift a new param, so the screen reacts every time.
+   */
+  liftedHome: (level: number) =>
+    ({
+      pathname: '/home' as const,
+      params: { lifted: String(level) },
     }) as const,
   withdraw: (goalId: string, amount: number) =>
     ({

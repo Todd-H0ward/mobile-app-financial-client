@@ -15,6 +15,7 @@ import {
   Matrix4,
   Mesh,
   MeshBasicMaterial,
+  MeshLambertMaterial,
   MeshPhongMaterial,
   type Object3D,
   PointLight,
@@ -43,6 +44,7 @@ import {
 import {
   cellKey,
   cellOfFace,
+  columnTravel,
   damp,
   flushSteps,
   gearAngle,
@@ -91,6 +93,7 @@ import {
   colorForLabelStatus,
 } from './cell-number-marker';
 import type { CenterCharacter } from './center-character';
+import { buildColumnGeometry, buildRackGeometry } from './column-geometry';
 import { createHazeBackdrop } from './haze-backdrop';
 import { createLiftEffects, type LiftEffects } from './lift-effects';
 import { loadGlTexture } from './local-asset';
@@ -108,6 +111,12 @@ interface SceneModel {
   highlight: (segment: number | null, isImmediate?: boolean) => void;
   /** Where the platform stands on its way out of the pit: `0` on the floor, `1` clear of the rim. */
   setLevelProgress: (progress: number) => void;
+  /**
+   * How far the machine has climbed, `0 … 1`: the gears' turn and the columns' slide. Apart
+   * from `setLevelProgress` because the map lays the pit flat whatever the level, and the
+   * machine must still show the real climb there — the map is the only view it is seen from.
+   */
+  setClimbProgress: (progress: number) => void;
   /** Throws dust and sparks for one level-up: the ring landing and the gears. */
   burstLift: (level: number) => void;
   /** Platform height in world units, for the camera to follow. */
@@ -283,6 +292,9 @@ const CENTRE_POINT_INTENSITY = 3.2;
 
 /** Soft self-glow on platform slabs — stand-in for bloom on mid-range GL. */
 const PLATFORM_EMISSIVE = 0.26;
+
+/** Much less on the columns: self-glow flattens the texture, and they carry no numbers to read. */
+const COLUMN_EMISSIVE = 0.08;
 /** How high above the dropped platform the neon lamps sit. */
 const POINT_LIGHT_HEIGHT = 220;
 
@@ -307,6 +319,12 @@ const HIGHLIGHT_EPSILON = 0.02;
 /** World units per albedo tile — matches cell-geometry UV scale. */
 const TEX_SCALE = 180;
 
+/**
+ * The columns stand far off and 5000 units tall; at the cells' scale the concrete's stains
+ * shrink below a pixel and the column reads as bare grey.
+ */
+const COLUMN_TEX_SCALE = 560;
+
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
@@ -320,7 +338,7 @@ const fillVertexColors = (geometry: BufferGeometry) => {
 };
 
 /** Box-projected UVs from positions + normals — gears ship without UV in scene.json. */
-const fillBoxUvs = (geometry: BufferGeometry) => {
+const fillBoxUvs = (geometry: BufferGeometry, scale = TEX_SCALE) => {
   const position = geometry.getAttribute('position');
   const normal = geometry.getAttribute('normal');
   if (!position || !normal) return;
@@ -335,14 +353,14 @@ const fillBoxUvs = (geometry: BufferGeometry) => {
     let u: number;
     let v: number;
     if (ny >= nx && ny >= nz) {
-      u = x / TEX_SCALE;
-      v = z / TEX_SCALE;
+      u = x / scale;
+      v = z / scale;
     } else if (nx >= nz) {
-      u = z / TEX_SCALE;
-      v = y / TEX_SCALE;
+      u = z / scale;
+      v = y / scale;
     } else {
-      u = x / TEX_SCALE;
-      v = y / TEX_SCALE;
+      u = x / scale;
+      v = y / scale;
     }
     uv[i * 2] = u;
     uv[i * 2 + 1] = v;
@@ -621,6 +639,42 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
   /** The three wheels standing around the bowl — the machine that lifts the floor. */
   const gears: Group[] = [];
 
+  /**
+   * One concrete column behind each wheel, fixed in the world. The wheels ride up them with
+   * the platform, so from the camera the columns slide down — the whole of the climb.
+   */
+  const columns: Mesh[] = [];
+
+  /** Where each column stands before the climb: its wheel's hub height. */
+  const columnRestY: number[] = [];
+
+  // The joints come shaded from the builder, so its vertex colours are kept.
+  const columnGeometry = buildColumnGeometry();
+  fillBoxUvs(columnGeometry, COLUMN_TEX_SCALE);
+  geometries.push(columnGeometry);
+
+  /** The toothed rack in each column's channel — the gears' rust, since it is the same machine. */
+  const rackGeometry = buildRackGeometry();
+  fillVertexColors(rackGeometry);
+  fillBoxUvs(rackGeometry);
+  geometries.push(rackGeometry);
+
+  /**
+   * Concrete, not the gears' rust — the wheels have to stand out against what they climb.
+   * Lambert, not Phong: concrete has no highlight, and a specular sheen is what makes a
+   * grey box read as plastic.
+   */
+  const columnMaterial = new MeshLambertMaterial({
+    color: new Color(SCENE_PALETTE.column),
+    emissive: new Color(SCENE_PALETTE.column),
+    emissiveIntensity: COLUMN_EMISSIVE,
+    side: DoubleSide,
+    transparent: false,
+    opacity: 1,
+    depthWrite: true,
+    vertexColors: true,
+  });
+
   /** One group per terrace — the rings that merge into the floor as it rises. */
   const terraces: Group[] = [];
   for (let terrace = 0; terrace < SCENE_TERRACE_COUNT; terrace += 1) {
@@ -751,6 +805,17 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     gears.push(gear);
     root.add(gear);
 
+    // Out along the radial, on the side away from the pit — the inner half of the wheel is
+    // sunk in the rim.
+    const column = new Mesh(columnGeometry, columnMaterial);
+    column.position.copy(hub);
+    column.rotation.y = Math.atan2(-hub.z, hub.x);
+    // A child, so it slides and hides with its column.
+    column.add(new Mesh(rackGeometry, gearMaterial));
+    columns.push(column);
+    columnRestY.push(hub.y);
+    root.add(column);
+
     for (let terrace = 0; terrace < SCENE_TERRACE_COUNT; terrace += 1) {
       buildRow(segment, terrace);
     }
@@ -782,6 +847,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       }
       gearMaterial.map = rust;
       gearMaterial.needsUpdate = true;
+      columnMaterial.map = concrete;
+      columnMaterial.needsUpdate = true;
       albedos.push(concrete, rust);
     })
     .catch((error: unknown) => {
@@ -956,6 +1023,8 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     setFade(gearMaterial, gearPresence);
     const areGearsShown = gearPresence > HIGHLIGHT_EPSILON;
     for (const gear of gears) gear.visible = areGearsShown;
+    setFade(columnMaterial, gearPresence);
+    for (const column of columns) column.visible = areGearsShown;
   };
 
   const highlight = (segment: number | null, isImmediate = false) => {
@@ -971,6 +1040,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     gearPresenceTarget = segment === null ? 1 : 0;
     if (gearPresenceTarget > 0) {
       for (const gear of gears) gear.visible = true;
+      for (const column of columns) column.visible = true;
     }
 
     if (!isImmediate) return;
@@ -1203,13 +1273,6 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
       applyNumbers();
     }
 
-    gears.forEach((gear, index) => {
-      gear.quaternion.setFromAxisAngle(
-        axles[index],
-        gearAngle(index, progress),
-      );
-    });
-
     // Passed tiles stay on the disc when a bay opens out of the map flatten.
     applyDiskPins(progress);
     if (selected) {
@@ -1222,6 +1285,23 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
         }
       }
     }
+  };
+
+  let appliedClimb = Number.NaN;
+
+  const setClimbProgress = (progress: number) => {
+    if (progress === appliedClimb) return;
+    appliedClimb = progress;
+
+    const angle = gearAngle(progress);
+    gears.forEach((gear, index) => {
+      gear.quaternion.setFromAxisAngle(axles[index], angle);
+    });
+
+    const travel = columnTravel(progress);
+    columns.forEach((column, index) => {
+      column.position.y = columnRestY[index] - travel;
+    });
   };
 
   const burstLift = (level: number) => {
@@ -1338,6 +1418,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     for (const material of frames) material.dispose();
     for (const material of numberMaterials) material.dispose();
     gearMaterial.dispose();
+    columnMaterial.dispose();
     selectionMaterial.dispose();
     holdMaterial.dispose();
     holdMesh.geometry.dispose();
@@ -1348,6 +1429,7 @@ const buildScene = (skin: RobotDogSkin, action: RobotDogAction): SceneModel => {
     scene,
     highlight,
     setLevelProgress,
+    setClimbProgress,
     burstLift,
     platformHeight,
     tick,
