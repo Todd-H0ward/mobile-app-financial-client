@@ -34,10 +34,20 @@ export const DYNAMIC_ROUTES = {
       pathname: '/story/[cutsceneId]' as const,
       params: { cutsceneId },
     }) as const,
-  goal: (goalId: string) =>
+  /** A jar; `'lift'` opens it with the lift confirmation already up. */
+  goal: (goalId: string, action?: 'lift') =>
     ({
       pathname: '/savings/[goalId]' as const,
-      params: { goalId },
+      params: action ? { goalId, action } : { goalId },
+    }) as const,
+  /**
+   * Home on the map with every terminal closed, so a lift that was just paid for plays in
+   * front of the child. The level makes each lift a new param, so the screen reacts every time.
+   */
+  liftedHome: (level: number) =>
+    ({
+      pathname: '/home' as const,
+      params: { lifted: String(level) },
     }) as const,
   withdraw: (goalId: string, amount: number) =>
     ({
@@ -77,6 +87,24 @@ export const SHEET_ROUTE_NAMES = [
   'savings/[goalId]',
   'savings/withdraw',
   'tasks/[taskId]',
+] as const;
+
+/**
+ * Full-screen routes that still leave home's GL surface attached.
+ * Opaque card pushes detach the previous screen and force `buildScene` again;
+ * `transparentModal` keeps the fragment (sheets do the same for a different reason).
+ * Not in `SHEET_ROUTE_NAMES` — the arena must stay covered and the RAF paused.
+ */
+export const ARENA_COVER_ROUTE_NAMES = [
+  'lesson/[cellId]',
+  'games/index',
+  'games/market',
+  'games/weekly',
+  'games/console/index',
+  'games/snake/index',
+  'games/spacewar/index',
+  'games/play/[gameId]',
+  'games/puzzle/[puzzleId]',
 ] as const;
 
 const SHEET_PATH_PATTERNS = SHEET_ROUTE_NAMES.map(

@@ -14,13 +14,20 @@ const asString = (value: string | string[] | undefined): string | null => {
 };
 
 export default function GoalRoute() {
-  const goalId = asString(
-    useLocalSearchParams<{ goalId?: string | string[] }>().goalId,
-  );
+  const params = useLocalSearchParams<{
+    goalId?: string | string[];
+    action?: string | string[];
+  }>();
+  const goalId = asString(params.goalId);
 
   if (!goalId) {
     return <Redirect href={STATIC_ROUTES.SAVINGS} />;
   }
 
-  return <GoalRouteScreen goalId={goalId} />;
+  return (
+    <GoalRouteScreen
+      goalId={goalId}
+      isLiftRequested={asString(params.action) === 'lift'}
+    />
+  );
 }

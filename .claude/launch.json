@@ -4,14 +4,35 @@
     {
       "name": "design-handoff",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "output/design_handoff_vyshe_nulya/reference"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--directory",
+        "output/design_handoff_vyshe_nulya/reference"
+      ],
       "port": 8765
     },
     {
       "name": "android-device",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["-lc", "export ANDROID_HOME=\"$HOME/Library/Android/sdk\" JAVA_HOME=\"$(/usr/libexec/java_home -v 17)\"; export PATH=\"$ANDROID_HOME/platform-tools:$PATH\"; pnpm run:android --device \"${ANDROID_DEVICE_NAME:-TA_1004}\""],
+      "runtimeArgs": [
+        "-lc",
+        "export ANDROID_HOME=\"$HOME/Library/Android/sdk\" JAVA_HOME=\"$(/usr/libexec/java_home -v 17)\"; export PATH=\"$ANDROID_HOME/platform-tools:$PATH\"; pnpm run:android --device \"${ANDROID_DEVICE_NAME:-TA_1004}\""
+      ],
       "port": 8081
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "expo",
+        "start",
+        "--web",
+        "--port",
+        "8082"
+      ],
+      "port": 8082
     }
   ]
 }
