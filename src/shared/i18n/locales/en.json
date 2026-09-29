@@ -1463,5 +1463,21 @@
     "example": "“{{task}}”: {{before}} → {{after}} coins for full completion.",
     "explanation": "These purchases are optional. Owned modules stay in your inventory. Installing and removing them is free and does not change your growth stage.",
     "purchased": "The module is in your inventory. Fit it in Installed modules to activate the bonus. Your growth stage has not changed."
+  },
+  "stageUp": {
+    "label": "assembly grows",
+    "title": "{{name}} got stronger!",
+    "body": "The build stage grows from your decisions across periods — not from shopping. What you earned stays with you.",
+    "continue": "Continue",
+    "gear": {
+      "upgraded": {
+        "title": "A battery appeared",
+        "body": "A power pack clipped onto the body — the robot dog’s charge is easier to see."
+      },
+      "complete": {
+        "title": "A beacon lit up",
+        "body": "A beacon on the back marks a complete build. Battery and beacon stay for good."
+      }
+    }
   }
 }

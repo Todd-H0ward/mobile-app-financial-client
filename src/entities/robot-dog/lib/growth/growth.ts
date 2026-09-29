@@ -93,5 +93,17 @@ export const progressToNextStage = (
   };
 };
 
+/**
+ * Stage to celebrate after settlement, or `null` when nothing moved.
+ * A jump past a middle stage shows the highest one earned (2.5.10).
+ */
+export const stageTransition = (
+  before: RobotDogStage,
+  after: RobotDogStage,
+): Exclude<RobotDogStage, 'basic'> | null => {
+  if (rank(after) <= rank(before) || after === 'basic') return null;
+  return after;
+};
+
 export type { GrowthFacts, GrowthProgress, GrowthRule };
 export { GROWTH_RULES };

@@ -5,6 +5,7 @@ export const STATIC_ROUTES = {
   END_PERIOD: '/end-period',
   PERIOD_SUMMARY: '/period-summary',
   RECOVERY: '/recovery',
+  STAGE_UP: '/stage-up',
   GAMES_MARKET: '/games/market',
   GAMES_WEEKLY: '/games/weekly',
   SAVINGS: '/savings',
@@ -33,6 +34,12 @@ export const DYNAMIC_ROUTES = {
     ({
       pathname: '/story/[cutsceneId]' as const,
       params: { cutsceneId },
+    }) as const,
+  /** Celebration after the build stage rose on period settle. */
+  stageUp: (stage: 'upgraded' | 'complete', next: 'home' | 'plan' = 'home') =>
+    ({
+      pathname: '/stage-up' as const,
+      params: { stage, next },
     }) as const,
   /** A jar; `'lift'` opens it with the lift confirmation already up. */
   goal: (goalId: string, action?: 'lift') =>

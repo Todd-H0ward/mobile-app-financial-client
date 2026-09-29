@@ -4,4 +4,5 @@ export {
   growRobotDog,
   progressToNextStage,
   stageFor,
+  stageTransition,
 } from './growth';

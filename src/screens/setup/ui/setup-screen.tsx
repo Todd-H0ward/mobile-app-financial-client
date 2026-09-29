@@ -33,7 +33,7 @@ import {
 import { DYNAMIC_ROUTES, SPACING, STATIC_ROUTES } from '@/shared/constants';
 import { useTheme } from '@/shared/hooks';
 import { useTranslation } from '@/shared/i18n';
-import { Button, Chip, Input, Screen, Text } from '@/shared/ui';
+import { Button, Input, Screen, Segmented, Text } from '@/shared/ui';
 
 // ═══════════════════════════════════════════
 // TYPES
@@ -45,11 +45,14 @@ interface LookChoiceProps {
   onPress: () => void;
 }
 
+type LookTab = 'coat' | 'ears' | 'face';
+
 // ═══════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════
 const EARS = ['floppy', 'blade', 'radar'] as const;
 const FACES = ['dots', 'happy', 'wide'] as const;
+const LOOK_TABS = ['coat', 'ears', 'face'] as const satisfies readonly LookTab[];
 
 // ═══════════════════════════════════════════
 // COMPONENTS
@@ -114,12 +117,16 @@ export const SetupScreen = () => {
     ears: user?.robot.assembly.ears ?? 'floppy',
     face: user?.robot.assembly.face ?? 'dots',
   });
-  const [tab, setTab] = useState<'coat' | 'ears' | 'face'>('coat');
+  const [tab, setTab] = useState<LookTab>('coat');
   const [isNicknameVisible, setNicknameVisible] = useState(false);
   if (!user) return <Redirect href={STATIC_ROUTES.ENTRY} />;
   if (user.playerName && user.robot.name)
     return <Redirect href={STATIC_ROUTES.HOME} />;
   const isValid = isPlayerNameValid(playerName) && isRobotNameValid(robotName);
+  const lookOptions = LOOK_TABS.map((key) => ({
+    value: key,
+    label: t(`setup.look.${key}`),
+  }));
   const save = () => {
     if (!isValid) return;
     updateUser((current) =>
@@ -149,17 +156,7 @@ export const SetupScreen = () => {
           autoCorrect={false}
           isCounterVisible
         />
-        <View style={styles.tabs}>
-          {(['coat', 'ears', 'face'] as const).map((key) => (
-            <Chip
-              key={key}
-              variant={tab === key ? 'selected' : 'neutral'}
-              onPress={() => setTab(key)}
-            >
-              {t(`setup.look.${key}`)}
-            </Chip>
-          ))}
-        </View>
+        <Segmented options={lookOptions} value={tab} onChange={setTab} />
         <View style={styles.choices}>
           {tab === 'coat'
             ? ROBOT_DOG_SKINS.map((value) => (
@@ -246,7 +243,6 @@ const styles = StyleSheet.create({
   choices: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.TWO },
   heading: { flex: 0 },
   root: { flex: 1 },
-  tabs: { flexDirection: 'row', gap: SPACING.TWO },
 });
 
 export type { LookChoiceProps };
