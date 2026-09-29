@@ -1008,7 +1008,7 @@
         "toy-duck": "The duck",
         "toy-cube": "The blocks"
       },
-      "empty": "No puzzles on the shelf yet.",
+      "empty": "No puzzles yet. Toys from the shop unlock them.",
       "goToys": "Go to toys"
     },
     "practice": {
