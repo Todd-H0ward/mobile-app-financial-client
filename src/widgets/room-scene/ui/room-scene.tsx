@@ -758,7 +758,7 @@ export const RoomScene = ({
         lens.lookAt(orbitAim);
 
         frames.current += 1;
-        built.tick(now / 1000, delta);
+        built.tick(now / 1000, delta, isAnimatedRef.current);
         webgl.setClearColor(clear.set(clearColor.current), 1);
         webgl.render(built.scene, lens);
         gl.endFrameEXP();
